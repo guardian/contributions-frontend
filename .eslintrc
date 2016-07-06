@@ -1,0 +1,23 @@
+{
+    "extends": "eslint:recommended",
+    "env": {
+        "amd": true,
+        "browser": true,
+        "node": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+    },
+    "globals"   : {
+        "guardian": true,
+        "curl": true
+    },
+    "rules": {
+        "curly": [2, "all"],
+        "no-trailing-spaces": 2,
+        "quotes": [2, "single"],
+        "wrap-iife": 2,
+        "no-console": 0
+    }
+}
