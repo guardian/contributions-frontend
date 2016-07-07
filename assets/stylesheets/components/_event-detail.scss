@@ -1,0 +1,432 @@
+/* ==========================================================================
+   Event Detail
+   ========================================================================== */
+
+.event-header {
+    @include clearfix;
+    background-color: $c-neutral7;
+}
+.event-header__container {
+    background-color: transparent;
+    padding: rem($gs-baseline / 2) rem($gs-gutter / 2) rem($gs-baseline);
+    margin: 0 auto;
+
+    @include mq(tablet) {
+        padding: rem($gs-baseline / 2) rem($gs-gutter) rem($gs-baseline * 3);
+        width: rem(map-get($max-widths, max-tablet) + $gs-gutter * 2);
+    }
+
+    @include mq(desktop) {
+        width: rem(map-get($max-widths, max-desktop) + $gs-gutter * 2);
+    }
+
+    @include mq(mem-full) {
+        width: rem(map-get($max-widths, max-mem-full) + $gs-gutter * 2);
+    }
+}
+.event-header__container--details {
+    padding: rem($gs-gutter / 2);
+    position: relative;
+    min-height: rem(75px);
+
+    @include mq(tablet) {
+        padding: rem($gs-baseline / 2) rem($gs-gutter) rem($gs-baseline);
+        min-height: rem(120px);
+    }
+
+    @include mq(mem-full) {
+        padding-left: rem(gs-span(2) + ($gs-gutter * 2));
+    }
+}
+.event-header__logo {
+    float: right;
+    margin: rem($gs-baseline) 0;
+    max-height: 40px;
+
+    @include mq(mobileLandscape) {
+        position: absolute;
+        bottom: rem($gs-baseline);
+        right: rem($gs-baseline);
+        margin: 0;
+    }
+
+    @include mq(desktop) {
+        max-height: none;
+    }
+}
+
+.event-header--pricing {
+    background-color: $white;
+}
+
+
+/**
+ * TODO: Combine with event header,
+ *       reduce layout complexity.
+ */
+.event-masthead {
+    position: relative;
+
+    .event-masthead__name {
+        max-width: rem(gs-span(8));
+        @include fs-headline(5);
+        padding-top: rem($gs-baseline / 2);
+
+
+        @include mq(tablet) {
+            padding-top: rem($gs-baseline);
+            @include fs-headline(7);
+        }
+
+        @include mq(mem-full) {
+            float: left;
+            padding-top: 0;
+        }
+    }
+    .event-masthead__title {
+        @include fs-header(1);
+        border-bottom: 1px dotted rgba(255, 255, 255, .29);
+        padding-bottom: rem($gs-gutter / 4);
+
+        @include mq(tablet) {
+            @include fs-header(3);
+        }
+
+        @include mq(mem-full) {
+            width: rem(gs-span(2));
+            margin-right: rem($gs-gutter);
+            border-bottom: 0;
+            float: left;
+        }
+    }
+}
+
+/**
+ * Event details
+ */
+.event-details {
+    margin-bottom: rem($gs-baseline / 2);
+
+    @include mq(tablet) {
+        margin-bottom: rem($gs-baseline);
+    }
+}
+.event-details__time {
+    @include fs-headline(2);
+    white-space: nowrap;
+
+    @include mq(tablet) {
+        @include fs-headline(4, true);
+    }
+}
+.event-details__location {
+    @include fs-data(4);
+    color: inherit;
+}
+
+
+/**
+ * Event extra bar
+ * (event status)
+ */
+.event-extra {
+    color: $white;
+    background-color: $c-neutral1;
+    position: relative;
+    padding: rem($gs-gutter / 2);
+
+    @include mq(tablet) {
+        padding: rem($gs-baseline) rem($gs-gutter);
+    }
+
+    @include mq(mem-full) {
+        padding-left: rem(gs-span(2) + ($gs-gutter * 2));
+    }
+}
+.event-extra__item {
+    padding-bottom: rem($gs-baseline / 2);
+
+    @include mq(tablet) {
+        display: inline-block;
+        vertical-align: middle;
+        padding-bottom: 0;
+        padding-right: rem($gs-gutter);
+    }
+}
+.event-extra__message {
+    @include fs-data(4);
+}
+.event-extra__status {
+    @include fs-textSans(2);
+    font-weight: bold;
+
+    @include mq(tablet) {
+        @include fs-header(5);
+    }
+}
+
+/* ==========================================================================
+   Event Ticket
+   ========================================================================== */
+
+.event-ticket {
+    @include mq(tablet) {
+        display: table;
+    }
+}
+.event-ticket__item {
+    @include mq(tablet) {
+        display: table-cell;
+        vertical-align: middle;
+        padding-right: rem($gs-gutter);
+    }
+}
+.event-ticket__details {
+    @include mq(tablet) {
+        padding-bottom: rem(3px); // Tweak for optical alignment (over actual alignment)
+    }
+}
+.event-ticket__action {
+    padding-top: rem($gs-baseline);
+    padding-bottom: rem($gs-baseline);
+    min-width: 169px;
+
+    @include mq(tablet) {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+.event-ticket__terms {
+    @include fs-textSans(1);
+
+    @include mq(tablet) {
+        max-width: rem(gs-span(4));
+    }
+}
+.event-ticket__terms a {
+    color: inherit;
+    border-color: $c-neutral4;
+}
+
+.event-ticket--aligned {
+    padding-top: 0;
+    .event-ticket__details {
+        padding-bottom: rem($gs-baseline / 2);
+    }
+    @include mq(tablet) {
+        .event-ticket__details,
+        .event-ticket__action {
+            vertical-align: middle;
+        }
+        .event-ticket__details {
+            padding-bottom: 0;
+        }
+    }
+}
+
+// Free event modifier
+.event-ticket--free {
+    @include mq(tablet) {
+        .event-ticket__details,
+        .event-ticket__action {
+            vertical-align: middle;
+        }
+        .event-ticket__details {
+            padding-bottom: 0;
+        }
+    }
+}
+
+.event-ticket__price-amount {
+    @include fs-header(5);
+    -webkit-font-smoothing: antialiased;
+}
+
+.event-ticket__trail {
+    @include fs-textSans(1);
+}
+
+/* Event Image
+   ========================================================================== */
+
+.event-image {
+    margin: 0 auto;
+
+    @include mq(tablet) {
+        width: rem(map-get($max-widths, max-tablet) + $gs-gutter * 2);
+    }
+    @include mq(desktop) {
+        width: rem(map-get($max-widths, max-desktop) + $gs-gutter * 2);
+    }
+    @include mq(mem-full) {
+        width: rem(map-get($max-widths, max-mem-full) + $gs-gutter * 2);
+    }
+
+    img {
+        width: 100%;
+    }
+}
+.event-image__credit {
+    background-color: $white;
+    padding: rem(5px) rem($gs-gutter / 2) 0;
+
+    @include mq(tablet) {
+        padding-left: rem($gs-gutter);
+    }
+
+    @include mq(mem-full) {
+        padding: rem($gs-baseline) 0 0 rem(gs-span(2) + ($gs-gutter * 2));
+    }
+}
+.event-image__credit__detail {
+    color: $c-neutral2;
+    @include fs-textSans(1);
+
+    @include mq(tablet) {
+        width: rem(gs-span(5) + $gs-gutter * 3);
+    }
+
+    @include mq(desktop) {
+        width: rem(gs-span(8) - $gs-gutter);
+    }
+}
+.event-image--clippath-0,
+.event-image--clippath-1,
+.event-image--clippath-2 {
+    .supports-clippath-shapes & {
+        position: relative;
+    }
+    .supports-clippath-shapes &::after {
+        content: ' ';
+        display: block;
+        position: absolute;
+        top: 0; bottom: 0;
+        left: 0; right: 0;
+        background-color: rgba(255,255,255,0.25);
+    }
+}
+.event-image--clippath-0 {
+    .supports-clippath-shapes &::after {
+        @include clip-path-shape('thumbnail-a');
+    }
+}
+.event-image--clippath-1 {
+    .supports-clippath-shapes &::after {
+        @include clip-path-shape('thumbnail-b');
+    }
+}
+.event-image--clippath-2 {
+    .supports-clippath-shapes &::after {
+        @include clip-path-shape('thumbnail-c');
+    }
+}
+
+
+
+/* Event Content
+   ========================================================================== */
+// TODO: Document and refactor
+
+.event-content {
+    padding: 0;
+    background-color: $white;
+
+    @include mq(desktop) {
+        background-color: transparent;
+    }
+}
+.event-content__container {
+    background-color: $white;
+    padding: rem($gs-gutter) rem($gs-gutter / 2);
+
+    @include mq(tablet) {
+        padding: rem($gs-gutter * 3) 0;
+    }
+}
+
+.u-event-content-width,
+.event-content__container {
+    @include mq(tablet) {
+        width: rem(gs-span(9) + $gs-gutter * 2);
+        margin: 0 auto;
+    }
+
+    @include mq(desktop) {
+        width: rem(gs-span(12) + $gs-gutter * 2);
+    }
+
+    @include mq(mem-full) {
+        width: rem(gs-span(14) + $gs-gutter * 2);
+    }
+}
+
+.event-content__body {
+    position: relative;
+
+    @include mq(tablet) {
+        float: left;
+        padding: 0 rem($gs-gutter);
+        width: rem(gs-span(5) + $gs-gutter * 2);
+    }
+
+    @include mq(desktop) {
+        padding: 0 rem($gs-gutter);
+        width: rem(gs-span(8) + $gs-gutter * 2);
+    }
+
+    @include mq(mem-full) {
+        width: rem(gs-span(10) + $gs-gutter * 2);
+    }
+}
+
+.event__price-note,
+.event__sale_ends_note,
+.event__sale_ends_time {
+    @include fs-textSans(4);
+    display: inline-block;
+}
+
+.event__description {
+    margin-bottom: rem($gs-gutter * 2);
+
+    @include mq(mem-full) {
+        float: right;
+        width: rem(gs-span(8));
+    }
+
+    img {
+        max-width: 100%;
+    }
+}
+
+.event__social {
+    width: rem(gs-span(2));
+    margin-bottom: rem($gs-gutter * 2);
+
+    @include mq(tablet) {
+        float: left;
+    }
+}
+.event__social__title {
+    @include fs-textSans(1);
+    border-top: 1px solid $c-neutral7;
+    padding: rem($gs-baseline / 2) 0;
+}
+
+.event-content__sidebar {
+    margin-bottom: rem($gs-gutter);
+
+    @include mq(tablet) {
+        float: left;
+        width: gs-span(4);
+    }
+}
+
+.event-content__sticky.is-sticky {
+    @include mq(tablet) {
+        width: gs-span(4);
+        position: fixed;
+        top: 0;
+        z-index: 1;
+    }
+}

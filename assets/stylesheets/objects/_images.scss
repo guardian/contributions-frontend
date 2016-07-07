@@ -1,0 +1,96 @@
+/* ==========================================================================
+   Images
+   ========================================================================== */
+
+.responsive-img {
+    display: block;
+    height: auto;
+    width: 100%;
+}
+
+/* ==========================================================================
+   Images: Captions
+   ========================================================================== */
+
+.o-caption {
+    @include fs-textSans(1);
+    font-weight: normal;
+}
+.o-caption--block {
+    .o-caption__credit {
+        display: block;
+    }
+}
+
+.captioned-image {
+    position: relative;
+}
+.captioned-image__detail {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    z-index: 2;
+    padding: rem($gs-gutter / 2);
+    padding-top: rem($gs-gutter * 2);
+    background-image: linear-gradient(to top, rgba(0,0,0,0.75), transparent 90%);
+    color: $white;
+
+    @include mq(mobileLandscape) {
+        padding: rem($gs-gutter * 2) rem($gs-gutter) rem($gs-baseline * 1.5);
+    }
+}
+.captioned-image__detail--right {
+    @include mq(tablet) {
+        right: 0;
+        width: 350px;
+        padding-left: 100px;
+    }
+}
+.captioned-image__caption {
+    @include mq(tablet) {
+        max-width: 27em;
+        padding-right: rem($gs-gutter);
+    }
+}
+
+/* ==========================================================================
+   Images: Stamped Image
+   ========================================================================== */
+
+.stamped-image {
+    position: relative;
+}
+.stamped-image__container {
+    position: absolute;
+    top: 0; right: 0;
+    height: 100%;
+    padding: ($gs-gutter / 2);
+    background-image: -webkit-linear-gradient(0deg, transparent 0%, rgba(0, 0, 0, .6) 100%);
+    background-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .6) 100%);
+}
+.stamped-image__stamp {
+    height: ($gs-gutter * 2);
+}
+
+/* ==========================================================================
+   Images: Inline SVGS
+   http://nicolasgallagher.com/canvas-fix-svg-scaling-in-internet-explorer/
+   ========================================================================== */
+
+.inline-svg {
+    display: inline-block;
+    position: relative;
+    user-select: none;
+}
+.inline-svg__canvas {
+    display: block;
+    height: 100% !important;
+    visibility: hidden;
+}
+.inline-svg__image {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}

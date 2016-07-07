@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+html {
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+html {
+    overflow-y: scroll;
+    font-family: $f-serif-text;
+    font-size: 100%;
+
+    position: relative;
+    min-height: 100%;
+    background-color: $c-background;
+}
+
+/**
+ * Use flexbox for sticky footer
+ * @see http://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/
+ */
+body {
+    color: $c-body;
+    line-height: 1.4;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.container-global {
+    flex: 1 1 auto;
+}
+
+body:after {
+    content: 'mobile';
+    @include u-h;
+
+    @include mq(tablet) {
+        content: 'tablet';
+    }
+    @include mq(desktop) {
+        content: 'desktop';
+    }
+    @include mq(wide) {
+        content: 'wide';
+    }
+}
+
+/*  =========================================================================
+    Embedded content
+    http://developers.whatwg.org/embedded-content-1
+    ========================================================================= */
+
+img {
+    background-color: transparent;
+}
+figure,
+form {
+    margin: 0;
+}
+
+/*  =========================================================================
+    Text-level semantics
+    http://developers.whatwg.org/text-level-semantics.html
+    ========================================================================= */
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: $gs-baseline * 1.3333;
+}
+
+dt {
+    font-weight: bold;
+}
+
+menu,
+ol,
+ul {
+    padding: 0;
+}
+
+table {
+    width: 100%;
+}
+th,
+td {
+    text-align: left;
+}
+
+address {
+    font-style: normal;
+    margin-bottom: $gs-baseline / 2;
+}

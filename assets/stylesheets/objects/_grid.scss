@@ -1,0 +1,210 @@
+/* ==========================================================================
+   Objects: Grid
+   ========================================================================== */
+
+/* Grid Shared
+   ========================================================================== */
+
+.grid {
+    @include clearfix;
+    list-style: none;
+    margin: 0;
+}
+.grid__item {
+    border-color: transparent;
+    margin-bottom: rem($gs-gutter / 2);
+
+    @include mq(mobileLandscape) {
+        margin-bottom: rem($gs-baseline);
+    }
+}
+
+@mixin grid-equal-heights($breakpoint: desktop) {
+    @if ($browser-supports-flexbox) {
+        @include mq($breakpoint) {
+            display: flex;
+        }
+        .grid__item {
+            @include mq($breakpoint) {
+                display: flex;
+            }
+        }
+    }
+}
+
+// Drop bottom margins if we know we only
+// have a single row of grid items.
+.grid--single-row {
+    @include mq(desktop) {
+        .grid__item {
+            margin-bottom: 0 !important;
+        }
+    }
+}
+
+.grid--bordered {
+    .grid__item {
+        border-color: $c-neutral5;
+    }
+}
+
+/**
+ * See: One True Layout Method
+ *      http://css-tricks.com/fluid-width-equal-height-columns/
+ */
+.grid--stretch {
+    overflow: hidden;
+    .grid__item {
+        margin-bottom: -99999px !important;
+        padding-bottom: 99999px !important;
+    }
+}
+
+.grid--2up,
+.grid--3up,
+.grid--4up {
+    @include mq(mobileLandscape) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    .grid__item {
+        @include mq(mobileLandscape) {
+            float: left;
+            margin-left: $gutter-width-fluid / 2;
+            padding-left: $gutter-width-fluid / 2;
+            margin-bottom: rem($gs-baseline);
+            width: 50% - ($gutter-width-fluid / 2);
+            &:nth-of-type(2n+1) { clear: left; }
+        }
+        @include mq(tablet) {
+            border-style: solid;
+            border-width: 0 0 0 1px;
+        }
+    }
+}
+
+/* Grid 2up
+   ========================================================================== */
+
+.grid--2up {
+    &.grid--equal-heights {
+        @include grid-equal-heights(tablet);
+    }
+
+    .grid__item {
+        @include mq(tablet) {
+            &:nth-of-type(2n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+.grid--2up-stacked {
+    &.grid--equal-heights {
+        @include grid-equal-heights(desktop);
+    }
+
+    @include mq(desktop) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    .grid__item {
+        @include mq(desktop) {
+            float: left;
+            border-style: solid;
+            border-width: 0 0 0 1px;
+            margin-left: $gutter-width-fluid / 2;
+            padding-left: $gutter-width-fluid / 2;
+            margin-bottom: rem($gs-baseline);
+            width: 50% - ($gutter-width-fluid / 2);
+            &:nth-of-type(2n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+/* Grid 3up (Cols per row: 3 on desktop > 2 on tablet > 1 on mobile)
+   ========================================================================== */
+
+.grid--3up {
+    &.grid--equal-heights {
+        @include grid-equal-heights(tablet);
+    }
+
+    .grid__item {
+        @include mq(tablet) {
+            width: 33.3% - ($gutter-width-fluid / 2);
+            &:nth-of-type(2n+1) { clear: none; }
+            &:nth-of-type(3n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+/* 3up Stacked (Cols per row: 3 on larger viewport > 1 on smaller)
+   ========================================================================== */
+
+@mixin grid-3up-stacked($breakpoint) {
+    &.grid--equal-heights {
+        @include grid-equal-heights($breakpoint);
+    }
+
+    @include mq($breakpoint) {
+        width: 100% + $gutter-width-fluid;
+        margin-left: -$gutter-width-fluid;
+    }
+    .grid__item {
+        @include mq($breakpoint) {
+            float: left;
+            border-style: solid;
+            border-width: 0 0 0 1px;
+            margin-left: $gutter-width-fluid / 2;
+            padding-left: $gutter-width-fluid / 2;
+            margin-bottom: rem($gs-baseline);
+            width: 33.3% - ($gutter-width-fluid / 2);
+            &:nth-of-type(3n+1) { clear: left; border-left: none; }
+        }
+    }    
+}
+
+// 3 on desktop > 1 on tablet > 1 on mobile
+.grid--3up-stacked {
+    @include grid-3up-stacked(desktop);
+}
+
+
+// 3 on desktop > 3 on tablet > 1 on mobile
+.grid--3up-stacked-mobile {
+    @include grid-3up-stacked(tablet);
+}
+
+/* Grid 4up
+   ========================================================================== */
+
+.grid--4up {
+    .grid__item {
+        @include mq(tablet) {
+            width: 25% - ($gutter-width-fluid / 2);
+            &:nth-of-type(2n+1) { clear: none; }
+            &:nth-of-type(4n+1) { clear: left; border-left: none; }
+        }
+    }
+}
+
+
+/* ==========================================================================
+   Grid: Flex Grid
+   ========================================================================== */
+
+@if ($browser-supports-flexbox) {
+    @include mq(tablet) {
+        .o-flexgrid {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .o-flexgrid__item {
+            flex: 1 0 calc(50% - 10px);
+            min-width: calc(50% - 10px);
+        }
+        .o-flexgrid__item:nth-child(even) {
+            margin-left: $gs-gutter / 2;
+        }
+    }
+}

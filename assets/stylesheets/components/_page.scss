@@ -1,0 +1,299 @@
+/* ==========================================================================
+   Page
+   ========================================================================== */
+
+$_page-offset: rem(gs-span(2) + $gs-gutter);
+
+/* ==========================================================================
+   Page: Global Page Content
+   ========================================================================== */
+
+.page-content {
+    @include clearfix;
+    background-color: $c-background;
+    padding: 0 ($gs-gutter / 2);
+    position: relative;
+
+    @include mq(mobileLandscape) {
+        padding: 0 ($gs-gutter);
+    }
+}
+.page-content--padded {
+    @include mq(tablet) {
+        padding: 0 ($gs-gutter * 4) ($gs-gutter * 8);
+    }
+}
+
+/* ==========================================================================
+   Brochure Page Layout Components
+   ========================================================================== */
+
+/* Page Slice
+   - Used on brochure style pages, full-width page segments
+   ========================================================================== */
+
+.page-slice {
+    overflow: auto;
+    background-color: $white;
+    padding-bottom: rem($gs-baseline);
+
+    @include mq(tablet) {
+        padding-bottom: rem($gs-baseline * 3);
+    }
+}
+    .page-slice__headline {
+        @include fs-headline(4);
+        font-weight: guss-font-weight(medium);
+        padding: rem($gs-gutter / 2);
+
+        @include mq(desktop) {
+            @include fs-headline(6, true);
+            padding: rem($gs-baseline) rem($gs-gutter);
+        }
+    }
+    .page-slice__content {
+        padding: rem($gs-gutter / 2);
+
+        @include mq(tablet) {
+            padding: rem($gs-gutter);
+        }
+        @include mq(mem-full) {
+            padding-left: rem($gs-gutter * 9);
+        }
+    }
+
+    .page-slice--legal {
+        background-color: $c-neutral1;
+        color: $c-neutral5;
+        padding-bottom: rem($gs-baseline);
+    }
+
+.page-slice--split {
+    padding-bottom: 0;
+
+    @include mq(desktop) {
+        .page-slice__headline {
+            float: left;
+            width: rem(gs-span(4));
+        }
+        .page-slice__content {
+            float: right;
+            width: rem(gs-span(9) - $gs-gutter);
+            padding: rem($gs-gutter);
+        }
+    }
+    @include mq(mem-full) {
+        .page-slice__headline {
+            width: rem(gs-span(6));
+            padding-right: rem(gs-span(1));
+        }
+    }
+}
+.page-slice--listing {
+    position: relative;
+    padding-bottom: $gs-baseline * 2;
+
+    .listing {
+        padding-bottom: 0;
+    }
+}
+.page-slice--slim {
+    padding-bottom: 0;
+}
+.page-slice--padded {
+    padding: $gs-gutter / 2;
+
+    @include mq(tablet) {
+        padding: $gs-gutter;
+    }
+}
+
+/* ==========================================================================
+   Functional Page Layout Components
+   ========================================================================== */
+
+/* Page Header
+   ========================================================================== */
+
+/**
+ * Page header is the container,
+ * typically combined with page-headline and page-intro
+ */
+.page-header {
+    max-width: rem(gs-span(8));
+    padding: rem($gs-gutter / 2) 0 rem($gs-baseline * 2);
+
+    @include mq(tablet) {
+        padding-bottom: $gs-baseline * 4;
+    }
+
+    @include mq(mem-full) {
+        margin-right: rem($gs-gutter);
+        margin-left: $_page-offset;
+    }
+}
+.page-header--slim {
+    @include mq(tablet) {
+        padding-bottom: $gs-baseline;
+    }
+}
+
+/**
+ * Main page headline for functional pages
+ */
+.page-headline {
+    @include fs-headline(4);
+
+    @include mq(tablet) {
+        @include fs-headline(5);
+    }
+    @include mq(desktop) {
+        @include fs-headline(7);
+    }
+}
+
+/**
+ * Optional page intro for functional pages
+ */
+.page-intro {
+    color: $c-neutral2;
+    @include fs-headline(2);
+    margin-bottom: 0;
+
+    @include mq(tablet) {
+        @include fs-headline(3, true);
+    }
+}
+
+/* Page Section
+   ========================================================================== */
+
+/**
+ * Example usage:
+ * <div class="page-section page-section--bordered">
+ *     <div class="page-section__leadin">
+ *         <h2 class="page-section__headline">Headline</h2>
+ *     </div>
+ *     <div class="page-section__content">[...]</div>
+ *     <div class="page-section__supplementary">(Optional)</div>
+ * </div>
+ *
+ * Only .page-section and .page-section__content are required
+ */
+.page-section {
+    @include clearfix;
+    padding-bottom: rem($gs-baseline);
+
+    @include mq(desktop) {
+        width: auto;
+    }
+    @include mq(mem-full) {
+        position: relative;
+        min-height: rem(gs-height(3));
+    }
+}
+.page-section__lead-in {
+    @include mq(mem-full) {
+        width: rem(gs-span(2));
+        position: absolute;
+        left: 0;
+    }
+}
+.page-section__headline {
+    @include fs-header(3);
+    margin-bottom: rem($gs-baseline / 4);
+}
+.page-section__content {
+    @include mq(tablet) {
+        float: left;
+        width: 75% - $gutter-width-fluid;
+        margin-right: $gutter-width-fluid;
+    }
+    @include mq(desktop) {
+        margin-right: 0;
+        width: rem(gs-span(9));
+    }
+    @include mq(mem-full) {
+        width: rem(gs-span(11));
+        padding-left: $_page-offset;
+    }
+}
+.page-section__supplementary {
+    clear: both;
+    @include mq(tablet) {
+        clear: none;
+        float: right;
+        width: 25%;
+    }
+    @include mq(desktop) {
+        width: rem(gs-span(3));
+    }
+}
+
+.page-section--no-padding {
+    padding-bottom: 0;
+}
+
+/**
+ * Example usage:
+ * <div class="page-section page-section--bordered">
+ *     <div class="page-section__content">[...]</div>
+ * </div>
+ */
+.page-section--bordered {
+
+    .page-section__lead-in,
+    .page-section__content,
+    .page-section__supplementary {
+        padding-top: rem($gs-baseline / 2);
+    }
+
+    .page-section__lead-in {
+        border-top: 1px solid color(brand-main);
+    }
+
+    @include mq(desktop) {
+        .page-section__lead-in {
+            border-top: none;
+        }
+        .page-section__content {
+            border-top: 1px solid color(brand-main);
+        }
+    }
+}
+
+/* Page Section Spread
+   ========================================================================== */
+
+.page-section-spread {
+    @include clearfix;
+    padding-bottom: rem($gs-baseline);
+
+    @include mq(desktop) {
+        position: relative;
+        min-height: rem(gs-height(3));
+    }
+}
+.page-section-spread__lead-in {
+    margin-bottom: rem($gs-baseline * 2);
+
+    @include mq(desktop) {
+        position: absolute;
+        left: 0;
+        margin-bottom: 0;
+        padding-right: rem($gs-gutter);
+        width: 30%;
+    }
+}
+.page-section-spread__content {
+
+    @include mq(tablet) {
+        width: 85%;
+    }
+
+    @include mq(desktop) {
+        padding-left: 30%;
+        width: 85% - $gutter-width-fluid;
+        float: left;
+    }
+}

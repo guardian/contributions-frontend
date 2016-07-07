@@ -1,0 +1,26 @@
+/* ==========================================================================
+   User
+   ========================================================================== */
+
+.user-welcome {
+    @include clearfix;
+    display: table;
+    margin-bottom: rem($gs-gutter);
+}
+.user-welcome__image,
+.user-welcome__content {
+    display: table-cell;
+    vertical-align: middle;
+}
+.user-welcome__image {
+    @include circular;
+    width: 75px;
+    height: 75px;
+    margin-right: rem($gs-gutter/2);
+}
+.user-welcome__title {
+    margin-bottom: 0;
+}
+.user-welcome__content p {
+    margin-bottom: 0;
+}

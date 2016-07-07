@@ -11,12 +11,13 @@ import scala.io.Source
 
 object Asset {
   lazy val map = {
-    val resourceOpt = Option(getClass.getClassLoader.getResourceAsStream("assets.map"))
+    val resourceOpt = Option(getClass.getClassLoader.getResourceAsStream("NOassets.map"))
     val jsonOpt = resourceOpt.map(Source.fromInputStream(_).mkString).map(Json.parse(_))
     jsonOpt.map(_.as[JsObject].fields.toMap.mapValues(_.as[String])).getOrElse(Map.empty)
   }
 
   def at(path: String): String = "/assets/" + map.getOrElse(path, path)
+ // def at(path: String): String = "/public/" + map.getOrElse(path, path)
   def pathAt(path: String): String = "public/" + map.getOrElse(path, path)
 
   def inlineResource(path: String): Option[String] = {

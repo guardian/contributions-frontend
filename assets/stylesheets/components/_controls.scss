@@ -1,0 +1,40 @@
+/* ==========================================================================
+   Controls
+   ========================================================================== */
+
+.control,
+.control:active {
+    color: $black;
+    display: table;
+    width: 100%;
+}
+.control__item {
+    display: table-cell;
+    vertical-align: middle;
+    padding-right: rem($gs-gutter / 4);
+}
+.control__info {
+    @include fs-bodyHeading(1);
+    color: $black;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: left;
+    max-width: rem($gs-gutter * 10);
+    user-select: none;
+}
+.control__icon {
+    color: $black;
+    border-color: rgba(0,0,0,0.3);
+}
+
+.control:hover,
+.control:active,
+.control.is-active {
+    .control__icon {
+        border-color: color(neutral-1);
+    }
+    .control__info {
+        text-decoration: underline;
+    }
+}

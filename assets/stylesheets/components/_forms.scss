@@ -1,0 +1,552 @@
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
+/* ==========================================================================
+   Forms: Layout Components
+   ========================================================================== */
+
+/* Form Header
+   ========================================================================== */
+
+/** Example usage:
+*   <section class="form-header">
+*       <h1 class="form-headline"></h1>
+*       <p class="form-intro"></p>
+*   </section>
+*/
+/**
+ * Form header is the container,
+ * typically combined with form-headline and form-intro
+ */
+.form-header {
+    padding: rem($gs-gutter / 2) 0 rem($gs-baseline * 3);
+
+    @include mq(tablet) {
+        width: rem(gs-span(9));
+        margin: 0 auto;
+        padding-bottom: rem($gs-baseline * 4);
+    }
+
+    @include mq(desktop) {
+        width: rem(gs-span(11));
+        margin-left: 0;
+        padding-left: rem(gs-span(2) + $gs-gutter);
+    }
+}
+
+/**
+ * Main page headline for functional form pages
+ */
+.form-headline {
+    @include fs-headline(5);
+
+    @include mq(desktop) {
+        @include fs-headline(7);
+    }
+}
+
+/**
+ * Optional page intro for functional pages
+ */
+.form-intro {
+    color: $c-neutral2;
+    @include fs-headline(2);
+
+    @include mq(tablet) {
+        @include fs-headline(3);
+    }
+}
+
+/* Form Section
+   ========================================================================== */
+
+/**
+ * Example usage:
+ *  <div class="form-section">
+ *      <div class="form-section__leadin">
+ *          <h2 class="form-section__headline">Headline</h2>
+ *      </div>
+        <div class="form-section__content">
+     *      <fieldset class="fieldset">
+     *          <div class="fieldset__heading">
+     *              <h2 class="fieldset__headline">Headline</h2>
+     *          </div>
+     *          <div class="fieldset__fields"></div>
+     *      </fieldset>
+        </div>
+ *  </div>
+ */
+.form-section {
+    @include clearfix;
+    position: relative;
+    padding: 0;
+
+    @include mq(tablet) {
+        padding-top: rem(12px);
+        padding-bottom: rem(12px);
+    }
+
+    @include mq(desktop) {
+        width: auto;
+    }
+}
+
+.form-section--no-padding {
+    padding: 0;
+}
+
+.form-section__lead-in {
+
+    @include mq(tablet) {
+        width: rem(gs-span(9));
+        margin: 0 auto;
+    }
+
+    @include mq(desktop) {
+        width: rem(gs-span(2));
+        position: absolute;
+        left: 0;
+    }
+}
+
+.form-section__headline {
+    @include fs-header(3);
+    padding-bottom: rem($gs-gutter * 1.6);
+}
+
+.form-section__content {
+
+    @include mq(tablet) {
+        width: rem(gs-span(9));
+        margin: 0 auto;
+    }
+
+    @include mq(desktop) {
+        width: rem(gs-span(11));
+        float: left;
+        padding-left: rem(gs-span(2) + $gs-gutter);
+    }
+}
+
+.form-detail {
+    border-top: 1px solid color(brand-main);
+    padding-top: rem($gs-baseline / 2);
+}
+
+/* ==========================================================================
+   Forms: Groups
+   ========================================================================== */
+
+.form-group {
+    border-bottom: 1px solid $c-neutral3;
+    margin-bottom: $gs-gutter;
+}
+.form-group--last {
+    margin-bottom: 0;
+}
+.form-group__title {
+    @include fs-headline(4);
+    margin-bottom: $gs-baseline;
+}
+
+/* ==========================================================================
+   Forms: Fieldset
+   ========================================================================== */
+
+.fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: table;
+    background-color: $c-neutral8;
+    border-top: 1px solid $c-neutral3;
+}
+.fieldset__heading {
+    vertical-align: top;
+    padding: ($gs-baseline / 2) $gs-baseline;
+    padding-left: ($gs-gutter / 2);
+
+    @include mq(tablet) {
+        display: table-cell;
+        padding-right: ($gs-gutter * 2);
+        padding-bottom: ($gs-baseline * 2);
+        width: gs-span(4) + $gs-gutter;
+    }
+}
+.fieldset__headline {
+    @include fs-header(3);
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: ($gs-baseline / 2);
+}
+.fieldset__note {
+    @include fs-textSans(2);
+    color: $c-neutral2;
+    p {
+        margin-bottom: 0;
+    }
+}
+.fieldset__fields {
+    vertical-align: top;
+    padding: ($gs-gutter / 2);
+    padding-bottom: $gs-baseline;
+
+    @include mq(tablet) {
+        display: table-cell;
+        width: gs-span(5);
+        padding-left: 0;
+    }
+}
+
+.fieldset--simple {
+    background-color: transparent;
+    border-top: none;
+
+    .fieldset__fields {
+        padding-top: ($gs-gutter / 2);
+    }
+}
+
+.fieldset--no-background {
+    background-color: transparent;
+}
+
+/* ==========================================================================
+   Forms: Fields
+   ========================================================================== */
+
+.form-field {
+    margin-bottom: $gs-baseline;
+}
+
+.form-field--no-margin {
+    margin-bottom: 0;
+}
+
+.form-field--error {
+    .label {
+        color: $c-error;
+    }
+
+    .input-text,
+    .input-text:focus,
+    .input-textarea,
+    .input-textarea:focus {
+        border-color: $c-error;
+    }
+}
+
+.form-field__error-message {
+    @include fs-data(3);
+    color: $c-error;
+    margin-top: 2px;
+    margin-bottom: ($gs-baseline / 2);
+}
+
+.form-note {
+    @include fs-textSans(1);
+    color: $c-neutral2;
+    padding-top: ($gs-baseline / 2);
+    margin-bottom: 8px;
+}
+
+.form-note--left {
+    @include mq(mobileLandscape) {
+        float: left;
+    }
+}
+
+.form-note--right {
+    @include mq(mobileLandscape) {
+        text-align: right;
+        margin-left: $gs-gutter;
+    }
+}
+
+.form-note--underneath {
+    margin-top: ($gs-baseline / 2);
+}
+
+/* ==========================================================================
+   Forms: Labels & Inputs
+   ========================================================================== */
+
+.label {
+    @include fs-bodyCopy(2);
+    color: $c-neutral1;
+    cursor: pointer;
+    display: block;
+}
+
+.label--inline {
+    display: inline-block;
+}
+
+.input-text,
+.input-textarea {
+    color: $c-body;
+    border: 1px solid $c-neutral4;
+    @include fs-textSans(5);
+    padding: 8px 8px 7px;
+    outline: none;
+    width: 100%;
+    -webkit-appearance: none;
+    border-radius: $input-border-radius;
+
+    &:focus {
+        border-color: $c-border-brand;
+    }
+
+    @include mq(tablet) {
+        font-size: 14px;
+    }
+}
+
+.input-text--small {
+    width: 30%;
+}
+
+.input-textarea {
+    resize: vertical;
+}
+
+.input-textarea--long {
+    min-height: (($gs-baseline / 3) * 40);
+}
+
+.optional-marker {
+    &:after {
+        vertical-align: middle;
+        content: '(optional)';
+        color: $c-neutral2;
+        @include fs-textSans(1);
+        margin-left: 4px;
+    }
+}
+
+/**
+ * Width needed for iphone so select doesn't exceed screen width
+ */
+.select {
+    width: 100%;
+}
+.select-minimal {
+    border: 0;
+    outline: 0;
+    background-color: transparent;
+    font-weight: bold;
+}
+
+// TODO: Remove / too tightly scoped
+.ts-and-cs {
+    @include fs-textSans(3);
+    color: $c-neutral2;
+}
+
+/* ==========================================================================
+   Psuedo radio form inputs
+   ========================================================================== */
+
+.pseudo-radio {
+    width: 100%;
+    position: relative;
+    border: 1px solid transparent;
+    padding: $gs-baseline $gs-gutter;
+    padding-left: $gs-baseline * 3;
+
+    &:hover {
+        border-color: $c-neutral2;
+    }
+
+    &:before {
+        @include radio-circle($c-neutral5);
+    }
+}
+
+input[type=radio]:checked ~ .pseudo-radio {
+    border-color: $c-border-brand;
+    &:before {
+        background-color: color(brand-main);
+    }
+}
+.pseudo-radio__label {
+    @include fs-bodyCopy(2);
+    line-height: 1.2;
+}
+.pseudo-radio__header {
+    @include fs-bodyHeading(2);
+    line-height: 1.2;
+    margin-bottom: ($gs-baseline / 2);
+}
+.pseudo-radio__note {
+    @include fs-textSans(3);
+    margin-bottom: 0;
+}
+
+/**
+ * Fake version of radio controls
+ * Used on Patron account creation to
+ * show the available options event though
+ * they are not selectable (you get both).
+ * This is a really awkward name,
+ */
+.pseudo-radio-faker {
+    margin-bottom: $gs-baseline;
+}
+.pseudo-radio-faker__header {
+    @include fs-bodyHeading(2);
+    line-height: 1.2;
+    margin-bottom: ($gs-baseline / 2);
+}
+.pseudo-radio-faker__note {
+    @include fs-textSans(3);
+    margin-bottom: 0;
+}
+
+// TODO: Move to forms-payment sub-module
+/* ==========================================================================
+   Payment credit card types
+   ========================================================================== */
+
+$small-card: 32px;
+$large-card: 35px;
+$card-icon-offset: 1px;
+
+.credit-card-container {
+    position: relative;
+}
+
+.credit-card {
+    width: 54px;
+    height: $large-card;
+}
+
+.credit-card--input-visualisation {
+    position: absolute;
+    right: $card-icon-offset;
+    top: $card-icon-offset;
+}
+
+
+/* ==========================================================================
+   Credit card notes
+   ========================================================================== */
+
+.credit-card-note {
+    color: $c-neutral2;
+}
+
+.credit-card-note__header {
+    @include fs-textSans(3);
+    color: $c-neutral1;
+}
+
+.credit-card-input {
+    // bit messy but needs to account for outline plus icon offset
+    height: ($large-card + $card-icon-offset + 2px);
+}
+
+/* ==========================================================================
+   Password Strength indicator
+   ========================================================================== */
+
+$password-strength-score-0: #e31f26;
+$password-strength-score-1: #e6711b;
+$password-strength-score-2: #ffbb00;
+$password-strength-score-3: #aad801;
+$password-strength-score-4: #33a22b;
+
+.password-strength {
+    margin: ($gs-baseline / 2) 0;
+}
+.password-strength__indicator {
+    height: 8px;
+    position: relative;
+    background-color: $c-neutral5;
+
+    &:after {
+        bottom: 0;
+        content: '';
+        display: block;
+        left: 0;
+        position: absolute;
+        top: 0;
+    }
+    &.score-0:after {
+        width: 20%;
+        background-color: $password-strength-score-0;
+    }
+    &.score-1:after {
+        width: 40%;
+        background-color: $password-strength-score-1;
+    }
+    &.score-2:after {
+        width: 60%;
+        background-color: $password-strength-score-2;
+    }
+    &.score-3:after {
+        width: 80%;
+        background-color: $password-strength-score-3;
+    }
+    &.score-4:after {
+        width: 100%;
+        background-color: $password-strength-score-4;
+    }
+}
+.password-strength__note {
+    @include fs-textSans(1);
+    color: $c-neutral2;
+    margin: ($gs-baseline / 2) 0;
+
+    @include mq(mobile) {
+        text-align: right;
+    }
+}
+
+
+/* ==========================================================================
+   Cvc toggle
+   ========================================================================== */
+
+.cvc-cta {
+    font-family: $f-sans-serif-text;
+    font-size: 13px;
+    line-height: 16px;
+}
+
+.cvc {
+    font-family: $f-sans-serif-text;
+    padding: ($gs-baseline / 2) ($gs-baseline / 2) ($gs-baseline / 2) 0;
+    font-size: 13px;
+    line-height: 16px;
+}
+
+.cvc__image {
+    float: left;
+}
+
+.cvc__detail {
+    margin-left: 70px;
+}
+
+.cvc__heading {
+    font-weight: bold;
+    font-family: $f-sans-serif-text;
+    font-size: 13px;
+    line-height: 16px;
+}
+
+/* ==========================================================================
+   disable number spinners
+   (https://css-tricks.com/numeric-inputs-a-comparison-of-browser-defaults/)
+   ========================================================================== */
+/* Remove controls from Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0; /* Removes leftover margin */
+}

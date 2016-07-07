@@ -1,0 +1,111 @@
+/* ==========================================================================
+   Global Footer
+   ========================================================================== */
+
+.global-footer {
+    position: relative;
+    z-index: 2;
+}
+.global-footer__info {
+    @include fs-textSans(3);
+    color: $c-neutral4;
+    background-color: guss-colour(multimedia-support-4);
+
+    a {
+        color: inherit;
+    }
+}
+.global-footer__info__inner {
+    padding: ($gs-baseline * 2) ($gs-gutter / 2);
+
+    @include mq(tablet) {
+        padding: ($gs-baseline * 2) $gs-gutter;
+    }
+}
+.global-footer__copyright {
+    @include fs-textSans(1);
+    border-top: 1px solid $c-neutral2;
+    margin-top: $gs-gutter;
+    padding-top: $gs-baseline / 2;
+    display: block;
+}
+
+/* Footer - Brandbar
+   ========================================================================== */
+
+.global-brandbar {
+    background: color(brand-main) url(/assets/images/common/bg-brandbar.png) no-repeat;
+    background-position: 65% 100%;
+
+    @include mq(phablet) {
+        background-position: 60% 100%;
+    }
+    @include mq(tablet) {
+        padding-bottom: $global-toggle-height;
+        background-position: top center;
+    }
+}
+.global-brandbar__inner {
+   @include clearfix();
+   padding: ($gs-gutter / 2) ($gs-gutter / 4);
+
+   @include mq(tablet) {
+       padding: ($gs-gutter / 2) ($gs-gutter / 2) $gs-baseline
+   }
+}
+.global-brandbar__top {
+    float: left;
+}
+.global-brandbar__logo {
+   float: right;
+   line-height: 0;
+   width: auto;
+}
+.global-brandbar__logo__image {
+    width: auto;
+    height: 35px;
+
+    @include mq(tablet) {
+        height: 45px;
+    }
+}
+
+/* Footer - Colophon
+   ========================================================================== */
+
+.colophon {
+    @include clearfix();
+    @include fs-bodyHeading(1);
+
+    margin: 0;
+    list-style: none;
+
+    @include mq(desktop) {
+        max-width: 75%;
+    }
+}
+.colophon__item {
+    display: block;
+    float: left;
+    width: 50%;
+
+    @include mq(tablet) {
+        width: 33.333%;
+    }
+}
+.colophon__link {
+    text-transform: lowercase;
+    border-bottom: none;
+    text-decoration: none;
+    display: inline-block;
+    padding-bottom: ($gs-baseline / 2);
+}
+
+/* Footer - In App
+   ========================================================================== */
+
+body.in-app {
+    .global-footer {
+        display: none;
+    }
+}

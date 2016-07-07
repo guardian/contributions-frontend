@@ -21,13 +21,13 @@ project/project
 project/target
 
 bower_components
-*/public/javascripts
-*/public/stylesheets
-*/assets/javascripts/lib/bower-components/
+public/stylesheets
+assets/javascripts/lib/bower-components/
 
-frontend/conf/keys.conf
-frontend/conf/assets.map
+conf/keys.conf
+conf/assets.map
 
-frontend/assets/images/inline-svgs/*.svg
-frontend/assets/images/svg-sprite.svg
-frontend/public/
+assets/images/inline-svgs/*.svg
+/assets/images/svg-sprite.svg
+/public/
+/assets/javascripts/lib/bower-components/

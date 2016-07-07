@@ -1,0 +1,111 @@
+/* ==========================================================================
+   Scopes: Prose
+   Opt-in typographic styles
+   ========================================================================== */
+// These are for styling HTML that we get from external sources
+// and may contain more specific selectors than we would usually like.
+// Similar in goal to _from-content-api.scss from next-gen.
+//
+// Opt-in typography
+// Particularly useful when copy come from a third-party (e.g., eventbrite/evently)
+// See:
+//     http://css-tricks.com/opt-in-typography/
+//     http://dbushell.com/2012/04/18/scoping-typography-css/
+//     http://anthonyshort.me/global-typographic-styles-suck/
+
+.copy,
+.s-prose {
+
+    > p,
+    ul,
+    ol,
+    address {
+        padding: 0;
+        margin: 0 0 $gs-baseline;
+
+        @include mq(tablet) {
+            margin-bottom: ($gs-baseline * 1.3333);
+        }
+    }
+
+    h2 {
+        @include fs-header(2);
+
+        @include mq(tablet) {
+            margin-bottom: 1px;
+            @include fs-header(3, true);
+        }
+    }
+    h2 + h2, p + h2, ol + h2, ul + h2 {
+        margin-top: ($gs-gutter * 1.3);
+    }
+    h3 {
+        @include fs-bodyHeading(3);
+    }
+    p + h3, ol + h3, ul + h3 {
+        margin-top: $gs-baseline;
+    }
+    h4 {
+        @include fs-bodyHeading(2);
+    }
+    h5, h6 {
+        @include fs-bodyHeading(1);
+    }
+    h6 {
+        font-weight: normal;
+        font-style: italic;
+    }
+
+    a {
+        @include text-link();
+    }
+
+    li > ol,
+    li > ul {
+        margin-bottom: 0;
+    }
+
+    ul {
+        @include bulleted-list();
+    }
+
+    ol {
+        list-style: none;
+        margin-left: $gs-gutter;
+        counter-reset: li;
+    }
+    ol > li {
+        list-style-position: outside;
+        text-indent: -($gs-gutter);
+    }
+    ol > li:before {
+        content: counter(li)'.';
+        counter-increment: li;
+        @include fs-header(1);
+        margin-right: $gs-baseline / 2;
+
+        @include mq(tablet) {
+            @include fs-header(2, $size-only: true);
+        }
+    }
+
+    .no-style-list {
+        list-style: none;
+    }
+
+    blockquote {
+        padding-left: 14px;
+        border-left: 2px solid color(brand-main);
+        font-style: italic;
+        margin: 0 0 16px;
+    }
+
+    blockquote p {
+        margin: 0;
+    }
+
+}
+
+.text-link {
+    @include text-link();
+}

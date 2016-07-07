@@ -1,0 +1,114 @@
+/* ==========================================================================
+   Links
+   ========================================================================== */
+
+a,
+.fake-link {
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover,
+    &:focus {
+        text-decoration: underline;
+    }
+}
+
+// transforms buttons into link-like elements
+.fake-link {
+    display: inline;
+    padding: 0;
+    background: none;
+    border: 0;
+    outline: none;
+}
+
+.minimal-link {
+    color: inherit;
+}
+
+.mini-link {
+    @include fs-data(3);
+    color: $c-neutral2;
+
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+.no-underline {
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover,
+    &:focus,
+    &:active {
+        text-decoration: none;
+    }
+
+    // useful for disabling underline on images inside links
+    // but enabling it for text nodes inside those links
+    &:hover .no-underline--override,
+    &:focus .no-underline--override,
+    &:active .no-underline--override {
+        text-decoration: underline;
+    }
+}
+
+.block-hover {
+    transition: background-color $transition-duration-medium ease;
+
+    &,
+    &:active,
+    &:hover,
+    &:focus {
+        color: $black;
+        text-decoration: none;
+    }
+
+    &:hover {
+        background-color: $c-neutral5;
+        .block-hover__media {
+            background-color: $black;
+            img {
+                opacity: .8;
+            }
+        }
+    }
+}
+.block-hover__media {
+    transition: background-color $transition-duration-medium ease;
+
+    img {
+        transition: opacity $transition-duration-medium ease;
+        // Prevent flicker on hover in WebKit
+        -webkit-backface-visibility: hidden;
+    }
+}
+
+
+// Skip to main content link
+// Needs to override .u-h
+// hence the !important declarations
+.skip:focus, .skip:active {
+    display: block;
+    color: $black;
+    background-color: $c-neutral8;
+    @include fs-data(3);
+    text-decoration: none;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: ($gs-gutter / 2) 0 !important;
+    text-align: center;
+    outline: none;
+}
+
+.link-outbound {}
+
+.link-outbound__highlight {
+    color: color(brand-main);
+}
+.link-outbound__separator {
+    color: $c-neutral3;
+}

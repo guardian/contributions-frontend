@@ -1,0 +1,186 @@
+/* ==========================================================================
+   Objects: Icons
+   ========================================================================== */
+
+.icon {
+    display: inline-block;
+    background-repeat: no-repeat;
+}
+.icon--inline {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.icon--small {
+    background-size: 16px;
+    width: 16px; height: 16px;
+}
+.icon--medium {
+    background-size: 24px;
+    width: 24px; height: 24px;
+}
+.icon--large {
+    background-size: 32px;
+    width: 32px; height: 32px;
+}
+.icon--faq {
+    background-size: 18px;
+    width: 18px; height: 18px;
+}
+
+.icon--featured {
+    width: 25px;
+    height: 25px;
+    background-size: 25px;
+    @include mq(tablet) {
+        width: 48px;
+        height: 48px;
+        background-size: 48px;
+    }
+}
+
+/* Inline Icons
+   ========================================================================== */
+
+.icon-inline {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    fill: currentColor;
+}
+.icon-inline--small {
+    width: 13px;
+    height: 13px;
+}
+.icon-inline--medium {
+    width: 22px;
+    height: 22px;
+}
+.icon-inline--large {
+    width: 36px;
+    height: 36px;
+}
+.icon-inline--badge {
+    width: 50px;
+    height: 18px;
+    margin-right: 2px;
+    vertical-align: text-bottom;
+}
+.icon-inline--scale {
+    width: .75em;
+    height: .75em;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+    margin-right: rem($gs-baseline / 4);
+}
+.icon-inline--offset {
+    margin-right: 5px;
+}
+.icon-inline--top {
+    vertical-align: top;
+}
+.icon-inline--bottom {
+    vertical-align: bottom;
+}
+.icon-inline--brand {
+    fill: color(brand-main);
+}
+.icon-inline--neutral {
+    fill: $c-neutral2;
+}
+
+/* Icon Holder
+   ========================================================================== */
+
+.icon-holder {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0; margin: 0;
+    width: 26px; height: 26px;
+    background-color: transparent;
+    border-radius: 1000px;
+    border: 1px solid $c-border-brand;
+    color: color(brand-main);
+
+    .icon-inline {
+        @include vertically-center();
+        position: relative;
+        width: 16px; height: 16px;
+    }
+}
+.icon-holder--large {
+    width: 36px;
+    height: 36px;
+
+    .icon-inline {
+        width: 20px;
+        height: 20px;
+    }
+}
+.icon-holder--small {
+    width: 20px;
+    height: 20px;
+
+    .icon-inline {
+        width: 12px;
+        height: 12px;
+    }
+}
+.icon-holder--neutral {
+    color: $c-neutral1;
+    border-color: $c-neutral1;
+}
+.icon-holder--fill {
+    color: $white;
+    background-color: color(brand-main);
+    border-color: color(brand-main);
+}
+.icon-holder--fill-guardian-live {
+    color: $white;
+    background-color: tone('live');
+    border-color: tone('live');
+}
+.icon-holder--fill-local {
+    color: $white;
+    background-color: tone('local');
+    border-color: tone('local');
+}
+.icon-holder--fill-masterclasses {
+    color: $white;
+    background-color: tone('masterclass');
+    border-color: tone('masterclass');
+}
+.icon-holder--control {
+    color: $c-neutral1;
+    border-color: $c-neutral2;
+}
+.icon-holder--control:hover,
+.icon-holder--control:active,
+.icon-holder--control:focus {
+    border-color: $c-neutral1;
+}
+
+/* Checkmarks
+   ========================================================================== */
+
+.checkmark,
+.checkmark--true {
+    @include circular();
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0; margin: 0;
+    width: 24px; height: 24px;
+    color: $white;
+    background-color: #1f6e04;
+
+    .icon-inline {
+        @include vertically-center();
+        position: relative;
+        width: 14px; height: 14px;
+    }
+}
+.checkmark--false {
+    background-color: $c-neutral3;
+}

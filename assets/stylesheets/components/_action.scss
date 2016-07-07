@@ -1,0 +1,250 @@
+/* ==========================================================================
+   Actions
+   ========================================================================== */
+
+/* Action Group
+   ========================================================================== */
+
+/**
+ * Used to group a colleciton of icons,
+ * adds appropriate spacing between actions.
+ */
+.action-group {
+    clear: both;
+}
+.action-group > .action {
+    margin-right: rem($gs-gutter / 2);
+    margin-bottom: rem($gs-gutter / 2);
+}
+
+/* Action
+   ========================================================================== */
+
+.action {
+
+    @include font-smoothing();
+    @include fs-textSans(4);
+
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: left;
+    display: inline-block;
+    vertical-align: bottom;
+    outline: none;
+
+    color: $white;
+    background-color: $c-button;
+    padding: 6px $gs-gutter;
+    border: 1px solid $c-button;
+    @include circular;
+
+    &:focus,
+    &:active,
+    &:hover {
+        color: $white;
+        background-color: darken($c-button, 10%);
+        border-color: darken($c-button, 10%);
+        text-decoration: none;
+    }
+
+    /**
+     * TODO: Temporary inlining to help with removal of old icon sprite
+     * This should move to being an inline SVG. Requires a template refactor to get there.
+     */
+    &:after {
+        content: '';
+
+        display: inline-block;
+        background-repeat: no-repeat;
+        width: 20px;
+        height: 18px;
+        background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iMzYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTMwLjA1MiAxNy4yMzZoLTMuMzIzYy0xLjMxMS4wMDEtMi42MjktLjA3Ny0zLjkzMS4wMjItMS42MzQuMTI0LTMuMjU0LjQxMy00Ljg4NC41OTEtMS4zNjMuMTQ5LTIuNzMzLjIzLTQuMDk4LjM2NmwtMS4wNjUuMjM4LTIuMTkuMTc4Yy0uODYzLjEtMS44NTMuNTczLTIuNTUzLjI5My0xLjMwNC0uNTE5LTIuMjQ3LjI2NC0zLjAyNi43NTQtLjgyLjUxOC0xLjcxLjY5OC0yLjUzNiAxLjA2Ni0xLjIzNC41NDgtMi4yOTguMTM1LTIuNDQ2LTEuNTkyLjc3My0uODQ3IDEuODU2LS43MDggMi44MjgtLjk0MyAxLjU5OC0uMzg0IDMuMTY3LS44ODcgNC43NjMtMS4yNzggMS4zMTMtLjMyIDIuNjQ2LS41NjIgMy45NzUtLjgxNC45MzgtLjE3NyAxLjk0NC0uNTk1IDIuODEtLjQwNSAxLjU0OC4zMzcgMi45OTItLjEyNiA0LjQ3NS0uMTk1IDEuNTktLjA3NSAzLjE2My0uNDgyIDQuNzUyLS42NTQuOTQ4LS4xMDMgMS45MTctLjAzNCAyLjg3NS0uMDQuNjUxLS4wMDQgMS4zMTIuMDU2IDEuOTUtLjAzNy4yNS0uMDM3LjQ1MS0uNDExLjc1Mi0uNzA2LTEuNTUtMS4xNDYtMy4wMDEtMi4xNzYtNC40MDMtMy4yNy0uNzQ1LS41ODItMS40MDEtMS4yNzgtMi4xMDctMS45MTItLjMzNi0uMzAxLS42OTUtLjU3NS0xLjAzOS0uODY0LS4xOC0uMTUtLjM4My0uMjg2LS41MjMtLjQ2OS0uMjkxLS4zODQtLjY2NC0uNjQ1LTEuMDM3LS45MzctLjg1MS0uNjcxLTEuNDcxLTEuNjQ2LTIuMTI0LTIuNTQzLS4wNzItLjA5OS4xOTEtLjYxMy40MDctLjcyMyAxLjMyNC0uNjczIDIuMDEzLjQzOSAyLjgxIDEuMTE5IDIuMTg2IDEuODY2IDQuMjU5IDMuODcxIDYuNTIyIDUuNjM3IDEuNjM2IDEuMjc2IDMuNTAxIDIuMjU5IDUuMjY0IDMuMzczLjg2NC41NDUgMS43MzQgMS4wOCAyLjU4OCAxLjYzNy42MTIuMzk4LjUyNyAxLjAzNS4yNjQgMS41MTEtLjY1OSAxLjE4Ni0xLjI0MyAyLjUxLTIuMjA1IDMuNDA1LTEuMDEzLjk0Mi0xLjQgMi4zMzYtMi41MTggMy4xMDQtMS4yOTcuODk1LTEuNzUyIDIuMzk1LTIuNzI5IDMuNTEtLjczMi44MzgtMS41NiAxLjU5OS0yLjIzIDIuNDgzLS42NzguODkzLTEuMTYgMS45MzUtMS44MjkgMi44MzgtLjI5OC40MDItLjkzMS45NS0xLjI1MS44NTgtLjYwNi0uMTctMS40NjctLjI3MS0xLjY0NC0xLjEzOS0uMDUxLS4yNTItLjA1My0uNTg5LjA3NS0uNzk1LjYxOC0xLjAwNCAxLjI4NS0xLjk3OSAxLjkzNy0yLjk2N2wuMDg1LS4xMzFjLjIzOC0xLjMxMiAxLjE0NS0yLjI1MiAxLjc2NC0zLjM1Ni42NTUtMS4xNzUgMS43Ny0xLjg4NCAyLjQ1NS0yLjk5LjY2Mi0xLjA2NiAxLjQzNC0yLjA2NyAyLjEwOC0zLjEyOC4xNjktLjI2NS4xNDUtLjY1Mi4yMzItMS4wOTV6IiBmaWxsPSIjZmZmIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvc3ZnPg==);
+        background-size: 100%;
+
+        float: right;
+        margin: rem(2px) rem(-$gs-gutter / 2) 0 rem($gs-gutter);
+    }
+
+    .action__label {
+        display: block;
+        float: left;
+    }
+
+    .action__icon {
+        width: 21px; height: 21px;
+    }
+    .action__icon--left {
+        float: left;
+        margin-left: rem(-$gs-gutter / 2);
+        margin-right: rem($gs-gutter / 2);
+    }
+    .action__icon--right {
+        float: right;
+        margin-right: rem(-$gs-gutter / 2);
+        margin-left: rem($gs-gutter / 2);
+    }
+
+}
+
+.action--slim {
+    padding: 3px ($gs-gutter / 2);
+
+    &:after {
+        content: none;
+        display: none;
+    }
+
+    .action__icon--left {
+        margin-left: 0;
+        margin-right: 5px;
+    }
+    .action__icon--right {
+        margin-right: 0;
+        margin-left: 5px;
+    }
+}
+
+/**
+ * TODO: Remove background image from base icon and use inlined icon sprites
+ */
+.action--no-icon {
+    &:after {
+        content: none;
+        display: none;
+    }
+}
+
+/* Action Modifiers
+   ========================================================================== */
+
+/**
+ * Secondary modifier
+ */
+.action--secondary {
+
+   color: $c-button;
+   background-color: transparent;
+   border: 1px solid transparentize($c-button, 0.5);
+
+   &:focus,
+   &:active,
+   &:hover {
+       color: $c-button;
+       background-color: transparent;
+   }
+
+   &:hover,
+   &:active {
+       border-color: $c-button;
+   }
+
+   &:after {
+       display: none;
+   }
+
+}
+
+/**
+ * External link modifier
+ * e.g. "Watch higlights link for past events"
+ *
+ * Transparent background so expected usage is
+ * on a solid tone background.
+ */
+.action--external {
+   background-color: transparent;
+   border: 1px solid transparentize($white, 0.5);
+   width: 100%;
+
+   &:hover,
+   &:focus,
+   &:active {
+       border-color: $white;
+       background-color: transparent;
+   }
+
+   &:after {
+       display: none;
+   }
+
+   @include mq(tablet) {
+       width: auto;
+   }
+}
+
+
+/**
+ * Snap modifier
+ *
+ * Small screens: Circular button w/ no label
+ * Large screens: Full button w/ text label
+ *
+ * e.g.: Join page (/join)
+ */
+.action--snap {
+    min-width: 0;
+    width: rem(40px);
+    height: rem(40px);
+    margin: 0;
+    &:after {
+        margin-top: 3px;
+    }
+    .action__label {
+        display: none;
+    }
+    @include mq(tablet) {
+        height: auto;
+        width: auto;
+        max-width: rem(gs-span(3));
+        &:after {
+            margin-top: 2px;
+        }
+        .action__label {
+            display: inline-block;
+        }
+    }
+}
+
+/* Action Jump
+   ========================================================================== */
+
+.action-jump {
+    display: block;
+}
+.action-jump:link,
+.action-jump:visited,
+.action-jump:hover,
+.action-jump:active {
+    text-decoration: none;
+}
+.action-jump:hover .icon-holder {
+    background-color: darken($c-button, 10%);
+    border-color: darken($c-button, 10%);
+}
+.action-jump__label {
+    @include fs-data(4);
+    color: $c-neutral2;
+    vertical-align: middle;
+    padding-left: .2em;
+}
+.action-jump--block {
+    margin: $gs-baseline 0;
+
+    @include mq(tablet) {
+        margin: ($gs-baseline * 2) 0;
+    }
+}
+
+/* Actions - Disabled
+   ========================================================================== */
+
+/**
+ * Disabled state
+ */
+.action.is-disabled,
+.action[disabled],
+.action[disabled]:hover {
+    background-color: $c-neutral5;
+    border-color: $c-neutral5;
+}

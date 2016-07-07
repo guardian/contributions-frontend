@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Global Header
+   ========================================================================== */
+
+$global-header-height: 130px;
+$global-header-height-mobile: 116px;
+
+.global-header {
+
+    // we need to know the exact header height
+    // hence using the variable to enforce it
+    height: $global-header-height-mobile;
+
+    @include mq($from: tablet) {
+        height: $global-header-height;
+    }
+
+    background-color: color(brand-supporting-2);
+    position: relative;
+    z-index: 3;
+}
+.global-header__inner {
+    background: color(brand-main) url(/assets/images/common/bg-masthead.png) no-repeat;
+    background-position: 45% 60%;
+
+    @include mq(tablet) {
+        padding-bottom: $gs-gutter;
+        background-position: 50% 0%;
+    }
+}
+.global-header__branding {
+    @include clearfix();
+    padding: ($gs-gutter / 2);
+    padding-bottom: $gs-gutter;
+
+    @include mq(tablet) {
+        padding: ($gs-gutter / 2) $gs-gutter;
+    }
+}
+.global-header__primary {
+    float: left;
+    padding-right: ($gs-gutter / 2);
+
+    @include mq(tablet) {
+        margin-right: -25px;
+    }
+
+}
+.global-header__logo {
+    float: right;
+    width: auto;
+
+    @include mq(tablet) {
+        margin-right: -20px;
+    }
+}
+.global-header__logo__image,
+.global-header__logo__link {
+    height: 50px;
+
+    @include mq(tablet) {
+        height: 90px;
+    }
+}
+.global-header__logo__image {
+    width: auto;
+}
+.global-header__logo__link {
+    display: block;
+}
+
+/* Header - In App
+   ========================================================================== */
+
+body.in-app {
+    .global-header {
+        display: none;
+    }
+}

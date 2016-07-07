@@ -1,0 +1,12 @@
+/* ==========================================================================
+   FAQs
+   ========================================================================== */
+
+.faq {
+    padding-bottom: $gs-gutter;
+}
+.faq__headline {
+    @include fs-headline(3);
+    font-weight: guss-font-weight(bold);
+    margin-bottom: $gs-baseline / 4;
+}

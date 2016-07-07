@@ -1,0 +1,204 @@
+// =============================================================================
+// Mixins
+// =============================================================================
+
+@import 'bower_components/sass-mq/mq';
+
+// Guss - https://github.com/guardian/guss
+$guss-rem-baseline: 16px;
+@import 'bower_components/guss-rem/rem';
+@import 'bower_components/guss-typography/typography';
+@import 'bower_components/guss-layout/columns';
+@import 'bower_components/guss-layout/row';
+
+// Grid system
+// =============================================================================
+// gs- prefixes stand for Grid System
+
+$gs-gutter: 20px;
+$gs-baseline: 12px;
+$gs-column-width: 60px;
+$gs-row-height: 36px;
+$gs-max-columns: 16;
+
+@function gs-span($n-columns) {
+    @return $n-columns * $gs-column-width + $gs-gutter * ($n-columns - 1);
+}
+@function gs-height($n-rows) {
+    @return $n-rows * $gs-row-height + $gs-baseline * ($n-rows - 1);
+}
+
+// Constrain Layout
+// =============================================================================
+// A mixin so we can reuse these measurements for other properties.
+// The media queries and widths need to match the ones in side-margins-calc()
+
+@mixin constrain-layout($offset: $gs-gutter * 2) {
+    margin: 0 auto;
+
+    @include mq(tablet) {
+        max-width: map-get($max-widths, max-tablet) + $offset;
+    }
+    @include mq(desktop) {
+        max-width: map-get($max-widths, max-desktop) + $offset;
+    }
+    @include mq(mem-full) {
+        max-width: map-get($max-widths, max-mem-full) + $offset;
+    }
+}
+
+// Side Margins
+// =============================================================================
+// A mixin so we can reuse these measurements for other properties.
+// The media queries and widths need to match the ones in constrain-layout()
+
+@mixin side-margins-calc($property) {
+    $offset: ($gs-gutter * 2);
+    @include mq(tablet) {
+        $width: map-get($max-widths, max-tablet);
+        #{$property}: -webkit-calc((100% - #{rem($width + $offset)}) / 2);
+        #{$property}: calc((100% - #{rem($width + $offset)}) / 2);
+    }
+    @include mq(desktop) {
+        $width: map-get($max-widths, max-desktop);
+        #{$property}: -webkit-calc((100% - #{rem($width + $offset)}) / 2);
+        #{$property}: calc((100% - #{rem($width + $offset)}) / 2);
+    }
+    @include mq(mem-full) {
+        $width: map-get($max-widths, max-mem-full);
+        #{$property}: -webkit-calc((100% - #{rem($width + $offset)}) / 2);
+        #{$property}: calc((100% - #{rem($width + $offset)}) / 2);
+    }
+}
+
+// Helpers
+// =============================================================================
+
+@mixin vertically-center() {
+    transform: translateY(-50%);
+    top: 50%;
+    margin: 0 auto;
+    display: block;
+}
+
+@mixin circular {
+    border-radius: 1000px; // Android 2.3 cannot deal with '50%'
+}
+
+@mixin font-smoothing() {
+    -moz-osx-font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+}
+
+// Hide content visually, still readable by screen readers
+@mixin u-h {
+    border: 0 !important;
+    clip: rect(0 0 0 0) !important;
+    height: 1px !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+}
+
+@mixin image-replacement {
+    direction: ltr;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+@mixin clearfix {
+    &:after,
+    &:before {
+        content: '';
+        display: table;
+    }
+    &:after {
+        clear: both;
+    }
+}
+
+@mixin radio-circle($colour: color(brand-main)) {
+    @include circular;
+    content: ' ';
+    background-color: $colour;
+    width: 16px;
+    height: 16px;
+    display: block;
+    position: absolute;
+    left: $gs-baseline;
+    top: $gs-baseline;
+}
+
+@mixin unstyled-list() {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    > li,
+    > li > a {
+        display: inline-block;
+        zoom: 1;
+    }
+}
+
+@mixin overflow-scroll-x() {
+    overflow: hidden;
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+@mixin no-flicker() {
+    // Prevent flicker on hover in WebKit
+    -webkit-backface-visibility: hidden;
+}
+
+
+@mixin clip-path-shape($key) {
+    clip-path: polygon(#{map-get($clip-paths, $key)});
+}
+@mixin clip-path($key) {
+    .supports-clippath-shapes & {
+        @include clip-path-shape($key);
+        @content;
+    }
+}
+@mixin clip-path-padded($key,$bottom-padding) {
+    @include clip-path($key){
+        padding-bottom: $bottom-padding - $gs-gutter * 2 - $gs-baseline;
+    }
+}
+
+@mixin clip-overlay($background-color: rgba(255,255,255,0.25)) {
+    content: ' ';
+    display: block;
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0; right: 0;
+    background-color: $background-color;
+}
+
+@mixin text-link() {
+    color: guss-colour(guardian-brand);
+    text-decoration: none;
+    border-bottom: 1px solid $c-neutral3;
+    transition: border-color .15s ease-out;
+
+    &:hover,
+    &:focus {
+        text-decoration: none;
+        border-color: #6e99b3;
+    }
+}
+
+@mixin bulleted-list() {
+    list-style: none;
+    margin-left: $gs-gutter;
+
+    > li {
+        list-style-position: outside;
+        list-style-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTMiIHZpZXdCb3g9IjAgMCAxMiAxMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgNi44NTdjMCAxLjA4OS0uMjY4IDIuMDkzLS44MDUgMy4wMTEtLjUzNy45MTktMS4yNjUgMS42NDctMi4xODQgMi4xODQtLjkxOS41MzctMS45MjMuODA2LTMuMDExLjgwNS0xLjA4OC0uMDAxLTIuMDkyLS4yNjktMy4wMTEtLjgwNXMtMS42NDctMS4yNjQtMi4xODQtMi4xODRjLS41MzctLjkyLS44MDUtMS45MjQtLjgwNS0zLjAxMSAwLTEuMDg3LjI2OC0yLjA5MS44MDUtMy4wMTEuNTM3LS45MiAxLjI2NS0xLjY0OCAyLjE4NC0yLjE4NC45MTktLjUzNiAxLjkyMy0uODA0IDMuMDExLS44MDUgMS4wODgtLjAwMSAyLjA5Mi4yNjggMy4wMTEuODA1czEuNjQ3IDEuMjY1IDIuMTg0IDIuMTg0Yy41MzcuOTE5LjgwNSAxLjkyMi44MDUgMy4wMTF6IiBmaWxsPSIjQkRCREJEIi8+PC9zdmc+);
+    }
+}

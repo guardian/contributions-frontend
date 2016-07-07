@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Lists
+   ========================================================================== */
+
+.o-bulleted-list {
+    @include bulleted-list();
+    margin-top: 0;
+    margin-bottom: ($gs-baseline * 2);
+}
+
+// List of inline items
+// TODO: o-inline-list
+.o-inline-list {
+    margin: 0;
+    list-style: none;
+}
+.o-inline-list__item {
+    @include fs-data(4);
+    display: inline-block; // Prevent linebreak within an item
+    margin-right: $gutter-width-fluid;
+
+    &:last-child {
+        margin-right: 0;
+    }
+}
+.o-inline-list--bordered {
+    margin-top: ($gs-baseline * 2);
+    padding-top: ($gs-baseline / 2);
+    border-top: 1px solid $c-border-neutral;
+}

@@ -1,0 +1,240 @@
+// =============================================================================
+// Global variables
+// =============================================================================
+
+// Settings
+// =============================================================================
+
+$old-ie: false !default;
+$svg-support: true !default;
+$browser-supports-columns: true !default;
+$browser-supports-flexbox: true !default;
+
+// Colours
+// =============================================================================
+
+@import 'functions';
+@import 'bower_components/guss-colours/_colours.scss';
+@import 'bower_components/pasteup-palette/src/_palette';
+
+$guss-colours: $pasteup-palette;
+
+// Shorthands
+$white: #ffffff;
+$black: #000000;
+
+// Neutrals
+$c-neutral1: guss-colour(neutral-1);
+$c-neutral2: guss-colour(neutral-2);
+$c-neutral3: guss-colour(neutral-3);
+$c-neutral4: guss-colour(neutral-4);
+$c-neutral5: guss-colour(neutral-5);
+$c-neutral6: guss-colour(neutral-6);
+$c-neutral7: guss-colour(neutral-7);
+$c-neutral8: guss-colour(neutral-8);
+
+$c-body: $c-neutral1;
+$c-background: $white;
+$c-background-transparent: rgba(51, 51, 51, .1);
+$c-link: guss-colour(news-main-1);
+$c-error: guss-colour(error);
+$c-warning: #e9e939;
+
+/**
+ * Access palette
+ * access these through the color($name) function
+ *
+ * TODO: Move more colours into palette
+ */
+$membership-palette: (
+    brand-main: #bb3a7f,
+    brand-supporting-1: #aad7f0,
+    brand-supporting-2: #fff200
+);
+
+// Buttons
+$c-button: color(features-main-1);
+$c-button-cancel: #b8b8b8;
+
+// Borders
+$c-border-brand: color(features-main-1);
+$c-border-neutral: $c-neutral3;
+
+// Event Statuses
+$c-limitedAvailability: #d61d00;
+$c-soldOut: #cc2b12;
+
+// Messages
+$c-flash-error: #d61d00;
+$c-flash-error-border: #ff998a;
+$c-flash-error-background: #fdf4f3;
+$c-flash-success: #1c6326;
+$c-flash-success-border: #33a22b;
+$c-flash-success-background: #faffe5;
+
+// Thirdparty
+$c-thirdparty-twitter: #55acee;
+$c-thirdparty-facebook: #3b5998;
+
+/**
+ * Clip paths are used for shape cuts and
+ * overlays throughout the site:
+ *
+ * http://caniuse.com/#feat=css-clip-path
+ * We specifically use CSS shapes for the clip-paths,
+ * ssing SVG clip-paths theoretically has broader support
+ * but is super buggy in Safari so we don't use them.
+ * Point is, assume they are an enhancement.
+ *
+ * Use with clip-path mixin: @include clip-path-shape(name);
+ *
+ */
+$clip-paths: (
+    top-slice: "100% 0, 100% 100%, 0 100%, 0 10%",
+    accent-top-slice: "0 0, 100% 10%, 100% 100%, 0 10%",
+    slideshow: "0 0, 100% 0, 100% 100%, 98% 0, 0 6%",
+    promo: "0 0, 100% 0, 100% 85%, 0 100%",
+    promo-bottom: "0 100%, 100% 100%, 100% 85%, 0 90%",
+    promo-bottom-cut: "100% 0, 100% 90%, 0 100%, 0 0",
+    promo-bottom-deep: "100% 0, 100% 65%, 0 70%, 0 0",
+    promo-bottom-shallow: "100% 0, 100% 85%, 0 90%, 0 0",
+    thumbnail-a: "0 0, 0 100%, 100% 100%, 100% 90%, 10% 100%",
+    thumbnail-b: "90% 100%, 100% 0, 100% 100%, 0 100%, 0 90%",
+    thumbnail-c: "100% 0, 0 0, 100% 10%",
+    quote-mobile: "100% 0, 100% calc(100% - 82px), 0 calc(100% - 46px), 0 0", //CALC 100% - X px where X is desired - 50
+    quote: "100% 0, 100% calc(100% - 34px), 0 calc(100% - 1px), 0 0" //CALC 100% - X px where X is desired - 50
+);
+
+// Tone Colours
+// =============================================================================
+// Usage: tone('live', 'accent')
+//        tone('live') => defaults to 'base' key
+$tones-palette: (
+    live: (
+        base: color(live-main-1),
+        accent: color(live-main-2)
+    ),
+    masterclass: (
+        base: #ffbb00,
+        accent: #ffd21e
+    ),
+    local: (
+        base: #951655,
+        accent: #b82266,
+        contrast: #fdadba
+    ),
+    friend: (
+        base: color(neutral-3)
+    ),
+    supporter: (
+        base: #feba14,
+    ),
+    partner: (
+        base: #b94387
+    ),
+    patron: (
+        base: #6f90a3
+    )
+);
+
+// Layout dimensions
+// =============================================================================
+
+$gutter-width-fluid: 2%;
+$global-toggle-height: 36px;
+$trailblock-img-width: 140px;
+$input-border-radius: 20px;
+
+
+// Animation Settings
+// =============================================================================
+
+$transition-duration-medium: .5s;
+
+// Guss defaults overrides
+// =============================================================================
+
+$guss-column-rule: none;
+@import 'bower_components/guss-grid-system/grid-system';
+
+// Breakpoints
+// =============================================================================
+// Name your breakpoints in a way that creates a
+// ubiquitous language across team members.
+
+$mq-breakpoints: (
+    mobile: gs-span(4) + $gs-gutter, // 320px
+    tablet: gs-span(9) + $gs-gutter * 2, // 740px
+    desktop: gs-span(12) + $gs-gutter * 2, // 980px
+    mem-full: gs-span(14) + $gs-gutter * 2, // 1140px
+    wide: gs-span(16) + $gs-gutter * 2, // 1300px
+    // Tweakpoints
+    mobileLandscape: gs-span(6) + $gs-gutter, // 480px
+    phablet: gs-span(8)  + $gs-gutter * 2 // 660px
+);
+
+$max-widths: (
+    max-tablet: gs-span(9),
+    max-desktop: gs-span(12),
+    max-mem-full: gs-span(14),
+    max-wide: gs-span(16)
+);
+
+// Fonts
+// =============================================================================
+
+$f-data: 'Guardian Text Sans Web', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif !default;
+$f-serif-text: 'Guardian Text Egyptian Web', Georgia, serif !default;
+$f-serif-headline: 'Guardian Egyptian Web', Georgia, serif !default;
+$f-sans-serif-text: 'Guardian Text Sans Web', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif !default;
+$f-sans-serif-headline: 'Guardian Sans Web', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif !default;
+
+// Font scale
+// Usage: font-size (px) line-height (px) // level
+$font-scale: (
+    header: (
+        1: (font-size: 16, line-height: 20),
+        2: (font-size: 18, line-height: 22),
+        3: (font-size: 20, line-height: 24),
+        4: (font-size: 22, line-height: 26),
+        5: (font-size: 24, line-height: 28),
+        6: (font-size: 26, line-height: 28)
+    ),
+    headline: (
+        1: (font-size: 14, line-height: 18),
+        2: (font-size: 16, line-height: 20),
+        3: (font-size: 20, line-height: 24),
+        4: (font-size: 24, line-height: 28),
+        5: (font-size: 28, line-height: 32),
+        6: (font-size: 32, line-height: 36),
+        7: (font-size: 36, line-height: 40),
+        8: (font-size: 40, line-height: 44),
+        9: (font-size: 44, line-height: 48)
+    ),
+    bodyHeading: (
+        1: (font-size: 14, line-height: 20),
+        2: (font-size: 16, line-height: 24),
+        3: (font-size: 18, line-height: 28),
+        4: (font-size: 20, line-height: 28)
+    ),
+    bodyCopy: (
+        1: (font-size: 14, line-height: 20),
+        2: (font-size: 16, line-height: 24),
+        3: (font-size: 18, line-height: 28)
+    ),
+    data: (
+        1: (font-size: 11, line-height: 14),
+        2: (font-size: 12, line-height: 14),
+        3: (font-size: 13, line-height: 16),
+        4: (font-size: 14, line-height: 18),
+        5: (font-size: 16, line-height: 20),
+        6: (font-size: 18, line-height: 22)
+    ),
+    textSans: (
+        1: (font-size: 12, line-height: 16),
+        2: (font-size: 13, line-height: 18),
+        3: (font-size: 14, line-height: 20),
+        4: (font-size: 14, line-height: 22),
+        5: (font-size: 16, line-height: 22)
+    )
+) !default;
