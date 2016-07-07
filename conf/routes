@@ -14,6 +14,7 @@ GET            /uk/contribute                         controllers.Giraffe.contri
 GET            /us/contribute                         controllers.Giraffe.contributeUSA
 GET            /au/contribute                         controllers.Giraffe.contributeAustralia
 GET            /eu/contribute                         controllers.Giraffe.contributeEurope
+GET            /:countryGroup/contribute              controllers.Giraffe.contribute(countryGroup: com.gu.i18n.CountryGroup)
 
 GET            /contribute/thank-you                  controllers.Giraffe.thanksUK
 GET            /us/contribute/thank-you               controllers.Giraffe.thanksUSA

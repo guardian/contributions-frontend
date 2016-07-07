@@ -1,0 +1,24 @@
+@import views.support.PageInfo
+@(pageInfo: PageInfo, isMembershipBranded: Boolean = true)
+
+<button role="menuitem" class="mobile-menu mobile-only js-menu-icon" title="Menu">
+    <span class="mobile-menu__icon">
+        <i></i><i></i><i></i>
+    </span>
+</button>
+
+<nav role="navigation" class="global-navigation js-global-nav">
+    <div class="global-navigation__scroll l-constrained">
+        <ul class="global-navigation__list">
+            <li class="global-navigation__item global-navigation__item--home">
+                <a href="@if(isMembershipBranded) {/} else {http://theguardian.com/}" class="global-navigation__link js-nav-link-home">
+                    @fragments.inlineIcon("home")
+                    <span class="u-h">Home</span>
+                </a>
+            </li>
+
+            <li class="global-navigation__item global-navigation__item--right">
+            </li>
+        </ul>
+    </div>
+</nav>

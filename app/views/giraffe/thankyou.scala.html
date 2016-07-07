@@ -1,9 +1,10 @@
 
 @import com.gu.i18n.CountryGroup
 @import views.support.ChosenVariants
-@(maxAmount: Option[Int], countryGroup: CountryGroup, isUAT: Boolean, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String])
+@import views.support.PageInfo
+@(pageInfo:PageInfo,maxAmount: Option[Int], countryGroup: CountryGroup, isUAT: Boolean, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String])
 
-{
+@main(pageInfo){
   <div class="support-wrapper__outer__a">
     <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
       <div class="giraffe__heading">

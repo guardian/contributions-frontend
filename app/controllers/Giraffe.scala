@@ -9,6 +9,7 @@ import com.gu.stripe.Stripe.Serializer._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
+import configuration.Config
 import services.AuthenticationService
 import com.netaporter.uri.dsl._
 import views.support.{TestTrait, _}
@@ -95,16 +96,15 @@ class Giraffe(stripeService: StripeService) extends Controller {
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
     val chosenVariants: ChosenVariants = Test.getContributePageVariants(request)
-   /* val pageInfo = PageInfo(
+    val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,
       image = Some("https://media.guim.co.uk/5719a2b724efd8944e0222d57c839a7d2b6e39b3/0_0_1440_864/1000.jpg"),
       stripePublicKey = Some(stripe.publicKey),
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
-      navigation = Seq.empty,
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
-    )*/
-    Ok(views.html.giraffe.contribute(maxAmount,countryGroup,isUAT, chosenVariants, cmp, intCmp))
+    )
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmount,countryGroup,isUAT, chosenVariants, cmp, intCmp))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
@@ -113,13 +113,12 @@ class Giraffe(stripeService: StripeService) extends Controller {
     request.session.get(chargeId).fold(
       Redirect(redirectUrl, SEE_OTHER)
     )( id => {
-      /*val info: Any = PageInfo(
+      val info: Any = PageInfo(
         title = "Thank you for supporting the Guardian",
         url = request.path,
         image = None,
-        description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism."),
-        navigation = Seq.empty
-      )*/
+        description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
+      )
       Ok("ta")
     }
     )
@@ -135,7 +134,6 @@ class Giraffe(stripeService: StripeService) extends Controller {
   def thanksUSA = thanks(CountryGroup.US, routes.Giraffe.contributeUSA().url)
   def thanksAustralia = thanks(CountryGroup.Australia, routes.Giraffe.contributeAustralia().url)
   def thanksEurope = thanks(CountryGroup.Europe, routes.Giraffe.contributeEurope().url)
-
 
 
   def pay = /*OptionallyAuthenticated*/Action.async { implicit request =>

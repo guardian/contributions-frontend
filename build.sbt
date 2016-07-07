@@ -2,8 +2,20 @@ name := """contributions-frontend"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
-
+lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin).settings(
+    buildInfoKeys := Seq[BuildInfoKey](
+        name,
+        BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
+        BuildInfoKey.constant("buildTime", System.currentTimeMillis),
+        BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse(try {
+            "git rev-parse HEAD".!!.trim
+        } catch {
+            case e: Exception => "unknown"
+        }))
+    ),
+    buildInfoPackage := "app"
+)
+play.sbt.routes.RoutesKeys.routesImport += "controllers.Binders._"
 scalaVersion := "2.11.7"
 val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
 val scalaz = "org.scalaz" %% "scalaz-core" % "7.1.1"

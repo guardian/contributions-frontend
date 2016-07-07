@@ -1,0 +1,89 @@
+@import views.support.PageInfo
+@import configuration.ProfileLinks
+
+@import com.gu.i18n.CountryGroup
+@import com.gu.i18n.CountryGroup._
+@(pageInfo: PageInfo, countryGroup: Option[CountryGroup])
+
+@import configuration.Config
+@import configuration.ProfileLinks
+
+<ul class="nav-control u-cf" role="menubar">
+    <li class="nav-control__item">
+        <a href="@pageInfo.customSignInUrl.getOrElse(Config.idWebAppSigninUrl(""))"
+        class="control js-dropdown js-identity-menu-toggle@if(pageInfo.customSignInUrl.isEmpty){ js-identity-menu-url}"
+        data-dropdown-menu="js-identity-menu"
+        id="qa-identity-control"
+        title="Your account"
+        role="menuitem"
+        >
+            <span class="control__item">
+                <span class="control__icon icon-holder icon-holder--large icon-holder--neutral">
+                @fragments.inlineIcon("user")
+                </span>
+            </span>
+            <span class="control__item hidden-mobile js-user-detail">
+                <span class="control__info">
+                    <span class="case--lower js-user-displayname">Sign in</span>
+                    <span class="u-h u-parentheses js-user-tier"></span>
+                </span>
+            </span>
+        </a>
+        @* Identity / Account pop-up *@
+        <nav id="js-identity-menu" role="navigation" class="nav-popup is-hidden js-dropdown-menu" aria-label="Profile menu">
+            <ul class="nav-popup__list">
+                <li class="nav-popup__item">
+                    <a href="@ProfileLinks.commentActivity" class="nav-popup__link js-identity-menu-comment-activity">Comment activity</a>
+                </li>
+                <li class="nav-popup__item">
+                    <a class="nav-popup__link js-identity-menu-edit-profile"
+                    id="qa-identity-nav-edit"
+                    href="@ProfileLinks.editProfile"
+                    data-member-href="@ProfileLinks.editProfileMembership">Edit profile</a>
+                </li>
+                <li class="nav-popup__item">
+                    <a href="@ProfileLinks.emailPreferences" class="nav-popup__link">Email preferences</a>
+                </li>
+                <li class="nav-popup__item">
+                    <a href="@ProfileLinks.changePassword" class="nav-popup__link">Change password</a>
+                </li>
+                <li class="nav-popup__item">
+                    <a href="@ProfileLinks.signOut(pageInfo.url)" class="nav-popup__link">Sign out</a>
+                </li>
+            </ul>
+        </nav>
+    </li>
+    @for(countryGroup <- countryGroup) {
+        <li class="nav-control__item">
+            <a href="#" class="control js-dropdown" data-dropdown-menu="js-country-switcher" title="Choose country" role="menuitem">
+                <span class="control__item">
+                    <span class="control__icon icon-holder icon-holder--large icon-holder--neutral">
+                    @fragments.inlineIcon("globe")
+                    </span>
+                </span>
+                <span class="control__item hidden-mobile js-user-detail">
+                    <span class="control__info">@countryGroup.name (@countryGroup.currency.identifier)</span>
+                </span>
+            </a>
+            <nav id="js-country-switcher" role="navigation" class="js-dropdown-menu nav-popup is-hidden" aria-label="Country switcher">
+                <ul class="nav-popup__list">
+                @for(countryGroup <- Seq(UK, Europe, US, Canada, RestOfTheWorld)) {
+                    <li class="nav-popup__item">
+                        <a href="@routes.Giraffe.contribute(countryGroup)" class="nav-popup__link">@countryGroup.name (@countryGroup.currency.identifier)</a>
+                    </li>
+                }
+                </ul>
+            </nav>
+        </li>
+    }
+    <li class="nav-control__item nav-control__item--last hidden-mobile">
+        <a class="control" href="http://theguardian.com/" role="menuitem">
+            <span class="control__item">
+            @fragments.inlineIcon("g-mark", List("icon-inline--large"))
+            </span>
+            <span class="control__item">
+                <span class="control__info">the guardian</span>
+            </span>
+        </a>
+    </li>
+</ul>
