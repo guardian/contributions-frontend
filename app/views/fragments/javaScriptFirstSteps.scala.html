@@ -1,13 +1,11 @@
 @import views.support.PageInfo
 @(pageInfo: PageInfo)
 
-@import configuration.Config
-@import views.support.Asset
-@import views.support.PageInfo._
+     @import configuration.Config
+    @import views.support.Asset
 
-@import play.api.libs.json.Json
 
-@* Critical scripts that should execute as soon as possible, preventing layout thrashing *@
+    @* Critical scripts that should execute as soon as possible, preventing layout thrashing *@
 
     <!--[if IE 9]>
 <script src="@Asset.at("javascripts/lib/polyfills.min.js")"></script>
@@ -117,5 +115,30 @@
             } catch(e) {}
         }
 
-       })(guardian.isModernBrowser);
-    </script>
+        /**
+         * Insert SVG sprite into document
+         */
+        function inlineSvg(data) {
+            var el = document.createElement('div');
+            el.innerHTML = data;
+            var ref = document.getElementsByTagName('script')[0];
+            ref.parentNode.insertBefore(el, ref);
+        }
+
+        function loadSvgIcons() {
+            var data = !guardian.isDev && localStorage.getItem('icons.' + guardian.membership.buildNumber);
+            if (data) {
+                inlineSvg(data);
+            } else {
+                loadData(guardian.membership.svgSprite, function(xhr) {
+                    inlineSvg(xhr.responseText);
+                    updateLocalStorage('icons', xhr.responseText);
+                });
+            }
+        }
+
+        if (isModern) {
+            loadSvgIcons();
+        }
+    })(guardian.isModernBrowser);
+</script>

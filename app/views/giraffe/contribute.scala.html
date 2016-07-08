@@ -1,10 +1,11 @@
 @import com.gu.i18n.CountryGroup
 @import views.support.ChosenVariants
 @import views.support.PageInfo
+@import views.support.Asset
 
 @(pageInfo:PageInfo,maxAmount: Option[Int], countryGroup: CountryGroup, isUAT: Boolean, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String])
 
-@main(pageInfo){
+@main(pageInfo,Some(countryGroup)){
     <div class="support-wrapper__outer__a">
         <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="giraffe__heading">
@@ -107,7 +108,7 @@
                     <div class="form__column js-hidden-tablet js-payment">
                         <span>
                             <h3 class="form__column-heading headline-text--bolder">Your payment</h3>
-                            <div class="security-note">@@fragments.inlineIcon("secure", List("icon-inline--small", "icon-inline--top"))
+                            <div class="security-note">@fragments.inlineIcon("secure", List("icon-inline--small", "icon-inline--top"))
                                 This site is secure</div>
 
                         </span>
@@ -126,7 +127,7 @@
                                     maxlength="19"
                                     autocomplete="off"
                                     data-validation="validCreditCardNumber"/>
-                                    @@fragments.form.errorMessage("Sorry, the card number that you have entered is incorrect. Please check and retype.")
+                                    @fragments.form.errorMessage("Sorry, the card number that you have entered is incorrect. Please check and retype.")
                                 </div>
                             </li>
 
@@ -160,7 +161,7 @@
                                         <option value="21">21</option>
                                     </select>
                                 </div>
-                                @@fragments.form.errorMessage("Sorry, the expiry date that you have entered is invalid. Please check and re-enter.")
+                                @fragments.form.errorMessage("Sorry, the expiry date that you have entered is invalid. Please check and re-enter.")
                             </li>
 
                             <li id="card_cvc_field" class="form-field">
@@ -172,13 +173,13 @@
                                             What's this?</a>
                                     </div>
                                 </div>
-                                @@fragments.form.errorMessage("Sorry, the security code that you have entered is incorrect. Please check and retype.")
+                                @fragments.form.errorMessage("Sorry, the security code that you have entered is incorrect. Please check and retype.")
                             </li>
 
                             <div id="js-cvc-image-container" class="cvc u-cf" data-toggle-hidden>
                                 <div class="u-cf">
                                     <div class="cvc__image">
-                                        <img src="@@Asset.at("images/form/cvc-card.png")" alt="CVC explanation"/>
+                                        <img src="@Asset.at("images/form/cvc-card.png")" alt="CVC explanation"/>
                                     </div>
                                     <div class="cvc__detail">
                                         <h3 class="cvc__heading">Visa, Mastercard</h3>
@@ -189,7 +190,7 @@
                                 </div>
                                 <div class="u-cf">
                                     <div class="cvc__image">
-                                        <img src="@@Asset.at("images/form/cvc-card-american-express.png")" alt="CVC explanation American Express"/>
+                                        <img src="@Asset.at("images/form/cvc-card-american-express.png")" alt="CVC explanation American Express"/>
                                     </div>
                                     <div class="cvc__detail">
                                         <h3 class="cvc__heading">American Express</h3>
