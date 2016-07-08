@@ -1,49 +1,165 @@
-This is your new Play application
-=================================
+# ~~Membership~~ Contributions Frontend
 
-This file will be packaged with your application when using `activator dist`.
 
-There are several demonstration files available in this template.
+## Table of Contents
 
-Controllers
-===========
+1. [Getting Started](#getting-started)
+1. [Setup](#setup)
+1. [Run](#run)
+1. [Tests](#tests)
+1. [Deployment](#deployment)
+1. [Test Users](#test-users)
+1. [Security](#security)
+1. [Additional Documentation](#additional)
 
-- HomeController.scala:
+## Getting Started
 
-  Shows how to handle simple HTTP requests.
+To get started working on Contributions you will need to complete the following steps:
 
-- AsyncController.scala:
+1. Work through the [Setup](#setup) instructions for this project
+2. **Optional:** Work through the setup instructions for the [identity frontend](https://github.com/guardian/identity-frontend). This provides a frontend for sign-up and registration.
+3. Start up Contributions by running the commands in the [Run](#run) section of this README
 
-  Shows how to do asynchronous programming when handling a request.
+## Setup
 
-- CountController.scala:
+### Requirements
 
-  Shows how to inject a component into a controller and use the component when
-  handling requests.
+We require the following to be installed:
 
-Components
-==========
+- `Java 8`
+- `Node (with npm)`
+- `NGINX`
 
-- Module.scala:
+### Install client-side dependencies
 
-  Shows how to use Guice to bind all the components needed by your application.
+```
+npm install
+npm run devSetup
+```
 
-- Counter.scala:
+A ~~good~~ way to check everything is setup correctly is to run the tests
 
-  An example of a component that contains state, in this case a simple counter.
+```
+npm test
+```
 
-- ApplicationTimer.scala:
+For development you'll also need the following commands:
 
-  An example of a component that starts when the application starts and stops
-  when the application stops.
+**Compile assets**
 
-Filters
-=======
+```
+npm run compile
+```
 
-- Filters.scala:
+**Watch files for changes**
 
-  Creates the list of HTTP filters used by your application.
+```
+npm run watch
+```
 
-- ExampleFilter.scala
+**Client-side Principles**: See [client-side-principles.md](docs/client-side-principles.md) for high-level client-side principles for Membership.
 
-  A simple filter that adds a header to every response.
+### Setup NGINX
+
+Follow the instructions in [`/nginx/README.md`](./nginx/README.md) in this project.
+
+### Setup AWS credentials
+
+Install the awscli:
+```
+brew install awscli
+```
+
+Fetch the developer AWS credentials, discuss how we do this with a team member.
+
+
+### Download private keys
+
+Download our private keys from the `membership-private` S3 bucket. If you have the AWS CLI set up you can run:
+
+```
+sudo aws s3 cp s3://membership-private/DEV/membership-keys.conf /etc/gu/giraffe-keys.conf --profile membership
+```
+
+**Update this when we have our own keys**
+
+## Run
+
+Start the app as follows:
+
+```
+./start-frontend.sh
+```
+
+This will start the Play application, which usually listens on port `9111`. Making a request to `localhost:9111` should give you the homepage.
+
+To make the site reachable as `giraffe.thegulocal.com` (necessary for register/sign-in functionality) you then need to make sure NGINX is configured and running as described in [`/nginx/README.md`](./nginx/README.md).
+
+## Testing
+
+### Automated
+
+#### JavaScript unit tests
+
+
+```
+cd frontend/
+npm test
+```
+
+
+#### Scala unit tests
+
+`sbt fast-test`
+
+#### Acceptance tests
+
+1. Run local membership-frontend: `sbt devrun`
+2. Run local [idenity-frontend](https://github.com/guardian/identity-frontend): `sbt devrun`
+3. `sbt acceptance-test`
+
+These are browser driving Selenium tests.
+
+#### All tests
+
+`sbt test`
+
+
+## Deployment
+
+**TODO: Make this autodeployable**
+
+We use continuous deployment of the `master` branch to Production (https://membership.theguardian.com/).
+See [fix-a-failed-deploy.md](https://github.com/guardian/deploy/blob/master/magenta-lib/docs/magenta-lib/howto/fix-a-failed-deploy.md)
+for what to do if a deploy goes bad.
+
+## Security
+
+### Committing config credentials
+
+For the Membership project, we put both `DEV` and `PROD` credentials in `membership-keys.conf` files in the private S3 bucket `membership-private`, and if private credentials need adding or updating, they need to be updated there in S3.
+
+You can download and update credentials like this
+
+    aws s3 cp s3://membership-private/DEV/membership-keys.conf /etc/gu
+    aws s3 cp /etc/gu/membership-keys.conf s3://membership-private/DEV/
+
+For a reminder on why we do this, here's @tackley on the subject:
+
+>NEVER commit access keys, passwords or other sensitive credentials to any source code repository*.
+
+>That's especially true for public repos, but also applies to any private repos. (Why? 1. it's easy to make it public and 2. every person who ever worked on your project almost certainly has a copy of your repo somewhere. It's too easy for a subsequently-disaffected individual to take advantage of this.)
+
+>For AWS access keys, always prefer to use instance profiles instead.
+
+>For other credentials, either use websys's puppet based config distribution (for websys managed machines) or put them in a configuration store such as DynamoDB or a private S3 bucket.
+
+<a name="additional"></a>
+
+
+## Additional Documentation
+
+Further documentation notes and useful items can be found in [docs](/docs).
+
+- [Troubleshooting](docs/Troubleshooting.md) for information on common problems and how to fix them.
+- [Building AMIs](docs/building-amis.md) for how to update our AMIs
