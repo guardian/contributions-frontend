@@ -94,23 +94,23 @@ module.exports = function (grunt) {
                 }]
             }
         },
+        px_to_rem: {
+            dist: {
+                options: {
+                    map: isDev,
+                    base: 16,
+                    fallback: false,
+                    max_decimals: 5
+                },
+                files: [{
+                    expand: true,
+                    cwd: '<%= dirs.publicDir.stylesheets %>',
+                    src: ['*.css'],
+                    dest: '<%= dirs.publicDir.stylesheets %>'
+                }]
+            }
+        },
 
-     //  px_to_rem: {
-     //      dist: {
-     //          options: {
-     //              map: isDev,
-     //              base: 16,
-     //              fallback: false,
-     //              max_decimals: 5
-     //          },
-     //          files: [{
-     //              expand: true,
-     //              cwd: '<%= dirs.publicDir.stylesheets %>',
-     //              src: ['*.css'],
-     //              dest: '<%= dirs.publicDir.stylesheets %>'
-     //          }]
-     //      }
-     //  },
 
         postcss: {
             options: {
@@ -247,30 +247,30 @@ module.exports = function (grunt) {
 
         // generate a mapping file of hashed assets
         // and move/rename built files to /dist/
-    //  asset_hash: {
-    //      options: {
-    //          preserveSourceMaps: true,
-    //          assetMap: isDev ? false : 'conf/assets.map',
-    //          hashLength: 8,
-    //          algorithm: 'md5',
-    //          srcBasePath: 'public/',
-    //          destBasePath: 'public/',
-    //          references: [
-    //              '<%= dirs.publicDir.root %>/dist/stylesheets/**/*.css'
-    //          ]
-    //      }, 
-    //      staticfiles: {
-    //          files: [{
-    //              src: [
-    //                  '<%= dirs.publicDir.stylesheets %>/**/*.css',
-    //                  '<%= dirs.publicDir.javascripts %>/**/*.js',
-    //                  '<%= dirs.publicDir.javascripts %>/**/*.map',
-    //                  '<%= dirs.publicDir.images %>/**/*.*'
-    //              ],
-    //              dest: '<%= dirs.publicDir.root %>/dist/'
-    //          }]
-    //      }
-    //  },
+        asset_hash: {
+            options: {
+                preserveSourceMaps: true,
+                assetMap: isDev ? false : 'conf/assets.map',
+                hashLength: 8,
+                algorithm: 'md5',
+                srcBasePath: 'public/',
+                destBasePath: 'public/',
+                references: [
+                    '<%= dirs.publicDir.root %>/dist/stylesheets/**/*.css'
+                ]
+            },
+            staticfiles: {
+                files: [{
+                    src: [
+                        '<%= dirs.publicDir.stylesheets %>/**/*.css',
+                        '<%= dirs.publicDir.javascripts %>/**/*.js',
+                        '<%= dirs.publicDir.javascripts %>/**/*.map',
+                        '<%= dirs.publicDir.images %>/**/*.*'
+                    ],
+                    dest: '<%= dirs.publicDir.root %>/dist/'
+                }]
+            }
+        },
 
         imagemin: {
             dynamic: {
@@ -282,7 +282,6 @@ module.exports = function (grunt) {
                 }]
             }
         },
-
         /***********************************************************************
          * Test & Validate
          ***********************************************************************/
@@ -409,7 +408,7 @@ module.exports = function (grunt) {
          */
         if (!isDev) {
             grunt.task.run([
-                //'asset_hash',
+                'asset_hash',
                 'clean:public:prod'
             ]);
         }

@@ -59,7 +59,7 @@ define([
     'src/modules/form/validation',
     'src/modules/form/helper/formUtil',
     'src/modules/form/payment',
-    'src/modules/form/submitButton',
+    'src/modules/form/submitButton'
 ], function (validation, form, payment, submitButton) {
     'use strict';
 
