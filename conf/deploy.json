@@ -1,0 +1,19 @@
+{
+    "defaultStacks": ["membership"],
+    "packages":{
+        "frontend":{
+            "type":"autoscaling",
+            "data":{
+                "bucket": "contributions-dist"
+            }
+        }
+    },
+    "recipes":{
+        "default":{
+            "actionsBeforeApp": ["frontend.uploadArtifacts", "frontend.deploy"]
+        },
+        "artifactUploadOnly": {
+           "actions": [ "frontend.uploadArtifacts" ]
+       }
+    }
+}

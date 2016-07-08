@@ -1,3 +1,4 @@
+
 // The Play plugin
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.4")
 
@@ -20,3 +21,5 @@ addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.2")
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.6.1")
 
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.2")
+
+addSbtPlugin("com.gu" % "sbt-riffraff-artifact" % "0.8.4")

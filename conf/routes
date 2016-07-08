@@ -8,17 +8,17 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 
 # Giraffe
-GET            /contribute                            controllers.Giraffe.contributeRedirect
+GET            /                            controllers.Giraffe.contributeRedirect
 
-GET            /uk/contribute                         controllers.Giraffe.contributeUK
-GET            /us/contribute                         controllers.Giraffe.contributeUSA
-GET            /au/contribute                         controllers.Giraffe.contributeAustralia
-GET            /eu/contribute                         controllers.Giraffe.contributeEurope
-GET            /:countryGroup/contribute              controllers.Giraffe.contribute(countryGroup: com.gu.i18n.CountryGroup)
+GET            /uk/                         controllers.Giraffe.contributeUK
+GET            /us/                         controllers.Giraffe.contributeUSA
+GET            /au/                         controllers.Giraffe.contributeAustralia
+GET            /eu/                         controllers.Giraffe.contributeEurope
+GET            /:countryGroup/              controllers.Giraffe.contribute(countryGroup: com.gu.i18n.CountryGroup)
 
-GET            /contribute/thank-you                  controllers.Giraffe.thanksUK
-GET            /us/contribute/thank-you               controllers.Giraffe.thanksUSA
-GET            /au/contribute/thank-you               controllers.Giraffe.thanksAustralia
-GET            /eu/contribute/thank-you               controllers.Giraffe.thanksEurope
+GET            /thank-you                  controllers.Giraffe.thanksUK
+GET            /us/thank-you               controllers.Giraffe.thanksUSA
+GET            /au/thank-you               controllers.Giraffe.thanksAustralia
+GET            /eu/thank-you               controllers.Giraffe.thanksEurope
 
-POST           /contribute/pay                        controllers.Giraffe.pay
+POST           /pay                        controllers.Giraffe.pay

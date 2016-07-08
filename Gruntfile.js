@@ -94,6 +94,7 @@ module.exports = function (grunt) {
                 }]
             }
         },
+
         px_to_rem: {
             dist: {
                 options: {
@@ -110,6 +111,7 @@ module.exports = function (grunt) {
                 }]
             }
         },
+
 
 
         postcss: {
@@ -400,7 +402,6 @@ module.exports = function (grunt) {
             'compile:css',
             'compile:images',
             'compile:js',
-            'compile:bookmarklets'
         ]);
         /**
          * Only version files for prod builds

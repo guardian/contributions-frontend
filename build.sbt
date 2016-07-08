@@ -2,7 +2,13 @@ name := """contributions-frontend"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin).settings(
+maintainer := "Membership Contributions <membership.dev@theguardian.com>"
+
+packageSummary := "Contributions Play APP"
+
+packageDescription := """lorem ipsum donor sit amet"""
+
+lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin, RiffRaffArtifact, UniversalPlugin).settings(
     buildInfoKeys := Seq[BuildInfoKey](
         name,
         BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
@@ -15,6 +21,11 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin).
     ),
     buildInfoPackage := "app"
 )
+
+sources in (Compile,doc) := Seq.empty
+
+publishArtifact in (Compile, packageDoc) := false
+
 play.sbt.routes.RoutesKeys.routesImport += "controllers.Binders._"
 scalaVersion := "2.11.7"
 val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
@@ -39,5 +50,13 @@ dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
-
+git
 addCommandAlias("devrun", "run -Dconfig.resource=dev.conf 9111")
+
+riffRaffPackageType := (packageZipTarball in Universal).value
+
+def env(key: String): Option[String] = Option(System.getenv(key))
+riffRaffBuildIdentifier := env("TRAVIS_BUILD_NUMBER").getOrElse("DEV")
+riffRaffUploadArtifactBucket := Option("riffraff-artifact")
+riffRaffUploadManifestBucket := Option("riffraff-builds")
+riffRaffNotifyTeamcity := true
