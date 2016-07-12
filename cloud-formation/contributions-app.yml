@@ -88,7 +88,7 @@
         KeyName:
           Ref: "KeyName"
         IamInstanceProfile:
-          Ref: "MembershipAppInstanceProfile"
+          Ref: "ContributionsAppInstanceProfile"
         AssociatePublicIpAddress: true
         UserData:
           Fn::Base64:
@@ -98,13 +98,7 @@
                 - "#!/bin/bash -ev"
                 - "CONF_DIR=/membership/frontend-1.0-SNAPSHOT/conf"
                 -
-                  Fn::Join:
-                    - ""
-                    -
-                      - "wget -N --directory-prefix=/home/ubuntu/.ssh https://s3-eu-west-1.amazonaws.com/membership-dist/"
-                      -
-                        Ref: "Stack"
-                      - "/authorized_keys &"
+                - "/opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true \n"
                 - "adduser --system --home /membership --disabled-password membership"
                 -
                   Fn::Join:
@@ -113,13 +107,10 @@
                       - "aws --region "
                       -
                         Ref: "AWS::Region"
-                      - " s3 cp s3://membership-dist/"
-                      -
-                        Ref: "Stack"
-                      - "/"
+                      - " s3 cp s3://membership-dist/contributions"
                       -
                         Ref: "Stage"
-                      - "/frontend/app.zip /tmp"
+                      - "/app.zip /tmp"
                 - "unzip -d /membership /tmp/app.zip"
                 - "mkdir /etc/gu"
                 -
@@ -129,7 +120,7 @@
                       - "aws --region "
                       -
                         Ref: "AWS::Region"
-                      - " s3 cp s3://membership-private/"
+                      - " s3 cp s3://contributions-private/"
                       -
                         Ref: "Stage"
                       - "/membership-keys.conf /etc/gu"
@@ -221,7 +212,7 @@
                     - "logs:*"
                   Resource:
                     - "arn:aws:logs:*:*:*"
-    MembershipAppInstanceProfile:
+    ContributionsAppInstanceProfile:
       Type: "AWS::IAM::InstanceProfile"
       Properties:
         Path: "/"

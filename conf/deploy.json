@@ -4,7 +4,7 @@
         "contributions":{
             "type":"autoscaling",
             "data":{
-                "bucket": "contributions-dist"
+                "bucket": "membership-dist"
             }
         }
     },
