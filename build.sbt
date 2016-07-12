@@ -56,7 +56,8 @@ addCommandAlias("devrun", "run -Dconfig.resource=dev.conf 9111")
 riffRaffPackageType := (packageZipTarball in Universal).value
 
 def env(key: String): Option[String] = Option(System.getenv(key))
-riffRaffBuildIdentifier := env("TRAVIS_BUILD_NUMBER").getOrElse("DEV")
+riffRaffBuildIdentifier := env("BUILD_NUMBER").getOrElse("DEV")
+riffRaffManifestBranch := env("BRANCH_NAME").getOrElse("unknown_branch")
+riffRaffManifestVcsUrl  := "git@github.com:guardian/contributions-frontend.git"
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffNotifyTeamcity := true
