@@ -1,7 +1,7 @@
 {
     "defaultStacks": ["membership"],
     "packages":{
-        "contributions":{
+        "contributions-frontend":{
             "type":"autoscaling",
             "data":{
                 "bucket": "membership-dist"
