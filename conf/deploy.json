@@ -10,10 +10,10 @@
     },
     "recipes":{
         "default":{
-            "actionsBeforeApp": ["contributions.uploadArtifacts", "contributions.deploy"]
+            "actionsBeforeApp": ["contributions-frontend.uploadArtifacts", "contributions-frontend.deploy"]
         },
         "artifactUploadOnly": {
-           "actions": [ "contributions.uploadArtifacts" ]
+           "actions": [ "contributions-frontend.uploadArtifacts" ]
        }
     }
 }
