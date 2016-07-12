@@ -1,0 +1,18 @@
+#!/bin/bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+nvm use new
+
+set -o xtrace
+set -o nounset
+set -o errexit
+
+################################################################################
+# Build the static asset files for the project
+# Files will now be found in Public folder
+################################################################################
+
+npm cache clean
+npm install
+
+./node_modules/.bin/grunt "$@"

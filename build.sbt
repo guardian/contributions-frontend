@@ -50,7 +50,7 @@ dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
-git
+
 addCommandAlias("devrun", "run -Dconfig.resource=dev.conf 9111")
 
 riffRaffPackageType := (packageZipTarball in Universal).value
