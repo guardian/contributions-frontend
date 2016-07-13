@@ -68,7 +68,7 @@
             PropagateAtLaunch: "true"
           -
             Key: "App"
-            Value: "frontend"
+            Value: "contributions-frontend"
             PropagateAtLaunch: "true"
           -
             Key: "Stage"
@@ -96,10 +96,9 @@
               - "\n"
               -
                 - "#!/bin/bash -ev"
-                - "CONF_DIR=/membership/frontend-1.0-SNAPSHOT/conf"
-                -
+                - "apt-get -y update"
+                - "apt-get -y upgrade"
                 - "/opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true \n"
-                - "adduser --system --home /membership --disabled-password membership"
                 -
                   Fn::Join:
                     - ""
@@ -110,8 +109,7 @@
                       - " s3 cp s3://membership-dist/contributions"
                       -
                         Ref: "Stage"
-                      - "/app.zip /tmp"
-                - "unzip -d /membership /tmp/app.zip"
+                      - "/contributions-frontend_1.0-SNAPSHOT_all.deb /tmp"
                 - "mkdir /etc/gu"
                 -
                   Fn::Join:
@@ -123,9 +121,9 @@
                       - " s3 cp s3://contributions-private/"
                       -
                         Ref: "Stage"
-                      - "/membership-keys.conf /etc/gu"
-                - "chown membership /etc/gu/membership-keys.conf"
-                - "chmod 0600 /etc/gu/membership-keys.conf"
+                      - "/giraffe-keys.conf /etc/gu"
+                - "chown contributions-frontend /etc/gu/giraffe-keys.conf"
+                - "chmod 0600 /etc/gu/giraffe-keys.conf"
                 - "wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
                 -
                   Fn::Join:
@@ -147,16 +145,8 @@
                       -
                         Ref: "AWS::Region"
                       - "-c $CONF_DIR/logger.conf"
-                -
-                  Fn::Join:
-                    - ""
-                    -
-                      - "sed 's/__STAGE/"
-                      -
-                        Ref: "Stage"
-                      - "/' $CONF_DIR/upstart.conf > /etc/init/membership-app.conf"
-                - "chown -R membership /membership/"
-                - "start membership-app"
+                - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHOT.all.deb"
+
     MembershipAppRole:
       Type: "AWS::IAM::Role"
       Properties:
@@ -219,7 +209,7 @@
         Roles:
           -
             Ref: "MembershipAppRole"
-    FrontendElasticLoadBalancer:
+    ContributionsFrontendElasticLoadBalancer:
       Type: "AWS::ElasticLoadBalancing::LoadBalancer"
       Properties:
         Listeners:
@@ -318,7 +308,7 @@
         ResourceRecords:
           -
             Fn::GetAtt:
-              - "FrontendElasticLoadBalancer"
+              - "ContributionsFrontendElasticLoadBalancer"
               - "DNSName"
   Outputs:
     URL:
@@ -330,6 +320,6 @@
             - "http://"
             -
               Fn::GetAtt:
-                - "FrontendElasticLoadBalancer"
+                - "ContributionsFrontendElasticLoadBalancer"
                 - "DNSName"
 
