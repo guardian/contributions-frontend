@@ -8,7 +8,7 @@ packageSummary := "Contributions Play APP"
 
 packageDescription := """lorem ipsum donor sit amet"""
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin, RiffRaffArtifact, UniversalPlugin).settings(
+lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin, RiffRaffArtifact, JDebPackaging).settings(
     buildInfoKeys := Seq[BuildInfoKey](
         name,
         BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
@@ -53,11 +53,28 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 addCommandAlias("devrun", "run -Dconfig.resource=dev.conf 9111")
 
-riffRaffPackageType := (packageZipTarball in Universal).value
+import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
+serverLoading in Debian := Systemd
 
+debianPackageDependencies := Seq("openjdk-8-jre-headless")
+maintainer := "Alex Ware <alex.ware@guardian.co.uk>"
+packageSummary := "contributions frontend"
+packageDescription := """take financial contributions"""
+
+riffRaffPackageType := (packageBin in Debian).value
 def env(key: String): Option[String] = Option(System.getenv(key))
 riffRaffBuildIdentifier := env("BUILD_NUMBER").getOrElse("DEV")
 riffRaffManifestBranch := env("BRANCH_NAME").getOrElse("unknown_branch")
 riffRaffManifestVcsUrl  := "git@github.com:guardian/contributions-frontend.git"
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
+
+javaOptions in Universal ++= Seq(
+    "-Dpidfile.path=/dev/null",
+    "-J-XX:MaxRAMFraction=2",
+    "-J-XX:InitialRAMFraction=2",
+    "-J-XX:MaxMetaspaceSize=500m",
+    "-J-XX:+PrintGCDetails",
+    "-J-XX:+PrintGCDateStamps",
+    s"-J-Xloggc:/var/log/${packageName.value}/gc.log"
+)

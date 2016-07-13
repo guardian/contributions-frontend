@@ -1,6 +1,6 @@
 ---
   AWSTemplateFormatVersion: "2010-09-09"
-  Description: "membership-app"
+  Description: "contributions-app"
   Parameters:
     VpcId:
       Type: "String"
