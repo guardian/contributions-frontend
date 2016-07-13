@@ -57,7 +57,7 @@
         DesiredCapacity: "3"
         LoadBalancerNames:
           -
-            Ref: "FrontendElasticLoadBalancer"
+            Ref: "ContributionsFrontendElasticLoadBalancer"
         HealthCheckType: "ELB"
         HealthCheckGracePeriod: 300
         Tags:
@@ -169,18 +169,7 @@
                 -
                   Effect: "Allow"
                   Action: "s3:GetObject"
-                  Resource: "arn:aws:s3:::membership-private/*"
-          -
-            PolicyName: "SendingEmail"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                -
-                  Effect: "Allow"
-                  Action:
-                    - "ses:SendEmail"
-                    - "ses:SendRawEmail"
-                  Resource: "*"
+                  Resource: "arn:aws:s3:::contributions-private/*"
           -
             PolicyName: "PushMetrics"
             PolicyDocument:
@@ -294,15 +283,10 @@
     FrontendELBDNSrecord:
       Type: "AWS::Route53::RecordSet"
       Properties:
-        HostedZoneId: "/hostedzone/Z1E4V12LQGXFEC"
+        HostedZoneId: "/hostedzone/Z1EMYAF4JFS791"
         Comment: "CNAME for AWS ELB"
         Name:
-          Fn::Join:
-            - "."
-            -
-              -
-                Ref: "SiteDomain"
-              - "origin.membership.guardianapis.com."
+          - "contribute.guardianapis.com."
         Type: "CNAME"
         TTL: "120"
         ResourceRecords:
