@@ -98,6 +98,7 @@
                 - "#!/bin/bash -ev"
                 - "apt-get -y update"
                 - "apt-get -y upgrade"
+                - "/opt/features/ssh-keys/install.sh"
                 - "/opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true \n"
                 -
                   Fn::Join:
