@@ -147,7 +147,7 @@
                       - "-c $CONF_DIR/logger.conf"
                 - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHOT.all.deb"
 
-    MembershipAppRole:
+    ContributionsAppRole:
       Type: "AWS::IAM::Role"
       Properties:
         Path: "/"
@@ -197,7 +197,7 @@
         Path: "/"
         Roles:
           -
-            Ref: "MembershipAppRole"
+            Ref: "ContributionsAppRole"
     ContributionsFrontendElasticLoadBalancer:
       Type: "AWS::ElasticLoadBalancing::LoadBalancer"
       Properties:
@@ -280,20 +280,6 @@
             ToPort: "9000"
             SourceSecurityGroupId:
               Ref: "LoadBalancerSecurityGroup"
-    FrontendELBDNSrecord:
-      Type: "AWS::Route53::RecordSet"
-      Properties:
-        HostedZoneId: "/hostedzone/Z1EMYAF4JFS791"
-        Comment: "CNAME for AWS ELB"
-        Name:
-          - "contribute.guardianapis.com."
-        Type: "CNAME"
-        TTL: "120"
-        ResourceRecords:
-          -
-            Fn::GetAtt:
-              - "ContributionsFrontendElasticLoadBalancer"
-              - "DNSName"
   Outputs:
     URL:
       Description: "URL of the Frontend website"
