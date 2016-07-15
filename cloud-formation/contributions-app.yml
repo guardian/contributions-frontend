@@ -57,7 +57,7 @@
         DesiredCapacity: "3"
         LoadBalancerNames:
           -
-            Ref: "FrontendElasticLoadBalancer"
+            Ref: "ContributionsFrontendElasticLoadBalancer"
         HealthCheckType: "ELB"
         HealthCheckGracePeriod: 300
         Tags:
@@ -68,7 +68,7 @@
             PropagateAtLaunch: "true"
           -
             Key: "App"
-            Value: "frontend"
+            Value: "contributions-frontend"
             PropagateAtLaunch: "true"
           -
             Key: "Stage"
@@ -96,10 +96,9 @@
               - "\n"
               -
                 - "#!/bin/bash -ev"
-                - "CONF_DIR=/membership/frontend-1.0-SNAPSHOT/conf"
-                -
+                - "apt-get -y update"
+                - "apt-get -y upgrade"
                 - "/opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true \n"
-                - "adduser --system --home /membership --disabled-password membership"
                 -
                   Fn::Join:
                     - ""
@@ -107,11 +106,10 @@
                       - "aws --region "
                       -
                         Ref: "AWS::Region"
-                      - " s3 cp s3://membership-dist/contributions"
+                      - " s3 cp s3://membership-dist/membership/"
                       -
                         Ref: "Stage"
-                      - "/app.zip /tmp"
-                - "unzip -d /membership /tmp/app.zip"
+                      - "/contributions-frontend/contributions-frontend_1.0-SNAPSHOT_all.deb /tmp"
                 - "mkdir /etc/gu"
                 -
                   Fn::Join:
@@ -123,9 +121,7 @@
                       - " s3 cp s3://contributions-private/"
                       -
                         Ref: "Stage"
-                      - "/membership-keys.conf /etc/gu"
-                - "chown membership /etc/gu/membership-keys.conf"
-                - "chmod 0600 /etc/gu/membership-keys.conf"
+                      - "/giraffe-keys.conf /etc/gu"
                 - "wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
                 -
                   Fn::Join:
@@ -147,17 +143,12 @@
                       -
                         Ref: "AWS::Region"
                       - "-c $CONF_DIR/logger.conf"
-                -
-                  Fn::Join:
-                    - ""
-                    -
-                      - "sed 's/__STAGE/"
-                      -
-                        Ref: "Stage"
-                      - "/' $CONF_DIR/upstart.conf > /etc/init/membership-app.conf"
-                - "chown -R membership /membership/"
-                - "start membership-app"
-    MembershipAppRole:
+                - "chmod a+r /etc/gu/giraffe-keys.conf"
+                - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHOT.all.deb"
+                - "chown contributions-frontend /etc/gu/giraffe-keys.conf"
+                - "chmod 0600 /etc/gu/giraffe-keys.conf"
+
+    ContributionsAppRole:
       Type: "AWS::IAM::Role"
       Properties:
         Path: "/"
@@ -179,18 +170,15 @@
                 -
                   Effect: "Allow"
                   Action: "s3:GetObject"
-                  Resource: "arn:aws:s3:::membership-private/*"
-          -
-            PolicyName: "SendingEmail"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
+                  Resource: "arn:aws:s3:::contributions-private/*"
                 -
                   Effect: "Allow"
-                  Action:
-                    - "ses:SendEmail"
-                    - "ses:SendRawEmail"
-                  Resource: "*"
+                  Action: "s3:GetObject"
+                  Resource: "arn:aws:s3:::github-team-keys/*"
+                -
+                  Effect: "Allow"
+                  Action: "s3:ListBucket"
+                  Resource: "arn:aws:s3:::github-team-keys"
           -
             PolicyName: "PushMetrics"
             PolicyDocument:
@@ -218,8 +206,8 @@
         Path: "/"
         Roles:
           -
-            Ref: "MembershipAppRole"
-    FrontendElasticLoadBalancer:
+            Ref: "ContributionsAppRole"
+    ContributionsFrontendElasticLoadBalancer:
       Type: "AWS::ElasticLoadBalancing::LoadBalancer"
       Properties:
         Listeners:
@@ -301,25 +289,6 @@
             ToPort: "9000"
             SourceSecurityGroupId:
               Ref: "LoadBalancerSecurityGroup"
-    FrontendELBDNSrecord:
-      Type: "AWS::Route53::RecordSet"
-      Properties:
-        HostedZoneId: "/hostedzone/Z1E4V12LQGXFEC"
-        Comment: "CNAME for AWS ELB"
-        Name:
-          Fn::Join:
-            - "."
-            -
-              -
-                Ref: "SiteDomain"
-              - "origin.membership.guardianapis.com."
-        Type: "CNAME"
-        TTL: "120"
-        ResourceRecords:
-          -
-            Fn::GetAtt:
-              - "FrontendElasticLoadBalancer"
-              - "DNSName"
   Outputs:
     URL:
       Description: "URL of the Frontend website"
@@ -330,6 +299,6 @@
             - "http://"
             -
               Fn::GetAtt:
-                - "FrontendElasticLoadBalancer"
+                - "ContributionsFrontendElasticLoadBalancer"
                 - "DNSName"
 
