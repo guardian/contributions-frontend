@@ -76,5 +76,6 @@ javaOptions in Universal ++= Seq(
     "-J-XX:MaxMetaspaceSize=500m",
     "-J-XX:+PrintGCDetails",
     "-J-XX:+PrintGCDateStamps",
+    " -Dconfig.resource=prod.conf",
     s"-J-Xloggc:/var/log/${packageName.value}/gc.log"
 )

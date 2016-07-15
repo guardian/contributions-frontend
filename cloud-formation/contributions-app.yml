@@ -123,6 +123,8 @@
                         Ref: "Stage"
                       - "/giraffe-keys.conf /etc/gu"
                 - "wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
+                - "export CONF_DIR=/etc/contributions-frontend"
+                - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHOT.all.deb"
                 -
                   Fn::Join:
                     - ""
@@ -144,7 +146,6 @@
                         Ref: "AWS::Region"
                       - "-c $CONF_DIR/logger.conf"
                 - "chmod a+r /etc/gu/giraffe-keys.conf"
-                - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHOT.all.deb"
                 - "chown contributions-frontend /etc/gu/giraffe-keys.conf"
                 - "chmod 0600 /etc/gu/giraffe-keys.conf"
 
