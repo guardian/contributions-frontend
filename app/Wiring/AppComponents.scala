@@ -25,8 +25,9 @@ class AppComponents(private val stage: Stage, c: BuiltInComponents with AhcWSCom
   lazy val stripeApiConfig = StripeApiConfig.from(config, stage.name, "giraffe")
   lazy val stripeService = wire[StripeService]
   lazy val giraffeController = wire[Giraffe]
-
+  lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
+
 
   val prefix: String = "/"
   lazy val router: Router = wire[Routes]

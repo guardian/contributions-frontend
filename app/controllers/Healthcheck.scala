@@ -1,7 +1,9 @@
 package controllers
 
-import play.api.mvc.Controller
+import play.api.mvc.{Action, Controller}
 
-object Healthcheck extends Controller {
-def healthcheck = Ok("OK")
+class Healthcheck extends Controller {
+  def healthcheck() = Action{
+    Ok("yeah its all good")
+  }
 }
