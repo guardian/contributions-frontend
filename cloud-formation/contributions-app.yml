@@ -124,7 +124,7 @@
                       - "/giraffe-keys.conf /etc/gu"
                 - "wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
                 - "export CONF_DIR=/etc/contributions-frontend"
-                - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHOT.all.deb"
+                - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHfix OT_all.deb"
                 -
                   Fn::Join:
                     - ""
