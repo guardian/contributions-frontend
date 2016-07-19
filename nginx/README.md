@@ -31,6 +31,7 @@ Or follow the steps in that file.
 Add the following to your hosts file in `/etc/hosts`:
 
 ```
+127.0.0.1   contribute.thegulocal.com
 127.0.0.1   mem.thegulocal.com
 127.0.0.1   profile.thegulocal.com
 ```
