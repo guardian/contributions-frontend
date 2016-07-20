@@ -177,7 +177,7 @@
                 if (isModern) {
                     // only load JS if the browser cuts the mustard
                     var newElm = document.createElement('script');
-                    newElm.src = '@Asset.at("javascripts/giraffeMain.js")';
+                    newElm.src = '@Asset.at("javascripts/main.js")';
                     document.getElementsByTagName("head")[0].appendChild(newElm);
                 }
             })(guardian.isModernBrowser);
