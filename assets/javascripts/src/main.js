@@ -1,7 +1,6 @@
 require([
     'babel-polyfill',
     'ajax',
-    'src/modules/raven',
     'src/modules/analytics/setup',
     'src/modules/images',
     'src/modules/toggle',
@@ -19,7 +18,6 @@ require([
 ], function(
     b,
     ajax,
-    raven,
     analytics,
     images,
     toggle,
@@ -40,7 +38,6 @@ require([
     console.log('Giraffe js initialising.');
 
     ajax.init({page: {ajaxUrl: ''}});
-    raven.init('https://8ad435f4fefe468eb59b19fd81a06ea9@app.getsentry.com/56405');
 
     analytics.init();
 
