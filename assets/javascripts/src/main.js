@@ -37,6 +37,8 @@ require([
 ) {
     'use strict';
 
+    console.log('Giraffe js initialising.');
+
     ajax.init({page: {ajaxUrl: ''}});
     raven.init('https://8ad435f4fefe468eb59b19fd81a06ea9@app.getsentry.com/56405');
 
