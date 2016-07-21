@@ -94,30 +94,13 @@ module.exports = function (grunt) {
             }
         },
 
-        px_to_rem: {
-            dist: {
-                options: {
-                    map: isDev,
-                    base: 16,
-                    fallback: false,
-                    max_decimals: 5
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%= dirs.publicDir.stylesheets %>',
-                    src: ['*.css'],
-                    dest: '<%= dirs.publicDir.stylesheets %>'
-                }]
-            }
-        },
-
-
 
         postcss: {
             options: {
                 map: isDev ? true : false,
                 processors: [
-                    require('autoprefixer-core')({browsers: ['> 5%', 'last 2 versions', 'IE 9', 'Safari 6']})
+                    require('autoprefixer-core')({browsers: ['> 5%', 'last 2 versions', 'IE 9', 'Safari 6']}),
+                    require('postcss-pxtorem')()
                 ]
             },
             dist: { src: '<%= dirs.publicDir.stylesheets %>/*.css' }
