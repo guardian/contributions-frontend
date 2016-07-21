@@ -5,7 +5,6 @@ define([
     'src/modules/analytics/ophan',
     'src/modules/analytics/omniture',
     'src/modules/analytics/krux',
-    'src/modules/analytics/facebook',
     'src/modules/analytics/uet'
 ], function (
     cookie,
@@ -13,7 +12,6 @@ define([
     ophan,
     omniture,
     krux,
-    facebook,
     uet
 ) {
     'use strict';
@@ -43,7 +41,6 @@ define([
 
     function setupThirdParties() {
         krux.init();
-        facebook.init();
     }
 
     function init() {
