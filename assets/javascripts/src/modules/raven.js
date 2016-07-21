@@ -1,8 +1,8 @@
 define(['src/utils/user','raven-js'], function (user, Raven) {
     'use strict';
 
-    function init(dsn) {
 
+        var dsn = 'https://f411f942730c4689a8f21d76b5a5fd32@app.getsentry.com/87918';
         var tags = { build_number: guardian.membership.buildNumber };
         var cookieUser = user.getUserFromCookie();
 
@@ -25,10 +25,9 @@ define(['src/utils/user','raven-js'], function (user, Raven) {
                 return !window.guardian.isDev;
             }
         }).install();
-    }
+
 
     return{
-        init: init,
         Raven: Raven
     };
 });
