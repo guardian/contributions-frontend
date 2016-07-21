@@ -108,7 +108,8 @@ function setAmount(amount) {
 }
 
 function getStuffFromIdentity() {
-    let IDENTITY_API = 'https://idapi.theguardian.com/user/me/';
+    //let IDENTITY_API = 'https://idapi.theguardian.com/user/me/';
+    let IDENTITY_API = 'https://idapi-code-proxy.thegulocal.com/user/me/';
     ajax.reqwest({
         url: IDENTITY_API,
         method: 'get',

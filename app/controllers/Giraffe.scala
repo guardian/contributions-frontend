@@ -42,22 +42,24 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   }
 
   case class SupportForm(
-                          name: String,
-                          currency: Currency,
-                          amount: BigDecimal,
-                          email: String,
-                          token: String,
-                          marketing: Boolean,
-                          postCode: Option[String],
-                          abTests: JsValue,
-                          ophanId: String,
-                          cmp: Option[String],
-                          intcmp: Option[String]
+      firstName: String,
+      lastName: String,
+      currency: Currency,
+      amount: BigDecimal,
+      email: String,
+      token: String,
+      marketing: Boolean,
+      postCode: Option[String],
+      abTests: JsValue,
+      ophanId: String,
+      cmp: Option[String],
+      intcmp: Option[String])
 
-                        )
+
   val supportForm: Form[SupportForm] = Form(
     mapping(
-      "name" -> nonEmptyText,
+      "firstName" -> nonEmptyText,
+      "lastName" -> nonEmptyText,
       "currency" -> of[Currency],
       "amount" -> bigDecimal(10, 2),
       "email" -> email,
@@ -148,7 +150,8 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       val metadata = Map(
         "marketing-opt-in" -> f.marketing.toString,
         "email" -> f.email,
-        "name" -> f.name,
+        "firstName" -> f.firstName,
+        "lastName" -> f.lastName,
         "abTests" -> f.abTests.toString,
         "ophanId" -> f.ophanId,
         "cmp" -> f.cmp.mkString,
