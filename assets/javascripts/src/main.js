@@ -1,6 +1,7 @@
 require([
     'babel-polyfill',
     'ajax',
+    'src/modules/raven',
     'src/modules/analytics/setup',
     'src/modules/images',
     'src/modules/toggle',
@@ -18,6 +19,7 @@ require([
 ], function(
     b,
     ajax,
+    raven,
     analytics,
     images,
     toggle,
@@ -34,8 +36,6 @@ require([
     abTests
 ) {
     'use strict';
-
-    console.log('Giraffe js initialising.');
 
     ajax.init({page: {ajaxUrl: ''}});
 
