@@ -334,6 +334,7 @@ $desktop-col-padding-right: 16px;
     @include button();
     width: 23%;
     text-align: center;
+    margin-right: 2px;
 }
 
 .option-button--bold {
