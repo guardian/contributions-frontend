@@ -19,6 +19,7 @@ import scala.concurrent.Future
 import utils.RequestCountry._
 import com.netaporter.uri.dsl._
 import com.netaporter.uri.{PathPart, Uri}
+import controllers._
 import play.api.data.{FieldMapping, Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
@@ -109,20 +110,16 @@ class Giraffe(stripeService: StripeService) extends Controller {
   }
 
 
-  def thanks(countryGroup: CountryGroup, redirectUrl: String) = /*NoCache*/Action { implicit request =>
-    request.session.get(chargeId).fold(
-      Redirect(redirectUrl, SEE_OTHER)
-    )( id => {
-      val info: Any = PageInfo(
-        title = "Thank you for supporting the Guardian",
-        url = request.path,
-        image = None,
-        description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
-      )
-      Ok("ta")
-    }
-    )
+  def thanks(countryGroup: CountryGroup, redirectUrl: String) = /*NoCache*/ Action { implicit request =>
+
+    Ok(views.html.giraffe.thankyou(PageInfo(
+      title = "Thank you for supporting the Guardian",
+      url = request.path,
+      image = None,
+      description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
+    ), social, countryGroup))
   }
+
 
 
   def contributeUK = contribute(CountryGroup.UK)
