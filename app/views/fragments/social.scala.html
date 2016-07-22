@@ -1,0 +1,21 @@
+@import views.support.Social
+@import configuration.{Social => SocialConfig}
+@import views.support._
+@(socials: Set[Social])
+
+<ul class="social-list">
+    @for(social <- socials) {
+        <li class="social-list__item">
+            <a class="social-action social-action--@{Social.metricAction(social)}"
+            target="_blank"
+            href="@{Social.link(social)}"
+            data-metric-trigger="click"
+            data-metric-category="social"
+            data-metric-action="@{Social.metricAction(social)}"
+            >
+                <span class="u-h">@{Social.tooltip(social)}</span>
+                @fragments.inlineIcon(Social.icon(social))
+            </a>
+        </li>
+    }
+</ul>
