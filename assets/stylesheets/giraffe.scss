@@ -320,11 +320,12 @@ $desktop-col-padding-right: 16px;
     background-color: #ffffff;
 
     &:hover {
-        background-color: lighten(color(news-support-1), 10%);
+        background-color: $comment-support-1;
+        color: $white;
     }
 
     &.active {
-        background-color: $c-neutral2;
+        background-color: $c-neutral1;
         font-family: $f-serif-headline;
         color: $white;
     }
@@ -334,6 +335,7 @@ $desktop-col-padding-right: 16px;
     @include button();
     width: 23%;
     text-align: center;
+    margin-right: 2px;
 }
 
 .option-button--bold {
