@@ -6,7 +6,6 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 import com.gu.i18n.CountryGroup
-import com.gu.i18n.CountryGroup._
 import play.api.libs.json._
 import play.api.mvc.{Cookie, Request}
 import play.twirl.api.Html
@@ -61,18 +60,6 @@ object AmountHighlightTest extends TestTrait {
     Variant("Amount -  50 highlight", "50", 0.33, contributeAmountButtons(List(25, 50, 100, 250), Some(50))),
     Variant("Amount -  75 highlight", "75", 0.33, contributeAmountButtons(List(25, 50, 75, 150), Some(75))),
     Variant("Amount -  100 highlight", "100", 0.33, contributeAmountButtons(List(25, 50, 100, 250), Some(100)))
-
-//    Variant("Amount -  50 highlight eu", "50-eu", 0.33, contributeAmountButtons(List(25, 50, 100, 250), Some(50)), List(UK, Europe)),
-//    Variant("Amount -  75 highlight eu", "75-eu", 0.33, contributeAmountButtons(List(25, 50, 75, 150), Some(75)), List(UK, Europe)),
-//    Variant("Amount -  100 highlight eu", "100-eu", 0.33, contributeAmountButtons(List(25, 50, 100, 250), Some(100)), List(UK, Europe)),
-//
-//    Variant("Amount -  50 highlight us", "50-usa", 0.33, contributeAmountButtons(List(26, 51, 101, 251), Some(51)), List(US, Canada)),
-//    Variant("Amount -  75 highlight us", "75-usa", 0.33, contributeAmountButtons(List(26, 51, 76, 151), Some(76)), List(US, Canada)),
-//    Variant("Amount -  100 highlight us", "100-usa", 0.33, contributeAmountButtons(List(26, 51, 101, 251), Some(101)), List(US, Canada)),
-//
-//    Variant("Amount -  50 highlight row", "50-row", 0.33, contributeAmountButtons(List(27, 52, 102, 252), Some(52)), List(Australia, NewZealand, RestOfTheWorld)),
-//    Variant("Amount -  75 highlight row", "75-row", 0.33, contributeAmountButtons(List(27, 52, 77, 152), Some(77)), List(Australia, NewZealand, RestOfTheWorld)),
-//    Variant("Amount -  100 highlight row", "100-row", 0.33, contributeAmountButtons(List(27, 52, 102, 252), Some(102)), List(Australia, NewZealand, RestOfTheWorld))
   )
 }
 
@@ -98,7 +85,7 @@ object MessageCopyTest extends TestTrait {
     Variant("Copy - coffee inline", "costofnewswithyourcoffeeinline", 0, contributeMessage("Do you want the news with your coffee or do you just want coffee? Quality journalism costs. Please contribute.")),
     Variant("Copy - coffee", "costofnewswithyourcoffee", 0, contributeMessage("Do you want the news with your coffee or do you just want coffee? Quality journalism costs. Please contribute.")),
     Variant("Copy - heritage inline", "heritageinline", 0, contributeMessage("From the Peterloo massacre to phone hacking and the Panama Papers, we've been there - on your side for almost 200 years. Contribute to the Guardian today")),
-    Variant("Copy - heritage", "heritage", 0, contributeMessage("From the Peterloo massacre to phone hacking and the Panama Papers, we've been there - on your side for almost 200 years. Contribute to the Guardian today")), Variant("Copy - global beijing inline", "global-beijing-inline", 0, contributeMessage("By the time you've had your morning tea, reporters in Rio, Beijing, Moscow, Berlin, Paris, Johannesburg have already filed their stories. Covering the world's news isn't cheap. Please chip in a few pounds.")),
+    Variant("Copy - heritage", "heritage", 0, contributeMessage("From the Peterloo massacre to phone hacking and the Panama Papers, we've been there - on your side for almost 200 years. Contribute to the Guardian today")),
     Variant("Copy - global beijing inline", "global-beijing-inline", 0, contributeMessage("By the time you've had your morning tea, reporters in Rio, Beijing, Moscow, Berlin, Paris, Johannesburg have already filed their stories. Covering the world's news isn't cheap. Please chip in a few pounds.")),
     Variant("Copy - global beijing", "global-beijing", 0, contributeMessage("By the time you've had your morning tea, reporters in Rio, Beijing, Moscow, Berlin, Paris, Johannesburg have already filed their stories. Covering the world's news isn't cheap. Please chip in a few pounds."))
 
