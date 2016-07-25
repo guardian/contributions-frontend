@@ -93,7 +93,7 @@ Start the app as follows:
 
 This will start the Play application, which usually listens on port `9111`. Making a request to `localhost:9111` should give you the homepage.
 
-To make the site reachable as `giraffe.thegulocal.com` (necessary for register/sign-in functionality) you then need to make sure NGINX is configured and running as described in [`/nginx/README.md`](./nginx/README.md).
+To make the site reachable as `contributions.thegulocal.com` (necessary for register/sign-in functionality) you then need to make sure NGINX is configured and running as described in [`/nginx/README.md`](./nginx/README.md).
 
 ## Testing
 
