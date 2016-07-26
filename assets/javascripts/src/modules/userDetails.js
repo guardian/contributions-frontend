@@ -4,7 +4,7 @@ define([
 ], function ($, userUtil) {
     'use strict';
 
-    var AVAILABLE_DETAILS = ['displayname', 'firstName', 'tier'];
+    var AVAILABLE_DETAILS = ['displayname', 'firstName'];
     var CLASS_NAMES = {
         signedOut: 'id--signed-out',
         signedIn: 'id--signed-in',
@@ -37,14 +37,6 @@ define([
                 .addClass(CLASS_NAMES.signedIn);
 
             populateUserDetails(userUtil.getUserFromCookie());
-            userUtil.getMemberDetail(function (memberDetail) {
-                if (!memberDetail) { return false; }
-                populateUserDetails(memberDetail);
-
-                if (memberDetail.tier) {
-                    htmlElement.addClass(CLASS_NAMES.hasTier);
-                }
-            });
         }
     }
 
