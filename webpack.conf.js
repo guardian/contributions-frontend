@@ -29,6 +29,16 @@ module.exports = function(debug) { return {
                     presets: ['es2015'],
                     cacheDirectory: ''
                 }
+            },
+
+            {
+                test: /\.jsx$/,
+                exclude: /node_modules/,
+                loader: 'babel',
+                query: {
+                    presets: ['react', 'es2015'],
+                    cacheDirectory: ''
+                }
             }
         ]
     },
