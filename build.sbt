@@ -32,7 +32,7 @@ val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
 val scalaz = "org.scalaz" %% "scalaz-core" % "7.1.1"
 val membershipCommon = "com.gu" %% "membership-common" % "0.225"
 val sentryRavenLogback = "com.getsentry.raven" % "raven-logback" % "7.2.3"
-val memsubCommonPlayAuth = "com.gu" %% "memsub-common-play-auth" % "0.7"
+val memsubCommonPlayAuth = "com.gu" %% "memsub-common-play-auth" % "1.0"
 libraryDependencies ++= Seq(
   cache,
   ws,
@@ -51,7 +51,7 @@ dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
-addCommandAlias("devrun", "run -Dconfig.resource=dev.conf 9111")
+addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9111")
 
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 serverLoading in Debian := Systemd
@@ -76,6 +76,6 @@ javaOptions in Universal ++= Seq(
     "-J-XX:MaxMetaspaceSize=500m",
     "-J-XX:+PrintGCDetails",
     "-J-XX:+PrintGCDateStamps",
-    " -Dconfig.resource=prod.conf",
+    " -Dconfig.resource=PROD.conf",
     s"-J-Xloggc:/var/log/${packageName.value}/gc.log"
 )
