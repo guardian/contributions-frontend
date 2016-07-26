@@ -141,12 +141,6 @@ module.exports = function (grunt) {
                 expand: true,
                 flatten: true
             },
-            uet: {
-                src: '<%= dirs.assets.javascripts %>/lib/analytics/uet.js',
-                dest: '<%= dirs.publicDir.javascripts %>/lib/uet/',
-                expand: true,
-                flatten: true
-            },
             // For developer use. These are js files, not served with any page
             // but included dynamically when clicking on the respective bookmarklet.
             bookmarklets: {
@@ -366,10 +360,7 @@ module.exports = function (grunt) {
             'clean:js',
             'webpack',
             'copy:polyfills',
-            'copy:curl',
-            'copy:zxcvbn',
-            'copy:omniture',
-            'copy:uet'
+            'copy:curl'
         ]);
     });
     grunt.registerTask('compile', function(){
