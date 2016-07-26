@@ -3,14 +3,12 @@ define([
     'src/utils/cookie',
     'src/modules/analytics/ga',
     'src/modules/analytics/ophan',
-    'src/modules/analytics/omniture',
     'src/modules/analytics/krux',
     'src/modules/analytics/uet'
 ], function (
     cookie,
     ga,
     ophan,
-    omniture,
     krux,
     uet
 ) {
@@ -34,7 +32,6 @@ define([
 
     function setupAnalytics() {
         ophan.init();
-        omniture.init();
         ga.init();
         uet.init();
     }
