@@ -51,7 +51,7 @@ dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
-addCommandAlias("devrun", "run -Dconfig.resource=DEV.conf 9111")
+addCommandAlias("devrun", "run 9111")
 
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 serverLoading in Debian := Systemd
@@ -76,6 +76,5 @@ javaOptions in Universal ++= Seq(
     "-J-XX:MaxMetaspaceSize=500m",
     "-J-XX:+PrintGCDetails",
     "-J-XX:+PrintGCDateStamps",
-    " -Dconfig.resource=PROD.conf",
     s"-J-Xloggc:/var/log/${packageName.value}/gc.log"
 )

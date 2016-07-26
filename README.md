@@ -75,10 +75,10 @@ Fetch the developer AWS credentials, discuss how we do this with a team member.
 
 ### Download private keys
 
-Download our private keys from the `membership-private` S3 bucket. If you have the AWS CLI set up you can run:
+Download our private keys from the `contributions-private` S3 bucket. If you have the AWS CLI set up you can run:
 
 ```
-sudo aws s3 cp s3://membership-private/DEV/membership-keys.conf /etc/gu/giraffe-keys.conf --profile membership
+sudo aws s3 cp s3://contributions-private/DEV/contributions.private.conf /etc/gu/ --profile membership
 ```
 
 **Update this when we have our own keys**
@@ -137,12 +137,13 @@ for what to do if a deploy goes bad.
 
 ### Committing config credentials
 
-For the Membership project, we put both `DEV` and `PROD` credentials in `membership-keys.conf` files in the private S3 bucket `membership-private`, and if private credentials need adding or updating, they need to be updated there in S3.
+For the Membership project, we put both `DEV` and `PROD` credentials in `contributions.private.conf` files in a private
+S3 bucket, and if private credentials need adding or updating, they need to be updated there in S3.
 
 You can download and update credentials like this
 
-    aws s3 cp s3://membership-private/DEV/membership-keys.conf /etc/gu
-    aws s3 cp /etc/gu/membership-keys.conf s3://membership-private/DEV/
+    aws s3 cp s3://contributions-private/DEV/contributions.private.conf /etc/gu
+    aws s3 cp /etc/gu/contributions.private.conf s3://contributions-private/DEV/
 
 For a reminder on why we do this, here's @tackley on the subject:
 
@@ -152,7 +153,7 @@ For a reminder on why we do this, here's @tackley on the subject:
 
 >For AWS access keys, always prefer to use instance profiles instead.
 
->For other credentials, either use websys's puppet based config distribution (for websys managed machines) or put them in a configuration store such as DynamoDB or a private S3 bucket.
+>For other credentials, put them in a configuration store such as DynamoDB or a private S3 bucket.
 
 <a name="additional"></a>
 
