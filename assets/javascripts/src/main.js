@@ -1,6 +1,7 @@
 require([
     'babel-polyfill',
     'ajax',
+    'react-dom',
     'src/modules/raven',
     'src/modules/analytics/setup',
     'src/modules/images',
@@ -14,11 +15,12 @@ require([
     'src/modules/identityPopup',
     'src/modules/identityPopupDetails',
     'src/modules/metrics',
-    'src/modules/giraffe',
-    'src/modules/abTests'
+    'src/modules/abTests',
+    'src/modules/contribute'
 ], function(
     b,
     ajax,
+    ReactDOM,
     raven,
     analytics,
     images,
@@ -32,8 +34,8 @@ require([
     identityPopup,
     identityPopupDetails,
     metrics,
-    giraffe,
-    abTests
+    abTests,
+    contribute
 ) {
     'use strict';
 
@@ -60,7 +62,6 @@ require([
     // Metrics
     metrics.init();
 
-
-    giraffe.init();
+    contribute.init();
     abTests.init();
 });

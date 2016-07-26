@@ -12,6 +12,7 @@ GET            /                            controllers.Giraffe.contributeRedire
 GET            /healthcheck                 controllers.Healthcheck.healthcheck
 
 GET            /uk/                         controllers.Giraffe.contributeUK
+GET            /uk-react/                   controllers.Giraffe.contributeUKReact
 GET            /us/                         controllers.Giraffe.contributeUSA
 GET            /au/                         controllers.Giraffe.contributeAustralia
 GET            /eu/                         controllers.Giraffe.contributeEurope

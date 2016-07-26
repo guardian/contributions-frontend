@@ -91,7 +91,7 @@ class Giraffe(stripeService: StripeService) extends Controller {
   // Once things have settled down and we have a reasonable idea of what might
   // and might not vary between different countries, we should merge these country-specific
   // controllers & templates into a single one which varies on a number of parameters
-  def contribute(countryGroup: CountryGroup) = /*OptionallyAuthenticated*/Action { implicit request =>
+  def contribute(countryGroup: CountryGroup, react: Boolean = false) = /*OptionallyAuthenticated*/Action { implicit request =>
     val stripe = stripeService
     val isUAT = true
     val cmp = request.getQueryString("CMP")
@@ -105,8 +105,13 @@ class Giraffe(stripeService: StripeService) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmount,countryGroup,isUAT, chosenVariants, cmp, intCmp))
-      .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
+
+    val template = {
+      if (react) views.html.giraffe.contributeReact(pageInfo, maxAmount, countryGroup, isUAT, chosenVariants, cmp, intCmp)
+      else views.html.giraffe.contribute(pageInfo, maxAmount, countryGroup, isUAT, chosenVariants, cmp, intCmp)
+    }
+
+    Ok(template).withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
 
@@ -126,6 +131,8 @@ class Giraffe(stripeService: StripeService) extends Controller {
   def contributeUSA = contribute(CountryGroup.US)
   def contributeAustralia = contribute(CountryGroup.Australia)
   def contributeEurope = contribute(CountryGroup.Europe)
+
+  def contributeUKReact = contribute(CountryGroup.UK, true)
 
   def thanksUK = thanks(CountryGroup.UK, routes.Giraffe.contributeUK().url)
   def thanksUSA = thanks(CountryGroup.US, routes.Giraffe.contributeUSA().url)
