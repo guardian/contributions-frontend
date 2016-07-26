@@ -6,6 +6,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 import com.gu.i18n.CountryGroup
+import com.gu.i18n.CountryGroup._
 import play.api.libs.json._
 import play.api.mvc.{Cookie, Request}
 import play.twirl.api.Html
@@ -26,14 +27,21 @@ sealed trait TestTrait {
   def slug: String
   def variants: NonEmptyList[Variant]
 
-  val variantsFor: Map[CountryGroup, List[Variant]] = {
+  def ValidateVariants = {
+    val countryWithNoVariants = variantsByCountry.collectFirst { case (country, variants) if variants.isEmpty => country.name }
+    val errorMessage = countryWithNoVariants.map(country => s"${getClass.getName}: No variant defined for ${country}.")
+
+    errorMessage.foreach(m => throw new IllegalStateException(m))
+  }
+
+  val variantsByCountry: Map[CountryGroup, List[Variant]] = {
 
     def filterVariants(countryGroup: CountryGroup) = variants.list.filter(_.matches(countryGroup))
 
-    CountryGroup.allGroups.map(c => c -> filterVariants(c)).toMap
-  }
+    CountryGroup.allGroups.map(country => country -> filterVariants(country)).toMap
+    }
 
-  val weightedVariantsFor = {
+  val weightedVariantsByCountry = {
 
     def addWeights(filteredVariants: List[Variant]) = {
       val totalWeight: Double = filteredVariants.map(_.weight).fold(0.0)(_ + _)
@@ -41,7 +49,7 @@ sealed trait TestTrait {
       cdf.zip(filteredVariants)
     }
 
-    variantsFor.map { case (country, variants) => country -> addWeights(variants) }
+    variantsByCountry.map { case (country, variants) => country -> addWeights(variants) }
   }
 }
 
@@ -108,17 +116,21 @@ case class ChosenVariants(v1: AmountHighlightTest.Variant, v2: MessageCopyTest.V
 
 object Test {
 
+  val allTests = List(AmountHighlightTest, MessageCopyTest)
+
+  def ValidateVariants = allTests.foreach(_.ValidateVariants)
+
   def pickVariant[A](countryGroup: CountryGroup, request: Request[A], test: TestTrait): test.Variant = {
 
     def pickRandomly: test.Variant = {
       val n = scala.util.Random.nextDouble()
-      test.weightedVariantsFor(countryGroup).dropWhile(_._1 < n).head._2
+      test.weightedVariantsByCountry(countryGroup).dropWhile(_._1 < n).head._2
     }
 
     def pickByQueryStringOrCookie[A]: Option[test.Variant] = {
       val search: Option[String] = request.getQueryString(test.slug)
         .orElse(request.cookies.get(test.slug + "_GIRAFFE_TEST").map(_.value))
-      test.variantsFor(countryGroup).find(_.variantSlug == search.getOrElse(None))
+      test.variantsByCountry(countryGroup).find(_.variantSlug == search.getOrElse(None))
     }
 
     pickByQueryStringOrCookie getOrElse pickRandomly
