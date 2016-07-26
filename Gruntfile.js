@@ -191,14 +191,7 @@ module.exports = function (grunt) {
                 }
             },
             compile_js: {
-                files: ['<%= dirs.assets.javascripts %>/**/*.js'],
-                tasks: ['compile:js'],
-                options: {
-                    atBegin: true
-                }
-            },
-            compile_es6: {
-                files: ['<%= dirs.assets.javascripts %>/**/*.es6'],
+                files: ['<%= dirs.assets.javascripts %>/**/*.es6', '<%= dirs.assets.javascripts %>/**/*.jsx'],
                 tasks: ['compile:js'],
                 options: {
                     atBegin: true
