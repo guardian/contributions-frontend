@@ -10,19 +10,17 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
 import configuration.Config
-import services.AuthenticationService
-import com.netaporter.uri.dsl._
-import views.support.{TestTrait, _}
+import views.support._
 
 import scalaz.syntax.std.option._
 import scala.concurrent.Future
 import utils.RequestCountry._
 import com.netaporter.uri.dsl._
 import com.netaporter.uri.{PathPart, Uri}
-import controllers._
 import play.api.data.{FieldMapping, Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import utils.RichResults._
 
 class Giraffe(stripeService: StripeService) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
@@ -107,6 +105,7 @@ class Giraffe(stripeService: StripeService) extends Controller {
     )
     Ok(views.html.giraffe.contribute(pageInfo,maxAmount,countryGroup,isUAT, chosenVariants, cmp, intCmp))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
+      .withoutCache
   }
 
 
