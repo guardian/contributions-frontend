@@ -29,7 +29,7 @@ sealed trait TestTrait {
 
   def ValidateVariants = {
     val countryWithNoVariants = variantsByCountry.collectFirst { case (country, variants) if variants.isEmpty => country.name }
-    val errorMessage = countryWithNoVariants.map(country => s"${getClass.getName}: No variant defined for ${country}.")
+    val errorMessage = countryWithNoVariants.map(country => s"${getClass.getName}: No variant defined for $country.")
 
     errorMessage.foreach(m => throw new IllegalStateException(m))
   }
