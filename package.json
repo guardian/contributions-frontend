@@ -3,8 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "copyHooks": "cp  -f ../git-hooks/pre-commit ../.git/hooks/",
-    "devSetup": "npm run compile --dev && npm run copyHooks",
+    "devSetup": "npm run compile --dev",
     "bowerCss": "cd assets/stylesheets && rimraf bower_components &&  bower install",
     "bowerSetup": "npm run bowerCss",
     "compile": "echo 'compiling assets' && grunt compile",
