@@ -10,6 +10,7 @@ import com.gu.i18n.CountryGroup._
 import play.api.libs.json._
 import play.api.mvc.{Cookie, Request}
 import play.twirl.api.Html
+import scala.util.Random
 
 import scalaz.NonEmptyList
 import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage}
@@ -60,14 +61,15 @@ object AmountHighlightTest extends TestTrait {
   override type VariantFn = (CountryGroup, Option[Int]) => Html
 
   def variants = NonEmptyList(
-    Variant("Amount - 5 highlight","5",0,contributeAmountButtons(List(5,25,50,100),Some(5))),
-    Variant("Amount - 25 highlight","25",0,contributeAmountButtons(List(5,25,50,100),Some(25))),
-    Variant("Amount - no highlight","None",0,contributeAmountButtons(List(5,25,50,100), None)),
-    Variant("Amount -  35 highlight","35",0,contributeAmountButtons(List(10,35,65,100),Some(35))),
-    Variant("Amount -  35 highlight descending","35-descending",0,contributeAmountButtons(List(100,65,35,10),Some(35))),
-    Variant("Amount -  50 highlight", "50", 0.33, contributeAmountButtons(List(25, 50, 100, 250), Some(50))),
-    Variant("Amount -  75 highlight", "75", 0.33, contributeAmountButtons(List(25, 50, 75, 150), Some(75))),
-    Variant("Amount -  100 highlight", "100", 0.33, contributeAmountButtons(List(25, 50, 100, 250), Some(100)))
+    Variant("Amount - 5 highlight", "5", 0, contributeAmountButtons(List(5, 25, 50, 100), Some(5))),
+    Variant("Amount - 25 highlight", "25", 0, contributeAmountButtons(List(5, 25, 50, 100), Some(25))),
+    Variant("Amount - no highlight", "None", 0, contributeAmountButtons(List(5, 25, 50, 100), None)),
+    Variant("Amount - 35 highlight", "35", 0, contributeAmountButtons(List(10, 35, 65, 100), Some(35))),
+    Variant("Amount - 35 highlight descending", "35-descending", 0, contributeAmountButtons(List(100, 65, 35, 10), Some(35))),
+    Variant("Amount - 100 highlight", "100", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(100))),
+    Variant("Amount - 50 highlight", "50", 0.33, contributeAmountButtons(List(25, 50, 100, 250), Some(50))),
+    Variant("Amount - 15", "15", 0.33, contributeAmountButtons(List(15, 35, 65, 100), Some(35))),
+    Variant("Amount - 40 highlight", "40", 0.33, contributeAmountButtons(List(20, 40, 75, 100), Some(40)))
   )
 }
 
@@ -123,7 +125,7 @@ object Test {
   def pickVariant[A](countryGroup: CountryGroup, request: Request[A], test: TestTrait): test.Variant = {
 
     def pickRandomly: test.Variant = {
-      val n = scala.util.Random.nextDouble()
+      val n = Random.nextDouble
       test.weightedVariantsByCountry(countryGroup).dropWhile(_._1 < n).head._2
     }
 

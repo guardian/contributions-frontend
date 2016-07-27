@@ -121,10 +121,14 @@
                       - " s3 cp s3://contributions-private/"
                       -
                         Ref: "Stage"
-                      - "/giraffe-keys.conf /etc/gu"
+                      - "/contributions.private.conf /etc/gu"
+
+
                 - "wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
                 - "export CONF_DIR=/etc/contributions-frontend"
-                - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHfix OT_all.deb"
+                - "dpkg -i /tmp/contributions-frontend_1.0-SNAPSHOT_all.deb"
+                - "chown contributions-frontend /etc/gu/contributions.private.conf"
+                - "chmod 0600 /etc/gu/contributions.private.conf"
                 -
                   Fn::Join:
                     - ""
@@ -145,9 +149,6 @@
                       -
                         Ref: "AWS::Region"
                       - "-c $CONF_DIR/logger.conf"
-                - "chmod a+r /etc/gu/giraffe-keys.conf"
-                - "chown contributions-frontend /etc/gu/giraffe-keys.conf"
-                - "chmod 0600 /etc/gu/giraffe-keys.conf"
 
     ContributionsAppRole:
       Type: "AWS::IAM::Role"
@@ -290,16 +291,3 @@
             ToPort: "9000"
             SourceSecurityGroupId:
               Ref: "LoadBalancerSecurityGroup"
-  Outputs:
-    URL:
-      Description: "URL of the Frontend website"
-      Value:
-        Fn::Join:
-          - ""
-          -
-            - "http://"
-            -
-              Fn::GetAtt:
-                - "ContributionsFrontendElasticLoadBalancer"
-                - "DNSName"
-

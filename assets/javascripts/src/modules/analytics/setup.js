@@ -3,16 +3,12 @@ define([
     'src/utils/cookie',
     'src/modules/analytics/ga',
     'src/modules/analytics/ophan',
-    'src/modules/analytics/omniture',
-    'src/modules/analytics/krux',
-    'src/modules/analytics/uet'
+    'src/modules/analytics/krux'
 ], function (
     cookie,
     ga,
     ophan,
-    omniture,
-    krux,
-    uet
+    krux
 ) {
     'use strict';
 
@@ -34,9 +30,7 @@ define([
 
     function setupAnalytics() {
         ophan.init();
-        omniture.init();
         ga.init();
-        uet.init();
     }
 
     function setupThirdParties() {
