@@ -14,9 +14,12 @@ import router.Routes
 
 //Sometimes intellij deletes this -> (import router.Routes)
 
-class AppComponents(private val stage: Stage, c: BuiltInComponents with AhcWSComponents) {
+/* https://www.playframework.com/documentation/2.5.x/ScalaCompileTimeDependencyInjection
+ * https://github.com/adamw/macwire/blob/master/README.md#play24x
+ */
+trait AppComponents extends BuiltInComponents {
 
-  import c._
+  val stage = AppComponents.DEV
 
   lazy val metrics = new ServiceMetrics(stage.name, "giraffe","stripe")
 
@@ -31,7 +34,6 @@ class AppComponents(private val stage: Stage, c: BuiltInComponents with AhcWSCom
 
   val prefix: String = "/"
   lazy val router: Router = wire[Routes]
-
 }
 
 object AppComponents {
