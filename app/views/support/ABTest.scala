@@ -17,11 +17,10 @@ import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage}
 
 sealed trait TestTrait {
   type VariantFn
-  case class Variant(variantName: String, variantSlug: String, weight: Double, render: VariantFn, countryGroupFilter: Seq[CountryGroup] = List.empty) {
+  case class Variant(variantName: String, variantSlug: String, weight: Double, render: VariantFn, countryGroupFilter: Set[CountryGroup] = Set.empty) {
     def testName = name
     def testSlug = slug
     def matches(countryGroup:CountryGroup):Boolean = countryGroupFilter.isEmpty || countryGroupFilter.contains(countryGroup)
-
   }
 
   def name: String
