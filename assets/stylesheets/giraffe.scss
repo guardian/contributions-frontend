@@ -505,8 +505,50 @@ $desktop-col-padding-right: 16px;
         }
 
     }
-
 }
+
+
+
+.contribute-form {
+    background-color: #ffd359;
+    padding: 10px;
+    width: 300px;
+}
+
+.contribute-form__heading {
+    @include clearfix()
+}
+
+.contribute-form__title {
+    @include fs-headline(3);
+    color: color(neutral-1);
+    font-weight: 900;
+    float: left;
+}
+
+.contribute-form__progress {
+    float: right;
+
+    > span {
+        &:after {
+            $dot-size: 8px;
+
+            content: '';
+            display: inline-block;
+            height: $dot-size;
+            width: $dot-size;
+            border-radius: $dot-size;
+            margin-left: $dot-size;
+            margin-right: $dot-size;
+            background: $c-neutral2;
+        }
+
+        &.active:after {
+            background: white;
+        }
+    }
+}
+
 
 // CSS to show/hide regional specific stuff
 
@@ -522,3 +564,4 @@ $currencies: gbp usd aud eur;
         }
     }
 }
+
