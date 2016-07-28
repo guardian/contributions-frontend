@@ -15,7 +15,7 @@ import scala.util.Random
 import scalaz.NonEmptyList
 import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage}
 
-sealed trait TestTrait {
+trait TestTrait {
   type VariantFn
   case class Variant(variantName: String, variantSlug: String, weight: Double, render: VariantFn, countryGroupFilter: Set[CountryGroup] = Set.empty) {
     def testName = name
@@ -27,29 +27,24 @@ sealed trait TestTrait {
   def slug: String
   def variants: NonEmptyList[Variant]
 
-  def ValidateVariants = {
-    val countryWithNoVariants = variantsByCountry.collectFirst { case (country, variants) if variants.isEmpty => country.name }
-    val errorMessage = countryWithNoVariants.map(country => s"${getClass.getName}: No variant defined for $country.")
+ val variantsByCountry: Map[CountryGroup, Set[Variant]] = {
 
-    errorMessage.foreach(m => throw new IllegalStateException(m))
-  }
-
-  val variantsByCountry: Map[CountryGroup, List[Variant]] = {
-
-    def filterVariants(countryGroup: CountryGroup) = variants.list.filter(_.matches(countryGroup))
+    def filterVariants(countryGroup: CountryGroup) = variants.list.filter(_.matches(countryGroup)).toSet
 
     CountryGroup.allGroups.map(country => country -> filterVariants(country)).toMap
     }
 
-  val weightedVariantsByCountry = {
+ val variantRangesByCountry = {
 
-    def addWeights(filteredVariants: List[Variant]) = {
-      val totalWeight: Double = filteredVariants.map(_.weight).fold(0.0)(_ + _)
-      val cdf: Seq[Double] = filteredVariants.map(_.weight).foldLeft(Seq[Double]())((l, p) => l :+ l.lastOption.getOrElse(0.0) + p / totalWeight)
-      cdf.zip(filteredVariants)
-    }
+   def addRanges(filteredVariants: Set[Variant]): Seq[(Double, Variant)] = {
+     val filteredVariantList = filteredVariants.toList
+     val weightSum: Double = filteredVariantList.map(_.weight).fold(0.0)(_ + _)
+     val totalWeight = if (weightSum != 0) weightSum else 1
+     val cdf: Seq[Double] = filteredVariantList.map(_.weight).foldLeft(Seq[Double]())((l, p) => l :+ l.lastOption.getOrElse(0.0) + p / totalWeight)
+     cdf.zip(filteredVariantList)
+   }
 
-    variantsByCountry.map { case (country, variants) => country -> addWeights(variants) }
+    variantsByCountry.map { case (country, variants) => country -> addRanges(variants) }
   }
 }
 
@@ -118,13 +113,11 @@ object Test {
 
   val allTests = List(AmountHighlightTest, MessageCopyTest)
 
-  def ValidateVariants = allTests.foreach(_.ValidateVariants)
-
   def pickVariant[A](countryGroup: CountryGroup, request: Request[A], test: TestTrait): test.Variant = {
 
     def pickRandomly: test.Variant = {
       val n = Random.nextDouble
-      test.weightedVariantsByCountry(countryGroup).dropWhile(_._1 < n).head._2
+      test.variantRangesByCountry(countryGroup).dropWhile(_._1 < n).head._2
     }
 
     def pickByQueryStringOrCookie[A]: Option[test.Variant] = {

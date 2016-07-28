@@ -18,8 +18,6 @@ class AppLoader extends ApplicationLoader {
       _.configure(context.environment)
     }
 
-    Test.ValidateVariants
-
     new BuiltInComponentsFromContext(context) with AhcWSComponents {
       lazy val map = Map[String, Router](
         "UAT" ->  new AppComponents(AppComponents.UAT, this).router,
