@@ -93,7 +93,6 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   // controllers & templates into a single one which varies on a number of parameters
   def contribute(countryGroup: CountryGroup) = /*OptionallyAuthenticated*/Action { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
-    val isUAT = true
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
     val chosenVariants: ChosenVariants = Test.getContributePageVariants(request)
@@ -105,7 +104,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmount,countryGroup,isUAT, chosenVariants, cmp, intCmp))
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmount,countryGroup, chosenVariants, cmp, intCmp))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
