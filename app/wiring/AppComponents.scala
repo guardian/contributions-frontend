@@ -1,15 +1,15 @@
 package wiring
 
-import com.gu.monitoring.ServiceMetrics
-import com.gu.stripe.{StripeApiConfig, StripeCredentials, StripeService}
-import play.api.BuiltInComponents
-import play.api.libs.concurrent.Execution.Implicits._
-import com.typesafe.config.ConfigFactory
+import com.github.nscala_time.time.Imports._
+import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
+import com.gu.identity.play.AccessCredentials.{Cookies, Token}
+import com.gu.identity.testing.usernames.TestUsernames
 import com.softwaremill.macwire._
+import com.typesafe.config.ConfigFactory
 import controllers._
-import play.api.libs.ws.ahc.AhcWSComponents
+import play.api.BuiltInComponents
 import play.api.routing.Router
-import wiring.AppComponents.Stage
+import services.PaymentServices
 import router.Routes
 
 //Sometimes intellij deletes this -> (import router.Routes)
@@ -19,14 +19,27 @@ import router.Routes
  */
 trait AppComponents extends BuiltInComponents {
 
-  val stage = AppComponents.DEV
 
-  lazy val metrics = new ServiceMetrics(stage.name, "giraffe","stripe")
+  lazy val config = ConfigFactory.load()
 
-  lazy val config = ConfigFactory.load().getConfig(s"touchpoint.backend.environments.${stage.name}")
+  private val idConfig = config.getConfig("identity")
 
-  lazy val stripeApiConfig = StripeApiConfig.from(config, stage.name, "giraffe")
-  lazy val stripeService = wire[StripeService]
+  lazy val identityKeys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
+
+  lazy val testUsernames = TestUsernames(
+    com.gu.identity.testing.usernames.Encoder.withSecret(idConfig.getString("test.users.secret")),
+    recency = 2.days.standardDuration
+  )
+
+  lazy val identityAuthProvider =
+    Cookies.authProvider(identityKeys).withDisplayNameProvider(Token.authProvider(identityKeys, "membership"))
+
+  lazy val paymentServices = PaymentServices(
+    identityAuthProvider,
+    testUsernames,
+    PaymentServices.stripeServicesFor(config.getConfig("stripe"))
+  )
+
   lazy val giraffeController = wire[Giraffe]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
@@ -34,24 +47,4 @@ trait AppComponents extends BuiltInComponents {
 
   val prefix: String = "/"
   lazy val router: Router = wire[Routes]
-}
-
-object AppComponents {
-
-  sealed trait Stage {
-    def name: String
-  }
-
-  case object DEV extends Stage {
-    override def name = "DEV"
-  }
-
-  case object UAT extends Stage {
-    override def name = "UAT"
-  }
-
-  case object PROD extends Stage {
-    override def name = "PROD"
-  }
-
 }
