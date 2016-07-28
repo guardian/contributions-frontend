@@ -7,7 +7,6 @@ import play.api.{ApplicationLoader, BuiltInComponentsFromContext, Logger}
 import play.api._
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.libs.ws.ning.NingWSComponents
-import views.support.Test
 
 
 class AppLoader extends ApplicationLoader {
@@ -19,6 +18,7 @@ class AppLoader extends ApplicationLoader {
     }
 
     new BuiltInComponentsFromContext(context) with AhcWSComponents {
+
       lazy val map = Map[String, Router](
         "UAT" ->  new AppComponents(AppComponents.UAT, this).router,
         "DEV" -> new AppComponents(AppComponents.DEV, this).router
