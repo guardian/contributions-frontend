@@ -110,7 +110,8 @@ class Giraffe(stripeService: StripeService) extends Controller {
   }
 
 
-  def thanks(countryGroup: CountryGroup, redirectUrl: String) = /*NoCache*/ Action { implicit request =>
+  def thanks(countryGroup: CountryGroup) = /*NoCache*/ Action { implicit request =>
+    val redirectUrl = routes.Giraffe.contribute(countryGroup).url
 
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = "Thank you for supporting the Guardian",
@@ -119,19 +120,6 @@ class Giraffe(stripeService: StripeService) extends Controller {
       description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
     ), social, countryGroup))
   }
-
-
-
-  def contributeUK = contribute(CountryGroup.UK)
-  def contributeUSA = contribute(CountryGroup.US)
-  def contributeAustralia = contribute(CountryGroup.Australia)
-  def contributeEurope = contribute(CountryGroup.Europe)
-
-  def thanksUK = thanks(CountryGroup.UK, routes.Giraffe.contributeUK().url)
-  def thanksUSA = thanks(CountryGroup.US, routes.Giraffe.contributeUSA().url)
-  def thanksAustralia = thanks(CountryGroup.Australia, routes.Giraffe.contributeAustralia().url)
-  def thanksEurope = thanks(CountryGroup.Europe, routes.Giraffe.contributeEurope().url)
-
 
   def pay = /*OptionallyAuthenticated*/Action.async { implicit request =>
     val stripe = stripeService
@@ -152,10 +140,10 @@ class Giraffe(stripeService: StripeService) extends Controller {
 
 
       val redirect = f.currency match {
-        case USD => routes.Giraffe.thanksUSA().url
-        case AUD => routes.Giraffe.thanksAustralia().url
-        case EUR => routes.Giraffe.thanksEurope().url
-        case _ => routes.Giraffe.thanksUK().url
+        case USD => routes.Giraffe.thanks(CountryGroup.US).url
+        case AUD => routes.Giraffe.thanks(CountryGroup.Australia).url
+        case EUR => routes.Giraffe.thanks(CountryGroup.Europe).url
+        case _ => routes.Giraffe.thanks(CountryGroup.UK).url
       }
 
       res.map { charge =>
