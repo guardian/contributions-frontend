@@ -10,7 +10,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
 import configuration.Config
-import services.AuthenticationService
+import services.{AuthenticationService, PaymentServices}
 import com.netaporter.uri.dsl._
 import views.support.{TestTrait, _}
 
@@ -24,7 +24,7 @@ import play.api.data.{FieldMapping, Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 
-class Giraffe(stripeService: StripeService) extends Controller {
+class Giraffe(paymentServices: PaymentServices) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError],JsValue] = {
       val parse: JsValue = Json.parse(URLDecoder.decode(data(key),StandardCharsets.UTF_8.name()))
@@ -92,8 +92,7 @@ class Giraffe(stripeService: StripeService) extends Controller {
   // and might not vary between different countries, we should merge these country-specific
   // controllers & templates into a single one which varies on a number of parameters
   def contribute(countryGroup: CountryGroup) = /*OptionallyAuthenticated*/Action { implicit request =>
-    val stripe = stripeService
-    val isUAT = true
+    val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
     val chosenVariants: ChosenVariants = Test.getContributePageVariants(request)
@@ -105,7 +104,7 @@ class Giraffe(stripeService: StripeService) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmount,countryGroup,isUAT, chosenVariants, cmp, intCmp))
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmount,countryGroup, chosenVariants, cmp, intCmp))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
@@ -134,8 +133,8 @@ class Giraffe(stripeService: StripeService) extends Controller {
 
 
   def pay = /*OptionallyAuthenticated*/Action.async { implicit request =>
-    val stripe = stripeService
-    //val identity = request.touchpointBackend.identityService
+    val stripe = paymentServices.stripeServiceFor(request)
+
     supportForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
       Future.successful(BadRequest(JsArray(withErrors.errors.map(k => JsString(k.key)))))
     },{ f =>

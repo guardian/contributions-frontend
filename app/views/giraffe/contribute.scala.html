@@ -3,7 +3,7 @@
 @import views.support.PageInfo
 @import views.support.Asset
 
-@(pageInfo:PageInfo,maxAmount: Option[Int], countryGroup: CountryGroup, isUAT: Boolean, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String])
+@(pageInfo:PageInfo,maxAmount: Option[Int], countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String])
 
 @main(pageInfo,Some(countryGroup)){
     <div class="support-wrapper__outer__a">
@@ -205,8 +205,7 @@
 
                             <li id="submit_field" class="form-field">
                                 <button class="action action--contribute js-submit-input" type="submit" tabindex="17">
-                                    Contribute <span class="js-currency-pay">@countryGroup.currency.prefix@countryGroup.currency.glyph</span><span class="js-amount js-pay"></span>@if(isUAT) {
-                                    (UAT)}</button>
+                                    Contribute <span class="js-currency-pay">@countryGroup.currency.prefix@countryGroup.currency.glyph</span><span class="js-amount js-pay"></span></button>
                                 <div class="loader js-loader"></div>
                             </li>
 
