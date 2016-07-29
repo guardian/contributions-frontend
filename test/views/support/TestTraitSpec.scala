@@ -24,7 +24,7 @@ class TestTraitSpec extends WordSpec with MustMatchers {
       allGroups.foreach(c => extractWeights(test, c) must matchRanges(expectedRanges))
     }
 
-    "generate ranges or size proportional to weights" in {
+    "generate ranges of size proportional to weights" in {
       val test = getTestTrait(NonEmptyList(("v1", 50.0, allGroups), ("v2", 30.0, allGroups), ("v3", 20.0, allGroups)))
       val expectedRanges = List(("v1", 0.5), ("v2", 0.8), ("v3", 1.0))
       allGroups.foreach(c => extractWeights(test, c) must matchRanges(expectedRanges))
@@ -42,7 +42,6 @@ class TestTraitSpec extends WordSpec with MustMatchers {
   }
 
   def extractWeights(test: TestTrait, c: CountryGroup) = test.variantRangesByCountry(c).map { case (weight, variant) => ((variant.variantName, weight)) }
-
 
   def getTestTrait(weights: NonEmptyList[(String, Double, List[CountryGroup])]): TestTrait = {
     object TestImp extends TestTrait {
