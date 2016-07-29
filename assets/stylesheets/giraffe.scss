@@ -145,11 +145,11 @@ $tablet-col-padding-right: ($gs-gutter/2) + 1;
             border-radius: 6px;
             margin-left: 6px;
             margin-right: 6px;
-            background: $c-neutral2;
+            background: $white;
 
         }
         a.form__container--active {
-            background: white;
+            background: $c-neutral1;
         }
 
     }
