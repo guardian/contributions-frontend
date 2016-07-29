@@ -1,5 +1,4 @@
 require([
-    'babel-polyfill',
     'ajax',
     'react-dom',
     'src/modules/raven',
@@ -18,7 +17,6 @@ require([
     'src/modules/abTests',
     'src/modules/contribute'
 ], function(
-    b,
     ajax,
     ReactDOM,
     raven,
