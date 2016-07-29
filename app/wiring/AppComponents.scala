@@ -7,7 +7,9 @@ import com.gu.identity.testing.usernames.TestUsernames
 import com.softwaremill.macwire._
 import com.typesafe.config.ConfigFactory
 import controllers._
+import filters.CheckCacheHeadersFilter
 import play.api.BuiltInComponents
+import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import services.PaymentServices
 import router.Routes
@@ -17,7 +19,7 @@ import router.Routes
 /* https://www.playframework.com/documentation/2.5.x/ScalaCompileTimeDependencyInjection
  * https://github.com/adamw/macwire/blob/master/README.md#play24x
  */
-trait AppComponents extends BuiltInComponents {
+trait AppComponents extends BuiltInComponents with PlayComponents {
 
 
   lazy val config = ConfigFactory.load()
@@ -44,6 +46,8 @@ trait AppComponents extends BuiltInComponents {
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
 
+
+  override lazy val httpFilters: Seq[EssentialFilter] = Seq(wire[CheckCacheHeadersFilter])
 
   val prefix: String = "/"
   lazy val router: Router = wire[Routes]
