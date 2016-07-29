@@ -15,11 +15,14 @@ GET            /uk/                         controllers.Giraffe.contributeUK
 GET            /us/                         controllers.Giraffe.contributeUSA
 GET            /au/                         controllers.Giraffe.contributeAustralia
 GET            /eu/                         controllers.Giraffe.contributeEurope
+GET            /ca/                         controllers.Giraffe.contributeCanada
 GET            /:countryGroup/              controllers.Giraffe.contribute(countryGroup: com.gu.i18n.CountryGroup)
 
 GET            /thank-you                  controllers.Giraffe.thanksUK
 GET            /us/thank-you               controllers.Giraffe.thanksUSA
 GET            /au/thank-you               controllers.Giraffe.thanksAustralia
 GET            /eu/thank-you               controllers.Giraffe.thanksEurope
+GET            /ca/thank-you               controllers.Giraffe.thanksCanada
+
 
 POST           /pay                        controllers.Giraffe.pay

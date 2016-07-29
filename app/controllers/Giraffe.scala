@@ -124,11 +124,13 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   def contributeUK = contribute(CountryGroup.UK)
   def contributeUSA = contribute(CountryGroup.US)
   def contributeAustralia = contribute(CountryGroup.Australia)
+  def contributeCanada = contribute(CountryGroup.Canada)
   def contributeEurope = contribute(CountryGroup.Europe)
 
   def thanksUK = thanks(CountryGroup.UK, routes.Giraffe.contributeUK().url)
   def thanksUSA = thanks(CountryGroup.US, routes.Giraffe.contributeUSA().url)
   def thanksAustralia = thanks(CountryGroup.Australia, routes.Giraffe.contributeAustralia().url)
+  def thanksCanada = thanks(CountryGroup.Canada, routes.Giraffe.contributeCanada().url)
   def thanksEurope = thanks(CountryGroup.Europe, routes.Giraffe.contributeEurope().url)
 
 
@@ -153,6 +155,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       val redirect = f.currency match {
         case USD => routes.Giraffe.thanksUSA().url
         case AUD => routes.Giraffe.thanksAustralia().url
+        case CAD => routes.Giraffe.thanksCanada().url
         case EUR => routes.Giraffe.thanksEurope().url
         case _ => routes.Giraffe.thanksUK().url
       }
@@ -174,6 +177,7 @@ object MakeGiraffeRedirectURL {
       case CountryGroup.UK => CountryGroup.UK
       case CountryGroup.US => CountryGroup.US
       case CountryGroup.Australia => CountryGroup.Australia
+      case CountryGroup.Canada => CountryGroup.Canada
       case CountryGroup.Europe => CountryGroup.Europe
       case _ => CountryGroup.UK
     }
