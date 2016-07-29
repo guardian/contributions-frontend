@@ -2,6 +2,25 @@ import React from 'react';
 
 export default class Payment extends React.Component {
     render() {
-        return <p>payment page</p>;
+        return <div>
+            <input
+                type="text"
+                value={this.props.card.number}
+                onChange={(event)=>{console.log(event);event.target.checkValidity();this.props.updateCard({number: event.target.value})}}
+                required
+            />
+            <input
+                type="text"
+                value={this.props.card.cvc}
+                onChange={(event)=>{event.target.checkValidity();this.props.updateCard({cvc: event.target.value})}}
+                required
+            />
+            <input
+                type="text"
+                value={this.props.card.validTil}
+                onChange={(event)=>{event.target.checkValidity();this.props.updateCard({validTil: event.target.value})}}
+                required
+            />
+        </div>
     }
 }
