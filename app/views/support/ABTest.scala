@@ -38,7 +38,7 @@ trait TestTrait {
 
    def addRanges(filteredVariants: Set[Variant]): Seq[(Double, Variant)] = {
      val filteredVariantList = filteredVariants.toList
-     val weightSum: Double = filteredVariantList.map(_.weight).fold(0.0)(_ + _)
+     val weightSum: Double = filteredVariantList.map(_.weight).sum
      val totalWeight = if (weightSum != 0) weightSum else 1
      val cdf: Seq[Double] = filteredVariantList.map(_.weight).foldLeft(Seq[Double]())((l, p) => l :+ l.lastOption.getOrElse(0.0) + p / totalWeight)
      cdf.zip(filteredVariantList).toList
