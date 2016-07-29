@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK } from 'src/actions';
+import { GO_FORWARD, GO_BACK, UPDATE_DETAILS } from 'src/actions';
 
 import Contribution from './pages/Contribution.jsx';
 import Details from './pages/Details.jsx';
@@ -15,7 +15,7 @@ class Main extends React.Component {
     componentFor(page) {
         switch (page) {
             case 1: return <Contribution />;
-            case 2: return <Details />;
+            case 2: return <Details details={this.props.details} updateDetails={this.props.updateDetails}/>;
             case 3: return <Payment />;
         }
     }
@@ -37,13 +37,17 @@ class Main extends React.Component {
 }
 
 function mapStateToProps(state) {
-    return { page: state.page }
+    return {
+        page: state.page,
+        details: state.details,
+            }
 }
 
 function mapDispatchToProps(dispatch) {
     return {
         goBack: () => dispatch({ type: GO_BACK }),
-        goForward: () => dispatch({ type: GO_FORWARD })
+        goForward: () => dispatch({ type: GO_FORWARD }),
+        updateDetails: (d) => dispatch({type: UPDATE_DETAILS, details: d})
     }
 }
 
