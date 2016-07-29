@@ -34,17 +34,17 @@ trait TestTrait {
     CountryGroup.allGroups.map(country => country -> filterVariants(country)).toMap
     }
 
- val variantRangesByCountry = {
+  val variantRangesByCountry: Map[CountryGroup, Seq[(Double, Variant)]] = {
 
    def addRanges(filteredVariants: Set[Variant]): Seq[(Double, Variant)] = {
      val filteredVariantList = filteredVariants.toList
      val weightSum: Double = filteredVariantList.map(_.weight).fold(0.0)(_ + _)
      val totalWeight = if (weightSum != 0) weightSum else 1
      val cdf: Seq[Double] = filteredVariantList.map(_.weight).foldLeft(Seq[Double]())((l, p) => l :+ l.lastOption.getOrElse(0.0) + p / totalWeight)
-     cdf.zip(filteredVariantList)
+     cdf.zip(filteredVariantList).toList
    }
 
-    variantsByCountry.map { case (country, variants) => country -> addRanges(variants) }
+    variantsByCountry.map { case (country, variants) => country -> addRanges(variants)}
   }
 }
 
