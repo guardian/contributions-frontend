@@ -2,7 +2,7 @@
 import * as ophan from 'src/modules/analytics/ophan';
 
 export function init(){
-    if (abTests){
+    if ("abTests" in Window){
             var data = {};
             for (var test of abTests){
                 data[test.testSlug] = {
