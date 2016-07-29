@@ -23,7 +23,6 @@
     "bean": "~1.0.15",
     "bonzo": "~2.0.0",
     "bower": "^1.7.9",
-    "curl-amd": "~0.8.12",
     "domready": "~1.0.8",
     "grunt": "^1.0.1",
     "grunt-asset-hash": "0.1.9",

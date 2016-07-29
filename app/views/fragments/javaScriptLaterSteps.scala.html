@@ -1,14 +1,15 @@
 @import views.support.Asset
 
-@* Scripts that should be executed after CSS is loaded *@
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
 
 <script>
-    var curl = {
-        apiName: 'curl',
-        paths: {
-            stripe: 'https://js.stripe.com/v2/stripe-dss3',
-        }
-    };
+            (function (isModern) {
+                if (isModern) {
+                    // only load JS if the browser cuts the mustard
+                    var newElm = document.createElement('script');
+                    newElm.src = '@Asset.at("javascripts/main.js")';
+                    document.getElementsByTagName("head")[0].appendChild(newElm);
+                }
+            })(guardian.isModernBrowser);
 </script>
-<script src='@Asset.at("javascripts/lib/curl/curl.js")'></script>
-<noscript><img src="//bat.bing.com/action/0?ti=5039324&Ver=2" height="0" width="0" style="display:none; visibility: hidden;" /></noscript>
+    <script async src="//j.ophan.co.uk/membership.js" onload="console.log(this)"/>

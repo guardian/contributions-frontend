@@ -1,5 +1,5 @@
 //global abTests
-import * as ophan from 'src/modules/analytics/ophan';
+//import * as ophan from 'src/modules/analytics/ophan';
 
 export function init(){
     if ("abTests" in Window){
@@ -10,10 +10,10 @@ export function init(){
                     'complete': 'true'
                 }
             }
-            ophan.ophan.then(function(o){
+            /*ophan.ophan.then(function(o){
                 o.record({
                 abTestRegister:data
-            })});
+            })});*/
 
     }
 }

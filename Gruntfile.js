@@ -129,18 +129,6 @@ module.exports = function (grunt) {
                 expand: true,
                 flatten: true
             },
-            curl: {
-                src: 'node_modules/curl-amd/dist/curl-with-js-and-domReady/curl.js',
-                dest: '<%= dirs.publicDir.javascripts %>/lib/curl/',
-                expand: true,
-                flatten: true
-            },
-            zxcvbn: {
-                src: '<%= dirs.assets.javascripts %>/lib/bower-components/zxcvbn/dist/zxcvbn.js',
-                dest: '<%= dirs.publicDir.javascripts %>/lib/zxcvbn/',
-                expand: true,
-                flatten: true
-            },
             // For developer use. These are js files, not served with any page
             // but included dynamically when clicking on the respective bookmarklet.
             bookmarklets: {
@@ -353,7 +341,6 @@ module.exports = function (grunt) {
             'clean:js',
             'webpack',
             'copy:polyfills',
-            'copy:curl'
         ]);
     });
     grunt.registerTask('compile', function(){
