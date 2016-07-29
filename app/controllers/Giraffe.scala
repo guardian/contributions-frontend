@@ -95,7 +95,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
-    val chosenVariants: ChosenVariants = Test.getContributePageVariants(request)
+    val chosenVariants: ChosenVariants = Test.getContributePageVariants(countryGroup, request)
     val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,
