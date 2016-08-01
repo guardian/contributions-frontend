@@ -21,6 +21,11 @@ export default class Payment extends React.Component {
                 onChange={(event)=>{event.target.checkValidity();this.props.updateCard({validTil: event.target.value})}}
                 required
             />
+            <button
+                onClick={this.props.pay}
+                onSubmit={this.props.pay}
+            > money </button>
+
         </div>
     }
 }
