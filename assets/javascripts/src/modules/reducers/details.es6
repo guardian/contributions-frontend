@@ -1,9 +1,14 @@
-import {UPDATE_DETAILS} from 'src/actions'
+import { UPDATE_DETAILS } from 'src/actions';
 
-export default function detailsReducer(state = {name: "", email: "", postcode: ""}, action) {
-    if (action.type !== UPDATE_DETAILS) {
-        return(state);
-    }
+const initialState = {
+    name: '',
+    email: '',
+    postcode: ''
+};
 
-    return(Object.assign({}, state, action.details));
+export default function detailsReducer(state = initialState, action) {
+    if (action.type === UPDATE_DETAILS)
+        return Object.assign({}, state, action.details);
+    else
+        return state;
 }

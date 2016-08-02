@@ -1,15 +1,15 @@
 import UPDATE_CARD from 'src/actions'
 import stripe from 'src/stripe'
 
-export default function cardReducer(state={number:"",cvc:"",exp:"",error:""},action){
-    console.log(action);
-    if(action.type !== UPDATE_CARD){
-        return(state);
-    }
-    if(!stripe){
-        return(Object.assign({}, state, {error:"Stripe did not load."}));
-    }
+const initialState = {
+    number: '',
+    cvc: '',
+    expiry: ''
+}
 
-    return(Object.assign({}, state, action.details));
-
+export default function cardReducer(state = initialState, action) {
+    if (action.type === UPDATE_CARD)
+        return Object.assign({}, state, action.details);
+    else
+        return state;
 }
