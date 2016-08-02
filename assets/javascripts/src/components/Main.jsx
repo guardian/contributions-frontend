@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, PAY, PAGES, stripeCheckout } from 'src/actions';
-
+import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, PAY, stripeCheckout } from 'src/actions';
+import { PAGES } from 'src/constants';
 
 import Contribution from './pages/Contribution.jsx';
 import Details from './pages/Details.jsx';
