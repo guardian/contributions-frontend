@@ -27,6 +27,12 @@
                 <div class="form__switcher">
                     <a href="#" class="js-switcher-contribute form__container--active" data-switches="js-contribution"></a> <a class="js-switcher-details" href="#" data-switches="js-details"></a> <a class="js-switcher-pay" href="#" data-switches="js-payment"></a>
                 </div>
+
+                <!--TODO too much code here to get the language from the countryGroup ( I would prefer to have a language def in CountryGroup)"-->
+                @fragments.giraffe.paypal(  language = countryGroup.defaultCountry.map(_.alpha2).getOrElse("GB"),
+                                            currency = countryGroup.currency.toString.toUpperCase,
+                                            defaultAmount= 3)
+
                 <form id="form" class="form js-form" role="main" method="POST" autocomplete="on" novalidate action="@routes.Giraffe.pay()">
                     @fragments.giraffe.abFormTrack(chosenVariants)
 
