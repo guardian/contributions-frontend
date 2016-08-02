@@ -3,6 +3,8 @@ package controllers
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+import actions.CommonActions
+import actions.CommonActions.NoCacheAction
 import com.gu.i18n._
 import com.gu.stripe.{Stripe, StripeService}
 import com.gu.stripe.Stripe.Serializer._
@@ -91,7 +93,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   // Once things have settled down and we have a reasonable idea of what might
   // and might not vary between different countries, we should merge these country-specific
   // controllers & templates into a single one which varies on a number of parameters
-  def contribute(countryGroup: CountryGroup) = /*OptionallyAuthenticated*/Action { implicit request =>
+  def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
@@ -109,7 +111,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   }
 
 
-  def thanks(countryGroup: CountryGroup) = /*NoCache*/ Action { implicit request =>
+  def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val redirectUrl = routes.Giraffe.contribute(countryGroup).url
 
     Ok(views.html.giraffe.thankyou(PageInfo(
@@ -120,7 +122,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     ), social, countryGroup))
   }
 
-  def pay = /*OptionallyAuthenticated*/Action.async { implicit request =>
+  def pay = NoCacheAction.async { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
 
     supportForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
