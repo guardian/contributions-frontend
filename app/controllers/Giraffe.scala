@@ -81,8 +81,11 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
 
   val chargeId = "charge_id"
-  val maxAmount: Option[Int] = 2000.some
 
+  def maxAmount(currency: Currency): Option[Int] = currency match {
+    case CountryGroup.Australia.currency => 3500.some
+    case _ => 2000.some
+  }
 
   def contributeRedirect = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.RestOfTheWorld)
@@ -106,7 +109,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmount,countryGroup, chosenVariants, cmp, intCmp))
+
+    val maxAmountInLocalCurrency = maxAmount(countryGroup.currency)
+
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
@@ -137,7 +143,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         "cmp" -> f.cmp.mkString,
         "intcmp" -> f.intcmp.mkString
       )  ++ f.postCode.map("postcode" -> _)
-      val res = stripe.Charge.create(maxAmount.fold((f.amount*100).toInt)(max => Math.min(max * 100, (f.amount * 100).toInt)), f.currency, f.email, "Your contribution", f.token, metadata)
+      val res = stripe.Charge.create(maxAmount(f.currency).fold((f.amount*100).toInt)(max => Math.min(max * 100, (f.amount * 100).toInt)), f.currency, f.email, "Your contribution", f.token, metadata)
 
 
       val redirect = f.currency match {
