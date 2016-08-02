@@ -1,12 +1,14 @@
 import React from 'react';
 
+import { PAGES } from 'src/constants';
+
 export default class Title extends React.Component {
     render() {
         const titlesByPageId = {
-            1: 'Your contribution',
-            2: 'Your details',
-            3: 'Your payment'
-        } ;
+            [PAGES.CONTRIBUTION]: 'Your contribution',
+            [PAGES.DETAILS]: 'Your details',
+            [PAGES.PAYMENT]: 'Your payment'
+        };
 
         return <h3 className="contribute-form__title">
             {titlesByPageId[this.props.page]}

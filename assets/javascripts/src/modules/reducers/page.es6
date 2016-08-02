@@ -1,15 +1,15 @@
-import { GO_BACK, GO_FORWARD, PAY, PAGES } from 'src/actions'
+import { GO_BACK, GO_FORWARD, PAY } from 'src/actions';
+import { PAGES } from 'src/constants';
 
 
 export default function pageReducer(state = 1, action) {
-    console.log(state,action);
     switch (action.type) {
         case GO_BACK:
-            if (state === 1) return state;
+            if (state === PAGES.CONTRIBUTION) return state;
             else return state - 1;
 
         case GO_FORWARD:
-            if (state === 3) return state;
+            if (state === PAGES.PAYMENT) return state;
             else return state + 1;
 
         case PAY:
