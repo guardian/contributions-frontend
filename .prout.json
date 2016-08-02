@@ -1,8 +1,8 @@
 {
     "checkpoints": {
         "PROD": {
-            "url": "https://contribute.theguardian.com/uk/",
-            "overdue": "12M"
+            "url": "https://contribute.theguardian.com/uk",
+            "overdue": "11M"
         }
     }
 }
