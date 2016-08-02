@@ -90,7 +90,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   def contributeRedirect = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.RestOfTheWorld)
 
-    Redirect(routes.Giraffe.contribute(countryGroup).absoluteURL(), SEE_OTHER)
+    Redirect(routes.Giraffe.contribute(countryGroup).url, SEE_OTHER)
   }
 
   // Once things have settled down and we have a reasonable idea of what might
