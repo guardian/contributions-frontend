@@ -84,10 +84,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   val maxAmount: Option[Int] = 2000.some
 
 
-  def contributeRedirect = /*NoCache*/Action { implicit request =>
+  def contributeRedirect = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.RestOfTheWorld)
-    val url = MakeGiraffeRedirectURL(request, countryGroup)
-    Redirect(url, SEE_OTHER)
+
+    Redirect(routes.Giraffe.contribute(countryGroup).absoluteURL(), SEE_OTHER)
   }
 
   // Once things have settled down and we have a reasonable idea of what might
@@ -156,21 +156,3 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     })
   }
 }
-
-object MakeGiraffeRedirectURL {
-
-  def getRedirectCountryCodeGiraffe(countryGroup: CountryGroup): CountryGroup = {
-    countryGroup match {
-      case CountryGroup.UK => CountryGroup.UK
-      case CountryGroup.US => CountryGroup.US
-      case CountryGroup.Australia => CountryGroup.Australia
-      case CountryGroup.Europe => CountryGroup.Europe
-      case _ => CountryGroup.UK
-    }
-  }
-  def apply(request: Request[AnyContent], countryGroup: CountryGroup) = {
-    val x = Uri.parse(request.uri).withScheme("https")
-    x.copy(pathParts = Seq(PathPart(getRedirectCountryCodeGiraffe(countryGroup).id)) ++ x.pathParts)
-  }
-}
-
