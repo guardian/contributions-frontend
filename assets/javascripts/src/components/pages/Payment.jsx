@@ -24,8 +24,7 @@ export default class Payment extends React.Component {
             <button
                 onClick={this.props.pay}
                 onSubmit={this.props.pay}
-            > money </button>
-
+            >money</button>
         </div>
     }
 }

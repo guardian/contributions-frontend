@@ -1,21 +1,14 @@
 import React from 'react';
-import {PAGES} from 'src/actions';
+import { PAGES } from 'src/constants';
 
 export default class Navigation extends React.Component {
-
     render() {
-        const fwd = () => {
-            if (!(this.props.page === PAGES.PAYMENT || this.props.page === PAGES.PROCESSING))
-            {return <a onClick={this.props.goForward}>forward</a>}
-        };
-        const bk = () => {
-            if (!(this.props.page === PAGES.CONTRIBUTION || this.props.page === PAGES.PROCESSING))
-            {return <a onClick={this.props.goBack}>back</a>;}
-        };
+        const showForward = this.props.page !== PAGES.PAYMENT && this.props.page !== PAGES.PROCESSING;
+        const showBack = this.props.page !== PAGES.CONTRIBUTION && this.props.page !== PAGES.PROCESSING;
 
         return <div>
-            {bk()}
-            {fwd()}
+          {showBack && <a onClick={this.props.goBack}>back</a> }
+          {showForward && <a onClick={this.props.goForward}>forward</a>}
         </div>;
     }
 }

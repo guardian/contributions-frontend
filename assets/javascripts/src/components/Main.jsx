@@ -15,13 +15,11 @@ import Navigation from './Navigation.jsx';
 
 class Main extends React.Component {
     componentFor(page) {
-        console.log(PAGES);
-        console.log(page);
         switch (page) {
             case PAGES.CONTRIBUTION: return <Contribution />;
-            case PAGES.DETAILS: return <Details details={this.props.details} updateDetails={this.props.updateDetails}/>;
-            case PAGES.PAYMENT: return <Payment card={this.props.card} updateCard={this.props.updateCard} pay={this.props.pay}/>;
-            case PAGES.PROCESSING: return <Processing/>
+            case PAGES.DETAILS: return <Details details={this.props.details} updateDetails={this.props.updateDetails} />;
+            case PAGES.PAYMENT: return <Payment card={this.props.card} updateCard={this.props.updateCard} pay={this.props.pay} />;
+            case PAGES.PROCESSING: return <Processing />;
         }
     }
 
@@ -46,7 +44,7 @@ function mapStateToProps(state) {
         page: state.page,
         details: state.details,
         card: state.card
-            }
+    };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -56,7 +54,7 @@ function mapDispatchToProps(dispatch) {
         updateDetails: (d) => dispatch({type: UPDATE_DETAILS, details: d}),
         updateCard: (c) => dispatch({type: UPDATE_CARD, card: c}),
         pay: () => dispatch(stripeCheckout())
-    }
+    };
 }
 
 export default connect(
