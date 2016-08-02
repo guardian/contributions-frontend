@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, PAY, PAGES } from 'src/actions';
+import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, PAY, PAGES, stripeCheckout } from 'src/actions';
 
 
 import Contribution from './pages/Contribution.jsx';
@@ -55,7 +55,7 @@ function mapDispatchToProps(dispatch) {
         goForward: () => dispatch({ type: GO_FORWARD }),
         updateDetails: (d) => dispatch({type: UPDATE_DETAILS, details: d}),
         updateCard: (c) => dispatch({type: UPDATE_CARD, card: c}),
-        pay: () => dispatch({type: PAY})
+        pay: () => dispatch(stripeCheckout())
     }
 }
 
