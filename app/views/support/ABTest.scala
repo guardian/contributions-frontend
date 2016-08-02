@@ -54,6 +54,14 @@ object AmountHighlightTest extends TestTrait {
   def name = "AmountHighlightTest"
   def slug = "highlight"
   override type VariantFn = (CountryGroup, Option[Int]) => Html
+  private lazy val notAustralia: Set[CountryGroup] = Set(
+    UK,
+    US,
+    Canada,
+    NewZealand,
+    Europe,
+    RestOfTheWorld
+  )
 
   def variants = NonEmptyList(
     Variant("Amount - 5 highlight", "5", 0, contributeAmountButtons(List(5, 25, 50, 100), Some(5))),
@@ -62,10 +70,12 @@ object AmountHighlightTest extends TestTrait {
     Variant("Amount - 35 highlight", "35", 0, contributeAmountButtons(List(10, 35, 65, 100), Some(35))),
     Variant("Amount - 35 highlight descending", "35-descending", 0, contributeAmountButtons(List(100, 65, 35, 10), Some(35))),
     Variant("Amount - 100 highlight", "100", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(100))),
-    Variant("Amount - 50 highlight", "50", 0.33, contributeAmountButtons(List(25, 50, 100, 250), Some(50))),
-    Variant("Amount - 15", "15", 0.33, contributeAmountButtons(List(15, 35, 65, 100), Some(35))),
-    Variant("Amount - 40 highlight", "40", 0.33, contributeAmountButtons(List(20, 40, 75, 100), Some(40)))
+    Variant("Amount - 50 highlight", "50", 1, contributeAmountButtons(List(25, 50, 100, 250), Some(50)), notAustralia),
+    Variant("Amount - 15", "15", 0, contributeAmountButtons(List(15, 35, 65, 100), Some(35))),
+    Variant("Amount - 40 highlight", "40", 0, contributeAmountButtons(List(20, 40, 75, 100), Some(40))),
+    Variant("Amount - 100 highlight Australia", "100-Australia", 1, contributeAmountButtons(List(50, 100, 250, 500), Some(100)), Set(Australia))
   )
+
 }
 
 object MessageCopyTest extends TestTrait {
