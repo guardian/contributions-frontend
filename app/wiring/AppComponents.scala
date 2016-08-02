@@ -11,6 +11,7 @@ import filters.CheckCacheHeadersFilter
 import play.api.BuiltInComponents
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
+import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services.PaymentServices
 import router.Routes
 
@@ -47,7 +48,12 @@ trait AppComponents extends BuiltInComponents with PlayComponents {
   lazy val assetController = wire[Assets]
 
 
-  override lazy val httpFilters: Seq[EssentialFilter] = Seq(wire[CheckCacheHeadersFilter])
+  override lazy val httpFilters: Seq[EssentialFilter] = Seq(
+    wire[CheckCacheHeadersFilter],
+    SecurityHeadersFilter(SecurityHeadersConfig(
+      contentSecurityPolicy = None
+    ))
+  )
 
   val prefix: String = "/"
   lazy val router: Router = wire[Routes]
