@@ -89,8 +89,9 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   def contributeRedirect = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.RestOfTheWorld)
+    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
 
-    Redirect(routes.Giraffe.contribute(countryGroup).url, SEE_OTHER)
+    Redirect(routes.Giraffe.contribute(countryGroup).url, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
   }
 
   // Once things have settled down and we have a reasonable idea of what might
