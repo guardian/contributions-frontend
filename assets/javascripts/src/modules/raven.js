@@ -2,7 +2,7 @@ define(['src/utils/user','raven-js'], function (user, Raven) {
     'use strict';
 
 
-        var dsn = 'https://f411f942730c4689a8f21d76b5a5fd32@app.getsentry.com/87918';
+        var dsn = 'https://4be2858531754dae8a011addc0b69198@app.getsentry.com/90312';
         var tags = { build_number: guardian.membership.buildNumber };
         var cookieUser = user.getUserFromCookie();
 
@@ -14,7 +14,7 @@ define(['src/utils/user','raven-js'], function (user, Raven) {
          * Set up Raven, which speaks to Sentry to track errors
          */
         Raven.config(dsn, {
-            whitelistUrls: [ /membership\.theguardian\.com/, /mem\.thegulocal\.com/, /localhost/ ],
+            whitelistUrls: [ /contribute\.theguardian\.com/, /contribute\.thegulocal\.com/, /localhost/ ],
             tags: tags,
             ignoreErrors: [ /duplicate define: jquery/ ],
             ignoreUrls: [ /platform\.twitter\.com/ ],
