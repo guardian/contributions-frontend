@@ -9,6 +9,7 @@ import com.typesafe.config.ConfigFactory
 import controllers._
 import filters.CheckCacheHeadersFilter
 import play.api.BuiltInComponents
+import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
@@ -47,6 +48,8 @@ trait AppComponents extends BuiltInComponents with PlayComponents {
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
 
+  override lazy val httpErrorHandler =
+    new monitoring.ErrorHandler(identityAuthProvider, environment, configuration, sourceMapper, Some(router))
 
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(
     wire[CheckCacheHeadersFilter],
