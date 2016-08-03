@@ -29,5 +29,8 @@ conf/assets.map
 
 assets/images/inline-svgs/*.svg
 /assets/images/svg-sprite.svg
-/public/
+/public/dist/
+/public/webpack/
+/public/*.js
+/public/*.js.map
 /assets/javascripts/lib/bower-components/
