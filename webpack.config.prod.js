@@ -1,8 +1,9 @@
 var Uglify = require("webpack/lib/optimize/UglifyJsPlugin");
+var path = require('path');
 
-module.exports = function(debug) { return {
+module.exports = {
     resolve: {
-        root: ["assets/javascripts", "assets/../node_modules/"],
+        root: ["assets/javascripts", "node_modules"],
         extensions: ["", ".js", ".es6"],
         alias: {
             '$$': 'src/utils/$',
@@ -29,13 +30,25 @@ module.exports = function(debug) { return {
                     presets: ['es2015'],
                     cacheDirectory: ''
                 }
+            },
+
+            {
+                test: /\.jsx$/,
+                exclude: /node_modules/,
+                loader: 'babel',
+                query: {
+                    presets: ['react', 'es2015'],
+                    cacheDirectory: ''
+                }
             }
         ]
     },
 
-    plugins: !debug ? [
-        new Uglify({compress: {warnings: false}})
-    ] : [],
+    resolveLoader: {
+        root: path.join(__dirname, "node_modules")
+    },
+
+    plugins: new Uglify({ compress: { warnings: false }}),
 
     progress: true,
     failOnError: true,
@@ -51,6 +64,5 @@ module.exports = function(debug) { return {
     },
 
     context: 'assets/javascripts',
-    debug: false,
-    devtool: 'source-map'
-}};
+    debug: false
+};
