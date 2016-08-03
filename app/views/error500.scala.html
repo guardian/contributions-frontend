@@ -1,0 +1,18 @@
+@import views.support.PageInfo
+@(ex: Throwable)
+@main(PageInfo("Internal Server Error")) {
+    <main role="main" class="page-content l-constrained">
+        <section class="page-section">
+            <div class="page-section__content copy">
+                <p>
+                    Sorry, there was an error on this page. We're aware of the problem. If this error persists, please contact
+                    support on <a href="mailto:contribution.support@@theguardian.com">contribution.support@@theguardian.com</a>.
+                </p>
+                @ex match { case err: play.api.UsefulException =>
+                    <p>Please provide the following error code to help identify the issue.</p>
+                    <pre>Error code: @err.id</pre>
+                }
+            </div>
+        </section>
+    </main>
+}

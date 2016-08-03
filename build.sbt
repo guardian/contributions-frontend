@@ -19,7 +19,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin, 
             case e: Exception => "unknown"
         }))
     ),
-    buildInfoPackage := "app"
+    buildInfoPackage := "app",
+    buildInfoOptions += BuildInfoOption.ToMap
 )
 
 sources in (Compile,doc) := Seq.empty
@@ -31,7 +32,7 @@ scalaVersion := "2.11.7"
 val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
 val scalaz = "org.scalaz" %% "scalaz-core" % "7.1.1"
 val membershipCommon = "com.gu" %% "membership-common" % "0.225"
-val sentryRavenLogback = "com.getsentry.raven" % "raven-logback" % "7.2.3"
+val sentryRavenLogback = "com.getsentry.raven" % "raven-logback" % "7.6.0"
 val memsubCommonPlayAuth = "com.gu" %% "memsub-common-play-auth" % "1.0"
 libraryDependencies ++= Seq(
   cache,

@@ -12,7 +12,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
 import configuration.Config
-import services.{AuthenticationService, PaymentServices}
+import services.PaymentServices
 import com.netaporter.uri.dsl._
 import views.support.{TestTrait, _}
 
