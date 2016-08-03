@@ -3,7 +3,8 @@ import { UPDATE_DETAILS } from 'src/actions';
 const initialState = {
     name: '',
     email: '',
-    postcode: ''
+    postcode: '',
+    valid: false
 };
 
 export default function detailsReducer(state = initialState, action) {

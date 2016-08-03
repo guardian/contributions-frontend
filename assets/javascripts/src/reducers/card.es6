@@ -4,7 +4,8 @@ import stripe from 'src/stripe'
 const initialState = {
     number: '',
     cvc: '',
-    expiry: ''
+    expiry: '',
+    valid: false
 }
 
 export default function cardReducer(state = initialState, action) {

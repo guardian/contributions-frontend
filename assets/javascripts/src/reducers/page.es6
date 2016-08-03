@@ -1,7 +1,6 @@
 import { GO_BACK, GO_FORWARD, PAY } from 'src/actions';
 import { PAGES } from 'src/constants';
 
-
 export default function pageReducer(state = 1, action) {
     switch (action.type) {
         case GO_BACK:
