@@ -51,7 +51,7 @@ module.exports = function (grunt) {
          ***********************************************************************/
 
         webpack: {
-            options: require('./webpack.conf.js')(isDev),
+            options: isDev ? require('./webpack.config.js') : require('./webpack.config.prod.js'),
             frontend: {
                 output: {
                     path: 'public/',
@@ -174,13 +174,6 @@ module.exports = function (grunt) {
             compile_css: {
                 files: ['<%= dirs.assets.stylesheets %>/**/*.scss'],
                 tasks: ['compile:css'],
-                options: {
-                    atBegin: true
-                }
-            },
-            compile_js: {
-                files: ['<%= dirs.assets.javascripts %>/**/*.js', '<%= dirs.assets.javascripts %>/**/*.es6', '<%= dirs.assets.javascripts %>/**/*.jsx'],
-                tasks: ['compile:js'],
                 options: {
                     atBegin: true
                 }

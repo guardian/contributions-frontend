@@ -124,10 +124,15 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   def contributeReact = contribute(CountryGroup.UK, true)
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
-    val redirectUrl = routes.Giraffe.contribute(countryGroup).url
 
+    val title = countryGroup match {
+      case CountryGroup.Australia => "Thank you for supporting Guardian Australia"
+      case _ => "Thank you for supporting the Guardian"
+    }
+
+    val redirectUrl = routes.Giraffe.contribute(countryGroup).url
     Ok(views.html.giraffe.thankyou(PageInfo(
-      title = "Thank you for supporting the Guardian",
+      title = title,
       url = request.path,
       image = None,
       description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
