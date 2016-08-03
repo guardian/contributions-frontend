@@ -8,7 +8,7 @@ export default class Navigation extends React.Component {
 
         return <div>
           {showBack && <a onClick={this.props.goBack}>back</a> }
-          {showForward && <a onClick={this.props.goForward}>forward</a>}
+          {showForward && <button>forward</button>}
         </div>;
     }
 }

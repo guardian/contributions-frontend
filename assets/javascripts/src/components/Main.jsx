@@ -23,6 +23,11 @@ class Main extends React.Component {
         }
     }
 
+    submit(event) {
+        event.preventDefault();
+        this.props.goForward();
+    }
+
     render() {
         return (
             <div>
@@ -31,9 +36,10 @@ class Main extends React.Component {
                     <ProgressIndicator page={this.props.page} />
                 </div>
 
-                {this.componentFor(this.props.page)}
-
-                <Navigation page={this.props.page} goBack={this.props.goBack} goForward={this.props.goForward} />
+                <form onSubmit={this.submit.bind(this)}>
+                    {this.componentFor(this.props.page)}
+                    <Navigation page={this.props.page} goBack={this.props.goBack} />
+                </form>
             </div>
         );
     }
