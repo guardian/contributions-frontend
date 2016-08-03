@@ -51,7 +51,8 @@ trait AppComponents extends BuiltInComponents with PlayComponents {
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(
     wire[CheckCacheHeadersFilter],
     SecurityHeadersFilter(SecurityHeadersConfig(
-      contentSecurityPolicy = None
+      contentSecurityPolicy = None,
+      frameOptions = Some("SAMEORIGIN")
     ))
   )
 
