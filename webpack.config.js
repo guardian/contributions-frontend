@@ -58,14 +58,17 @@ module.exports = {
         colors: true
     },
 
+    context: 'assets/javascripts',
+
     debug: false,
     devtool: 'source-map',
     entry: 'src/main',
 
     output: {
         path: path.resolve(__dirname, "public"),
-        publicPath: "/javascripts/",
-        filename: "main.js"
+        chunkFilename:  'webpack/[chunkhash].js',
+        filename: "javascripts/[name].js",
+        publicPath: '/assets/'
     },
 
     devServer: {
