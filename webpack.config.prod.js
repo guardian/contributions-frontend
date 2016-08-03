@@ -64,5 +64,6 @@ module.exports = {
     },
 
     context: 'assets/javascripts',
-    debug: false
+    debug: false,
+    devtool: 'source-map'
 };
