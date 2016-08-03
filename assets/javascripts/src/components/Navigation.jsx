@@ -8,7 +8,7 @@ export default class Navigation extends React.Component {
 
         return <div className="contribute-navigation">
           {false && showBack && <a onClick={this.props.goBack}>back</a> }
-          {showForward && <button>Next</button>}
+          {showForward && <button className="contribute-navigation__next action action--contribute">Next</button>}
         </div>;
     }
 }
