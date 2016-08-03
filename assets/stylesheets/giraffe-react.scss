@@ -1,17 +1,11 @@
-
-
+@import 'vars';
+@import 'functions';
+@import 'mixins';
 
 .contribute-form {
     background-color: #ffd359;
     padding: 10px;
     width: 300px;
-    input:valid{
-        color: pink;
-    }
-    input:invalid{
-        color: red;
-        text-decoration: line-through;
-    }
 }
 
 .contribute-form__heading {
@@ -46,5 +40,38 @@
             background: white;
         }
     }
+}
+
+.contribute-controls {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.contribute-controls__button,
+.contribute-controls__input {
+    height: 36px;
+}
+
+.contribute-controls__button {
+    flex: 1;
+    margin-bottom: 7px;
+}
+
+.contribute-controls__input {
+    width: 100%;
+}
+
+.option-button {
+    @include button();
+    text-align: center;
+    margin-right: 5px;
+
+    &:last-of-type {
+        margin-right: 0;
+    }
+}
+
+.option-button--bold {
+    font-weight: bold;
 }
 

@@ -331,17 +331,6 @@ $desktop-col-padding-right: 16px;
     }
 }
 
-.option-button {
-    @include button();
-    width: 23%;
-    text-align: center;
-    margin-right: 2px;
-}
-
-.option-button--bold {
-    font-weight: bold;
-}
-
 .action--advance {
     display: none;
     @include mq(tablet) {
