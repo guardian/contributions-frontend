@@ -19,6 +19,7 @@ const AMOUNT_CLASS = 'js-amount';
 const CURRENCY_FIELD = document.querySelector('.js-currency-field');
 const $CURRENCY_DISPLAY = $('.js-currency');
 const $CURRENCY_PICKER = $('.js-currency-switcher');
+const $PAY_WITH_PAYPAL = $('#payWithPaypal')
 
 const $AMOUNT_PICKER = $('[data-amount]');
 const CUSTOM_AMOUNT = document.querySelector('.js-amount-field');
@@ -39,17 +40,17 @@ export function init() {
     if (!document.querySelector('.container-global--giraffe .js-form')) {
         return;
     }
-
     ophanId();
     carousel();
+
+    $PAY_WITH_PAYPAL.each(p=>p.addEventListener('click', ev => payWithPaypal()));
+
+
     $CURRENCY_PICKER.each(el => el.addEventListener('click', ev => selectCurrencyElement(ev.currentTarget)));
-
-
     // Preset amount
     $AMOUNT_PICKER.each(el => el.addEventListener('click', ev => {
         let element = ev.currentTarget;
         let amount = element.getAttribute('data-amount') + '.00';
-
         select(element);
 
         // Force a validation pass if we pick a pre-selected amount
@@ -77,6 +78,13 @@ export function init() {
 
 
     getStuffFromIdentity();
+}
+
+
+function payWithPaypal() {
+    let selectedAmount = $('.js-amount-hidden')[0].value;
+    $('#paypalAmount').val(selectedAmount);
+    $('form#paypalForm').each(p => p.submit());
 }
 
 function select(el) {
