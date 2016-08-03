@@ -3,6 +3,8 @@ package controllers
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+import actions.CommonActions
+import actions.CommonActions.NoCacheAction
 import com.gu.i18n._
 import com.gu.stripe.{Stripe, StripeService}
 import com.gu.stripe.Stripe.Serializer._
@@ -10,7 +12,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
 import configuration.Config
-import services.AuthenticationService
+import services.{AuthenticationService, PaymentServices}
 import com.netaporter.uri.dsl._
 import views.support.{TestTrait, _}
 
@@ -24,7 +26,7 @@ import play.api.data.{FieldMapping, Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 
-class Giraffe(stripeService: StripeService) extends Controller {
+class Giraffe(paymentServices: PaymentServices) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError],JsValue] = {
       val parse: JsValue = Json.parse(URLDecoder.decode(data(key),StandardCharsets.UTF_8.name()))
@@ -79,24 +81,27 @@ class Giraffe(stripeService: StripeService) extends Controller {
 
 
   val chargeId = "charge_id"
-  val maxAmount: Option[Int] = 2000.some
 
+  def maxAmount(currency: Currency): Option[Int] = currency match {
+    case CountryGroup.Australia.currency => 3500.some
+    case _ => 2000.some
+  }
 
-  def contributeRedirect = /*NoCache*/Action { implicit request =>
+  def contributeRedirect = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.RestOfTheWorld)
-    val url = MakeGiraffeRedirectURL(request, countryGroup)
-    Redirect(url, SEE_OTHER)
+    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
+
+    Redirect(routes.Giraffe.contribute(countryGroup).url, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
   }
 
   // Once things have settled down and we have a reasonable idea of what might
   // and might not vary between different countries, we should merge these country-specific
   // controllers & templates into a single one which varies on a number of parameters
-  def contribute(countryGroup: CountryGroup, react: Boolean = false) = /*OptionallyAuthenticated*/Action { implicit request =>
-    val stripe = stripeService
-    val isUAT = true
+  def contribute(countryGroup: CountryGroup, react: Boolean = false) = NoCacheAction { implicit request =>
+    val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
-    val chosenVariants: ChosenVariants = Test.getContributePageVariants(request)
+    val chosenVariants: ChosenVariants = Test.getContributePageVariants(countryGroup, request)
     val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,
@@ -106,16 +111,20 @@ class Giraffe(stripeService: StripeService) extends Controller {
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
 
+    val maxAmountInLocalCurrency = maxAmount(countryGroup.currency)
+
     val template = {
-      if (react) views.html.giraffe.contributeReact(pageInfo, maxAmount, countryGroup, isUAT, chosenVariants, cmp, intCmp)
-      else views.html.giraffe.contribute(pageInfo, maxAmount, countryGroup, isUAT, chosenVariants, cmp, intCmp)
+      if (react) views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp)
+      else views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp)
     }
 
     Ok(template).withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
+  def contributeReact = contribute(CountryGroup.UK, true)
 
-  def thanks(countryGroup: CountryGroup, redirectUrl: String) = /*NoCache*/ Action { implicit request =>
+  def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
+    val redirectUrl = routes.Giraffe.contribute(countryGroup).url
 
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = "Thank you for supporting the Guardian",
@@ -125,27 +134,12 @@ class Giraffe(stripeService: StripeService) extends Controller {
     ), social, countryGroup))
   }
 
+  def pay = NoCacheAction.async { implicit request =>
+    val stripe = paymentServices.stripeServiceFor(request)
 
-
-  def contributeUK = contribute(CountryGroup.UK)
-  def contributeUSA = contribute(CountryGroup.US)
-  def contributeAustralia = contribute(CountryGroup.Australia)
-  def contributeEurope = contribute(CountryGroup.Europe)
-
-  def contributeUKReact = contribute(CountryGroup.UK, true)
-
-  def thanksUK = thanks(CountryGroup.UK, routes.Giraffe.contributeUK().url)
-  def thanksUSA = thanks(CountryGroup.US, routes.Giraffe.contributeUSA().url)
-  def thanksAustralia = thanks(CountryGroup.Australia, routes.Giraffe.contributeAustralia().url)
-  def thanksEurope = thanks(CountryGroup.Europe, routes.Giraffe.contributeEurope().url)
-
-
-  def pay = /*OptionallyAuthenticated*/Action.async { implicit request =>
-    val stripe = stripeService
-    //val identity = request.touchpointBackend.identityService
     supportForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
       Future.successful(BadRequest(JsArray(withErrors.errors.map(k => JsString(k.key)))))
-    },{ f =>
+    }, { f =>
       val metadata = Map(
         "marketing-opt-in" -> f.marketing.toString,
         "email" -> f.email,
@@ -154,15 +148,15 @@ class Giraffe(stripeService: StripeService) extends Controller {
         "ophanId" -> f.ophanId,
         "cmp" -> f.cmp.mkString,
         "intcmp" -> f.intcmp.mkString
-      )  ++ f.postCode.map("postcode" -> _)
-      val res = stripe.Charge.create(maxAmount.fold((f.amount*100).toInt)(max => Math.min(max * 100, (f.amount * 100).toInt)), f.currency, f.email, "Your contribution", f.token, metadata)
+      ) ++ f.postCode.map("postcode" -> _)
+      val res = stripe.Charge.create(maxAmount(f.currency).fold((f.amount * 100).toInt)(max => Math.min(max * 100, (f.amount * 100).toInt)), f.currency, f.email, "Your contribution", f.token, metadata)
 
 
       val redirect = f.currency match {
-        case USD => routes.Giraffe.thanksUSA().url
-        case AUD => routes.Giraffe.thanksAustralia().url
-        case EUR => routes.Giraffe.thanksEurope().url
-        case _ => routes.Giraffe.thanksUK().url
+        case USD => routes.Giraffe.thanks(CountryGroup.US).url
+        case AUD => routes.Giraffe.thanks(CountryGroup.Australia).url
+        case EUR => routes.Giraffe.thanks(CountryGroup.Europe).url
+        case _ => routes.Giraffe.thanks(CountryGroup.UK).url
       }
 
       res.map { charge =>
@@ -174,21 +168,3 @@ class Giraffe(stripeService: StripeService) extends Controller {
     })
   }
 }
-
-object MakeGiraffeRedirectURL {
-
-  def getRedirectCountryCodeGiraffe(countryGroup: CountryGroup): CountryGroup = {
-    countryGroup match {
-      case CountryGroup.UK => CountryGroup.UK
-      case CountryGroup.US => CountryGroup.US
-      case CountryGroup.Australia => CountryGroup.Australia
-      case CountryGroup.Europe => CountryGroup.Europe
-      case _ => CountryGroup.UK
-    }
-  }
-  def apply(request: Request[AnyContent], countryGroup: CountryGroup) = {
-    val x = Uri.parse(request.uri).withScheme("https")
-    x.copy(pathParts = Seq(PathPart(getRedirectCountryCodeGiraffe(countryGroup).id)) ++ x.pathParts)
-  }
-}
-

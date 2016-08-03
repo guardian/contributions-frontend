@@ -36,6 +36,7 @@ val memsubCommonPlayAuth = "com.gu" %% "memsub-common-play-auth" % "1.0"
 libraryDependencies ++= Seq(
   cache,
   ws,
+  filters,
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
     scalaUri,
     scalaz,

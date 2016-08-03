@@ -1,9 +1,8 @@
 {
     "checkpoints": {
         "PROD": {
-            "url": "https://contribute.theguardian.com.origin.membership.guardianapis.com/uk/",
-            "overdue": "14M",
-            "disableSSLVerification": true
+            "url": "https://contribute.theguardian.com/uk",
+            "overdue": "11M"
         }
     }
 }
