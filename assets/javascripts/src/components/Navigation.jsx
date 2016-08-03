@@ -6,9 +6,9 @@ export default class Navigation extends React.Component {
         const showForward = this.props.page !== PAGES.PAYMENT && this.props.page !== PAGES.PROCESSING;
         const showBack = this.props.page !== PAGES.CONTRIBUTION && this.props.page !== PAGES.PROCESSING;
 
-        return <div>
-          {showBack && <a onClick={this.props.goBack}>back</a> }
-          {showForward && <button>forward</button>}
+        return <div className="contribute-navigation">
+          {false && showBack && <a onClick={this.props.goBack}>back</a> }
+          {showForward && <button>Next</button>}
         </div>;
     }
 }

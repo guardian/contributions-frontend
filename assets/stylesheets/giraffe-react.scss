@@ -2,14 +2,24 @@
 @import 'functions';
 @import 'mixins';
 
+.flex-vertical {
+    display: flex;
+    flex-direction: column;
+}
+
 .contribute-form {
     background-color: #ffd359;
     padding: 10px;
     width: 300px;
 }
 
+.contribute-form__inner {
+    height: 300px;
+}
+
 .contribute-form__heading {
-    @include clearfix()
+    @include clearfix();
+    width: 100%;
 }
 
 .contribute-form__title {
@@ -45,6 +55,7 @@
 .contribute-controls {
     display: flex;
     flex-wrap: wrap;
+    margin-top: auto;
 }
 
 .contribute-controls__button,
@@ -59,6 +70,11 @@
 
 .contribute-controls__input {
     width: 100%;
+}
+
+.contribute-navigation {
+    margin-top: auto;
+    align-self: center;
 }
 
 .option-button {

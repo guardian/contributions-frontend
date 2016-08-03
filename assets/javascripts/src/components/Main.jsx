@@ -30,17 +30,17 @@ class Main extends React.Component {
 
     render() {
         return (
-            <div>
+            <section>
                 <div className="contribute-form__heading">
                     <Title page={this.props.page} />
                     <ProgressIndicator page={this.props.page} />
                 </div>
 
-                <form onSubmit={this.submit.bind(this)}>
+                <form className="flex-vertical contribute-form__inner" onSubmit={this.submit.bind(this)}>
                     {this.componentFor(this.props.page)}
                     <Navigation page={this.props.page} goBack={this.props.goBack} />
                 </form>
-            </div>
+            </section>
         );
     }
 }
