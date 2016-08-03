@@ -4,4 +4,4 @@ export const PAGES = {
     PAYMENT: 3,
     PROCESSING: 4,
     GRATS: 5
-}
+};
