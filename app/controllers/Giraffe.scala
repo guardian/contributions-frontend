@@ -25,6 +25,7 @@ import controllers._
 import play.api.data.{FieldMapping, Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import java.time.LocalDate
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
@@ -112,8 +113,8 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     )
 
     val maxAmountInLocalCurrency = maxAmount(countryGroup.currency)
-
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp))
+    val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
@@ -165,5 +166,14 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         case e: Stripe.Error => BadRequest(Json.toJson(e))
       }
     })
+  }
+}
+
+
+object CreditCardExpiryYears {
+  def apply(currentYear: Int, offset: Int): List[Int] = {
+    val currentYearShortened = currentYear % 100
+    val subsequentYears = (currentYearShortened to currentYearShortened + offset - 2) map { _ + 1}
+    currentYearShortened :: subsequentYears.toList
   }
 }
