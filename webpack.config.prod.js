@@ -48,7 +48,7 @@ module.exports = {
         root: path.join(__dirname, "node_modules")
     },
 
-    plugins: new Uglify({ compress: { warnings: false }}),
+    plugins: [new Uglify({ compress: { warnings: false }})],
 
     progress: true,
     failOnError: true,
