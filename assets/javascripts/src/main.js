@@ -8,7 +8,6 @@ require([
     'src/modules/dropdown',
     'src/modules/navigation',
     'src/modules/userDetails',
-    'src/modules/events/cta',
     'src/modules/form',
     'src/modules/form/processSubmit',
     'src/modules/identityPopup',
@@ -26,7 +25,6 @@ require([
     dropdown,
     navigation,
     userDetails,
-    cta,
     form,
     processSubmit,
     identityPopup,
@@ -49,9 +47,6 @@ require([
     identityPopupDetails.init();
     navigation.init();
     userDetails.init();
-
-    // Events
-    cta.init();
 
     // Forms
     form.init();

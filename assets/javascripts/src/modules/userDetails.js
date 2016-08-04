@@ -37,14 +37,6 @@ define([
                 .addClass(CLASS_NAMES.signedIn);
 
             populateUserDetails(userUtil.getUserFromCookie());
-            userUtil.getMemberDetail(function (memberDetail) {
-                if (!memberDetail) { return false; }
-                populateUserDetails(memberDetail);
-
-                if (memberDetail.tier) {
-                    htmlElement.addClass(CLASS_NAMES.hasTier);
-                }
-            });
         }
     }
 

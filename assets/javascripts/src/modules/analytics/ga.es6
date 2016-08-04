@@ -2,9 +2,6 @@ import * as user  from 'src/utils/user'
 
 const dimensions = {
     signedIn: 'dimension1',
-    member: 'dimension2',
-    cmp: 'cmp',
-    intcmp: 'intcmp'
 };
 
 export function init() {
