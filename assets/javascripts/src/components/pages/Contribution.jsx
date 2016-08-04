@@ -35,6 +35,8 @@ export default class Contribution extends React.Component {
                    value={this.state.inputAmount}
                    onChange={this.updateInputAmount.bind(this)}
                    onBlur={this.setCustomAmount.bind(this)} />
+
+            <div className="fieldset__note">We are presently only able to accept contributions of £2000 or less</div>
         </div>;
     }
 }
