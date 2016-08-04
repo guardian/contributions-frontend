@@ -1,5 +1,13 @@
 import React from 'react';
 
+function setNoAmountError() {
+    document.getElementById("custom-amount").setCustomValidity("Please select a contribution amount");
+}
+
+function clearNoAmountError() {
+    document.getElementById("custom-amount").setCustomValidity("");
+}
+
 export default class Contribution extends React.Component {
     constructor(props) {
         super(props)
@@ -40,6 +48,18 @@ export default class Contribution extends React.Component {
         this.props.setAmount(amount);
     }
 
+    componentDidMount() {
+        setNoAmountError();
+    }
+
+    componentDidUpdate() {
+        if (!this.props.currentAmount || this.props.currentAmount === 0) {
+            setNoAmountError();
+        } else {
+            clearNoAmountError();
+        }
+    }
+
     render() {
         const boldSymbol = !!this.state.inputAmount;
 
@@ -55,6 +75,7 @@ export default class Contribution extends React.Component {
             <span className="contribute-controls__input contribute-controls__input--amount input-text">
                 <span className={'symbol ' + (boldSymbol ? 'active' : '')}>{this.props.symbol}</span>
                 <input type="number"
+                       id="custom-amount"
                        placeholder="Other amount" maxLength="10" tabIndex="12"
                        value={this.state.inputAmount}
                        onChange={this.updateInputAmount.bind(this)}
