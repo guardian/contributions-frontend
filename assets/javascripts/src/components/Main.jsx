@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, PAY, VALIDATE } from 'src/actions';
+import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, PAY, SET_AMOUNT } from 'src/actions';
 import { PAGES } from 'src/constants';
 
 import Contribution from './pages/Contribution.jsx';
@@ -16,7 +16,7 @@ import Navigation from './Navigation.jsx';
 class Main extends React.Component {
     componentFor(page) {
         switch (page) {
-            case PAGES.CONTRIBUTION: return <Contribution />;
+            case PAGES.CONTRIBUTION: return <Contribution setAmount={this.props.setAmount} currentAmount={this.props.card.amount} />;
             case PAGES.DETAILS: return <Details details={this.props.details} updateDetails={this.props.updateDetails} />;
             case PAGES.PAYMENT: return <Payment card={this.props.card} updateCard={this.props.updateCard} pay={this.props.pay} />;
             case PAGES.PROCESSING: return <Processing />;
@@ -57,8 +57,9 @@ function mapDispatchToProps(dispatch) {
     return {
         goBack: () => dispatch({ type: GO_BACK }),
         goForward: () => dispatch({ type: GO_FORWARD }),
-        updateDetails: (d) => dispatch({ type: UPDATE_DETAILS, details: d }),
-        updateCard: (c) => dispatch({ type: UPDATE_CARD, card: c }),
+        setAmount: a => dispatch({ type: SET_AMOUNT, amount: a }),
+        updateDetails: d => dispatch({ type: UPDATE_DETAILS, details: d }),
+        updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
         pay: () => dispatch({ type: PAY })
     };
 }
