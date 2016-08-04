@@ -43,11 +43,11 @@
             border-radius: $dot-size;
             margin-left: $dot-size;
             margin-right: $dot-size;
-            background: $c-neutral2;
+            background: white;
         }
 
         &.active:after {
-            background: white;
+            background: color(neutral-1);
         }
     }
 }
@@ -76,8 +76,15 @@
     margin-top: auto;
 }
 
+.contribute-navigation__back {
+    @include font-smoothing();
+    @include fs-textSans(4);
+    float: left;
+    line-height: 42px;
+}
+
 .contribute-navigation__next {
-    width: 100%
+    float: right;
 }
 
 .option-button {
@@ -94,3 +101,6 @@
     font-weight: bold;
 }
 
+.fieldset__note {
+    margin-top: 12px;
+}
