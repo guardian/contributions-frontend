@@ -445,7 +445,7 @@ $desktop-col-padding-right: 16px;
 
     .giraffe-checkbox {
         position: relative;
-        margin-bottom: $gs-baseline;
+        
         label {
             @include fs-textSans(2);
             padding-left: $gs-gutter;

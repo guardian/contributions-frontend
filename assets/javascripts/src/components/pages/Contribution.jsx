@@ -15,7 +15,7 @@ export default class Contribution extends React.Component {
     }
 
     updateInputAmount(event) {
-        const amount = event.target.value == '' ? event.target.value : parseInt(event.target.value);
+        const amount = event.target.value === '' ? event.target.value : parseInt(event.target.value);
         this.setState({ inputAmount: amount });
     }
 
@@ -25,7 +25,10 @@ export default class Contribution extends React.Component {
 
     handleBlur() {
         this.setState({ highlightButton: true });
-        this.props.setAmount(this.state.inputAmount);
+
+        if (!!this.state.inputAmount) {
+            this.props.setAmount(this.state.inputAmount);
+        }
     }
 
     handleClick(amount) {

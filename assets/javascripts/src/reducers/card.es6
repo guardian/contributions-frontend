@@ -4,8 +4,7 @@ const initialState = {
     number: '',
     cvc: '',
     expiry: '',
-    amount: '',
-    valid: false
+    amount: ''
 };
 
 export default function cardReducer(state = initialState, action) {
