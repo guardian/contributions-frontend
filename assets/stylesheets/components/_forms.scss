@@ -286,9 +286,9 @@
 .input-text,
 .input-textarea {
     color: $c-body;
-    border: 1px solid $white;
+    border: none;
+    padding: 0 10px;
     @include fs-textSans(5);
-    padding: 8px 8px 7px;
     outline: none;
     width: 100%;
     -webkit-appearance: none;
@@ -301,6 +301,10 @@
     @include mq(tablet) {
         font-size: 14px;
     }
+}
+
+.input-text {
+    margin-bottom: 12px;
 }
 
 .input-text--small {

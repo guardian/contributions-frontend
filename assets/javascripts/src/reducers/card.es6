@@ -4,7 +4,7 @@ const initialState = {
     number: '',
     cvc: '',
     expiry: '',
-    amount: 0,
+    amount: '',
     valid: false
 };
 

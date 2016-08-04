@@ -16,10 +16,23 @@ import Navigation from './Navigation.jsx';
 class Main extends React.Component {
     componentFor(page) {
         switch (page) {
-            case PAGES.CONTRIBUTION: return <Contribution setAmount={this.props.setAmount} currentAmount={this.props.card.amount} />;
-            case PAGES.DETAILS: return <Details details={this.props.details} updateDetails={this.props.updateDetails} />;
-            case PAGES.PAYMENT: return <Payment card={this.props.card} updateCard={this.props.updateCard} pay={this.props.pay} />;
-            case PAGES.PROCESSING: return <Processing />;
+            case PAGES.CONTRIBUTION:
+                return <Contribution amounts={[25, 50, 100, 250]}
+                                     symbol="£"
+                                     setAmount={this.props.setAmount}
+                                     currentAmount={this.props.card.amount} />;
+
+            case PAGES.DETAILS:
+                return <Details details={this.props.details}
+                                updateDetails={this.props.updateDetails} />;
+
+            case PAGES.PAYMENT:
+                return <Payment card={this.props.card}
+                                updateCard={this.props.updateCard}
+                                pay={this.props.pay} />;
+
+            case PAGES.PROCESSING:
+                return <Processing />;
         }
     }
 

@@ -58,18 +58,44 @@
     margin-top: auto;
 }
 
-.contribute-controls__button,
 .contribute-controls__input {
-    height: 36px;
+    line-height: 36px;
+}
+
+.contribute-controls__input--amount {
+    background: white;
+
+    input {
+        padding: 0 4px;
+        border: 0;
+        line-height: 36px;
+
+        &:active, &:focus {
+            outline: 0;
+        }
+    }
+
+    .symbol {
+        color: color(neutral-3);
+
+        &.active {
+            color: color(neutral-1);
+        }
+    }
 }
 
 .contribute-controls__button {
     flex: 1;
     margin-bottom: 7px;
+    height: 36px;
 }
 
 .contribute-controls__input {
     width: 100%;
+}
+
+.contribute--details {
+    margin-top: auto;
 }
 
 .contribute-navigation {
@@ -99,8 +125,4 @@
 
 .option-button--bold {
     font-weight: bold;
-}
-
-.fieldset__note {
-    margin-top: 12px;
 }
