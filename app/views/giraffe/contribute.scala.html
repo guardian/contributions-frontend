@@ -2,20 +2,21 @@
 @import views.support.ChosenVariants
 @import views.support.PageInfo
 @import views.support.Asset
+@import configuration.Links
 
-@(pageInfo:PageInfo,maxAmount: Option[Int], countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String])
+@(pageInfo:PageInfo,maxAmount: Option[Int], countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
 
 @main(pageInfo,Some(countryGroup)){
     <div class="support-wrapper__outer__a">
         <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="giraffe__heading">
-                <h1 class="giraffe__heading--main">Thank you</h1>
+                <h1 class="giraffe__heading--main">Producing well-reported journalism
+                    <span class="giraffe__heading--sub--indent">is difficult and expensive.</span>
+                </h1>
                 <h2 class="giraffe__heading--sub">
-                    <span class="giraffe__heading--sub--jaunty">
-                        for supporting </span><span class="giraffe__heading--sub--jaunty">
-                    the Guardian</span> <span class="giraffe__heading--sub--jaunty">
-                    and independent</span> <span class="giraffe__heading--sub--jaunty">
-                    journalism</span></h2>
+                    Supporting us isn’t.
+                    <span class="giraffe__heading--sub--indent">Please support the Guardian.</span>
+                </h2>
             </div>
             <div>
                     <!--
@@ -160,12 +161,9 @@
                                     <span>/</span>
                                     <label for="card_expiry_year" class="u-h form-field__note form-field__note--sub">Year</label>
                                     <select id="card_expiry_year" data-stripe="exp-year" tabindex="15" aria-required="true" class="js-credit-card-exp-year" data-validation="validCreditCardYear">
-                                        <option value="16">16</option>
-                                        <option value="17">17</option>
-                                        <option value="18">18</option>
-                                        <option value="19">19</option>
-                                        <option value="20">20</option>
-                                        <option value="21">21</option>
+                                        @for(year <- creditCardExpiryYears) {
+                                        <option value="@year">@year</option>
+                                        }
                                     </select>
                                 </div>
                                 @fragments.form.errorMessage("Sorry, the expiry date that you have entered is invalid. Please check and re-enter.")
@@ -218,14 +216,14 @@
 
                             <div class="fieldset__note">
                                 <p>By proceeding, you are agreeing to our
-                                    <a href="@@Links.giraffeTerms" class="text-link" target="_blank" data-shown="gbp eur">
+                                    <a href="@Links.giraffeTerms" class="text-link" target="_blank" data-shown="gbp eur">
                                         Terms and Conditions</a>
-                                    <a href="@@Links.giraffeTermsAustralia" class="text-link" target="_blank" data-shown="aud">
+                                    <a href="@Links.giraffeTermsAustralia" class="text-link" target="_blank" data-shown="aud">
                                         Terms and Conditions</a>
-                                    <a href="@@Links.giraffeTermsUS" class="text-link" target="_blank" data-shown="usd">
+                                    <a href="@Links.giraffeTermsUS" class="text-link" target="_blank" data-shown="usd">
                                         Terms and Conditions</a>
                                     and
-                                    <a href="@@Links.guardianPrivacyPolicy" class="text-link" target="_blank">
+                                    <a href="@Links.guardianPrivacyPolicy" class="text-link" target="_blank">
                                         Privacy Policy</a>.
                                 </p>
                             </div>

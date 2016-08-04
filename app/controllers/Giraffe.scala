@@ -12,7 +12,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
 import configuration.Config
-import services.{AuthenticationService, PaymentServices}
+import services.PaymentServices
 import com.netaporter.uri.dsl._
 import views.support.{TestTrait, _}
 
@@ -25,6 +25,7 @@ import controllers._
 import play.api.data.{FieldMapping, Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import java.time.LocalDate
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
@@ -89,8 +90,9 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   def contributeRedirect = NoCacheAction { implicit request =>
     val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.RestOfTheWorld)
+    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
 
-    Redirect(routes.Giraffe.contribute(countryGroup).url, SEE_OTHER)
+    Redirect(routes.Giraffe.contribute(countryGroup).url, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
   }
 
   // Once things have settled down and we have a reasonable idea of what might
@@ -111,17 +113,21 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     )
 
     val maxAmountInLocalCurrency = maxAmount(countryGroup.currency)
-
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp))
+    val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
-
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
-    val redirectUrl = routes.Giraffe.contribute(countryGroup).url
 
+    val title = countryGroup match {
+      case CountryGroup.Australia => "Thank you for supporting Guardian Australia"
+      case _ => "Thank you for supporting the Guardian"
+    }
+
+    val redirectUrl = routes.Giraffe.contribute(countryGroup).url
     Ok(views.html.giraffe.thankyou(PageInfo(
-      title = "Thank you for supporting the Guardian",
+      title = title,
       url = request.path,
       image = None,
       description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
@@ -160,5 +166,14 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         case e: Stripe.Error => BadRequest(Json.toJson(e))
       }
     })
+  }
+}
+
+
+object CreditCardExpiryYears {
+  def apply(currentYear: Int, offset: Int): List[Int] = {
+    val currentYearShortened = currentYear % 100
+    val subsequentYears = (currentYearShortened to currentYearShortened + offset - 2) map { _ + 1}
+    currentYearShortened :: subsequentYears.toList
   }
 }

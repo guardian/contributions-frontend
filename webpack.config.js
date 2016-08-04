@@ -1,8 +1,8 @@
-var Uglify = require("webpack/lib/optimize/UglifyJsPlugin");
+var path = require('path');
 
-module.exports = function(debug) { return {
+module.exports = {
     resolve: {
-        root: ["assets/javascripts", "assets/../node_modules/"],
+        root: ["assets/javascripts", "node_modules"],
         extensions: ["", ".js", ".es6"],
         alias: {
             '$$': 'src/utils/$',
@@ -29,20 +29,28 @@ module.exports = function(debug) { return {
                     presets: ['es2015'],
                     cacheDirectory: ''
                 }
+            },
+
+            {
+                test: /\.jsx$/,
+                exclude: /node_modules/,
+                loader: 'babel',
+                query: {
+                    presets: ['react', 'es2015'],
+                    cacheDirectory: ''
+                }
             }
         ]
     },
 
-    plugins: !debug ? [
-        new Uglify({compress: {warnings: false}})
-    ] : [],
+    resolveLoader: {
+        root: path.join(__dirname, "node_modules")
+    },
 
     progress: true,
     failOnError: true,
-    watch: false,
     keepalive: false,
     inline: true,
-    hot: false,
 
     stats: {
         modules: true,
@@ -51,6 +59,24 @@ module.exports = function(debug) { return {
     },
 
     context: 'assets/javascripts',
+
     debug: false,
-    devtool: 'source-map'
-}};
+    devtool: 'source-map',
+    entry: 'src/main',
+
+    output: {
+        path: path.resolve(__dirname, "public"),
+        chunkFilename:  'webpack/[chunkhash].js',
+        filename: "javascripts/[name].js",
+        publicPath: '/assets/'
+    },
+
+    devServer: {
+        proxy: {
+            '/*': {
+                target: 'http://localhost:9000',
+                secure: false
+            }
+        }
+    }
+};
