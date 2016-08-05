@@ -1,7 +1,7 @@
 import React from 'react';
 
 function setNoAmountError() {
-    document.getElementById("custom-amount").setCustomValidity("Please select a contribution amount");
+    document.getElementById("custom-amount").setCustomValidity("Please select a contribution amount.");
 }
 
 function clearNoAmountError() {
@@ -48,11 +48,7 @@ export default class Contribution extends React.Component {
         this.props.setAmount(amount);
     }
 
-    componentDidMount() {
-        setNoAmountError();
-    }
-
-    componentDidUpdate() {
+    setValidation() {
         if (!this.props.currentAmount || this.props.currentAmount === 0) {
             setNoAmountError();
         } else {
@@ -60,12 +56,18 @@ export default class Contribution extends React.Component {
         }
     }
 
-    render() {
-        const boldSymbol = !!this.state.inputAmount;
+    componentDidMount() {
+        this.setValidation();
+    }
 
+    componentDidUpdate() {
+        this.setValidation();
+    }
+
+    render() {
         return <div className="contribute-controls">
             {this.props.amounts.map(amount =>
-                <button type="button" tabIndex="8"
+                <button type="button"
                         key={amount}
                         className={'contribute-controls__button option-button ' + (this.state.highlightButton && this.props.currentAmount === amount ? ' active' : '')}
                         onClick={this.handleClick.bind(this, amount)}
@@ -73,10 +75,10 @@ export default class Contribution extends React.Component {
             )}
 
             <span className="contribute-controls__input contribute-controls__input--amount input-text">
-                <span className={'symbol ' + (boldSymbol ? 'active' : '')}>{this.props.symbol}</span>
+                <span className={'symbol ' + (!!this.state.inputAmount ? 'active' : '')}>{this.props.symbol}</span>
                 <input type="number"
                        id="custom-amount"
-                       placeholder="Other amount" maxLength="10" tabIndex="12"
+                       placeholder="Other amount" maxLength="10"
                        value={this.state.inputAmount}
                        onChange={this.updateInputAmount.bind(this)}
                        onFocus={this.handleFocus.bind(this)}
