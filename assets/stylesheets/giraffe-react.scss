@@ -22,11 +22,14 @@
     width: 100%;
 }
 
+.contribute-form__title-outer {
+    float: left;
+}
+
 .contribute-form__title {
     @include fs-headline(3);
     color: color(neutral-1);
     font-weight: 900;
-    float: left;
 }
 
 .contribute-form__progress {
