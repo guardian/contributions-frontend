@@ -14,12 +14,18 @@
 }
 
 .contribute-form__inner {
-    height: 330px;
+    margin-bottom: auto;
+    height: 305px;
+}
+
+.contribute-navigation {
+    margin-top: auto;
 }
 
 .contribute-form__heading {
     @include clearfix();
     width: 100%;
+    height: 60px;
 }
 
 .contribute-form__title-outer {
@@ -97,14 +103,6 @@
 
 .contribute-controls__input {
     width: 100%;
-}
-
-.contribute--details {
-    margin-top: auto;
-}
-
-.contribute-navigation {
-    margin-top: auto;
 }
 
 .contribute-navigation__back {
