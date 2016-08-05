@@ -1,13 +1,20 @@
+
+@mixin jaunty($indents) {
+    .giraffe__heading--main {
+    padding-left: nth($indents,1)
+    }
+    .giraffe__heading--sub--jaunty{
+    @for $i from 2 through length($indents) {
+        &:nth-child(#{$i - 1}) {
+            padding-left: nth($indents, $i)
+        }
+    }
+    }
+}
+
 .giraffe__heading {
     padding-top: 10px;
     padding-bottom: 20px;
-
-    @include mq(tablet){
-        padding-left: 60px;
-    }
-    @include mq(desktop){
-        padding-left: 60px;
-    }
 }
 
     .giraffe__heading--main, .giraffe__heading--sub {
@@ -15,14 +22,14 @@
         font-weight: 900;
 
         font-size: 24px;
-        line-height: 28px;
+        line-height: 24px;
 
         @include mq(tablet){
-            font-size: 24px;
+            font-size: 36px;
             line-height: 36px;
         }
         @include mq(desktop){
-            font-size: 34px;
+            font-size: 44px;
             line-height: 44px;
         }
     }
@@ -32,18 +39,28 @@
     }
     .giraffe__heading--sub {
         color: white;
-        padding-top: 10px;
     }
 
-    .giraffe__heading--sub--indent {
+    .giraffe__heading--sub--jaunty {
         display: block;
-        padding-left: 42px;
-
-        @include mq(tablet){
-            padding-left: 42px;
-        }
-        @include mq(desktop){
-            padding-left: 100px;
-        }
     }
+@include jaunty((0,40px,120px,40px,80px));
+@include mq(tablet){
+    @include jaunty((0,0,160px,0,80px));
+}
+@include mq(desktop){
+    @include jaunty((80px,80px,240px,80px,160px));
+
+}
+    /*
+    .giraffe__heading--sub--a {
+        padding-left: 40px;
+    }
+    .giraffe__heading--sub--b {
+        padding-left: 80px;
+    }
+    .giraffe__heading--sub--c {
+        padding-left: 120px;
+    }
+*/
 
