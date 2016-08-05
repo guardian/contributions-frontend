@@ -12,7 +12,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
 import configuration.Config
-import services.{AuthenticationService, PaymentServices}
+import services.PaymentServices
 import com.netaporter.uri.dsl._
 import views.support.{TestTrait, _}
 
@@ -25,6 +25,7 @@ import controllers._
 import play.api.data.{FieldMapping, Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import java.time.LocalDate
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
@@ -112,10 +113,11 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     )
 
     val maxAmountInLocalCurrency = maxAmount(countryGroup.currency)
+    val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
     val template = {
-      if (react) views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp)
-      else views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp)
+      if (react) views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears)
+      else views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears)
     }
 
     Ok(template).withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
@@ -171,5 +173,14 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         case e: Stripe.Error => BadRequest(Json.toJson(e))
       }
     })
+  }
+}
+
+
+object CreditCardExpiryYears {
+  def apply(currentYear: Int, offset: Int): List[Int] = {
+    val currentYearShortened = currentYear % 100
+    val subsequentYears = (currentYearShortened to currentYearShortened + offset - 2) map { _ + 1}
+    currentYearShortened :: subsequentYears.toList
   }
 }
