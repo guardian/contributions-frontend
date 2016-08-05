@@ -1,12 +1,15 @@
 
-@mixin jaunty($indents) {
-    .giraffe__heading--main {
-    padding-left: nth($indents,1)
-    }
+@mixin jaunty($indents--main,$indents--sub) {
+    .giraffe__heading--main--jaunty {
+        @for $i from 1 through length($indents--main) {
+            &:nth-child(#{$i}) {
+                padding-left: nth($indents--main, $i)
+            }
+        }    }
     .giraffe__heading--sub--jaunty{
-    @for $i from 2 through length($indents) {
-        &:nth-child(#{$i - 1}) {
-            padding-left: nth($indents, $i)
+    @for $i from 1 through length($indents--sub) {
+        &:nth-child(#{$i}) {
+            padding-left: nth($indents--sub, $i)
         }
     }
     }
@@ -41,26 +44,9 @@
         color: white;
     }
 
-    .giraffe__heading--sub--jaunty {
+    .giraffe__heading--sub--jaunty,
+    .giraffe__heading--main--jaunty {
         display: block;
     }
-@include jaunty((0,40px,120px,40px,80px));
-@include mq(tablet){
-    @include jaunty((0,0,160px,0,80px));
-}
-@include mq(desktop){
-    @include jaunty((80px,80px,240px,80px,160px));
-
-}
-    /*
-    .giraffe__heading--sub--a {
-        padding-left: 40px;
-    }
-    .giraffe__heading--sub--b {
-        padding-left: 80px;
-    }
-    .giraffe__heading--sub--c {
-        padding-left: 120px;
-    }
-*/
+@include jaunty((0,40px,80px,0),(80px,0,40px));
 
