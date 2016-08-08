@@ -1,13 +1,19 @@
 @import 'vars';
 @import 'functions';
 @import 'mixins';
+@import 'utilities/util-layout';
 
-.flex-vertical {
-    display: flex;
-    flex-direction: column;
+.giraffe__wrapper {
+    background: $dark-yellow;
+}
+
+.giraffe__inner {
+    padding: 50px ($gs-gutter * 2) $gs-baseline;
+    background: $medium-yellow;
 }
 
 .contribute-container {
+    margin-left: auto;
     background-color: #ffd359;
     padding: 10px;
 

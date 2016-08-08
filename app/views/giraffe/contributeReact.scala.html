@@ -6,28 +6,27 @@
 @(pageInfo: PageInfo, maxAmount: Option[Int], countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
 
 @main(pageInfo, Some(countryGroup)) {
-    <div class="support-wrapper__outer__a">
-        <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
-            <div class="giraffe__heading">
-                <h1 class="giraffe__heading--main">Thank you</h1>
+    <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
+        <div class="giraffe__inner page-slice l-constrained flex-horizontal">
+            <section class="giraffe__heading">
+                <h1 class="giraffe__heading--main">
+                    <span class="giraffe__heading--main--jaunty">Producing </span>
+                    <span class="giraffe__heading--main--jaunty">well-reported </span>
+                    <span class="giraffe__heading--main--jaunty">journalism </span>
+                    <span class="giraffe__heading--main--jaunty">is difficult and expensive. </span>
+                </h1>
                 <h2 class="giraffe__heading--sub">
-                    <span class="giraffe__heading--sub--jaunty">
-                        for supporting </span><span class="giraffe__heading--sub--jaunty">
-                    the Guardian</span> <span class="giraffe__heading--sub--jaunty">
-                    and independent</span> <span class="giraffe__heading--sub--jaunty">
-                    journalism</span></h2>
-            </div>
-            <div>
-                    <!--
-            this is a blank div to make the flex box work  ¯\_(ツ)_/¯
-            -->
-            </div>
+                    <span class="giraffe__heading--sub--jaunty">Supporting us isn’t. </span>
+                    <span class="giraffe__heading--sub--jaunty">Please support </span>
+                    <span class="giraffe__heading--sub--jaunty">the Guardian.</span> </h2>
+            </section>
 
             <!-- react injects its components here -->
             <section id="contribute" class="contribute-container"></section>
         </div>
-    </div>
-    <div class="support-wrapper__outer__b">
+    </main>
+
+    <section class="disclaimer">
         <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="feedback">
 
@@ -65,5 +64,5 @@
                 </p>
             </div>
         </div>
-    </div>
+    </section>
 }

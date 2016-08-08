@@ -116,3 +116,16 @@
 .u-no-bottom-margin {
     margin-bottom: 0 !important;
 }
+
+/**
+ * Flexbox stuff
+ */
+.flex-vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-horizontal {
+    display: flex;
+    flex-direction: row;
+}

@@ -80,13 +80,12 @@
 @import 'utilities/util-user';
 @import 'utilities/util-visibility';
 
-// =============================================================================
+// =============================================================================q
 // Print
 // =============================================================================
 
 @import 'print';
 
 // Giraffe
-@import 'giraffe';
+@import 'components/giraffe-header';
 @import 'giraffe-react';
-

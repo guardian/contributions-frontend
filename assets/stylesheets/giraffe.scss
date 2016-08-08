@@ -1,7 +1,6 @@
 @import 'vars';
 @import 'functions';
 @import 'mixins';
-@import 'components/giraffe-header';
 
 /**
     Breakpoints:
@@ -11,81 +10,6 @@
     - desktop:          @media all and (min-width: 61.25em) {}
     - wide:             @media all and (min-width: 81.25em) {}
 */
-
-$banner-yellow: #ffbb00;
-$tablet-form-width: map_get($max-widths, max-tablet);
-$desktop-form-width: 936px;
-
-//Styles which make giraffe appear in global gu branding
-.container-global.container-global--giraffe, .global-footer.global-footer--giraffe {
-
-    .control__icon {
-        border: 1px solid rgba(255, 255, 255, 0.3)
-    }
-
-    .control__icon, .control__info, .control__item {
-        color: white;
-    }
-
-    .global-header {
-        @include mq($until: tablet) {
-            height: unset;
-        }
-        background-color: #005689;
-    }
-
-    .global-header__inner {
-        height: 57px;
-
-        @include mq(tablet) {
-            height: 130px;
-        }
-    }
-
-    .mobile-menu {
-        display: none;
-    }
-
-    .global-header__branding, .global-header__inner {
-        background: #005689;
-        padding-bottom: 0;
-    }
-
-    .global-header__inner {
-        @include mq(tablet) {
-            padding-bottom: 2 * $gs-gutter;
-        }
-    }
-
-    .global-header__logo {
-        svg {
-            height: 30px;
-            width: 160px;
-        }
-
-        @include mq(tablet) {
-            svg {
-                height: 60px;
-                width: 320px;
-            }
-        }
-    }
-    .global-navigation {
-        display: none;
-        @include mq(tablet) {
-            display: block;
-        }
-    }
-    .global-navigation, .global-brandbar {
-        background: #00507f;
-        //display: none; //for mobile
-    }
-
-    .global-navigation__scroll {
-        background: #00456e;
-        width: 100%;
-    }
-}
 
 // UNKNOW?
 .support-wrapper {
@@ -112,7 +36,7 @@ $desktop-form-width: 936px;
     @include fs-headline(9);
     font-size: 48px;
     font-weight: 500;
-    color: $banner-yellow;
+    color: $light-yellow;
 }
 
 .support-wrapper__title {
@@ -300,37 +224,6 @@ $desktop-col-padding-right: 16px;
 //
 // New stuff
 //
-
-@mixin button {
-    @include font-smoothing();
-    @include fs-textSans(4);
-
-    font-weight: bold;
-    text-decoration: none;
-    cursor: pointer;
-    text-align: left;
-    display: inline-block;
-    vertical-align: bottom;
-    outline: none;
-
-    padding: 6px $gs-gutter/2;
-    border: none;
-    @include circular;
-
-    background-color: #ffffff;
-
-    &:hover {
-        background-color: $comment-support-1;
-        color: $white;
-    }
-
-    &.active {
-        background-color: $c-neutral1;
-        font-family: $f-serif-headline;
-        color: $white;
-    }
-}
-
 .action--advance {
     display: none;
     @include mq(tablet) {
@@ -383,7 +276,7 @@ $desktop-col-padding-right: 16px;
         flex-direction: column;
         justify-content: space-around;
 
-        background-color: $banner-yellow;
+        background-color: $light-yellow;
     }
     .page-slice__feedback {
         padding-top: $gs-baseline;
@@ -406,7 +299,7 @@ $desktop-col-padding-right: 16px;
     .support-wrapper__outer__a {
         background: #E6A226;
         .support-wrapper {
-            background: $banner-yellow;
+            background: $light-yellow;
         }
     }
     .support-wrapper__outer__b {
@@ -445,7 +338,7 @@ $desktop-col-padding-right: 16px;
 
     .giraffe-checkbox {
         position: relative;
-        
+
         label {
             @include fs-textSans(2);
             padding-left: $gs-gutter;
