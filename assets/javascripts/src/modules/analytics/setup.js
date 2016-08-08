@@ -31,6 +31,9 @@ define([
     function setupAnalytics() {
         ophan.init();
         ga.init();
+        ophan.ophan.then(function(ophan){
+            ga.setOphanId(ophan.pageViewId);
+        },null)
     }
 
     function setupThirdParties() {

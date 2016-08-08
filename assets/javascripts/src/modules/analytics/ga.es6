@@ -1,17 +1,17 @@
 import * as user  from 'src/utils/user'
 import * as cookie from 'src/utils/cookie'
 
-
+const dimensions = {
+    signedIn: 'dimension1',
+    signedOut: 'dimension2',
+    ophanPageViewId: 'dimension3',
+    ophanBrowserId: 'dimension4',
+    platform: 'dimension5',
+    identityId: 'dimension6',
+    isLoggedOn: 'dimension7'
+};
 export function init() {
-    const dimensions = {
-        signedIn: 'dimension1',
-        signedOut: 'dimension2',
-        ophanPageViewId: 'dimension3',
-        ophanBrowserId: 'dimension4',
-        platform: 'dimension5',
-        identityId: 'dimension6',
-        isLoggedOn: 'dimension7'
-    };
+
 
     /*eslint-disable */
     (function (i, s, o, g, r, a, m) {
@@ -48,14 +48,6 @@ export function init() {
     ga('set', dimensions.signedIn, isLoggedIn.toString());
     ga('set', dimensions.isLoggedOn, isLoggedIn.toString());
     ga('set', dimensions.signedOut, signedOut.toString());
-    var browserID = cookie.getCookie('bwid');
-    if(browserID) {
-        ga('set', dimensions.ophanBrowserId, browserID);
-    }
-    if (guardian.ophan) {
-        ga('set', dimensions.ophanPageViewId, guardian.ophan.pageViewId);
-    }
-    /* We load ophan as a promise, and if it's not here, then it misses out on getting tracked by ga. We can't wait for it.*/
     ga('set', dimensions.platform, 'contributions');
     if (isLoggedIn) {
         ga('set', dimensions.identityId, u.id);
@@ -65,6 +57,11 @@ export function init() {
     ga('send', 'pageview');
 
 
+}
+
+export function setOphanId(ophanPageViewId) {
+    ga('set', dimensions.ophanPageViewId, ophanPageViewId);
+    ga('set', dimensions.ophanBrowserId, cookie.getCookie('bwid'));
 }
 
 export function pageView(name) {
