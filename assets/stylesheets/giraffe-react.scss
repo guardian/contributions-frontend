@@ -8,8 +8,18 @@
 }
 
 .giraffe__inner {
-    padding: 50px ($gs-gutter * 2) $gs-baseline;
     background: $medium-yellow;
+
+    padding: 0 $gs-baseline $gs-gutter;
+
+    @include mq(tablet) {
+        padding-top: 50px;
+    }
+
+    @include mq(mem-full) {
+        padding-left: $gs-gutter * 2;
+        padding-right: $gs-gutter * 2;
+    }
 }
 
 .contribute-container {

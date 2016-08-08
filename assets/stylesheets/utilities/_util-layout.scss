@@ -125,7 +125,9 @@
     flex-direction: column;
 }
 
-.flex-horizontal {
-    display: flex;
-    flex-direction: row;
+.flex-horizontal-from-tablet {
+    @include mq(tablet) {
+        display: flex;
+        flex-direction: row;
+    }
 }
