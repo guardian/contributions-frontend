@@ -4,7 +4,7 @@ import InputField from '../InputField.jsx';
 
 export default class Details extends React.Component {
     render() {
-        return <div className="contribute-details contribute-fields">
+        return <div className='contribute-details contribute-fields'>
 
             <InputField label="Full name" id="name" type="text"
                         value={this.props.details.name}

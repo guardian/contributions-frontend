@@ -7,15 +7,26 @@
     flex-direction: column;
 }
 
-.contribute-form {
+.contribute-container {
     background-color: #ffd359;
     padding: 10px;
-    width: 300px;
+
+    @include mq(tablet) {
+        width: 300px;
+    }
 }
 
 .contribute-form__inner {
     margin-bottom: auto;
-    height: 305px;
+
+    @include mq(tablet) {
+        height: 305px;
+        display: none;
+
+        &.current {
+            display: flex;
+        }
+    }
 }
 
 .contribute-navigation {

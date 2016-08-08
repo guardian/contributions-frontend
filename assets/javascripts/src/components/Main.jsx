@@ -42,6 +42,8 @@ class Main extends React.Component {
     }
 
     render() {
+        const all = [PAGES.CONTRIBUTION, PAGES.DETAILS, PAGES.PAYMENT];
+
         return (
             <section>
                 <div className="contribute-form__heading">
@@ -49,10 +51,15 @@ class Main extends React.Component {
                     <ProgressIndicator page={this.props.page} />
                 </div>
 
-                <form className="flex-vertical contribute-form__inner" onSubmit={this.submit.bind(this)}>
-                    {this.componentFor(this.props.page)}
-                    <Navigation page={this.props.page} goBack={this.props.goBack} />
-                </form>
+                {all.map(p =>
+                    <form className={'flex-vertical contribute-form__inner ' + (this.props.page === p ? 'current' : '')}
+                          onSubmit={this.submit.bind(this)} key={p}>
+
+                        {this.componentFor(p)}
+                        <Navigation page={this.props.page} goBack={this.props.goBack} />
+
+                    </form>
+                )}
             </section>
         );
     }
