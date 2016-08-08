@@ -52,7 +52,10 @@ export function init() {
     if (isLoggedIn) {
         ga('set', dimensions.identityId, u.id);
     }
-
+    if (window.guardian.ophan) {
+        ga('set', dimensions.ophanPageViewId, window.guadian.ophan.pageViewId);
+    }
+    ga('set', dimensions.ophanBrowserId, cookie.getCookie('bwid'));
     //Send the pageview.
     ga('send', 'pageview');
 
@@ -60,8 +63,7 @@ export function init() {
 }
 
 export function setOphanId(ophanPageViewId) {
-    ga('set', dimensions.ophanPageViewId, ophanPageViewId);
-    ga('set', dimensions.ophanBrowserId, cookie.getCookie('bwid'));
+
 }
 
 export function pageView(name) {
