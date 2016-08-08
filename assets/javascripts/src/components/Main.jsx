@@ -44,24 +44,23 @@ class Main extends React.Component {
     render() {
         const all = [PAGES.CONTRIBUTION, PAGES.DETAILS, PAGES.PAYMENT];
 
-        return (
-            <section>
-                <div className="contribute-form__heading">
-                    <Title page={this.props.page} />
-                    <ProgressIndicator page={this.props.page} />
-                </div>
+        return <div>
+            {all.map(p =>
+                <section className={'contribute-section ' + (this.props.page === p ? 'current' : '')} key={p}>
+                    <div className="contribute-form__heading">
+                        <Title page={p}/>
+                        <ProgressIndicator page={this.props.page}/>
+                    </div>
 
-                {all.map(p =>
-                    <form className={'flex-vertical contribute-form__inner ' + (this.props.page === p ? 'current' : '')}
+                    <form className={'flex-vertical contribute-form__inner'}
                           onSubmit={this.submit.bind(this)} key={p}>
 
                         {this.componentFor(p)}
                         <Navigation page={this.props.page} goBack={this.props.goBack} />
-
                     </form>
-                )}
-            </section>
-        );
+                </section>
+            )}
+            </div>;
     }
 }
 
