@@ -9,7 +9,6 @@
     display: none !important;
  }
 
-// TODO: hidden-mobile and hidden-tablet are the same!
 .hidden-mobile {
     @include mq($until: tablet) {
         display: none !important;
@@ -23,21 +22,19 @@
     }
 }
 
-.hidden-tablet,
-.u-hidden-until-tablet {
-    @include mq($until: tablet) {
-        display: none !important;
-    }
-}
-.hidden-desktop,
-.u-hidden-until-desktop {
+.hidden-tablet {
     @include mq($until: desktop) {
         display: none !important;
     }
 }
 
-.hidden-mem-full,
-.u-hidden-until-mem-full {
+.hidden-desktop {
+    @include mq($until: mem-full) {
+        display: none !important;
+    }
+}
+
+.hidden-mem-full {
     @include mq($until:mem-full) {
         display: none !important;
     }
