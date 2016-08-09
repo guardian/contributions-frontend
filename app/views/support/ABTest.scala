@@ -53,7 +53,7 @@ object AmountHighlightTest extends TestTrait {
 
   def name = "AmountHighlightTest"
   def slug = "highlight"
-  override type VariantFn = (CountryGroup, Option[Int]) => Html
+  override type VariantFn = (CountryGroup, Int) => Html
   private lazy val notAustralia: Set[CountryGroup] = Set(
     UK,
     US,
