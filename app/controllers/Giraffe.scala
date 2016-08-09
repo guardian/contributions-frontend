@@ -26,6 +26,7 @@ import play.api.data.{FieldMapping, Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 import java.time.LocalDate
+import CountryGroup.{UK, US, Australia, NewZealand, Canada, Europe, RestOfTheWorld}
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
@@ -84,20 +85,28 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   val chargeId = "charge_id"
 
   def maxAmount(currency: Currency): Option[Int] = currency match {
-    case CountryGroup.Australia.currency => 3500.some
+    case Australia.currency => 3500.some
     case _ => 2000.some
   }
 
   def contributeRedirect = NoCacheAction { implicit request =>
-    val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.RestOfTheWorld)
-    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
 
-    Redirect(routes.Giraffe.contribute(countryGroup).url, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
+    val countryGroup = request.getFastlyCountry match {
+      case Some(Canada) | Some(NewZealand) | Some(RestOfTheWorld) => UK
+      case Some(other) => other
+      case None => UK
+    }
+
+    redirectWithCampaignCodes(routes.Giraffe.contribute(countryGroup).url)
   }
 
-  // Once things have settled down and we have a reasonable idea of what might
-  // and might not vary between different countries, we should merge these country-specific
-  // controllers & templates into a single one which varies on a number of parameters
+  def redirectToUk = NoCacheAction { implicit request => redirectWithCampaignCodes(routes.Giraffe.contribute(UK).url) }
+
+  private def redirectWithCampaignCodes(destinationUrl: String)(implicit request: Request[Any]) = {
+    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
+    Redirect(destinationUrl, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
+  }
+
   def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
@@ -121,7 +130,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
 
     val title = countryGroup match {
-      case CountryGroup.Australia => "Thank you for supporting Guardian Australia"
+      case Australia => "Thank you for supporting Guardian Australia"
       case _ => "Thank you for supporting the Guardian"
     }
 
@@ -153,10 +162,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
 
       val redirect = f.currency match {
-        case USD => routes.Giraffe.thanks(CountryGroup.US).url
-        case AUD => routes.Giraffe.thanks(CountryGroup.Australia).url
-        case EUR => routes.Giraffe.thanks(CountryGroup.Europe).url
-        case _ => routes.Giraffe.thanks(CountryGroup.UK).url
+        case USD => routes.Giraffe.thanks(US).url
+        case AUD => routes.Giraffe.thanks(Australia).url
+        case EUR => routes.Giraffe.thanks(Europe).url
+        case _ => routes.Giraffe.thanks(UK).url
       }
 
       res.map { charge =>

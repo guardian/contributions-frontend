@@ -14,6 +14,9 @@ GET            /assets/*file                controllers.Assets.versioned(path="/
 GET            /                            controllers.Giraffe.contributeRedirect
 GET            /healthcheck                 controllers.Healthcheck.healthcheck
 
+GET            /ca                          controllers.Giraffe.redirectToUk
+GET            /nz                          controllers.Giraffe.redirectToUk
+GET            /int                         controllers.Giraffe.redirectToUk
 GET            /:countryGroup               controllers.Giraffe.contribute(countryGroup: com.gu.i18n.CountryGroup)
 
 GET            /:countryGroup/thank-you    controllers.Giraffe.thanks(countryGroup: com.gu.i18n.CountryGroup)
