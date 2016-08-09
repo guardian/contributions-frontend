@@ -11,7 +11,7 @@ const dimensions = {
     isLoggedOn: 'dimension7'
 };
 export function init() {
-
+    let guardian = window.guardian;
 
     /*eslint-disable */
     (function (i, s, o, g, r, a, m) {
@@ -52,17 +52,13 @@ export function init() {
     if (isLoggedIn) {
         ga('set', dimensions.identityId, u.id);
     }
-    if (window.guardian.ophan) {
-        ga('set', dimensions.ophanPageViewId, window.guadian.ophan.pageViewId);
+    if (guardian.ophan) {
+        ga('set', dimensions.ophanPageViewId, guardian.ophan.pageViewId);
     }
     ga('set', dimensions.ophanBrowserId, cookie.getCookie('bwid'));
     //Send the pageview.
     ga('send', 'pageview');
 
-
-}
-
-export function setOphanId(ophanPageViewId) {
 
 }
 

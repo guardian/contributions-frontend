@@ -8,7 +8,7 @@ import validity from 'src/modules/form/validation/validity'
 import * as form from 'src/modules/form/helper/formUtil'
 
 
-import {ophan} from 'src/modules/analytics/ophan';
+import * as ophan from 'src/modules/analytics/ophan';
 
 const FORM_FIELD_ERROR_CLASSNAME = 'form-field--error'; // 1) from display.js 2) we need to split this out
 
@@ -123,7 +123,7 @@ function getStuffFromIdentity() {
 }
 
 function ophanId(){
-    ophan.then(o => {
+    ophan.loaded.then(o => {
         $OPHAN.val(o.viewId);
     })
 }
