@@ -10,9 +10,9 @@ const dimensions = {
     identityId: 'dimension6',
     isLoggedOn: 'dimension7'
 };
-export function init() {
-    let guardian = window.guardian;
 
+function create(){
+    const tracker = 'membershipPropertyTracker';
     /*eslint-disable */
     (function (i, s, o, g, r, a, m) {
         i['GoogleAnalyticsObject'] = r;
@@ -26,12 +26,17 @@ export function init() {
         m.parentNode.insertBefore(a, m)
     })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
     /*eslint-enable */
-
-    ga('create', guardian.googleAnalytics.trackingId, {
+    window.ga('create', guardian.googleAnalytics.trackingId, {
         'allowLinker': true,
-        'name': 'membershipPropertyTracker',
+        'name': tracker,
         'cookieDomain': guardian.googleAnalytics.cookieDomain
     });
+    return (a,b,c) => window.ga(tracker+ '.' + a,b,c);
+}
+
+export function init() {
+    let guardian = window.guardian;
+    let ga = create();
 
     ga('require', 'linker');
 
