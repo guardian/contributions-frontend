@@ -47,6 +47,7 @@ trait AppComponents extends BuiltInComponents with PlayComponents {
   lazy val giraffeController = wire[Giraffe]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
+  lazy val paypalController = wire[PaypalController]
 
   override lazy val httpErrorHandler =
     new monitoring.ErrorHandler(identityAuthProvider, environment, configuration, sourceMapper, Some(router))

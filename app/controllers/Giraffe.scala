@@ -113,9 +113,11 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     )
 
     val maxAmountInLocalCurrency = maxAmount(countryGroup.currency)
+
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
     Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
-      .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
+      .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2), Test.createCookie(chosenVariants.paymentMethodTest))
+
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>

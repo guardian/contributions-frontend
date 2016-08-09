@@ -10,10 +10,10 @@ import com.gu.i18n.CountryGroup._
 import play.api.libs.json._
 import play.api.mvc.{Cookie, Request}
 import play.twirl.api.Html
-import scala.util.Random
 
+import scala.util.Random
 import scalaz.NonEmptyList
-import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage}
+import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage, paymentMethods}
 
 trait TestTrait {
   type VariantFn
@@ -106,10 +106,26 @@ object MessageCopyTest extends TestTrait {
   )
 }
 
-case class ChosenVariants(v1: AmountHighlightTest.Variant, v2: MessageCopyTest.Variant) {
-  def asList: Seq[TestTrait#Variant] = Seq(v1,v2) //this makes me very sad
+object PaymentMethodTest extends TestTrait {
+
+  def name = "PaymentMethodTest"
+  def slug = "paymentMethod"
+  override type VariantFn = () => Html
+
+  def variants = NonEmptyList(
+    Variant("Control", "control", 0.5, paymentMethods(Set("CARD"))),
+    Variant("Paypal", "paypal", 0.5, paymentMethods(Set("PAYPAL", "CARD")))
+  )
+
+}
+case class ChosenVariants(v1: AmountHighlightTest.Variant, v2: MessageCopyTest.Variant, paymentMethodTest:PaymentMethodTest.Variant) {
+  def asList: Seq[TestTrait#Variant] = Seq(v1,v2, paymentMethodTest) //this makes me very sad
   def asJson = Json.toJson(asList).toString()
   def encodeURL = URLEncoder.encode(asJson, StandardCharsets.UTF_8.name())
+  def shortDescription = {
+    val description = this.asList.map(t => t.testName + ":" + t.variantName).mkString(",")
+    URLEncoder.encode(description, StandardCharsets.UTF_8.name())
+  }
   implicit val writesVariant: Writes[TestTrait#Variant] = new Writes[TestTrait#Variant]{
     def writes(variant: TestTrait#Variant) =  Json.obj(
       "testName" -> variant.testName,
@@ -145,7 +161,11 @@ object Test {
   }
 
   def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
-    ChosenVariants(pickVariant(countryGroup, request, AmountHighlightTest), pickVariant(countryGroup, request, MessageCopyTest))
+    ChosenVariants(
+      v1 = pickVariant(countryGroup, request, AmountHighlightTest),
+      v2 = pickVariant(countryGroup, request, MessageCopyTest),
+      paymentMethodTest = pickVariant(countryGroup, request, PaymentMethodTest)
+    )
   }
 }
 

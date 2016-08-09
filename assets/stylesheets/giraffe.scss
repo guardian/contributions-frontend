@@ -348,7 +348,12 @@ $desktop-col-padding-right: 16px;
         display: block;
     }
 }
-
+.action--mobile-card-payment {
+    display: block;
+    @include mq(tablet) {
+        display: none;
+    }
+}
 .action--contribute {
     width: 100%;
     border: none;
@@ -373,6 +378,40 @@ $desktop-col-padding-right: 16px;
         background-image: svg-url('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><path fill="white" stroke="white" d="M22.8 14.6L15.2 7l-.7.7 5.5 6.6H6v1.5h14l-5.5 6.6.7.7 7.6-7.6v-.9"/></svg>');
         background-size: 100%;
 
+        float: right;
+    }
+}
+.hiddenInMobile {
+   display: none;
+    @include mq(tablet) {
+        display: block;
+    }
+}
+.paypal {
+    background-repeat: no-repeat;
+    background-image: url('/assets/images/form/pp-logo-100px.png');
+    background-position: left 130px center;
+    }
+
+.payment-method-button {
+    background-repeat: no-repeat;
+    margin-top: 10px;
+    background-color: #AFAFAF;
+    color: black;
+
+    &:hover {
+        background-color: #7d7569;
+        color: $white;
+    }
+
+    &:after {
+        content: '';
+        display: inline-block;
+        background-repeat: no-repeat;
+        width: 30px;
+        height: 28px;
+        background-image: svg-url('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><path fill="black" stroke="black" d="M22.8 14.6L15.2 7l-.7.7 5.5 6.6H6v1.5h14l-5.5 6.6.7.7 7.6-7.6v-.9"/></svg>');
+        background-size: 100%;
         float: right;
     }
 }

@@ -34,6 +34,7 @@ val scalaz = "org.scalaz" %% "scalaz-core" % "7.1.1"
 val membershipCommon = "com.gu" %% "membership-common" % "0.225"
 val sentryRavenLogback = "com.getsentry.raven" % "raven-logback" % "7.6.0"
 val memsubCommonPlayAuth = "com.gu" %% "memsub-common-play-auth" % "1.0"
+val paypalSdk = "com.paypal.sdk" % "rest-api-sdk" % "1.9.2"
 libraryDependencies ++= Seq(
   cache,
   ws,
@@ -44,6 +45,7 @@ libraryDependencies ++= Seq(
     membershipCommon,
     sentryRavenLogback,
     memsubCommonPlayAuth,
+    paypalSdk,
     "com.softwaremill.macwire" %% "macros" % "2.2.2" % "provided",
     "com.softwaremill.macwire" %% "util" % "2.2.2",
     "com.softwaremill.macwire" %% "proxy" % "2.2.2"

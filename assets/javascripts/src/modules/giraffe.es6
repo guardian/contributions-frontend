@@ -20,6 +20,7 @@ const CURRENCY_FIELD = document.querySelector('.js-currency-field');
 const $CURRENCY_DISPLAY = $('.js-currency');
 const $CURRENCY_PICKER = $('.js-currency-switcher');
 const $PAY_WITH_PAYPAL = $('#payWithPaypal')
+const $MOBILE_CARD_PAYMENT_BUTTON = $('#mobile-card-payment-button')
 
 const $AMOUNT_PICKER = $('[data-amount]');
 const CUSTOM_AMOUNT = document.querySelector('.js-amount-field');
@@ -44,6 +45,7 @@ export function init() {
     carousel();
 
     $PAY_WITH_PAYPAL.each(p=>p.addEventListener('click', ev => payWithPaypal()));
+    $MOBILE_CARD_PAYMENT_BUTTON.each(p=>p.addEventListener('click', ev => showPaymentDetailsMobile()));
 
 
     $CURRENCY_PICKER.each(el => el.addEventListener('click', ev => selectCurrencyElement(ev.currentTarget)));
@@ -80,6 +82,12 @@ export function init() {
     getStuffFromIdentity();
 }
 
+function showPaymentDetailsMobile() {
+//todo if we use this the name of the css class should change
+$('.js-details').removeClass('hiddenInMobile')
+$('.js-payment').removeClass('hiddenInMobile')
+//$('.hiddenInMobile').each( c => $(c).removeClass('hiddenInMobile'));
+}
 
 function payWithPaypal() {
     let selectedAmount = $('.js-amount-hidden')[0].value;

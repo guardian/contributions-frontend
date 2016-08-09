@@ -29,10 +29,11 @@
                     <a href="#" class="js-switcher-contribute form__container--active" data-switches="js-contribution"></a> <a class="js-switcher-details" href="#" data-switches="js-details"></a> <a class="js-switcher-pay" href="#" data-switches="js-payment"></a>
                 </div>
 
-                <!--TODO too much code here to get the language from the countryGroup ( I would prefer to have a language def in CountryGroup)"-->
-                @fragments.giraffe.paypal(  language = countryGroup.defaultCountry.map(_.alpha2).getOrElse("GB"),
+                <!--TODO too much code here to get the language from the countryGroup ( I would prefer to have a language def in CountryGroup) also default amount doesnt really matter since we overwrite it in js"-->
+                @fragments.giraffe.paypalForm(  language = countryGroup.defaultCountry.map(_.alpha2).getOrElse("GB"),
                                             currency = countryGroup.currency.toString.toUpperCase,
-                                            defaultAmount= 3)
+                                            defaultAmount= 10,
+                                            chosenVariants = chosenVariants)
 
                 <form id="form" class="form js-form" role="main" method="POST" autocomplete="on" novalidate action="@routes.Giraffe.pay()">
                     @fragments.giraffe.abFormTrack(chosenVariants)
@@ -68,13 +69,10 @@
                                 </li>
                             }
                         </ul>
-                        <a class="action action--contribute js-advance action--advance" data-switches="js-details">
-                            Next
-                        </a>
-                        <a id="payWithPaypal" class="action action--contribute">Pay with Paypal</a>
+                        @chosenVariants.paymentMethodTest.render()
                     </div>
 
-                    <div class="form__column js-hidden-tablet js-details">
+                    <div class="form__column js-hidden-tablet js-details hiddenInMobile">
                         <h3 class="form__column-heading form__column-heading--first headline-text--bolder">
                             Your details</h3>
                         <ul class="u-unstyled">
@@ -113,7 +111,7 @@
 
 
 
-                    <div class="form__column js-hidden-tablet js-payment">
+                    <div class="form__column js-hidden-tablet js-payment hiddenInMobile">
                         <span>
                             <h3 class="form__column-heading headline-text--bolder">Your payment</h3>
                             <div class="security-note">@fragments.inlineIcon("secure", List("icon-inline--small", "icon-inline--top"))

@@ -13,9 +13,16 @@ GET            /assets/*file                controllers.Assets.versioned(path="/
 # Giraffe
 GET            /                            controllers.Giraffe.contributeRedirect
 GET            /healthcheck                 controllers.Healthcheck.healthcheck
+POST           /paypal/auth                 controllers.PaypalController.authorize
+POST           /paypal/onWebHookEvent       controllers.PaypalController.onWebHookEvent
+GET            /paypal/execute              controllers.PaypalController.executePayment(paymentId,token,PayerID)
+
+
 
 GET            /:countryGroup               controllers.Giraffe.contribute(countryGroup: com.gu.i18n.CountryGroup)
 
 GET            /:countryGroup/thank-you    controllers.Giraffe.thanks(countryGroup: com.gu.i18n.CountryGroup)
 
 POST           /pay                        controllers.Giraffe.pay
+POST           /paypalEvent                controllers.PaypalController.onEvent
+
