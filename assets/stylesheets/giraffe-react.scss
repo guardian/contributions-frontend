@@ -149,12 +149,14 @@
     line-height: 42px;
 }
 
+.contribute-navigation__button {
+    float: right;
+}
+
 .contribute-navigation__next {
     @include mq($until: tablet) {
         display: none;
     }
-    
-    float: right;
 }
 
 .option-button {
