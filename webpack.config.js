@@ -4,6 +4,9 @@ module.exports = {
     resolve: {
         root: ["assets/javascripts", "node_modules"],
         extensions: ["", ".js", ".es6"],
+        alias: {
+            'ajax': 'src/utils/ajax'
+        }
     },
 
     module: {
