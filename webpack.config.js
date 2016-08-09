@@ -4,19 +4,6 @@ module.exports = {
     resolve: {
         root: ["assets/javascripts", "node_modules"],
         extensions: ["", ".js", ".es6"],
-        alias: {
-            '$$': 'src/utils/$',
-            //'lodash': 'lodash-amd/modern',
-            'bean': 'bean/bean',
-            'bonzo': 'bonzo/bonzo',
-            'qwery': 'qwery/qwery',
-            'reqwest': 'reqwest/reqwest',
-            'respimage': 'respimage/respimage',
-            'lazySizes': 'lazysizes/lazysizes',
-            'gumshoe': 'gumshoe/dist/js/gumshoe',
-            'smoothScroll': 'smooth-scroll/dist/js/smooth-scroll',
-            'ajax': 'src/utils/ajax'
-        }
     },
 
     module: {
