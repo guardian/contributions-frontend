@@ -2,7 +2,7 @@
 import * as ophan from 'src/modules/analytics/ophan';
 
 export function init(){
-    if (abTests){
+    if ("abTests" in window){
             var data = {};
             for (var test of abTests){
                 data[test.testSlug] = {
@@ -10,8 +10,8 @@ export function init(){
                     'complete': 'true'
                 }
             }
-            ophan.ophan.then(function(o){
-                o.record({
+            ophan.loaded.then(function(ophan){
+                ophan.record({
                 abTestRegister:data
             })});
 

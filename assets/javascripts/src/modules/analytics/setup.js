@@ -30,7 +30,7 @@ define([
 
     function setupAnalytics() {
         ophan.init();
-        ga.init();
+        ophan.loaded.then(ga.init,ga.init);
     }
 
     function setupThirdParties() {
