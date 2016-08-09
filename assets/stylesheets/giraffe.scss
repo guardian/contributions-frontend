@@ -248,16 +248,6 @@ $desktop-col-padding-right: 16px;
     }
 }
 
-.action--next {
-    $colour: #005689;
-
-    background-color: $colour;
-
-    &:hover, &:focus {
-        background-color: darken($colour, 5%);
-    }
-}
-
 .giraffe-container {
     .security-note {
         margin-bottom: 2px;

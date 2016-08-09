@@ -157,6 +157,12 @@
     @include mq($until: tablet) {
         display: none;
     }
+
+    background-color: $blue;
+
+    &:hover, &:focus {
+        background-color: darken($blue, 5%);
+    }
 }
 
 .option-button {
