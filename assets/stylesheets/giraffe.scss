@@ -336,20 +336,6 @@ $desktop-col-padding-right: 16px;
         margin-left: $gs-gutter / 2;
     }
 
-    .giraffe-checkbox {
-        position: relative;
-
-        label {
-            @include fs-textSans(2);
-            padding-left: $gs-gutter;
-            display: block;
-        }
-        input {
-            position: absolute;
-            top: 1px;
-        }
-    }
-
     .giraffe__heading {
         @include mq(desktop) {
             width: 300px * 2 + $gs-gutter;
