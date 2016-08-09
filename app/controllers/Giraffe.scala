@@ -92,17 +92,20 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   def contributeRedirect = NoCacheAction { implicit request =>
 
     val countryGroup = request.getFastlyCountry match {
-      case Some(Canada) | Some(NewZealand) => UK
+      case Some(Canada) | Some(NewZealand) | Some(RestOfTheWorld) => UK
       case Some(other) => other
-      case None => RestOfTheWorld
+      case None => UK
     }
 
-    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
-
-    Redirect(routes.Giraffe.contribute(countryGroup).url, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
+    redirectWithCampaignCodes(routes.Giraffe.contribute(countryGroup).url)
   }
 
-  def redirectToUk = NoCacheAction { implicit request => Redirect(routes.Giraffe.contribute(UK).url, SEE_OTHER) }
+  def redirectToUk = NoCacheAction { implicit request => redirectWithCampaignCodes(routes.Giraffe.contribute(UK).url) }
+
+  private def redirectWithCampaignCodes(destinationUrl: String)(implicit request: Request[Any]) = {
+    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
+    Redirect(destinationUrl, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
+  }
 
   def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
