@@ -21,6 +21,7 @@ import play.api.mvc._
 import services.PaymentServices
 import utils.RequestCountry._
 import views.support._
+import utils.Formatters.currencyFormatter
 
 import scala.concurrent.Future
 
@@ -32,13 +33,6 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     }
     override def unbind(key: String, data: JsValue): Map[String,String] = Map()
 
-  }
-  implicit val currencyFormatter = new Formatter[Currency] {
-    type Result = Either[Seq[FormError], Currency]
-    override def bind(key: String, data: Map[String, String]): Result =
-      data.get(key).map(_.toUpperCase).flatMap(Currency.fromString).fold[Result](Left(Seq.empty))(currency => Right(currency))
-    override def unbind(key: String, value: Currency): Map[String, String] =
-      Map(key -> value.identifier)
   }
 
   case class SupportForm(

@@ -36,7 +36,7 @@
                 @fragments.giraffe.paypalForm(  language = countryGroup.defaultCountry.map(_.alpha2).getOrElse("GB"),
                                             currency = countryGroup.currency.toString.toUpperCase,
                                             defaultAmount= 10,
-                                            chosenVariants = chosenVariants)
+                                            transactionId = "tx000001-fake")
 
                 <form id="form" class="form js-form" role="main" method="POST" autocomplete="on" novalidate action="@routes.Giraffe.pay()">
                     @fragments.giraffe.abFormTrack(chosenVariants)

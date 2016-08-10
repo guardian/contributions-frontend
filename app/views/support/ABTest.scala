@@ -122,10 +122,7 @@ case class ChosenVariants(v1: AmountHighlightTest.Variant, v2: MessageCopyTest.V
   def asList: Seq[TestTrait#Variant] = Seq(v1,v2, paymentMethodTest) //this makes me very sad
   def asJson = Json.toJson(asList).toString()
   def encodeURL = URLEncoder.encode(asJson, StandardCharsets.UTF_8.name())
-  def shortDescription = {
-    val description = this.asList.map(t => t.testName + ":" + t.variantName).mkString(",")
-    URLEncoder.encode(description, StandardCharsets.UTF_8.name())
-  }
+
   implicit val writesVariant: Writes[TestTrait#Variant] = new Writes[TestTrait#Variant]{
     def writes(variant: TestTrait#Variant) =  Json.obj(
       "testName" -> variant.testName,

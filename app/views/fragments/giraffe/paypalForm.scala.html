@@ -1,6 +1,5 @@
-@import views.support.ChosenVariants
 
-@(language:String, currency:String, defaultAmount:Int, chosenVariants: ChosenVariants)
+@(language:String, currency:String, defaultAmount:Int, transactionId:String)
 <!--<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post" target="_top" id="paypalForm">-->
     <!--<input type="hidden" name="cmd" value="_donations">-->
     <!--&lt;!&ndash;<input type="hidden" name="cmd" value="_xclick">&ndash;&gt;-->
@@ -17,10 +16,11 @@
   <!--&lt;!&ndash;TODO get the correct thank you page&ndash;&gt;-->
     <!--<input type="hidden" value="https://6ef12c2b.ngrok.io/uk/thank-you" name="return">-->
     <!--<input type="hidden" value="http://www.yahoo.com" name="cancel_return">-->
-    <!--<input type="hidden" name="custom" value="@chosenVariants.shortDescription">-->
+    <!--<input type="hidden" name="custom" value="@transactionId">-->
 <!--</form>-->
 
 <form action="/paypal/auth" method="post" target="_top" id="paypalForm">
     <input type="hidden" name="amount" value="@defaultAmount" id="paypalAmount">
     <input type="hidden" name="currency_code" value="@currency.toString.toUpperCase" id="paypalCurrency">
+    <input type="hidden" name="transactionId" value="@transactionId">
 </form>
