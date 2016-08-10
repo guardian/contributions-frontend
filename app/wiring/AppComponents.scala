@@ -41,7 +41,8 @@ trait AppComponents extends BuiltInComponents with PlayComponents {
   lazy val paymentServices = PaymentServices(
     identityAuthProvider,
     testUsernames,
-    PaymentServices.stripeServicesFor(config.getConfig("stripe"))
+    PaymentServices.stripeServicesFor(config.getConfig("stripe")),
+    PaymentServices.paypalServicesFor(config.getConfig("paypal"))
   )
 
   lazy val giraffeController = wire[Giraffe]
