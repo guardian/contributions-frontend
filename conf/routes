@@ -4,8 +4,9 @@
 
 # Keep this for continual Google Webmasters tools validation - https://support.google.com/webmasters/answer/35179
 GET            /google740d86a82e4c4f9d.html controllers.Assets.at(path="/public", file="google740d86a82e4c4f9d.html")
-
 GET            /robots.txt                  controllers.Assets.at(path="/public", file="robots.txt")
+GET            /favicon.ico                 controllers.Assets.at(path="/public", file="favicon.ico")
+
 # Map static resources from the /public folder to the /assets URL path
 GET            /assets/*file                controllers.Assets.versioned(path="/public", file: Asset)
 
