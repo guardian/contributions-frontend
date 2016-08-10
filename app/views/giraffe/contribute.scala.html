@@ -4,19 +4,22 @@
 @import views.support.Asset
 @import configuration.Links
 
-@(pageInfo:PageInfo,maxAmount: Option[Int], countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
+@(pageInfo:PageInfo,maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
 
 @main(pageInfo,Some(countryGroup)){
     <div class="support-wrapper__outer__a">
         <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="giraffe__heading">
-                <h1 class="giraffe__heading--main">Producing well-reported journalism
-                    <span class="giraffe__heading--sub--indent">is difficult and expensive.</span>
+                <h1 class="giraffe__heading--main">
+                    <span class="giraffe__heading--main--jaunty">Producing </span>
+                    <span class="giraffe__heading--main--jaunty">well-reported </span>
+                    <span class="giraffe__heading--main--jaunty">journalism </span>
+                    <span class="giraffe__heading--main--jaunty">is difficult and expensive. </span>
                 </h1>
                 <h2 class="giraffe__heading--sub">
-                    Supporting us isn’t.
-                    <span class="giraffe__heading--sub--indent">Please support the Guardian.</span>
-                </h2>
+                    <span class="giraffe__heading--sub--jaunty">Supporting us isn’t. </span>
+                    <span class="giraffe__heading--sub--jaunty">Please support </span>
+                    <span class="giraffe__heading--sub--jaunty">the Guardian.</span> </h2>
             </div>
             <div>
                     <!--
@@ -60,14 +63,12 @@
                                 @chosenVariants.v1.render(countryGroup, maxAmount)
                                 </div>
                             </li>
-                            @maxAmount.fold {
-                            } { max =>
-                                <li>
-                                    <div class="fieldset__note">
-                                        We are presently only able to accept contributions of <span class="currency js-currency">@countryGroup.currency.prefix@countryGroup.currency.glyph</span>@max
-                                        or less</div>
-                                </li>
-                            }
+
+                            <li>
+                                <div class="fieldset__note">
+                                    We are presently only able to accept contributions of <span class="currency js-currency">@countryGroup.currency.prefix@countryGroup.currency.glyph</span>@maxAmount
+                                    or less</div>
+                            </li>
                         </ul>
                         @chosenVariants.paymentMethodTest.render()
                     </div>
@@ -254,17 +255,17 @@
                 <p data-shown="aud">
                     The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
                 </p>
-                <p data-shown="usd">If you have any questions about contributing to the Guardian, please
+                <p data-shown="usd cad">If you have any questions about contributing to the Guardian, please
                     <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">
                         contact us here</a>.
                 </p>
-                <p data-shown="usd">
+                <p data-shown="usd cad">
                     The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
                 </p>
                 <p data-shown="gbp aud eur">
                     Please note that your support of the Guardian’s journalism does not constitute a charitable donation, as such your contribution is not eligible for Gift Aid in the UK nor a tax-deduction elsewhere.
                 </p>
-                <p data-shown="usd">
+                <p data-shown="usd cad">
                     Please note that the Guardian is not a charity, will not use your support for charitable
                     programs, and your support of the Guardian’s journalism does not constitute a
                     charitable donation. As such your contribution is not eligible to be treated as a

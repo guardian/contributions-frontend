@@ -1,31 +1,28 @@
 package controllers
 
+import java.lang.Math.min
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 
-import actions.CommonActions
 import actions.CommonActions.NoCacheAction
+import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
-import com.gu.stripe.{Stripe, StripeService}
+import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Serializer._
+import com.netaporter.uri.dsl._
+import configuration.Config
+import play.api.data.Forms._
+import play.api.data.format.Formatter
+import play.api.data.{FieldMapping, Form, FormError}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
-import configuration.Config
 import services.PaymentServices
-import com.netaporter.uri.dsl._
-import views.support.{TestTrait, _}
-
-import scalaz.syntax.std.option._
-import scala.concurrent.Future
 import utils.RequestCountry._
-import com.netaporter.uri.dsl._
-import com.netaporter.uri.{PathPart, Uri}
-import controllers._
-import play.api.data.{FieldMapping, Form, FormError}
-import play.api.data.Forms._
-import play.api.data.format.Formatter
-import java.time.LocalDate
+import views.support._
+
+import scala.concurrent.Future
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
@@ -83,21 +80,29 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   val chargeId = "charge_id"
 
-  def maxAmount(currency: Currency): Option[Int] = currency match {
-    case CountryGroup.Australia.currency => 3500.some
-    case _ => 2000.some
+  def maxAmountFor(currency: Currency): Int = currency match {
+    case Australia.currency => 3500
+    case _ => 2000
   }
 
   def contributeRedirect = NoCacheAction { implicit request =>
-    val countryGroup = request.getFastlyCountry.getOrElse(CountryGroup.RestOfTheWorld)
-    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
 
-    Redirect(routes.Giraffe.contribute(countryGroup).url, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
+    val countryGroup = request.getFastlyCountry match {
+      case Some(Canada) | Some(NewZealand) | Some(RestOfTheWorld) => UK
+      case Some(other) => other
+      case None => UK
+    }
+
+    redirectWithCampaignCodes(routes.Giraffe.contribute(countryGroup).url)
   }
 
-  // Once things have settled down and we have a reasonable idea of what might
-  // and might not vary between different countries, we should merge these country-specific
-  // controllers & templates into a single one which varies on a number of parameters
+  def redirectToUk = NoCacheAction { implicit request => redirectWithCampaignCodes(routes.Giraffe.contribute(UK).url) }
+
+  private def redirectWithCampaignCodes(destinationUrl: String)(implicit request: Request[Any]) = {
+    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
+    Redirect(destinationUrl, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
+  }
+
   def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
@@ -111,9 +116,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-
-    val maxAmountInLocalCurrency = maxAmount(countryGroup.currency)
-
+    val maxAmountInLocalCurrency = maxAmountFor(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
     Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2), Test.createCookie(chosenVariants.paymentMethodTest))
@@ -123,7 +126,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
 
     val title = countryGroup match {
-      case CountryGroup.Australia => "Thank you for supporting Guardian Australia"
+      case Australia => "Thank you for supporting Guardian Australia"
       case _ => "Thank you for supporting the Guardian"
     }
 
@@ -151,14 +154,18 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         "cmp" -> f.cmp.mkString,
         "intcmp" -> f.intcmp.mkString
       )  ++ f.postCode.map("postcode" -> _)
-      val res = stripe.Charge.create(maxAmount(f.currency).fold((f.amount*100).toInt)(max => Math.min(max * 100, (f.amount * 100).toInt)), f.currency, f.email, "Your contribution", f.token, metadata)
+
+      // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
+      val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
+      val maxAmountInSmallestCurrencyUnit = maxAmountFor(f.currency) * 100
+      val res = stripe.Charge.create(min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit), f.currency, f.email, "Your contribution", f.token, metadata)
 
 
       val redirect = f.currency match {
-        case USD => routes.Giraffe.thanks(CountryGroup.US).url
-        case AUD => routes.Giraffe.thanks(CountryGroup.Australia).url
-        case EUR => routes.Giraffe.thanks(CountryGroup.Europe).url
-        case _ => routes.Giraffe.thanks(CountryGroup.UK).url
+        case USD => routes.Giraffe.thanks(US).url
+        case AUD => routes.Giraffe.thanks(Australia).url
+        case EUR => routes.Giraffe.thanks(Europe).url
+        case _ => routes.Giraffe.thanks(UK).url
       }
 
       res.map { charge =>
