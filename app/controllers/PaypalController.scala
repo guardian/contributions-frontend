@@ -17,7 +17,7 @@ import play.api.mvc.BodyParsers.parse.{json => BodyJson}
 import play.api.mvc.{Controller, Result}
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future // Combinator syntax
+import scala.concurrent.Future
 
 
 //TODO THIS CODE IS HORRIBLE (option.get synchronous posts and stuff like that, clean up later!!!)
@@ -62,12 +62,17 @@ class PaypalController(ws: WSClient) extends Controller {
 
   }
 
-  def onWebHookEvent = NoCacheAction { implicit request =>
-    val json = request.body.asJson
-    val eventType = (json \ "event_type").extract[Int]
-    println(s"HOOK RECEIVED:\n ${request.body}")
+  def onWebhookEvent = NoCacheAction { implicit request =>
+    println(s"HOOK RECEIVED:\n ${request.body}\n\n")
+
+    request.body.asJson.map { json =>
+      val eventType = (json \ "event_type")
+      val customData = (json \ "resource" \ "custom")
+
+      println(s"event type is $eventType, custom data is $customData")
       Ok("")
-    }
+    }.getOrElse(BadRequest(""))
+  }
 
   def verify(formData: Map[String, Seq[String]]): Future[Boolean] = ws.url(sandboxUrl).withHeaders(("Content-Type", "application/x-www-form-urlencoded")).post(formData).map(_.body == "VERIFIED")
 
@@ -119,6 +124,17 @@ class PaypalController(ws: WSClient) extends Controller {
     val transaction = new Transaction()
     transaction.setAmount(paypalAmount)
     transaction.setDescription("Contribution to the guardian.")
+    transaction.setCustom("some custom data here")
+
+    val item = new Item()
+    item.setDescription("Contribution to the guardian")
+    item.setCurrency(currencyCode)
+    item.setPrice(amount.toString())
+    item.setQuantity("1")
+    val itemList = new ItemList()
+    itemList.setItems(List(item).asJava)
+
+    transaction.setItemList(itemList)
 
     val transactions = new util.ArrayList[Transaction]()
     transactions.add(transaction)

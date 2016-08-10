@@ -14,7 +14,7 @@ GET            /assets/*file                controllers.Assets.versioned(path="/
 GET            /                            controllers.Giraffe.contributeRedirect
 GET            /healthcheck                 controllers.Healthcheck.healthcheck
 POST           /paypal/auth                 controllers.PaypalController.authorize
-POST           /paypal/onWebHookEvent       controllers.PaypalController.onWebHookEvent
+POST           /paypal/onWebhookEvent       controllers.PaypalController.onWebhookEvent
 GET            /paypal/execute              controllers.PaypalController.executePayment(paymentId,token,PayerID)
 
 
