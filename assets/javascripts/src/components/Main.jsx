@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, PAY, SET_AMOUNT } from 'src/actions';
-import { PAGES } from 'src/constants';
+import {  PAGES, ALL_PAGES } from 'src/constants';
 
 import Contribution from './pages/Contribution.jsx';
 import Details from './pages/Details.jsx';
@@ -12,6 +12,25 @@ import Processing from './pages/Processing.jsx';
 import Title from './Title.jsx';
 import ProgressIndicator from './ProgressIndicator.jsx';
 import Navigation from './Navigation.jsx';
+
+function mapStateToProps(state) {
+    return {
+        page: state.page,
+        details: state.details,
+        card: state.card
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        goBack: () => dispatch({ type: GO_BACK }),
+        goForward: () => dispatch({ type: GO_FORWARD }),
+        setAmount: a => dispatch({ type: SET_AMOUNT, amount: a }),
+        updateDetails: d => dispatch({ type: UPDATE_DETAILS, details: d }),
+        updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
+        pay: () => dispatch({ type: PAY })
+    };
+}
 
 class Main extends React.Component {
     componentFor(page) {
@@ -43,10 +62,8 @@ class Main extends React.Component {
     }
 
     render() {
-        const all = [PAGES.CONTRIBUTION, PAGES.DETAILS, PAGES.PAYMENT];
-
         return <div>
-            {all.map(p =>
+            {ALL_PAGES.map(p =>
                 <section className={'contribute-section ' + (this.props.page === p ? 'current' : '')} key={p}>
                     <div className="contribute-form__heading">
                         <Title page={p}/>
@@ -63,25 +80,6 @@ class Main extends React.Component {
             )}
             </div>;
     }
-}
-
-function mapStateToProps(state) {
-    return {
-        page: state.page,
-        details: state.details,
-        card: state.card
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        goBack: () => dispatch({ type: GO_BACK }),
-        goForward: () => dispatch({ type: GO_FORWARD }),
-        setAmount: a => dispatch({ type: SET_AMOUNT, amount: a }),
-        updateDetails: d => dispatch({ type: UPDATE_DETAILS, details: d }),
-        updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
-        pay: () => dispatch({ type: PAY })
-    };
 }
 
 export default connect(

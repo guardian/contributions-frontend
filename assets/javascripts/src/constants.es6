@@ -5,3 +5,5 @@ export const PAGES = {
     PROCESSING: 4,
     GRATS: 5
 };
+
+export const ALL_PAGES = [PAGES.CONTRIBUTION, PAGES.DETAILS, PAGES.PAYMENT];
