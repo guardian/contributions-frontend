@@ -17,6 +17,7 @@ module.exports = {
                 loader: 'babel',
                 query: {
                     presets: ['es2015'],
+                    plugins: ['transform-object-rest-spread'],
                     cacheDirectory: ''
                 }
             },
@@ -27,6 +28,7 @@ module.exports = {
                 loader: 'babel',
                 query: {
                     presets: ['react', 'es2015'],
+                    plugins: ['transform-object-rest-spread'],
                     cacheDirectory: ''
                 }
             }
