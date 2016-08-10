@@ -18,6 +18,7 @@ class Main extends React.Component {
         switch (page) {
             case PAGES.CONTRIBUTION:
                 return <Contribution amounts={[25, 50, 100, 250]}
+                                     max={2000}
                                      symbol="£"
                                      setAmount={this.props.setAmount}
                                      currentAmount={this.props.card.amount} />;
@@ -56,7 +57,7 @@ class Main extends React.Component {
                           onSubmit={this.submit.bind(this)} key={p}>
 
                         {this.componentFor(p)}
-                        <Navigation page={this.props.page} goBack={this.props.goBack} />
+                        <Navigation page={this.props.page} goBack={this.props.goBack} amount={this.props.card.amount} />
                     </form>
                 </section>
             )}

@@ -4,7 +4,11 @@ function setNoAmountError() {
     document.getElementById("custom-amount").setCustomValidity("Please select a contribution amount.");
 }
 
-function clearNoAmountError() {
+function setMaxContributionError(symbol, max) {
+    document.getElementById("custom-amount").setCustomValidity(`We are presently only able to accept contributions of ${symbol}${max} or less.`);
+}
+
+function clearError() {
     document.getElementById("custom-amount").setCustomValidity("");
 }
 
@@ -33,10 +37,7 @@ export default class Contribution extends React.Component {
 
     handleBlur() {
         this.setState({ highlightButton: true });
-
-        if (!!this.state.inputAmount) {
-            this.props.setAmount(this.state.inputAmount);
-        }
+        this.props.setAmount(this.state.inputAmount);
     }
 
     handleClick(amount) {
@@ -49,11 +50,15 @@ export default class Contribution extends React.Component {
     }
 
     setValidation() {
-        if (!this.props.currentAmount || this.props.currentAmount === 0) {
-            setNoAmountError();
-        } else {
-            clearNoAmountError();
+        if (this.state.inputAmount > this.props.max) {
+            return setMaxContributionError(this.props.symbol, this.props.max);
         }
+
+        if (!this.state.inputAmount && (!this.props.currentAmount || this.props.currentAmount === 0)) {
+            return setNoAmountError();
+        }
+
+        clearError();
     }
 
     componentDidMount() {
@@ -84,9 +89,6 @@ export default class Contribution extends React.Component {
                        onFocus={this.handleFocus.bind(this)}
                        onBlur={this.handleBlur.bind(this)} />
             </span>
-
-
-            <div className="fieldset__note">We are presently only able to accept contributions of £2000 or less</div>
         </div>;
     }
 }

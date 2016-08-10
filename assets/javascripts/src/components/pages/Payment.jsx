@@ -12,17 +12,21 @@ export default class Payment extends React.Component {
                         pattern="[0-9]*" placeholder="0000 0000 0000 0000" maxLength="19" autoComplete="off"
                         required autoFocus />
 
-            <InputField label="Expiry"
-                        type="text"
-                        value={this.props.card.expiry}
-                        onChange={event => this.props.updateCard({ expiry: event.target.value })}
-                        required />
+            <div className="flex-horizontal">
+                <InputField label="Expiry date"
+                            type="text"
+                            value={this.props.card.expiry}
+                            onChange={event => this.props.updateCard({ expiry: event.target.value })}
+                            halfWidth
+                            required />
 
-            <InputField label="Security code"
-                        type="text"
-                        value={this.props.card.cvc}
-                        onChange={event => this.props.updateCard({ cvc: event.target.value })}
-                        required />
+                <InputField label="Security code"
+                            type="text"
+                            value={this.props.card.cvc}
+                            onChange={event => this.props.updateCard({ cvc: event.target.value })}
+                            halfWidth
+                            required />
+            </div>
         </div>
     }
 }
