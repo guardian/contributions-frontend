@@ -34,6 +34,7 @@ object SentryLogging {
         val sentryAppender = new SentryAppender(RavenFactory.ravenInstance(dsn)) {
           addFilter(filter)
           setTags(tagsString)
+          setRelease(app.BuildInfo.gitCommitId)
           setExtraTags(AllMDCTags.mkString(","))
           setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
         }
