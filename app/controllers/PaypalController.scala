@@ -37,8 +37,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices) extends C
 
   def authorize = NoCacheAction { implicit request =>
     paypalForm.bindFromRequest().fold[Result](
-      hasErrors = form =>
-        handleError(form.errors.mkString(",")),
+      hasErrors = form => handleError(form.errors.mkString(",")),
       success = form => {
         val paypalService = paymentServices.paypalServiceFor(request)
         val maxAllowedAmount = configuration.Payment.maxAmountFor(form.countryGroup.currency)

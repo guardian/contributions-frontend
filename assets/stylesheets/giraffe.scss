@@ -389,7 +389,9 @@ $desktop-col-padding-right: 16px;
 }
 .paypal {
     background-repeat: no-repeat;
+    background-size: 100px;
     background-image: url('/assets/images/form/pp-logo-100px.png');
+    background-image: url('/assets/images/form/PayPal.svg');
     background-position: left 130px center;
     }
 
@@ -411,6 +413,28 @@ $desktop-col-padding-right: 16px;
         width: 30px;
         height: 28px;
         background-image: svg-url('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><path fill="black" stroke="black" d="M22.8 14.6L15.2 7l-.7.7 5.5 6.6H6v1.5h14l-5.5 6.6.7.7 7.6-7.6v-.9"/></svg>');
+        background-size: 100%;
+        float: right;
+    }
+}
+.selected-method-mobile {
+    background-repeat: no-repeat;
+    margin-top: 10px;
+    background-color: transparent;
+    color: black;
+
+    &:hover {
+        background-color: transparent;
+        color: black;
+    }
+
+    &:after {
+        content: '';
+        display: inline-block;
+        background-repeat: no-repeat;
+        width: 30px;
+        height: 28px;
+        background-image: svg-url('<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 28 28"><path fill="green" stroke="green" d="M7.885 25.741L0 14.821l3.219-3.218 5.082 5.136 16.393-14.48L28 5.566"/></svg>');
         background-size: 100%;
         float: right;
     }

@@ -83,10 +83,9 @@ export function init() {
 }
 
 function showPaymentDetailsMobile() {
-//todo if we use this the name of the css class should change
-$('.js-details').removeClass('hiddenInMobile')
-$('.js-payment').removeClass('hiddenInMobile')
-//$('.hiddenInMobile').each( c => $(c).removeClass('hiddenInMobile'));
+    $('.js-details').removeClass('hiddenInMobile')
+    $('.js-payment').removeClass('hiddenInMobile')
+    $MOBILE_CARD_PAYMENT_BUTTON.addClass('selected-method-mobile')
 }
 
 function payWithPaypal() {
