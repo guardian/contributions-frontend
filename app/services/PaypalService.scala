@@ -23,14 +23,14 @@ object PaypalApiConfig {
 }
 
 class PaypalService(config: PaypalApiConfig) {
+  val description = "Contribution to the guardian"
   val credentials = config.credentials
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
   //TODO SEE IF THERE IS A BETTER WAY OF DEALING WITH ERRORS
   def getAuthUrl(amount: BigDecimal, countryGroup: CountryGroup, transactionId: String): Either[String, String] = {
-    val description = "Contribution to the guardian"
-    //TODO see if there is already a way of getting the base url for contributions frontend
+    //TODO see if there is another way of getting the base url for contributions frontend
     val cancelUrl = config.baseReturnUrl
     val returnUrl = s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute"
     val currencyCode = countryGroup.currency.toString
@@ -43,8 +43,7 @@ class PaypalService(config: PaypalApiConfig) {
     transaction.setCustom(transactionId)
     transaction.setItemList(itemList)
 
-    val transactions = new util.ArrayList[Transaction]()
-    transactions.add(transaction)
+    val transactions = List(transaction).asJava
 
     val payer = new Payer().setPaymentMethod("paypal")
     val redirectUrls = new RedirectUrls().setCancelUrl(cancelUrl).setReturnUrl(returnUrl)

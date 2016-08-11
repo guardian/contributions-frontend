@@ -1,29 +1,23 @@
 package controllers
 
-import java.net.URLDecoder
-import java.util
-
 import actions.CommonActions._
-import com.gu.i18n.{CountryGroup, Currency, GBP}
+import com.gu.i18n.CountryGroup
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Controller, Result}
-
-import scala.concurrent.Future
 import utils.Formatters.countryGroupFormatter
 import play.api.data.format.Formats._
 import services.{PaymentServices}
+import play.api.Logger
+
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices) extends Controller {
   def executePayment(countryGroup: CountryGroup, paymentId: String, token: String, payerId: String) = NoCacheAction { implicit request =>
     val paypalService = paymentServices.paypalServiceFor(request)
     paypalService.executePayment(paymentId, token, payerId) match {
       case Right(_) => Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
-      //TODO show proper error message
-      case Left(error) => Ok(s"payment did not work: $error")
+      case Left(error) => handleError(s"Error executing PayPal payment: $error")
     }
   }
 
@@ -43,21 +37,26 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices) extends C
 
   def authorize = NoCacheAction { implicit request =>
     paypalForm.bindFromRequest().fold[Result](
-      //TODO redirect to some error page here
-      formWithErrors => BadRequest(JsArray(formWithErrors.errors.map(k => JsString(k.key)))),
-      form => {
+      hasErrors = form =>
+        handleError(form.errors.mkString(",")),
+      success = form => {
         val paypalService = paymentServices.paypalServiceFor(request)
-        val authResponse = paypalService.getAuthUrl(form.amount, form.countryGroup, form.transactionId)
+        val maxAllowedAmount = configuration.Payment.maxAmountFor(form.countryGroup.currency)
+        val amount = form.amount.min(maxAllowedAmount)
+        val authResponse = paypalService.getAuthUrl(amount, form.countryGroup, form.transactionId)
         authResponse match {
           case Right(url) => Redirect(url, SEE_OTHER)
-          //TODO see what to show on error
-          case Left(error) => Ok(s"errorMsg:$error")
+          case Left(error) => handleError(s"Error getting PayPal auth url: $error")
         }
       }
     )
   }
 
-  //val PaymentError(error) = OK("PAYMENT ERROR PAGE HERE!")
+  //TODO see what to do on error
+  def handleError(error: String) = {
+    Logger.error(error)
+    Ok(s"Error: $error")
+  }
 
 
   //TODO this should be somewhere else ( maybe a lambda?)
