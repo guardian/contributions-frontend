@@ -23,3 +23,5 @@ GET            /:countryGroup               controllers.Giraffe.contribute(count
 GET            /:countryGroup/thank-you    controllers.Giraffe.thanks(countryGroup: com.gu.i18n.CountryGroup)
 
 POST           /pay                        controllers.Giraffe.pay
+GET            /user/me                    controllers.Giraffe.getUser
+

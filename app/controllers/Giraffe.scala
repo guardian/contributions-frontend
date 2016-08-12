@@ -6,8 +6,10 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 import actions.CommonActions.NoCacheAction
+import com.gu.googleauth.AuthenticatedRequest
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
+import com.gu.identity.play.IdUser
 import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Serializer._
 import com.netaporter.uri.dsl._
@@ -18,42 +20,47 @@ import play.api.data.{FieldMapping, Form, FormError}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
-import services.PaymentServices
+import play.mvc.Security.AuthenticatedAction
+import services.{IdentityApi, IdentityService, PaymentServices}
 import utils.RequestCountry._
 import views.support._
 
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
   val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError],JsValue] = {
-      val parse: JsValue = Json.parse(URLDecoder.decode(data(key),StandardCharsets.UTF_8.name()))
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], JsValue] = {
+      val parse: JsValue = Json.parse(URLDecoder.decode(data(key), StandardCharsets.UTF_8.name()))
       Right(parse)
     }
-    override def unbind(key: String, data: JsValue): Map[String,String] = Map()
+
+    override def unbind(key: String, data: JsValue): Map[String, String] = Map()
 
   }
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
+
     override def bind(key: String, data: Map[String, String]): Result =
       data.get(key).map(_.toUpperCase).flatMap(Currency.fromString).fold[Result](Left(Seq.empty))(currency => Right(currency))
+
     override def unbind(key: String, value: Currency): Map[String, String] =
       Map(key -> value.identifier)
   }
 
   case class SupportForm(
-      firstName: String,
-      lastName: String,
-      currency: Currency,
-      amount: BigDecimal,
-      email: String,
-      token: String,
-      marketing: Boolean,
-      postCode: Option[String],
-      abTests: JsValue,
-      ophanId: String,
-      cmp: Option[String],
-      intcmp: Option[String])
+                          firstName: String,
+                          lastName: String,
+                          currency: Currency,
+                          amount: BigDecimal,
+                          email: String,
+                          token: String,
+                          marketing: Boolean,
+                          postCode: Option[String],
+                          abTests: JsValue,
+                          ophanId: String,
+                          cmp: Option[String],
+                          intcmp: Option[String])
 
 
   val supportForm: Form[SupportForm] = Form(
@@ -121,7 +128,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
     val maxAmountInLocalCurrency = maxAmountFor(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
+    Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
@@ -146,7 +153,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
     supportForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
       Future.successful(BadRequest(JsArray(withErrors.errors.map(k => JsString(k.key)))))
-    },{ f =>
+    }, { f =>
       val metadata = Map(
         "marketing-opt-in" -> f.marketing.toString,
         "email" -> f.email,
@@ -156,7 +163,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         "ophanId" -> f.ophanId,
         "cmp" -> f.cmp.mkString,
         "intcmp" -> f.intcmp.mkString
-      )  ++ f.postCode.map("postcode" -> _)
+      ) ++ f.postCode.map("postcode" -> _)
 
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
@@ -179,13 +186,43 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       }
     })
   }
-}
+
+  def makeIdentityAPIcall(request: Request[AnyContent]) = {
+    val headers = List("X-GU-ID-Client-Access-Token" -> s"Bearer ${Config.idApiClientToken}") ++
+      request.cookies.get("SC_GU_U").map(_.value).map("X-GU-ID-FOWARDED-SC-GU-U" -> _) ++
+      request.headers.get("GU-IdentityToken").map("Authorization" -> _)
+
+    val trackingParameters = List() ++
+      request.headers.get("Referer").map("trackingReferer" -> _) ++
+      request.headers.get("User-Agent").map("trackingUserAgent" -> _)
+
+    IdentityApi.get(s"user/21840407", headers, trackingParameters)
+
+    }
 
 
-object CreditCardExpiryYears {
-  def apply(currentYear: Int, offset: Int): List[Int] = {
-    val currentYearShortened = currentYear % 100
-    val subsequentYears = (currentYearShortened to currentYearShortened + offset - 2) map { _ + 1}
-    currentYearShortened :: subsequentYears.toList
+  def getUser = NoCacheAction { implicit request =>
+   val x = getIdentityUser(request).getOrElse("Nothing")
+    Ok(x)
   }
+
+
+  def getIdentityUser(request: Request[AnyContent]) = {
+    for {
+      idUser <- Await.result(makeIdentityAPIcall(request), Duration(1000, "millis"))
+    } yield {
+      IdentityUser(idUser, true).privateFields.firstName.getOrElse("None")
+    }
+  }
+
+  object CreditCardExpiryYears {
+    def apply(currentYear: Int, offset: Int): List[Int] = {
+      val currentYearShortened = currentYear % 100
+      val subsequentYears = (currentYearShortened to currentYearShortened + offset - 2) map {
+        _ + 1
+      }
+      currentYearShortened :: subsequentYears.toList
+    }
+  }
+
 }

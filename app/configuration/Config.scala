@@ -14,6 +14,9 @@ object Config {
   val facebookAppId = config.getString("facebook.app.id")
   val idWebAppUrl = config.getString("identity.webapp.url")
 
+  val idApiUrl = config.getString("identity.api.url")
+  val idApiClientToken = config.getString("identity.api.client.token")
+
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
   val stageDev: Boolean = stage == "DEV"

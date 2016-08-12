@@ -33,6 +33,7 @@ val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
 val scalaz = "org.scalaz" %% "scalaz-core" % "7.1.1"
 val membershipCommon = "com.gu" %% "membership-common" % "0.225"
 val sentryRavenLogback = "com.getsentry.raven" % "raven-logback" % "7.6.0"
+val dispatch = "net.databinder.dispatch" %% "dispatch-core" % "0.11.3"
 val memsubCommonPlayAuth = "com.gu" %% "memsub-common-play-auth" % "1.0"
 libraryDependencies ++= Seq(
   cache,
@@ -41,6 +42,7 @@ libraryDependencies ++= Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
     scalaUri,
     scalaz,
+    dispatch,
     membershipCommon,
     sentryRavenLogback,
     memsubCommonPlayAuth,
