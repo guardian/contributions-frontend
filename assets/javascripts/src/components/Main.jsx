@@ -17,7 +17,8 @@ function mapStateToProps(state) {
     return {
         page: state.page,
         details: state.details,
-        card: state.card
+        card: state.card,
+        symbol: '£'
     };
 }
 
@@ -38,7 +39,7 @@ class Main extends React.Component {
             case PAGES.CONTRIBUTION:
                 return <Contribution amounts={[25, 50, 100, 250]}
                                      max={2000}
-                                     symbol="£"
+                                     symbol={this.props.symbol}
                                      setAmount={this.props.setAmount}
                                      currentAmount={this.props.card.amount} />;
 
@@ -74,7 +75,11 @@ class Main extends React.Component {
                           onSubmit={this.submit.bind(this)} key={p}>
 
                         {this.componentFor(p)}
-                        <Navigation page={this.props.page} goBack={this.props.goBack} amount={this.props.card.amount} />
+                        <Navigation
+                            page={this.props.page}
+                            goBack={this.props.goBack}
+                            amount={this.props.card.amount}
+                            symbol={this.props.symbol} />
                     </form>
                 </section>
             )}

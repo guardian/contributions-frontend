@@ -4,8 +4,12 @@ import InputField from '../InputField.jsx';
 import CardIcon from '../CardIcon.jsx';
 
 export default class Payment extends React.Component {
-    updateExpiry(event) {
-        this.props.updateCard({ expiry: event.target.value });
+    formatExpiry(expiry) {
+        if (expiry.length >= 3 && expiry.indexOf('/') === -1) {
+            return expiry.slice(0, 2) + '/' + expiry.slice(2);
+        }
+
+        return expiry;
     }
 
     validateCardNumber(event) {
@@ -52,12 +56,12 @@ export default class Payment extends React.Component {
                 <InputField label="Expiry date"
                             type="text"
                             value={this.props.card.expiry}
-                            onChange={this.updateExpiry.bind(this)}
+                            onChange={event => this.props.updateCard({ expiry: this.formatExpiry(event.target.value) })}
                             onBlur={this.validateExpiry.bind(this)}
                             className="center-text"
                             outerClassName="half-width"
                             placeholder="MM/YY"
-                            maxLength="7"
+                            maxLength="5"
                             tabIndex="14"
                             required />
 
