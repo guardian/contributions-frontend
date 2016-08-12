@@ -63,15 +63,16 @@ $current-indicator: rem(72px);
 
 /* Payment Cards Sprite
    ========================================================================== */
+$sprite-card-ratio: 71/108;
 
-$sprite-card-width: 108px; // target = 35 aka n/3
-$sprite-card-height: 70px;
-$sprite-card-offset-american-express:        0;
-$sprite-card-offset-diners-club:         -71px;
-$sprite-card-offset-discover:           -142px;
-$sprite-card-offset-jcb:                -213px;
-$sprite-card-offset-mastercard:         -284px;
-$sprite-card-offset-visa:               -355px;
+$sprite-card-width: 80px; // target = 35 aka n/3
+$sprite-card-height: $sprite-card-width * $sprite-card-ratio;
+$sprite-card-offset-american-express:   0;
+$sprite-card-offset-diners-club:        -($sprite-card-height);
+$sprite-card-offset-discover:           -($sprite-card-height * 2);
+$sprite-card-offset-jcb:                -($sprite-card-height * 3);
+$sprite-card-offset-mastercard:         -($sprite-card-height * 4);
+$sprite-card-offset-visa:               -($sprite-card-height * 5);
 
 // by default we scale the 2x image down by half
 // for retina displays
@@ -82,6 +83,7 @@ $sprite-card-offset-visa:               -355px;
     background-size: $sprite-card-width/2 auto; // scales 2x image down
     width: $sprite-card-width/2;
     height: $sprite-card-height/2;
+    border-radius: $sprite-card-width / 20; // gives the card rounded corners
 }
 
 .sprite-card--american-express { background-position: 0 $sprite-card-offset-american-express/2; }

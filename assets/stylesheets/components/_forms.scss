@@ -425,24 +425,10 @@ input[type=radio]:checked ~ .pseudo-radio {
 /* ==========================================================================
    Payment credit card types
    ========================================================================== */
-
-$small-card: 32px;
-$large-card: 35px;
-$card-icon-offset: 1px;
-
-.credit-card-container {
-    position: relative;
-}
-
-.credit-card {
-    width: 54px;
-    height: $large-card;
-}
-
 .credit-card--input-visualisation {
     position: absolute;
-    right: $card-icon-offset;
-    top: $card-icon-offset;
+    top: 29px;
+    right: 13px;
 }
 
 
@@ -457,11 +443,6 @@ $card-icon-offset: 1px;
 .credit-card-note__header {
     @include fs-textSans(3);
     color: $c-neutral1;
-}
-
-.credit-card-input {
-    // bit messy but needs to account for outline plus icon offset
-    height: ($large-card + $card-icon-offset + 2px);
 }
 
 /* ==========================================================================

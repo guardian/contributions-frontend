@@ -1,6 +1,7 @@
 import React from 'react';
 
 import InputField from '../InputField.jsx';
+import CardIcon from '../CardIcon.jsx';
 
 export default class Payment extends React.Component {
     render() {
@@ -10,21 +11,23 @@ export default class Payment extends React.Component {
                         onChange={event => this.props.updateCard({ number: event.target.value })}
                         tabIndex="13" size="20" id="cc-num" data-stripe="number"
                         pattern="[0-9]*" placeholder="0000 0000 0000 0000" maxLength="19" autoComplete="off"
-                        required autoFocus />
+                        outerClassName="with-card-icon" required autoFocus>
+                <CardIcon number={this.props.card.number} />
+            </InputField>
 
             <div className="flex-horizontal">
                 <InputField label="Expiry date"
                             type="text"
                             value={this.props.card.expiry}
                             onChange={event => this.props.updateCard({ expiry: event.target.value })}
-                            halfWidth
+                            outerClassName="half-width"
                             required />
 
                 <InputField label="Security code"
                             type="text"
                             value={this.props.card.cvc}
                             onChange={event => this.props.updateCard({ cvc: event.target.value })}
-                            halfWidth
+                            outerClassName="half-width"
                             required />
             </div>
         </div>
