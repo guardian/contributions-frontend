@@ -311,6 +311,10 @@
         border-color: $c-border-brand;
     }
 
+    &.center-text {
+        text-align: center;
+    }
+
     @include mq(tablet) {
         font-size: 14px;
     }

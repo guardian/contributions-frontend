@@ -6,7 +6,7 @@ export default class InputField extends React.Component {
 
         return <div className={outerClassName || ''}>
             <label htmlFor={this.props.id} className="label">{this.props.label}</label>
-            <input {...props} className='input-text contribute-controls__input' />
+            <input {...props} className={'input-text contribute-controls__input ' + (props.className || '')} />
             {children}
         </div>;
     }

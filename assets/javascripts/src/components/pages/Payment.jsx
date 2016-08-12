@@ -4,6 +4,10 @@ import InputField from '../InputField.jsx';
 import CardIcon from '../CardIcon.jsx';
 
 export default class Payment extends React.Component {
+    updateExpiry(event) {
+        this.props.updateCard({ expiry: event.target.value });
+    }
+
     validateCardNumber(event) {
         if (this.props.card.number && !Stripe.card.validateCardNumber(this.props.card.number)) {
             event.target.setCustomValidity('Please enter a valid card number.');
@@ -48,9 +52,13 @@ export default class Payment extends React.Component {
                 <InputField label="Expiry date"
                             type="text"
                             value={this.props.card.expiry}
-                            onChange={event => this.props.updateCard({ expiry: event.target.value })}
+                            onChange={this.updateExpiry.bind(this)}
                             onBlur={this.validateExpiry.bind(this)}
+                            className="center-text"
                             outerClassName="half-width"
+                            placeholder="MM/YY"
+                            maxLength="7"
+                            tabIndex="14"
                             required />
 
                 <InputField label="Security code"
@@ -58,7 +66,9 @@ export default class Payment extends React.Component {
                             value={this.props.card.cvc}
                             onChange={event => this.props.updateCard({ cvc: event.target.value })}
                             onBlur={this.validateCVC.bind(this)}
+                            className="center-text"
                             outerClassName="half-width"
+                            tabIndex="15"
                             required />
             </div>
         </div>
