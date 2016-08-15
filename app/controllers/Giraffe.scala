@@ -102,8 +102,8 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     case _ => None
   }
 
-  def contribute(countryGroup: CountryGroup, errorCode: Option[String] = None) = NoCacheAction { implicit request =>
-    val errorMessage = getErrorMessage(errorCode)
+  def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
+    val errorMessage = error.map(_.message)
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")

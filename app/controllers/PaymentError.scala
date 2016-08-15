@@ -1,0 +1,16 @@
+package controllers
+
+sealed trait PaymentError {
+  def message: String
+}
+
+object PaymentError {
+  val allErrors: Map[String, PaymentError] = Map(PaypalError.toString -> PaypalError)
+
+  def fromString(errorCode: String): Option[PaymentError] = allErrors.get(errorCode)
+}
+
+case object PaypalError extends PaymentError {
+  override def message: String = "Your contribution using paypal could not be processed. Please try again or use another payment method."
+
+}

@@ -14,16 +14,16 @@ GET            /assets/*file                    controllers.Assets.versioned(pat
 GET            /                                controllers.Giraffe.contributeRedirect
 GET            /healthcheck                     controllers.Healthcheck.healthcheck
 POST           /paypal/auth                     controllers.PaypalController.authorize
-GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup:com.gu.i18n.CountryGroup,paymentId,token,PayerID)
+GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID)
 
 
 
 GET            /ca                              controllers.Giraffe.redirectToUk
 GET            /nz                              controllers.Giraffe.redirectToUk
 GET            /int                             controllers.Giraffe.redirectToUk
-GET            /:countryGroup                   controllers.Giraffe.contribute(countryGroup: com.gu.i18n.CountryGroup, error_code:Option[String]?=None)
+GET            /:countryGroup                   controllers.Giraffe.contribute(countryGroup: CountryGroup, error_code: Option[PaymentError]?=None)
 
-GET            /:countryGroup/thank-you         controllers.Giraffe.thanks(countryGroup: com.gu.i18n.CountryGroup)
+GET            /:countryGroup/thank-you         controllers.Giraffe.thanks(countryGroup: CountryGroup)
 
 POST           /pay                             controllers.Giraffe.pay
 

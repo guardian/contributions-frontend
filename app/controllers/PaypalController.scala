@@ -15,7 +15,6 @@ import scala.util.Right
 
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, transactionUtils :TransactionUtils) extends Controller {
-  val PaypalErrorCode = "paypalError"
 
   implicit val countryGroupFormatter = new Formatter[CountryGroup] {
     type Result = Either[Seq[FormError], CountryGroup]
@@ -66,6 +65,6 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, transacti
 
   def handleError(countryGroup: CountryGroup, error: String) = {
     Logger.error(error)
-    Redirect(routes.Giraffe.contribute(countryGroup, Some(PaypalErrorCode)).url, SEE_OTHER)
+    Redirect(routes.Giraffe.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
   }
 }

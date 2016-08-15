@@ -27,7 +27,7 @@ sources in (Compile,doc) := Seq.empty
 
 publishArtifact in (Compile, packageDoc) := false
 
-play.sbt.routes.RoutesKeys.routesImport += "controllers.Binders._"
+play.sbt.routes.RoutesKeys.routesImport ++= Seq("controllers.Binders._", "com.gu.i18n.CountryGroup", "controllers.PaymentError")
 scalaVersion := "2.11.7"
 val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
 val scalaz = "org.scalaz" %% "scalaz-core" % "7.1.1"
