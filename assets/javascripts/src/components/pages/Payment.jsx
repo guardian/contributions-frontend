@@ -45,9 +45,10 @@ export default class Payment extends React.Component {
 
             <InputField label="Card number" type="text" value={this.props.card.number}
                         onChange={event => this.props.updateCard({ number: event.target.value })}
+                        onKeyDown={event => this.clearValidation(event.target)}
                         onBlur={this.validateCardNumber.bind(this)}
                         tabIndex="13" size="20" id="cc-num" data-stripe="number"
-                        pattern="[0-9]*" placeholder="0000 0000 0000 0000" maxLength="19" autoComplete="off"
+                        pattern="[0-9 ]*" placeholder="0000 0000 0000 0000" maxLength="19" autoComplete="off"
                         outerClassName="with-card-icon" required autoFocus>
                 <CardIcon number={this.props.card.number} />
             </InputField>
@@ -57,6 +58,7 @@ export default class Payment extends React.Component {
                             type="text"
                             value={this.props.card.expiry}
                             onChange={event => this.props.updateCard({ expiry: this.formatExpiry(event.target.value) })}
+                            onKeyDown={event => this.clearValidation(event.target)}
                             onBlur={this.validateExpiry.bind(this)}
                             className="center-text"
                             outerClassName="half-width"
@@ -69,6 +71,7 @@ export default class Payment extends React.Component {
                             type="text"
                             value={this.props.card.cvc}
                             onChange={event => this.props.updateCard({ cvc: event.target.value })}
+                            onKeyDown={event => this.clearValidation(event.target)}
                             onBlur={this.validateCVC.bind(this)}
                             className="center-text"
                             outerClassName="half-width"
