@@ -21,6 +21,9 @@ const $CURRENCY_DISPLAY = $('.js-currency');
 const $CURRENCY_PICKER = $('.js-currency-switcher');
 const $PAY_WITH_PAYPAL = $('#payWithPaypal')
 const $MOBILE_CARD_PAYMENT_BUTTON = $('#mobile-card-payment-button')
+const $ERROR_TRY_AGAIN_BUTTON = $('#error_tryAgain')
+
+
 
 const $AMOUNT_PICKER = $('[data-amount]');
 const CUSTOM_AMOUNT = document.querySelector('.js-amount-field');
@@ -46,7 +49,7 @@ export function init() {
 
     $PAY_WITH_PAYPAL.each(p=>p.addEventListener('click', ev => payWithPaypal()));
     $MOBILE_CARD_PAYMENT_BUTTON.each(p=>p.addEventListener('click', ev => showPaymentDetailsMobile()));
-
+    $ERROR_TRY_AGAIN_BUTTON.each(p=>p.addEventListener('click', ev => showContributionsForm()));
 
     $CURRENCY_PICKER.each(el => el.addEventListener('click', ev => selectCurrencyElement(ev.currentTarget)));
     // Preset amount
@@ -138,6 +141,11 @@ function getStuffFromIdentity() {
             NAME_FIELD.value = resp.user.publicFields.displayName;
         }
     })
+}
+function showContributionsForm() {
+    console.log('something happened');
+    $('.form__container').removeClass('hidden');
+    $('#errorMessage').addClass('hidden');
 }
 
 function ophanId(){

@@ -123,6 +123,7 @@ $desktop-form-width: 936px;
     line-height: 2.8rem;
 }
 
+
 /* desktop */
 
 $tablet-col-padding-left: $gs-gutter/2;
@@ -163,6 +164,15 @@ $tablet-col-padding-right: ($gs-gutter/2) + 1;
         justify-content: space-between;
     }
 
+    .support-wrapper .error_message {
+        padding-left: $tablet-col-padding-left;
+        padding-right: $tablet-col-padding-right;
+        width: 300px;
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
     .support-wrapper .form__column:first-child {
         padding-left: 0;
         border: none;
@@ -387,6 +397,10 @@ $desktop-col-padding-right: 16px;
         display: block;
     }
 }
+
+.hidden {
+    display: none !important;
+}
 .paypal {
     background-repeat: no-repeat;
     background-size: 100px;
@@ -438,6 +452,12 @@ $desktop-col-padding-right: 16px;
         background-size: 100%;
         float: right;
     }
+}
+
+.error_message {
+    background-color: #ffd359;
+    padding: 10px;
+    margin-top: 2px;
 }
 
 .giraffe-container {

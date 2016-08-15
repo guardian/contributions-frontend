@@ -91,7 +91,13 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     Redirect(destinationUrl, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
   }
 
-  def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
+  private def getErrorMessage(errorCode: Option[String]) = errorCode match {
+    case Some("paypalError") => Some("Your contribution using paypal could not be processed. Please try again or use another payment method.")
+    case _ => None
+  }
+
+  def contribute(countryGroup: CountryGroup, errorCode: Option[String] = None) = NoCacheAction { implicit request =>
+    val errorMessage = getErrorMessage(errorCode)
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
@@ -106,7 +112,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     )
     val maxAmountInLocalCurrency = configuration.Payment.maxAmountFor(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears, errorMessage))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2), Test.createCookie(chosenVariants.paymentMethodTest))
 
   }

@@ -1,8 +1,6 @@
 package services
 
-import java.util
-
-import com.gu.i18n.{CountryGroup, Currency}
+import com.gu.i18n.CountryGroup
 import com.paypal.api.payments._
 import com.paypal.base.rest.{APIContext, PayPalRESTException}
 
@@ -66,7 +64,7 @@ class PaypalService(config: PaypalApiConfig) {
     try {
       val createdPayment = payment.execute(apiContext, paymentExecution)
       //todo do I need to check anything in the created payment to make sure nothing failed?
-      Right()
+      Right(Unit)
     } catch {
       case e: PayPalRESTException => Left(e.getMessage)
     }
