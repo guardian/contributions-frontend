@@ -15,7 +15,8 @@ import Navigation from './Navigation.jsx';
 
 function mapStateToProps(state) {
     return {
-        page: state.page,
+        page: state.page.page,
+        processing: state.page.processing,
         details: state.details,
         card: state.card,
         symbol: '£'
@@ -49,8 +50,7 @@ class Main extends React.Component {
 
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}
-                                updateCard={this.props.updateCard}
-                                pay={this.props.pay} />;
+                                updateCard={this.props.updateCard} />;
 
             case PAGES.PROCESSING:
                 return <Processing />;
@@ -59,7 +59,12 @@ class Main extends React.Component {
 
     submit(event) {
         event.preventDefault();
-        this.props.goForward();
+
+        if (this.props.page === PAGES.PAYMENT) {
+            this.props.pay();
+        } else {
+            this.props.goForward();
+        }
     }
 
     render() {
@@ -75,15 +80,18 @@ class Main extends React.Component {
                           onSubmit={this.submit.bind(this)} key={p}>
 
                         {this.componentFor(p)}
+
                         <Navigation
                             page={this.props.page}
                             goBack={this.props.goBack}
                             amount={this.props.card.amount}
-                            symbol={this.props.symbol} />
+                            symbol={this.props.symbol}
+                            processing={this.props.processing}
+                            pay={this.props.pay} />
                     </form>
                 </section>
             )}
-            </div>;
+        </div>;
     }
 }
 
