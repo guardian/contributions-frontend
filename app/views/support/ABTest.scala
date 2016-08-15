@@ -154,7 +154,7 @@ object Test {
   }
 
   def createCookie(variant: TestTrait#Variant): Cookie = {
-    Cookie(variant.testSlug+"_GIRAFFE_TEST", variant.variantSlug, maxAge = Some(1209600))
+    Cookie(variant.testSlug+"_GIRAFFE_TEST", variant.variantSlug, maxAge = Some(604800))
   }
 
   def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
