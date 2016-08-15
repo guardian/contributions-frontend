@@ -9,12 +9,12 @@ import play.api.mvc.{Controller, Result}
 import services.PaymentServices
 import play.api.Logger
 import play.api.data.format.Formatter
-import utils.TransactionUtils
+import utils.TransactionUtil
 
 import scala.util.Right
 
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices, transactionUtils :TransactionUtils) extends Controller {
+class PaypalController(ws: WSClient, paymentServices: PaymentServices, transactionUtil :TransactionUtil) extends Controller {
 
   implicit val countryGroupFormatter = new Formatter[CountryGroup] {
     type Result = Either[Seq[FormError], CountryGroup]
@@ -50,7 +50,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, transacti
     paypalForm.bindFromRequest().fold[Result](
       hasErrors = form => handleError(CountryGroup.UK, form.errors.mkString(",")),
       success = form => {
-        val transactionId = transactionUtils.newTransactionId
+        val transactionId = transactionUtil.newTransactionId
         val paypalService = paymentServices.paypalServiceFor(request)
         val maxAllowedAmount = configuration.Payment.maxAmountFor(form.countryGroup.currency)
         val amount = form.amount.min(maxAllowedAmount)

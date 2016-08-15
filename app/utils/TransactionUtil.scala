@@ -1,10 +1,10 @@
 package utils
 import java.util.UUID
 
-trait TransactionUtils {
+trait TransactionUtil {
   def newTransactionId: String
 }
 
-object SimpleTransactionUtils extends TransactionUtils {
+object TransactionUtilImpl extends TransactionUtil {
   override def newTransactionId: String = UUID.randomUUID.toString
 }
