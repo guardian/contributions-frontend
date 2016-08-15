@@ -1,4 +1,4 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux';
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 
 import pageReducer from 'src/reducers/page';
@@ -13,6 +13,6 @@ let reducer = combineReducers({
 
 const store = createStore(
     reducer,
-    applyMiddleware(thunk)
+    compose(applyMiddleware(thunk), window.devToolsExtension && window.devToolsExtension())
 );
 export default store;
