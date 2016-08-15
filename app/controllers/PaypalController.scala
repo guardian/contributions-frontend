@@ -2,14 +2,13 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup
-import play.api.data.Form
+import play.api.data.{Form, FormError}
 import play.api.data.Forms._
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Controller, Result}
-import utils.Formatters.countryGroupFormatter
-import play.api.data.format.Formats._
 import services.PaymentServices
 import play.api.Logger
+import play.api.data.format.Formatter
 import utils.TransactionUtils
 
 import scala.util.Right
@@ -17,6 +16,17 @@ import scala.util.Right
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, transactionUtils :TransactionUtils) extends Controller {
   val PaypalErrorCode = "paypalError"
+
+  implicit val countryGroupFormatter = new Formatter[CountryGroup] {
+    type Result = Either[Seq[FormError], CountryGroup]
+
+    override def bind(key: String, data: Map[String, String]): Result = {
+      data.get(key).flatMap(CountryGroup.byId(_)).fold[Result](Left(Seq.empty))(countryGroup => Right(countryGroup))
+    }
+
+    override def unbind(key: String, value: CountryGroup): Map[String, String] = Map(key -> value.id)
+  }
+
   def executePayment(countryGroup: CountryGroup, paymentId: String, token: String, payerId: String) = NoCacheAction { implicit request =>
     val paypalService = paymentServices.paypalServiceFor(request)
     paypalService.executePayment(paymentId, token, payerId) match {
@@ -58,5 +68,4 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, transacti
     Logger.error(error)
     Redirect(routes.Giraffe.contribute(countryGroup, Some(PaypalErrorCode)).url, SEE_OTHER)
   }
-
 }
