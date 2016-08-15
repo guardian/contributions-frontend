@@ -10,11 +10,12 @@ import utils.Formatters.countryGroupFormatter
 import play.api.data.format.Formats._
 import services.PaymentServices
 import play.api.Logger
+import utils.TransactionUtils
 
 import scala.util.Right
 
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices) extends Controller {
+class PaypalController(ws: WSClient, paymentServices: PaymentServices, transactionUtils :TransactionUtils) extends Controller {
   val PaypalErrorCode = "paypalError"
   def executePayment(countryGroup: CountryGroup, paymentId: String, token: String, payerId: String) = NoCacheAction { implicit request =>
     val paypalService = paymentServices.paypalServiceFor(request)
@@ -26,15 +27,13 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices) extends C
 
   case class PaymentData(
     countryGroup: CountryGroup,
-    amount: BigDecimal,
-    transactionId: String
+    amount: BigDecimal
   )
 
   val paypalForm = Form(
     mapping(
       "countryGroup" -> of[CountryGroup],
-      "amount" -> bigDecimal(10, 2),
-      "transactionId" -> of[String]
+      "amount" -> bigDecimal(10, 2)
     )(PaymentData.apply)(PaymentData.unapply)
   )
 
@@ -42,10 +41,11 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices) extends C
     paypalForm.bindFromRequest().fold[Result](
       hasErrors = form => handleError(CountryGroup.UK, form.errors.mkString(",")),
       success = form => {
+        val transactionId = transactionUtils.newTransactionId
         val paypalService = paymentServices.paypalServiceFor(request)
         val maxAllowedAmount = configuration.Payment.maxAmountFor(form.countryGroup.currency)
         val amount = form.amount.min(maxAllowedAmount)
-        val authResponse = paypalService.getAuthUrl(amount, form.countryGroup, form.transactionId)
+        val authResponse = paypalService.getAuthUrl(amount, form.countryGroup, transactionId)
         authResponse match {
           case Right(url) => Redirect(url, SEE_OTHER)
           case Left(error) => handleError(form.countryGroup, s"Error getting PayPal auth url: $error")
@@ -58,4 +58,5 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices) extends C
     Logger.error(error)
     Redirect(routes.Giraffe.contribute(countryGroup, Some(PaypalErrorCode)).url, SEE_OTHER)
   }
+
 }

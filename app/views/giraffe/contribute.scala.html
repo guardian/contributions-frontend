@@ -41,8 +41,7 @@
                 <div class="form__switcher">
                     <a href="#" class="js-switcher-contribute form__container--active" data-switches="js-contribution"></a> <a class="js-switcher-details" href="#" data-switches="js-details"></a> <a class="js-switcher-pay" href="#" data-switches="js-payment"></a>
                 </div>
-                    <!--todo get the real transaction id here-->
-                @fragments.giraffe.paypalForm(countryGroup, "fake-tx-id")
+                @fragments.giraffe.paypalForm(countryGroup)
                 <form id="form" class="form js-form" role="main" method="POST" autocomplete="on" novalidate action="@routes.Giraffe.pay()">
                     @fragments.giraffe.abFormTrack(chosenVariants)
 
