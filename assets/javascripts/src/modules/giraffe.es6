@@ -143,7 +143,6 @@ function getStuffFromIdentity() {
     })
 }
 function showContributionsForm() {
-    console.log('something happened');
     $('.form__container').removeClass('hidden');
     $('#errorMessage').addClass('hidden');
 }
