@@ -38,6 +38,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   case class AbTest(testName: String, testSlug: String, variantName: String, variantSlug: String)
 
+  object AbTest {
+    implicit val abTestFormat = Json.format[AbTest]
+  }
+
   case class SupportForm(
                           name: String,
                           currency: Currency,
@@ -151,7 +155,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         "marketing-opt-in" -> f.marketing.toString,
         "email" -> f.email,
         "name" -> f.name,
-        "abTests" -> f.abTests.toString,
+        "abTests" -> Json.toJson(f.abTests).toString,
         "ophanId" -> f.ophanId,
         "cmp" -> f.cmp.mkString,
         "intcmp" -> f.intcmp.mkString
