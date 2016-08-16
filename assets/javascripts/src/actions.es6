@@ -1,6 +1,7 @@
 import 'whatwg-fetch';
 
 import store from 'src/store';
+import { urls } from 'src/constants';
 import * as stripe from 'src/modules/stripe';
 
 export const SET_AB_TESTS = "SET_AB_TESTS";
@@ -16,20 +17,19 @@ export const PAYMENT_COMPLETE = "PAYMENT_COMPLETE";
 export const PAYMENT_ERROR = "PAYMENT_ERROR";
 
 export function submitPayment(dispatch) {
-    return function(dispatch) {
-        const state = store.getState();
+    const state = store.getState();
 
-        dispatch({ type: SUBMIT_PAYMENT });
+    dispatch({ type: SUBMIT_PAYMENT });
 
-        stripe.createToken(state.card)
-            .then(token => paymentFormData(state, token))
-            .then(data => fetch('/pay', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }))
-            .then(response => console.log(response));
-    };
+    stripe.createToken(state.card)
+        .then(token => paymentFormData(state, token))
+        .then(data => fetch(urls.pay, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }))
+        .then(() => dispatch({ type: PAYMENT_COMPLETE }))
+        .catch(error => dispatch({ type: PAYMENT_ERROR, error: error }));
 }
 
 /**

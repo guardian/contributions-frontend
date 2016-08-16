@@ -30,7 +30,7 @@ function mapDispatchToProps(dispatch) {
         setAmount: a => dispatch({ type: SET_AMOUNT, amount: a }),
         updateDetails: d => dispatch({ type: UPDATE_DETAILS, details: d }),
         updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
-        pay: () => dispatch(submitPayment())
+        pay: () => dispatch(submitPayment)
     };
 }
 
