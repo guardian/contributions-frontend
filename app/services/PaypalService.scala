@@ -26,7 +26,6 @@ class PaypalService(config: PaypalApiConfig) {
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  //TODO SEE IF THERE IS A BETTER WAY OF DEALING WITH ERRORS RATHER THAN RETURNING EITHER
   def getAuthUrl(amount: BigDecimal, countryGroup: CountryGroup, transactionId: String): Either[String, String] = {
     //TODO see if there is another way of getting the base url for contributions frontend
     val cancelUrl = config.baseReturnUrl

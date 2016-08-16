@@ -47,7 +47,7 @@ object PaymentServices {
   def stripeServicesFor(stripeConfig: Config):Map[Mode, StripeService]  =
     Mode.all.map(mode => mode -> stripeServiceFor(stripeConfig, mode)).toMap
 
-  def paypalServiceFor(paypalConfig:Config, universe:Mode):PaypalService = {
+  def paypalServiceFor(paypalConfig: Config, universe: Mode): PaypalService = {
     val paypalMode = paypalConfig.getString(universe.name)
     val keys = paypalConfig.getConfig(paypalMode)
     val apiConfig = PaypalApiConfig.from(keys, paypalMode)

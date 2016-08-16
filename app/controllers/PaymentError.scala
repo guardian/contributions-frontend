@@ -11,6 +11,5 @@ object PaymentError {
 }
 
 case object PaypalError extends PaymentError {
-  override def message: String = "Your contribution using paypal could not be processed. Please try again or use another payment method."
-
+  override def message = "Your contribution using PayPal could not be processed. Please try again or use pay by card."
 }
