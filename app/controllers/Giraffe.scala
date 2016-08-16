@@ -36,10 +36,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       Map(key -> value.identifier)
   }
 
-  case class AbTest(testName: String, testSlug: String, variantName: String, variantSlug: String)
+  case class JsonAbTest(testName: String, testSlug: String, variantName: String, variantSlug: String)
 
-  object AbTest {
-    implicit val abTestFormat = Json.format[AbTest]
+  object JsonAbTest {
+    implicit val abTestFormat = Json.format[JsonAbTest]
   }
 
   case class SupportForm(
@@ -50,7 +50,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
                           token: String,
                           marketing: Boolean,
                           postCode: Option[String],
-                          abTests: Set[AbTest],
+                          abTests: Set[JsonAbTest],
                           ophanId: String,
                           cmp: Option[String],
                           intcmp: Option[String]
@@ -71,7 +71,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         "testSlug" -> text,
         "variantName" -> text,
         "variantSlug" -> text
-      )(AbTest.apply)(AbTest.unapply)),
+      )(JsonAbTest.apply)(JsonAbTest.unapply)),
       "ophanId" -> text,
       "cmp" -> optional(text),
       "intcmp" -> optional(text)
