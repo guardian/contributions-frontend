@@ -35,7 +35,7 @@ object ProfileLinks {
   val changePassword =  Config.idWebAppUrl / "password/change"
 
   def signOut(path: String) = {
-    Config.idWebAppUrl / "signout" ? ("returnUrl" -> (Config.membershipUrl + path))
+    Config.idWebAppUrl / "signout" ? ("returnUrl" -> (Config.contributeUrl + path))
   }
 
 }
