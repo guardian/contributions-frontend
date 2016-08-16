@@ -8,7 +8,12 @@ const dimensions = {
     ophanBrowserId: 'dimension4',
     platform: 'dimension5',
     identityId: 'dimension6',
-    isLoggedOn: 'dimension7'
+    isLoggedOn: 'dimension7',
+    stripeId: 'dimension8',
+    zouraId: 'dimension9',
+    membershipNumber: 'dimension10',
+    productPurchased: 'dimension11',
+    intcmp: 'dimension12'
 };
 
 function create(){
@@ -54,12 +59,17 @@ export function init() {
     ga('set', dimensions.signedIn, isLoggedIn.toString());
     ga('set', dimensions.isLoggedOn, isLoggedIn.toString());
     ga('set', dimensions.signedOut, signedOut.toString());
-    ga('set', dimensions.platform, 'contributions');
+    ga('set', dimensions.platform, 'membership');
     if (isLoggedIn) {
         ga('set', dimensions.identityId, u.id);
     }
     if (guardian.ophan) {
         ga('set', dimensions.ophanPageViewId, guardian.ophan.pageViewId);
+    }
+    console.log(guardian);
+    debugger;
+    if("productDetails" in guardian) {
+        ga('set',dimensions.stripeId,guardian.productDetails.charge);
     }
     ga('set', dimensions.ophanBrowserId, cookie.getCookie('bwid'));
     //Send the pageview.
@@ -71,8 +81,4 @@ export function init() {
 export function pageView(name) {
     ga('set', 'page', '/#' + name);
     ga('send', 'pageview');
-}
-
-export function event(name) {
-    ga('send', 'event', 'Contribution', name);
 }
