@@ -19,7 +19,8 @@ function mapStateToProps(state) {
         processing: state.page.processing,
         details: state.details,
         card: state.card,
-        symbol: '£'
+        symbol: state.data.currency.symbol,
+        maxAmount: state.data.maxAmount
     };
 }
 
@@ -39,7 +40,7 @@ class Main extends React.Component {
         switch (page) {
             case PAGES.CONTRIBUTION:
                 return <Contribution amounts={[25, 50, 100, 250]}
-                                     max={2000}
+                                     max={this.props.maxAmount}
                                      symbol={this.props.symbol}
                                      setAmount={this.props.setAmount}
                                      currentAmount={this.props.card.amount} />;

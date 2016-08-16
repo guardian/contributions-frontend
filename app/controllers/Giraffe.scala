@@ -162,7 +162,6 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       ) ++ f.postCode.map("postcode" -> _)
       val res = stripe.Charge.create(maxAmount(f.currency).fold((f.amount * 100).toInt)(max => Math.min(max * 100, (f.amount * 100).toInt)), f.currency, f.email, "Your contribution", f.token, metadata)
 
-
       val redirect = f.currency match {
         case USD => routes.Giraffe.thanks(CountryGroup.US).url
         case AUD => routes.Giraffe.thanks(CountryGroup.Australia).url

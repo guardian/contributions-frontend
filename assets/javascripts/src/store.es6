@@ -4,13 +4,13 @@ import thunk from 'redux-thunk';
 import pageReducer from 'src/reducers/page';
 import detailsReducer from 'src/reducers/details';
 import cardReducer from 'src/reducers/card';
-import testReducer from 'src/reducers/abTests';
+import dataReducer from 'src/reducers/data';
 
 let reducer = combineReducers({
     page: pageReducer,
     details: detailsReducer,
     card: cardReducer,
-    abTests: testReducer
+    data: dataReducer
 });
 
 const store = createStore(

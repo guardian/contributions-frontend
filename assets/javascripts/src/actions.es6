@@ -4,7 +4,7 @@ import store from 'src/store';
 import { urls } from 'src/constants';
 import * as stripe from 'src/modules/stripe';
 
-export const SET_AB_TESTS = "SET_AB_TESTS";
+export const SET_DATA = "SET_DATA";
 
 export const GO_BACK = "GO_BACK";
 export const GO_FORWARD = "GO_FORWARD";
@@ -49,7 +49,7 @@ function paymentFormData(state, token) {
         postCode: state.details.postCode,
         abTests: state.abTests,
         ophanId: 1,
-        cmp: '',
-        intcmp: ''
+        cmp: state.data.cmp,
+        intcmp: state.data.intcmp
     };
 }
