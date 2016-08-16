@@ -59,7 +59,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       "currency" -> of[Currency],
       "amount" -> bigDecimal(10, 2),
       "email" -> email,
-      "payment.token" -> nonEmptyText,
+      "token" -> nonEmptyText,
       "guardian-opt-in" -> boolean,
       "postcode" -> optional(nonEmptyText),
       "abTests" -> set(mapping(

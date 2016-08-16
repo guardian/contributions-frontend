@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, PAY, SET_AMOUNT } from 'src/actions';
+import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment } from 'src/actions';
 import {  PAGES, ALL_PAGES } from 'src/constants';
 
 import Contribution from './pages/Contribution.jsx';
@@ -30,7 +30,7 @@ function mapDispatchToProps(dispatch) {
         setAmount: a => dispatch({ type: SET_AMOUNT, amount: a }),
         updateDetails: d => dispatch({ type: UPDATE_DETAILS, details: d }),
         updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
-        pay: () => dispatch({ type: PAY })
+        pay: () => dispatch(submitPayment())
     };
 }
 

@@ -1,4 +1,4 @@
-import { GO_BACK, GO_FORWARD, PAY } from 'src/actions';
+import { GO_BACK, GO_FORWARD, SUBMIT_PAYMENT } from 'src/actions';
 import { PAGES } from 'src/constants';
 
 const initialState = {
@@ -16,7 +16,7 @@ export default function pageReducer(state = initialState, action) {
             if (state.page === PAGES.PAYMENT) return state;
             else return Object.assign({}, state, { page: state.page + 1 });
 
-        case PAY:
+        case SUBMIT_PAYMENT:
             return Object.assign({}, state, { processing: true });
 
         default:
