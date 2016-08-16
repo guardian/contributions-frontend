@@ -28,14 +28,6 @@ import play.api.data.format.Formatter
 import java.time.LocalDate
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
-  val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError],JsValue] = {
-      val parse: JsValue = Json.parse(URLDecoder.decode(data(key),StandardCharsets.UTF_8.name()))
-      Right(parse)
-    }
-    override def unbind(key: String, data: JsValue): Map[String,String] = Map()
-
-  }
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
     override def bind(key: String, data: Map[String, String]): Result =
@@ -43,6 +35,8 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     override def unbind(key: String, value: Currency): Map[String, String] =
       Map(key -> value.identifier)
   }
+
+  case class AbTest(testName: String, testSlug: String, variantName: String, variantSlug: String)
 
   case class SupportForm(
                           name: String,
@@ -52,12 +46,13 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
                           token: String,
                           marketing: Boolean,
                           postCode: Option[String],
-                          abTests: JsValue,
+                          abTests: Set[AbTest],
                           ophanId: String,
                           cmp: Option[String],
                           intcmp: Option[String]
 
                         )
+
   val supportForm: Form[SupportForm] = Form(
     mapping(
       "name" -> nonEmptyText,
@@ -67,7 +62,12 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       "payment.token" -> nonEmptyText,
       "guardian-opt-in" -> boolean,
       "postcode" -> optional(nonEmptyText),
-      "abTest" -> FieldMapping[JsValue]()(abTestFormatter),
+      "abTests" -> set(mapping(
+        "testName" -> text,
+        "testSlug" -> text,
+        "variantName" -> text,
+        "variantSlug" -> text
+      )(AbTest.apply)(AbTest.unapply)),
       "ophanId" -> text,
       "cmp" -> optional(text),
       "intcmp" -> optional(text)
