@@ -22,8 +22,12 @@
             </section>
 
             <!-- react injects its components here -->
-            <section id="contribute" class="contribute-container"
-                     data-ab-tests="@chosenVariants.asJson"></section>
+            <section    id="contribute" class="contribute-container"
+                        data-ab-tests="@chosenVariants.asJson"
+                        @maxAmount.map(max => s"""data-max-amount="$max"""")
+                        @cmpCode.map(code => s"""data-cmp-code="$code"""")
+                        @intCmpCode.map(code => s"""data-cmp-code="$code"""")>
+            </section>
         </div>
     </main>
 
