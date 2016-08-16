@@ -2,12 +2,12 @@
 define([
     'src/utils/cookie',
     'src/modules/analytics/ga',
-    //'src/modules/analytics/ophan',
+    'src/modules/analytics/ophan.es6',
     'src/modules/analytics/krux'
 ], function (
     cookie,
     ga,
-  //  ophan,
+    ophan,
     krux
 ) {
     'use strict';
@@ -29,7 +29,7 @@ define([
     );
 
     function setupAnalytics() {
-        //ophan.init();
+        ophan.init();
         ga.init();
     }
 
