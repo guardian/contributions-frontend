@@ -1,6 +1,5 @@
 define([
     'src/utils/atob',
-    'ajax',
     'src/utils/cookie',
     'config/appCredentials'
 ], function(AtoB, ajax, cookie, appCredentials){
@@ -73,13 +72,9 @@ define([
                     callbacks.push(callback);
 
                     if (!pendingXHR) {
-                        pendingXHR = ajax({
-                            url: '/user/me',
-                            method: 'get',
-                            success: function (resp) {
-                                invokeCallbacks([resp, hasTier(resp)]);
-                                pendingXHR = null;
-                            }
+                        pendingXHR = fetch('/user/me').then(function (resp) {
+                            invokeCallbacks([resp, hasTier(resp)]);
+                            pendingXHR = null;
                         });
                     }
                 }

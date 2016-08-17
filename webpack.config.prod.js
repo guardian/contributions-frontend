@@ -1,23 +1,24 @@
-var Uglify = require("webpack/lib/optimize/UglifyJsPlugin");
 var path = require('path');
+var webpack = require('webpack');
 
 module.exports = {
+    context: 'assets/javascripts',
+    entry: 'src/main',
+    target: 'web',
+
+    output: {
+        path: path.resolve(__dirname, "public"),
+        chunkFilename: 'webpack/[chunkhash].js',
+        filename: "javascripts/[name].js",
+        publicPath: '/assets/'
+    },
+
     resolve: {
-        root: ["assets/javascripts", "node_modules"],
-        extensions: ["", ".js", ".es6"],
-        alias: {
-            '$$': 'src/utils/$',
-            //'lodash': 'lodash-amd/modern',
-            'bean': 'bean/bean',
-            'bonzo': 'bonzo/bonzo',
-            'qwery': 'qwery/qwery',
-            'reqwest': 'reqwest/reqwest',
-            'respimage': 'respimage/respimage',
-            'lazySizes': 'lazysizes/lazysizes',
-            'gumshoe': 'gumshoe/dist/js/gumshoe',
-            'smoothScroll': 'smooth-scroll/dist/js/smooth-scroll',
-            'ajax': 'src/utils/ajax'
-        }
+        root: [
+            path.resolve(__dirname, "assets/javascripts"),
+            path.resolve(__dirname, "node_modules")
+        ],
+        extensions: ["", ".js", ".jsx", ".es6"]
     },
 
     module: {
@@ -46,18 +47,25 @@ module.exports = {
         ]
     },
 
+    plugins: [
+        new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }),
+        new webpack.DefinePlugin({
+            "process.env": { NODE_ENV: JSON.stringify("production") }
+        }),
+        new webpack.optimize.OccurrenceOrderPlugin(),
+        new webpack.optimize.DedupePlugin()
+    ],
+
     resolveLoader: {
         root: path.join(__dirname, "node_modules")
     },
 
-    plugins: [new Uglify({ compress: { warnings: false }})],
-
     progress: true,
     failOnError: true,
-    watch: false,
     keepalive: false,
     inline: true,
     hot: false,
+    watch: false,
 
     stats: {
         modules: true,
@@ -65,7 +73,6 @@ module.exports = {
         colors: true
     },
 
-    context: 'assets/javascripts',
     debug: false,
-    devtool: 'source-map'
+    devtool: 'source-map',
 };

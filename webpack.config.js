@@ -5,6 +5,13 @@ module.exports = {
     context: 'assets/javascripts',
     entry:  'src/main',
 
+    output: {
+        path: path.resolve(__dirname, "public"),
+        chunkFilename: 'webpack/[chunkhash].js',
+        filename: "javascripts/[name].js",
+        publicPath: '/assets/'
+    },
+
     resolve: {
         root: [
             path.resolve(__dirname, "assets/javascripts"),
@@ -59,13 +66,6 @@ module.exports = {
 
     debug: false,
     devtool: 'source-map',
-
-    output: {
-        path: path.resolve(__dirname, "public"),
-        chunkFilename:  'webpack/[chunkhash].js',
-        filename: "javascripts/[name].js",
-        publicPath: '/assets/'
-    },
 
     devServer: {
         proxy: {
