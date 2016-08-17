@@ -93,12 +93,14 @@ function showPaymentDetailsMobile() {
 
 function payWithPaypal() {
     let selectedAmount = $('.js-amount-hidden')[0].value;
-    //TODO this is a hack to validate max amount, fix this!
     let maxAmount = parseInt($("#other_amount")[0].getAttribute("data-max"), 10);
+
     if (maxAmount >= selectedAmount) {
         $('#paypalAmount').val(selectedAmount);
-        $('form#paypalForm').each(p => p.submit());    }
-  }
+        $('form#paypalForm').each(p => p.submit());
+
+    }
+}
 
 function select(el) {
     // if we had a real DOM manipulation library (i.e. jQuery) we could do:

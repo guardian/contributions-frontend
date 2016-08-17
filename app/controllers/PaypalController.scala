@@ -9,7 +9,9 @@ import play.api.mvc.{Controller, Result}
 import services.PaymentServices
 import play.api.Logger
 import play.api.data.format.Formatter
+import play.api.libs.json._
 import utils.TransactionUtil
+import play.api.libs.functional.syntax._
 
 import scala.util.Right
 
@@ -61,6 +63,39 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, transacti
         }
       }
     )
+  }
+
+  case class AuthRequest(countryGroup: CountryGroup, amount: BigDecimal)
+  case class AuthResponse(approvalUrl:String)
+
+  implicit val AuthResponseWrites = Json.writes[AuthResponse]
+  implicit val CountryGroupReads = new Reads[CountryGroup] {
+    override def reads(json: JsValue): JsResult[CountryGroup] = json match {
+      case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid countrygroup id"))
+      case _ => JsError("invalid value for country group")
+    }
+
+  }
+  implicit val AuthRequestReads: Reads[AuthRequest] = (
+    (JsPath \ "countryGroup").read[CountryGroup] and
+      (JsPath \ "amount").read[BigDecimal]
+    ) (AuthRequest.apply _)
+
+  def ajaxAuth = NoCacheAction(parse.json) { request =>
+    request.body.validate[AuthRequest] match {
+      case JsSuccess(authRequest, _) =>
+        val transactionId = transactionUtil.newTransactionId
+        val paypalService = paymentServices.paypalServiceFor(request)
+        val authResponse = paypalService.getAuthUrl(authRequest.amount, authRequest.countryGroup, transactionId)
+        authResponse match {
+          case Right(url) => Ok(Json.toJson(AuthResponse(url)))
+          case Left(error) => handleError(authRequest.countryGroup, s"Error getting PayPal auth url: $error")
+        }
+      case JsError(error) =>
+
+        Logger.warn(s"Invalid request=$error")
+        BadRequest(s"Invalid request=$error")
+    }
   }
 
   def handleError(countryGroup: CountryGroup, error: String) = {
