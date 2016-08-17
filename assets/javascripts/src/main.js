@@ -14,6 +14,7 @@ require([
     'use strict';
 
     analytics.init();
+    images.init();
     metrics.init();
     contribute.init();
     stripe.init();
