@@ -113,8 +113,8 @@ object PaymentMethodTest extends TestTrait {
   override type VariantFn = () => Html
 
   def variants = NonEmptyList(
-    Variant("Control", "control", 0.5, paymentMethods(Set("CARD"))),
-    Variant("Paypal", "paypal", 0.5, paymentMethods(Set("PAYPAL", "CARD")))
+    Variant("Control", "control", 1, paymentMethods(Set("CARD"))),
+    Variant("Paypal", "paypal", 0, paymentMethods(Set("PAYPAL", "CARD")))
   )
 
 }
