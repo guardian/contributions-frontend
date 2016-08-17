@@ -18,7 +18,11 @@ module.exports = {
             path.resolve(__dirname, "assets/javascripts"),
             path.resolve(__dirname, "node_modules")
         ],
-        extensions: ["", ".js", ".jsx", ".es6"]
+        extensions: ["", ".js", ".jsx", ".es6"],
+        alias: {
+            'respimage': 'respimage/respimage',
+            'lazySizes': 'lazysizes/lazysizes'
+        }
     },
 
     module: {
@@ -74,5 +78,5 @@ module.exports = {
     },
 
     debug: false,
-    devtool: 'source-map',
+    devtool: 'source-map'
 };

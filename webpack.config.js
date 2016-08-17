@@ -19,7 +19,8 @@ module.exports = {
         ],
         extensions: ["", ".js", ".jsx", ".es6"],
         alias: {
-            'ajax': 'src/utils/ajax'
+            'respimage': 'respimage/respimage',
+            'lazySizes': 'lazysizes/lazysizes'
         }
     },
 
