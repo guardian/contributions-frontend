@@ -7,7 +7,6 @@ import com.gu.stripe.{StripeApiConfig, StripeCredentials, StripeService}
 import com.typesafe.config.Config
 import play.api.mvc.RequestHeader
 import services.PaymentServices.{Default, Mode, Testing}
-import services.PaypalService
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -65,12 +64,12 @@ case class PaymentServices(
   paypalServices: Map[Mode, PaypalService]
 ) {
 
-  def isTestUser(request: RequestHeader): Boolean = authProvider(request).flatMap(_.displayName).exists(testUsernames.isValid)
+  private def isTestUser(request: RequestHeader): Boolean = authProvider(request).flatMap(_.displayName).exists(testUsernames.isValid)
 
-  def stripeServiceFor(request: RequestHeader): StripeService = {
-    stripeServices(if (isTestUser(request)) Testing else Default)
-  }
-  def paypalServiceFor(request: RequestHeader): PaypalService = {
-    paypalServices(if (isTestUser(request)) Testing else Default)
-  }
+  private def modeFor(request: RequestHeader): Mode = if (isTestUser(request)) Testing else Default
+
+  def stripeServiceFor(request: RequestHeader): StripeService = stripeServices(modeFor(request))
+
+  def paypalServiceFor(request: RequestHeader): PaypalService = paypalServices(modeFor(request))
+
 }
