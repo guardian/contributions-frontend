@@ -1,9 +1,16 @@
 var path = require('path');
+var webpack = require('webpack');
 
 module.exports = {
+    context: 'assets/javascripts',
+    entry:  'src/main',
+
     resolve: {
-        root: ["assets/javascripts", "node_modules"],
-        extensions: ["", ".js", ".es6"],
+        root: [
+            path.resolve(__dirname, "assets/javascripts"),
+            path.resolve(__dirname, "node_modules")
+        ],
+        extensions: ["", ".js", ".jsx", ".es6"],
         alias: {
             'ajax': 'src/utils/ajax'
         }
@@ -50,11 +57,8 @@ module.exports = {
         colors: true
     },
 
-    context: 'assets/javascripts',
-
     debug: false,
     devtool: 'source-map',
-    entry: 'src/main',
 
     output: {
         path: path.resolve(__dirname, "public"),
