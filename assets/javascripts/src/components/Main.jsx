@@ -2,12 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment } from 'src/actions';
-import {  PAGES, ALL_PAGES } from 'src/constants';
+import { PAGES, ALL_PAGES } from 'src/constants';
 
 import Contribution from './pages/Contribution.jsx';
 import Details from './pages/Details.jsx';
 import Payment from './pages/Payment.jsx';
-import Processing from './pages/Processing.jsx';
 
 import Title from './Title.jsx';
 import ProgressIndicator from './ProgressIndicator.jsx';
@@ -52,9 +51,6 @@ class Main extends React.Component {
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}
                                 updateCard={this.props.updateCard} />;
-
-            case PAGES.PROCESSING:
-                return <Processing />;
         }
     }
 
