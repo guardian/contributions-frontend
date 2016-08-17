@@ -4,7 +4,7 @@
 @import views.support.Asset
 @import configuration.Links
 
-@(pageInfo:PageInfo,maxAmount: Option[Int], countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
+@(pageInfo:PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
 
 @main(pageInfo,Some(countryGroup)){
     <div class="support-wrapper__outer__a">
@@ -56,14 +56,12 @@
                                 @chosenVariants.v1.render(countryGroup, maxAmount)
                                 </div>
                             </li>
-                            @maxAmount.fold {
-                            } { max =>
-                                <li>
-                                    <div class="fieldset__note">
-                                        We are presently only able to accept contributions of <span class="currency js-currency">@countryGroup.currency.prefix@countryGroup.currency.glyph</span>@max
-                                        or less</div>
-                                </li>
-                            }
+
+                            <li>
+                                <div class="fieldset__note">
+                                    We are presently only able to accept contributions of <span class="currency js-currency">@countryGroup.currency.prefix@countryGroup.currency.glyph</span>@maxAmount
+                                    or less</div>
+                            </li>
                         </ul>
                         <a class="action action--contribute js-advance action--advance" data-switches="js-details">
                             Next

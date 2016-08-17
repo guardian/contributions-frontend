@@ -4,8 +4,7 @@
 @import views.support.Asset
 @import views.support.CountryGroupImplicits._
 
-@import play.api.libs.json.Json
-@(pageInfo: PageInfo, maxAmount: Option[Int], countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
+@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
 
 @main(pageInfo, Some(countryGroup)) {
     <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
@@ -27,7 +26,7 @@
             <section    id="contribute" class="contribute-container"
                         data-ab-tests="@chosenVariants.asJson"
                         data-country-group="@countryGroup.asJson"
-                        @maxAmount.map(max => s"""data-max-amount="$max"""")
+                        data-max-amount="@maxAmount"
                         @cmpCode.map(code => s"""data-cmp-code="$code"""")
                         @intCmpCode.map(code => s"""data-cmp-code="$code"""")>
             </section>

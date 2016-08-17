@@ -53,7 +53,7 @@ object AmountHighlightTest extends TestTrait {
 
   def name = "AmountHighlightTest"
   def slug = "highlight"
-  override type VariantFn = (CountryGroup, Option[Int]) => Html
+  override type VariantFn = (CountryGroup, Int) => Html
   private lazy val notAustralia: Set[CountryGroup] = Set(
     UK,
     US,
@@ -141,7 +141,7 @@ object Test {
   }
 
   def createCookie(variant: TestTrait#Variant): Cookie = {
-    Cookie(variant.testSlug+"_GIRAFFE_TEST", variant.variantSlug, maxAge = Some(1209600))
+    Cookie(variant.testSlug+"_GIRAFFE_TEST", variant.variantSlug, maxAge = Some(604800))
   }
 
   def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {

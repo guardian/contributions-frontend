@@ -1,19 +1,21 @@
 //global abTests
-//import * as ophan from 'src/modules/analytics/ophan';
+import * as ophan from 'src/modules/analytics/ophan';
 
-export function init(){
-    if ("abTests" in Window){
-            var data = {};
-            for (var test of abTests){
-                data[test.testSlug] = {
-                    'variantName': test.variantSlug,
-                    'complete': 'true'
-                }
+export function init() {
+    if ("abTests" in window) {
+        var data = {};
+
+        for (var test of abTests) {
+            data[test.testSlug] = {
+                'variantName': test.variantSlug,
+                'complete': 'true'
             }
-            /*ophan.ophan.then(function(o){
-                o.record({
-                abTestRegister:data
-            })});*/
+        }
 
+        ophan.loaded.then(function (ophan) {
+            ophan.record({
+                abTestRegister: data
+            })
+        });
     }
 }

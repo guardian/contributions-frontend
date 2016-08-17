@@ -16,6 +16,7 @@ define(['src/utils/user','raven-js'], function (user, Raven) {
         Raven.config(dsn, {
             whitelistUrls: [ /contribute\.theguardian\.com/, /contribute\.thegulocal\.com/, /localhost/ ],
             tags: tags,
+            release: tags.build_number,
             ignoreErrors: [ /duplicate define: jquery/ ],
             ignoreUrls: [ /platform\.twitter\.com/ ],
             shouldSendCallback: function(data) {

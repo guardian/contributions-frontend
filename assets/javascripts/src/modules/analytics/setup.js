@@ -2,7 +2,7 @@
 define([
     'src/utils/cookie',
     'src/modules/analytics/ga',
-    'src/modules/analytics/ophan.es6',
+    'src/modules/analytics/ophan',
     'src/modules/analytics/krux'
 ], function (
     cookie,
@@ -30,7 +30,7 @@ define([
 
     function setupAnalytics() {
         ophan.init();
-        ga.init();
+        ophan.loaded.then(ga.init,ga.init);
     }
 
     function setupThirdParties() {
