@@ -97,11 +97,6 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     Redirect(destinationUrl, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
   }
 
-  private def getErrorMessage(errorCode: Option[String]) = errorCode match {
-    case Some("paypalError") => Some("Your contribution using paypal could not be processed. Please try again or use another payment method.")
-    case _ => None
-  }
-
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
     val errorMessage = error.map(_.message)
     val stripe = paymentServices.stripeServiceFor(request)
