@@ -59,15 +59,13 @@ export function init() {
     ga('set', dimensions.signedIn, isLoggedIn.toString());
     ga('set', dimensions.isLoggedOn, isLoggedIn.toString());
     ga('set', dimensions.signedOut, signedOut.toString());
-    ga('set', dimensions.platform, 'membership');
+    ga('set', dimensions.platform, 'contributions');
     if (isLoggedIn) {
         ga('set', dimensions.identityId, u.id);
     }
     if (guardian.ophan) {
         ga('set', dimensions.ophanPageViewId, guardian.ophan.pageViewId);
     }
-    console.log(guardian);
-    debugger;
     if("productDetails" in guardian) {
         ga('set',dimensions.stripeId,guardian.productDetails.charge);
     }
