@@ -15,7 +15,6 @@ GET            /assets/*file                controllers.Assets.versioned(path="/
 GET            /                            controllers.Giraffe.contributeRedirect
 GET            /healthcheck                 controllers.Healthcheck.healthcheck
 
-GET            /uk-react                    controllers.Giraffe.contributeReact
 GET            /ca                          controllers.Giraffe.redirectToUk
 GET            /nz                          controllers.Giraffe.redirectToUk
 GET            /int                         controllers.Giraffe.redirectToUk

@@ -110,7 +110,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   // Once things have settled down and we have a reasonable idea of what might
   // and might not vary between different countries, we should merge these country-specific
   // controllers & templates into a single one which varies on a number of parameters
-  def contribute(countryGroup: CountryGroup, react: Boolean = false) = NoCacheAction { implicit request =>
+  def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
@@ -127,15 +127,9 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     val maxAmountInLocalCurrency = maxAmountFor(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    val template = {
-      if (react) views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears)
-      else views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears)
-    }
-
-    Ok(template).withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
+    Ok(views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
+      .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
-
-  def contributeReact = contribute(CountryGroup.UK, true)
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
 

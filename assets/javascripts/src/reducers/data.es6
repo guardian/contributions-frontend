@@ -6,6 +6,7 @@ const initialState = {
     countryGroup: {},
     currency: {
         symbol: '',
+        identifier: '',
         prefix: ''
     }
 };

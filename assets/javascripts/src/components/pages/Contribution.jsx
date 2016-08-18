@@ -4,8 +4,8 @@ function setNoAmountError() {
     document.getElementById("custom-amount").setCustomValidity("Please select a contribution amount.");
 }
 
-function setMaxContributionError(symbol, max) {
-    document.getElementById("custom-amount").setCustomValidity(`We are presently only able to accept contributions of ${symbol}${max} or less.`);
+function setMaxContributionError(prefix, symbol, max) {
+    document.getElementById("custom-amount").setCustomValidity(`We are presently only able to accept contributions of ${prefix || ''}${symbol}${max} or less.`);
 }
 
 function clearError() {
@@ -51,7 +51,7 @@ export default class Contribution extends React.Component {
 
     setValidation() {
         if (this.state.inputAmount > this.props.max) {
-            return setMaxContributionError(this.props.symbol, this.props.max);
+            return setMaxContributionError(this.props.currency.prefix ,this.props.currency.symbol, this.props.max);
         }
 
         if (!this.state.inputAmount && (!this.props.currentAmount || this.props.currentAmount === 0)) {
@@ -76,11 +76,11 @@ export default class Contribution extends React.Component {
                         key={amount}
                         className={'contribute-controls__button option-button ' + (this.state.highlightButton && this.props.currentAmount === amount ? ' active' : '')}
                         onClick={this.handleClick.bind(this, amount)}
-                        data-amount={amount}>{this.props.symbol + amount}</button>
+                        data-amount={amount}>{this.props.currency.symbol + amount}</button>
             )}
 
             <span className="contribute-controls__input contribute-controls__input--amount input-text">
-                <span className={'symbol ' + (!!this.state.inputAmount ? 'active' : '')}>{this.props.symbol}</span>
+                <span className={'symbol ' + (!!this.state.inputAmount ? 'active' : '')}>{this.props.currency.symbol}</span>
                 <input type="number"
                        id="custom-amount"
                        placeholder="Other amount" maxLength="10"
