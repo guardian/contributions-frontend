@@ -32,6 +32,6 @@ assets/images/inline-svgs/*.svg
 /public/dist/
 /public/webpack/
 /public/images/
-/public/*.js
-/public/*.js.map
+/public/**/*.js
+/public/**/*.js.map
 /assets/javascripts/lib/bower-components/
