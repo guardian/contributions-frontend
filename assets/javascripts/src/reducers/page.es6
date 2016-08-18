@@ -1,4 +1,4 @@
-import { GO_BACK, GO_FORWARD, SUBMIT_PAYMENT, PAYMENT_COMPLETE } from 'src/actions';
+import { GO_BACK, GO_FORWARD, SUBMIT_PAYMENT, PAYMENT_COMPLETE, PAYMENT_ERROR } from 'src/actions';
 import { PAGES } from 'src/constants';
 
 const initialState = {
@@ -20,7 +20,11 @@ export default function pageReducer(state = initialState, action) {
             return Object.assign({}, state, { processing: true });
 
         case PAYMENT_COMPLETE:
-            return window.location.href = action.response.redirect;
+            window.location.href = action.response.redirect;
+            return state;
+
+        case PAYMENT_ERROR:
+            return Object.assign({}, state, { processing: false });
 
         default:
             return state;

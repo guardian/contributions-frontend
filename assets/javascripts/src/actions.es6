@@ -28,7 +28,8 @@ export function submitPayment(dispatch) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         }))
-        .then(response => dispatch({ type: PAYMENT_COMPLETE, response: JSON.parse(response) }))
+        .then(response => response.json())
+        .then(json => dispatch({ type: PAYMENT_COMPLETE, response: json }))
         .catch(error => dispatch({ type: PAYMENT_ERROR, error: error }));
 }
 
