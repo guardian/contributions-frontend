@@ -345,7 +345,7 @@ $desktop-col-padding-right: 16px;
             width: 100%;
             display: flex;
             flex-direction: row;
-            justify-content: space-around;
+            justifqy-content: space-around;
             p {
                 display: block;
                 padding-left: $tablet-col-padding-left;
@@ -359,17 +359,4 @@ $desktop-col-padding-right: 16px;
 }
 
 // CSS to show/hide regional specific stuff
-
-[data-shown] {
-    display: none !important;
-}
-
-$currencies: gbp usd aud eur nzd cad;
-@each $currency in $currencies {
-    .currency-#{$currency} {
-        [data-shown*=#{$currency}] {
-            display: block !important;
-        }
-    }
-}
 

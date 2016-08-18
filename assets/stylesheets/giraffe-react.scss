@@ -208,3 +208,54 @@ $currencies: gbp usd aud eur nzd cad;
         display: none;
     }
 }
+
+.disclaimer {
+    background: #E7E7E7;
+
+    .l-constrained {
+        padding-top: $gs-baseline;
+        padding-bottom: $gs-baseline;
+
+        @include mq(desktop) {
+            padding-top: $gs-baseline * 4;
+        }
+
+        @include mq($until: tablet) {
+            width: 100%;
+        }
+        @include mq(tablet) {
+            flex-direction: row;
+        }
+    }
+}
+
+.feedback {
+    $tablet-col-padding-left: $gs-gutter/2;
+    $tablet-col-padding-right: ($gs-gutter/2) + 1;
+
+    background: white;
+
+    @include fs-textSans(2);
+
+    padding: 16px;
+
+    @include mq(tablet) {
+        width: $tablet-form-width;
+    }
+
+    @include mq(desktop) {
+        padding: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        p {
+            display: block;
+            padding-left: $tablet-col-padding-left;
+            padding-right: $tablet-col-padding-right;
+            width: 300px;
+            height: 400px;
+        }
+    }
+
+}
