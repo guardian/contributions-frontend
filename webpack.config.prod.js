@@ -7,7 +7,7 @@ module.exports = {
     target: 'web',
 
     output: {
-        path: path.resolve(__dirname, "public"),
+        path: 'public/',
         chunkFilename: 'webpack/[chunkhash].js',
         filename: "javascripts/[name].js",
         publicPath: '/assets/'
