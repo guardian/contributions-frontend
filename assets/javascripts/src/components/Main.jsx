@@ -1,16 +1,15 @@
 import React from 'react';
+import MediaQuery from 'react-responsive';
 import { connect } from 'react-redux';
 
 import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment } from 'src/actions';
-import { PAGES, ALL_PAGES } from 'src/constants';
+import { PAGES } from 'src/constants';
 
-import Contribution from './pages/Contribution.jsx';
-import Details from './pages/Details.jsx';
-import Payment from './pages/Payment.jsx';
-
-import Title from './Title.jsx';
-import ProgressIndicator from './ProgressIndicator.jsx';
-import Navigation from './Navigation.jsx';
+import MobileWrapper from './form-wrapper/MobileWrapper';
+import DesktopWrapper from './form-wrapper/DesktopWrapper';
+import Contribution from './pages/Contribution';
+import Details from './pages/Details';
+import Payment from './pages/Payment';
 
 function mapStateToProps(state) {
     return {
@@ -42,15 +41,15 @@ class Main extends React.Component {
                                      max={this.props.maxAmount}
                                      currency={this.props.currency}
                                      setAmount={this.props.setAmount}
-                                     currentAmount={this.props.card.amount} />;
+                                     currentAmount={this.props.card.amount}/>;
 
             case PAGES.DETAILS:
                 return <Details details={this.props.details}
-                                updateDetails={this.props.updateDetails} />;
+                                updateDetails={this.props.updateDetails}/>;
 
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}
-                                updateCard={this.props.updateCard} />;
+                                updateCard={this.props.updateCard}/>;
         }
     }
 
@@ -66,31 +65,17 @@ class Main extends React.Component {
 
     render() {
         return <div>
-            {ALL_PAGES.map(p =>
-                <section className={'contribute-section ' + (this.props.page === p ? 'current' : '')} key={p}>
-                    <div className="contribute-form__heading">
-                        <Title page={p}/>
-                        <ProgressIndicator page={this.props.page}/>
-                    </div>
+            <MediaQuery query='(max-width: 740px)'>
+                <MobileWrapper submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
+            </MediaQuery>
 
-                    <form className={'flex-vertical contribute-form__inner'}
-                          onSubmit={this.submit.bind(this)} key={p}>
-
-                        {this.componentFor(p)}
-
-                        <Navigation
-                            page={p}
-                            goBack={this.props.goBack}
-                            amount={this.props.card.amount}
-                            currency={this.props.currency}
-                            processing={this.props.processing}
-                            pay={this.props.pay} />
-                    </form>
-                </section>
-            )}
-        </div>;
+            <MediaQuery query='(min-width: 741px)'>
+                <DesktopWrapper submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
+            </MediaQuery>
+        </div>
     }
 }
+
 
 export default connect(
     mapStateToProps,

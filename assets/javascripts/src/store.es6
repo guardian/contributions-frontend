@@ -15,6 +15,7 @@ let reducer = combineReducers({
 
 const store = createStore(
     reducer,
-    compose(applyMiddleware(thunk), window.devToolsExtension && window.devToolsExtension())
+    applyMiddleware(thunk),
+    window.devToolsExtension ? window.devToolsExtension() : f => f
 );
 export default store;
