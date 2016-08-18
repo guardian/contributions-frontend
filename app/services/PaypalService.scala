@@ -24,6 +24,7 @@ class PaypalService(config: PaypalApiConfig) {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
 
+
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
   def getAuthUrl(amount: BigDecimal, countryGroup: CountryGroup, transactionId: String): Either[String, String] = {
@@ -61,8 +62,11 @@ class PaypalService(config: PaypalApiConfig) {
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     try {
       val createdPayment = payment.execute(apiContext, paymentExecution)
-      //todo do I need to check anything in the created payment to make sure nothing failed?
-      Right(Unit)
+      if (createdPayment.getState.toUpperCase == "FAILED") {
+        Left(s"payment returned with state: ${createdPayment.getState}")
+      }
+      else
+        Right(Unit)
     } catch {
       case e: PayPalRESTException => Left(e.getMessage)
     }
