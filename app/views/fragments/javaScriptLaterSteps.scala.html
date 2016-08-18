@@ -1,6 +1,12 @@
 @import views.support.Asset
+@import views.support.PageInfo
 
-<script>
+@(pageInfo: PageInfo = views.support.PageInfo())
+
+
+@* TODO: improve this *@
+@if(!pageInfo.url.contains("thank-you")) {
+    <script>
             (function (isModern) {
                 if (isModern) {
                     // only load JS if the browser cuts the mustard
@@ -9,7 +15,9 @@
                     document.getElementsByTagName("head")[0].appendChild(newElm);
                 }
             })(guardian.isModernBrowser);
-</script>
+    </script>
+}
+
 
 <script>
     var curl = {
