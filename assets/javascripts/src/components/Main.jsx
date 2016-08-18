@@ -79,7 +79,7 @@ class Main extends React.Component {
                         {this.componentFor(p)}
 
                         <Navigation
-                            page={this.props.page}
+                            page={p}
                             goBack={this.props.goBack}
                             amount={this.props.card.amount}
                             currency={this.props.currency}

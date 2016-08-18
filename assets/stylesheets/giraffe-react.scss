@@ -182,3 +182,29 @@
 .with-card-icon {
     position: relative;
 }
+
+[data-shown] {
+    display: none !important;
+}
+
+$currencies: gbp usd aud eur nzd cad;
+@each $currency in $currencies {
+    .currency-#{$currency} {
+        [data-shown*=#{$currency}] {
+            display: block !important;
+        }
+    }
+}
+
+.hidden-desktop {
+    @include mq(tablet) {
+        display: none;
+    }
+}
+
+.contribute-navigation--contribution,
+.contribute-navigation--details {
+    .action--pay {
+        display: none;
+    }
+}
