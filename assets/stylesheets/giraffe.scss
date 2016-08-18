@@ -391,7 +391,7 @@ $desktop-col-padding-right: 16px;
         float: right;
     }
 }
-.hiddenInMobile {
+.hiddenOnMobile {
    display: none;
     @include mq(tablet) {
         display: block;

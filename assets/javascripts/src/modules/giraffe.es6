@@ -86,8 +86,8 @@ export function init() {
 }
 
 function showPaymentDetailsMobile() {
-    $('.js-details').removeClass('hiddenInMobile')
-    $('.js-payment').removeClass('hiddenInMobile')
+    $('.js-details').removeClass('hiddenOnMobile')
+    $('.js-payment').removeClass('hiddenOnMobile')
     $MOBILE_CARD_PAYMENT_BUTTON.addClass('selected-method-mobile')
 }
 

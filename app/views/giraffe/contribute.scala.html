@@ -8,6 +8,9 @@
 @containerVisibility = @{
     if(errorMessage.isDefined) "hidden" else ""
 }
+@paymentDetailsClass = @{
+    if(chosenVariants.paymentMethodTest.variantName == "Control") "" else "hiddenOnMobile"
+}
 @main(pageInfo, Some(countryGroup)) {
     <div class="support-wrapper__outer__a">
         <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
@@ -77,7 +80,7 @@
                         @chosenVariants.paymentMethodTest.render()
                     </div>
 
-                    <div class="form__column js-hidden-tablet js-details hiddenInMobile">
+                    <div class="form__column js-hidden-tablet js-details @paymentDetailsClass">
                         <h3 class="form__column-heading form__column-heading--first headline-text--bolder">
                             Your details</h3>
                         <ul class="u-unstyled">
@@ -116,7 +119,7 @@
 
 
 
-                    <div class="form__column js-hidden-tablet js-payment hiddenInMobile">
+                    <div class="form__column js-hidden-tablet js-payment @paymentDetailsClass">
                         <span>
                             <h3 class="form__column-heading headline-text--bolder">Your payment</h3>
                             <div class="security-note">@fragments.inlineIcon("secure", List("icon-inline--small", "icon-inline--top"))
