@@ -4,12 +4,17 @@ import { Provider } from 'react-redux';
 
 import Main from 'src/components/Main.jsx';
 import store from 'src/store';
-import { SET_DATA, SET_COUNTRY_GROUP } from 'src/actions';
+import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT } from 'src/actions';
 
 export function init() {
     const container = document.getElementById('contribute');
+    const presetAmount = getUrlParameter('amount');
 
     store.dispatch({ type: SET_DATA, data: appDataFrom(container) });
+
+    if (presetAmount) {
+        store.dispatch({ type: SET_AMOUNT, amount: parseInt(presetAmount) });
+    }
 
     ReactDOM.render(
         React.createElement(Provider, { store: store },
@@ -34,4 +39,15 @@ function appDataFrom(container) {
         countryGroup: countryGroup,
         currency: currency
     };
+}
+
+function getUrlParameter(rawName, url) {
+    const name = rawName.replace(/[\[\]]/g, "\\$&");
+    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)")
+    const results = regex.exec(url || window.location.href);
+
+    if (!results) return null;
+    if (!results[2]) return '';
+
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
