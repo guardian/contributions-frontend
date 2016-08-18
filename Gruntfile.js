@@ -190,6 +190,13 @@ module.exports = function (grunt) {
                 options: {
                     atBegin: true
                 }
+            },
+            compile_js: {
+                files: ['<%= dirs.assets.javascripts %>/**/*.js'],
+                tasks: ['compile:js'],
+                options: {
+                    atBegin: true
+                }
             }
         },
 
@@ -332,14 +339,14 @@ module.exports = function (grunt) {
         'clean:images',
         'build:images'
     ]);
-    grunt.registerTask('compile:js', function() {
+    grunt.registerTask('compile:js', function () {
         if (!isDev) {
             grunt.task.run(['validate']);
         }
         grunt.task.run([
             'clean:js',
-            'webpack',
             'copy:polyfills',
+            'copy:curl'
         ]);
     });
     grunt.registerTask('compile', function(){
