@@ -5,6 +5,7 @@ import { urls } from 'src/constants';
 import * as stripe from 'src/modules/stripe';
 
 export const SET_DATA = "SET_DATA";
+export const SET_COUNTRY_GROUP = "SET_COUNTRY_GROUP";
 
 export const GO_BACK = "GO_BACK";
 export const GO_FORWARD = "GO_FORWARD";

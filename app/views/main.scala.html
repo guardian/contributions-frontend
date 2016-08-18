@@ -2,7 +2,8 @@
 @import com.gu.i18n.CountryGroup
 @import org.joda.time.DateTime
 @(  pageInfo: PageInfo = views.support.PageInfo(),
-    countryGroup: Option[CountryGroup] = None
+    countryGroup: Option[CountryGroup] = None,
+    maxAmount: Option[Int] = None
 )(content: Html)
 @import play.api.libs.json.Json
 @import configuration.{Config, Social}
@@ -92,7 +93,7 @@
                 <div class="global-header__inner">
                     <div class="global-header__branding l-constrained">
                         <div class="global-header__primary">
-                        @fragments.global.controlNavigation(pageInfo, countryGroup)
+                        @fragments.global.controlNavigation(pageInfo, countryGroup, maxAmount)
                         </div>
                         @* Branding *@
                         <div class="global-header__logo">

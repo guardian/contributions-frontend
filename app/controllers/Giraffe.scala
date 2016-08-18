@@ -19,6 +19,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
 import services.PaymentServices
+import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
 
@@ -81,13 +82,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     Facebook("https://membership.theguardian.com/contribute")
   )
 
-
   val chargeId = "charge_id"
-
-  def maxAmountFor(currency: Currency): Int = currency match {
-    case Australia.currency => 3500
-    case _ => 2000
-  }
 
   def contributeRedirect = NoCacheAction { implicit request =>
 
@@ -107,9 +102,6 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     Redirect(destinationUrl, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
   }
 
-  // Once things have settled down and we have a reasonable idea of what might
-  // and might not vary between different countries, we should merge these country-specific
-  // controllers & templates into a single one which varies on a number of parameters
   def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
@@ -124,10 +116,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
 
-    val maxAmountInLocalCurrency = maxAmountFor(countryGroup.currency)
+
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    Ok(views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
+    Ok(views.html.giraffe.contributeReact(pageInfo, MaxAmount.forCurrency(countryGroup.currency), countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
@@ -164,7 +156,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       ) ++ f.postCode.map("postcode" -> _)
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
-      val maxAmountInSmallestCurrencyUnit = maxAmountFor(f.currency) * 100
+      val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(f.currency) * 100
       val res = stripe.Charge.create(min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit), f.currency, f.email, "Your contribution", f.token, metadata)
 
       val redirect = f.currency match {

@@ -1,9 +1,11 @@
 @import views.support.PageInfo
+@import views.support.CountryGroupImplicits._
+@import utils.MaxAmount
 @import configuration.ProfileLinks
 
 @import com.gu.i18n.CountryGroup
 @import com.gu.i18n.CountryGroup._
-@(pageInfo: PageInfo, countryGroup: Option[CountryGroup])
+@(pageInfo: PageInfo, countryGroup: Option[CountryGroup], maxAmount: Option[Int])
 
 @import configuration.Config
 @import configuration.ProfileLinks
@@ -62,14 +64,14 @@
                     </span>
                 </span>
                 <span class="control__item hidden-mobile js-user-detail">
-                    <span class="control__info">@countryGroup.name (@countryGroup.currency.identifier)</span>
+                    <span class="control__info" id="js-country-name">@countryGroup.name (@countryGroup.currency.identifier)</span>
                 </span>
             </a>
             <nav id="js-country-switcher" role="navigation" class="js-dropdown-menu nav-popup is-hidden" aria-label="Country switcher">
                 <ul class="nav-popup__list">
                 @for(countryGroup <- Seq(UK, Europe, US, Australia)) {
                     <li class="nav-popup__item">
-                        <a href="@routes.Giraffe.contribute(countryGroup)" class="nav-popup__link">@countryGroup.name (@countryGroup.currency.identifier)</a>
+                        <a href="@routes.Giraffe.contribute(countryGroup)" class="nav-popup__link" data-country-group="@countryGroup.asJson" data-max-amount="@MaxAmount.forCurrency(countryGroup.currency)">@countryGroup.name (@countryGroup.currency.identifier)</a>
                     </li>
                 }
                 </ul>

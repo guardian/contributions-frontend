@@ -6,7 +6,7 @@
 
 @(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
 
-@main(pageInfo, Some(countryGroup)) {
+@main(pageInfo, Some(countryGroup), Some(maxAmount)) {
     <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
         <div class="giraffe__inner page-slice l-constrained flex-horizontal-from-tablet">
             <section class="giraffe__heading">

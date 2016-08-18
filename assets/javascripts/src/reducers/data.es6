@@ -1,4 +1,4 @@
-import { SET_DATA } from 'src/actions';
+import { SET_DATA, SET_COUNTRY_GROUP } from 'src/actions';
 
 const initialState = {
     abTests: [],
@@ -20,6 +20,12 @@ export default function dataReducer(state = initialState, action) {
     switch (action.type) {
         case SET_DATA:
             return Object.assign({}, state, action.data);
+
+        case SET_COUNTRY_GROUP:
+            const { currency, ...countryGroup } = action.countryGroup;
+
+            return Object.assign({}, state, { currency: currency, countryGroup: countryGroup });
+
         default:
             return state;
     }
