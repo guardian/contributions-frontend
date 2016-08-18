@@ -123,6 +123,12 @@ module.exports = function (grunt) {
                 src: '<%= dirs.assets.javascripts %>/lib/polyfills.min.js',
                 dest: '<%= dirs.publicDir.javascripts %>/lib/polyfills.min.js'
             },
+            curl: {
+                src: 'node_modules/curl-amd/dist/curl-with-js-and-domReady/curl.js',
+                dest: '<%= dirs.publicDir.javascripts %>/lib/curl/',
+                expand: true,
+                flatten: true
+            },
             bundles: {
                 src: '<%= dirs.publicDir.root %>/bundles/*.js',
                 dest: '<%= dirs.publicDir.root %>/dist/javascripts/bundles/',
