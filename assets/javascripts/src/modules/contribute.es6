@@ -17,8 +17,6 @@ export function init() {
         ),
         container
     );
-
-    store.dispatch({ type: SET_DATA, data: appDataFrom(container) });
 }
 
 /**
