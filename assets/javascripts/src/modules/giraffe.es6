@@ -16,9 +16,13 @@ const FORM_FIELD_ERROR_CLASSNAME = 'form-field--error'; // 1) from display.js 2)
 const ACTIVE_CLASS = 'active';
 const AMOUNT_CLASS = 'js-amount';
 
+const HIDDEN = 'js-hidden-tablet';
+
 const CURRENCY_FIELD = document.querySelector('.js-currency-field');
 const $CURRENCY_DISPLAY = $('.js-currency');
 const $CURRENCY_PICKER = $('.js-currency-switcher');
+const $CONTRIBUTION = $('.js-contribution');
+const $DETAILS  = $('.js-details');
 
 const $AMOUNT_PICKER = $('[data-amount]');
 const CUSTOM_AMOUNT = document.querySelector('.js-amount-field');
@@ -34,7 +38,6 @@ const $OPHAN = $('.js-ophan-id');
 
 const $FORM_SWITCHER = $('.form__container');
 
-
 export function init() {
     if (!document.querySelector('.container-global--giraffe .js-form')) {
         return;
@@ -42,6 +45,8 @@ export function init() {
 
     ophanId();
     carousel();
+    skipAmount();
+
     $CURRENCY_PICKER.each(el => el.addEventListener('click', ev => selectCurrencyElement(ev.currentTarget)));
 
 
@@ -128,12 +133,15 @@ function ophanId(){
     })
 }
 
+function skipAmount() {
+    $CONTRIBUTION.addClass(HIDDEN);
+    $DETAILS.removeClass(HIDDEN);
+    $('[data-switches=' + $DETAILS + ']').addClass('form__container--active')
+}
+
 function carousel() {
-    const HIDDEN = 'js-hidden-tablet';
-    let $contribution = $('.js-contribution');
-    let $contributionButton = $('.js-advance',$contribution);
-    let $details = $('.js-details');
-    let $detailsButton = $('.js-advance', $details);
+    let $contributionButton = $('.js-advance',$CONTRIBUTION);
+    let $detailsButton = $('.js-advance', $DETAILS);
     let $pay = $('.js-payment');
     let all = Array.from($('.form__column'));
 
@@ -147,7 +155,7 @@ function carousel() {
             let jump = all.findIndex(e=> e == $selected[0]) - all.findIndex(e=> e == $old[0]);
             let valid = validateColumn($old);
             if (jump == 2) {
-                valid = valid && validateColumn($details); //fixme
+                valid = valid && validateColumn($DETAILS); //fixme
             }
             if(jump == -1 || valid){
                 hide();
@@ -175,8 +183,8 @@ function carousel() {
 
     let hide = () => {
         $pay.addClass(HIDDEN);
-        $contribution.addClass(HIDDEN);
-        $details.addClass(HIDDEN);
+        $CONTRIBUTION.addClass(HIDDEN);
+        $DETAILS.removeClass(HIDDEN);
         $('.form__container--active',$FORM_SWITCHER).removeClass('form__container--active');
     };
     let show = x => {
