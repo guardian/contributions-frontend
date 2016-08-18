@@ -6,7 +6,8 @@ require([
     'src/modules/stripe',
     'src/modules/dropdown',
     'src/modules/identityPopup',
-    'src/modules/identityPopupDetails'
+    'src/modules/identityPopupDetails',
+    'src/modules/userDetails'
 ], function (
     analytics,
     images,
@@ -15,7 +16,8 @@ require([
     stripe,
     dropdown,
     identityPopup,
-    identityPopupDetails
+    identityPopupDetails,
+    userDetails
 ) {
     'use strict';
 
@@ -28,4 +30,5 @@ require([
     dropdown.init();
     identityPopup.init();
     identityPopupDetails.init();
+    userDetails.init();
 });
