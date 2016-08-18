@@ -7,7 +7,8 @@ const initialState = {
     currency: {
         symbol: '',
         identifier: '',
-        prefix: ''
+        prefix: '',
+        code: ''
     }
 };
 

@@ -42,7 +42,7 @@ export function submitPayment(dispatch) {
 function paymentFormData(state, token) {
     return {
         name: state.details.name,
-        currency: 'GBP',
+        currency: state.data.currency.code,
         amount: state.card.amount,
         email: state.details.email,
         token: token,

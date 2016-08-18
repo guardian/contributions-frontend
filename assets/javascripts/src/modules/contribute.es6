@@ -4,10 +4,12 @@ import { Provider } from 'react-redux';
 
 import Main from 'src/components/Main.jsx';
 import store from 'src/store';
-import { SET_DATA } from 'src/actions';
+import { SET_DATA, SET_COUNTRY_GROUP } from 'src/actions';
 
 export function init() {
     const container = document.getElementById('contribute');
+
+    store.dispatch({ type: SET_DATA, data: appDataFrom(container) });
 
     ReactDOM.render(
         React.createElement(Provider, { store: store },
