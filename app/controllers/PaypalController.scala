@@ -10,13 +10,13 @@ import services.PaymentServices
 import play.api.Logger
 import play.api.data.format.Formatter
 import play.api.libs.json._
-import utils.TransactionUtil
+import utils.ContributionIdGenerator
 import play.api.libs.functional.syntax._
 
 import scala.util.Right
 
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices, transactionUtil :TransactionUtil) extends Controller {
+class PaypalController(ws: WSClient, paymentServices: PaymentServices, contributionIdGenerator :ContributionIdGenerator) extends Controller {
 
   implicit val countryGroupFormatter = new Formatter[CountryGroup] {
     type Result = Either[Seq[FormError], CountryGroup]
@@ -52,11 +52,10 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, transacti
     paypalForm.bindFromRequest().fold[Result](
       hasErrors = form => handleError(CountryGroup.UK, form.errors.mkString(",")),
       success = form => {
-        val transactionId = transactionUtil.newTransactionId
         val paypalService = paymentServices.paypalServiceFor(request)
         val maxAllowedAmount = configuration.Payment.maxAmountFor(form.countryGroup.currency)
         val amount = form.amount.min(maxAllowedAmount)
-        val authResponse = paypalService.getAuthUrl(amount, form.countryGroup, transactionId)
+        val authResponse = paypalService.getAuthUrl(amount, form.countryGroup, contributionIdGenerator.getNewId)
         authResponse match {
           case Right(url) => Redirect(url, SEE_OTHER)
           case Left(error) => handleError(form.countryGroup, s"Error getting PayPal auth url: $error")
@@ -84,9 +83,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, transacti
   def ajaxAuth = NoCacheAction(parse.json) { request =>
     request.body.validate[AuthRequest] match {
       case JsSuccess(authRequest, _) =>
-        val transactionId = transactionUtil.newTransactionId
         val paypalService = paymentServices.paypalServiceFor(request)
-        val authResponse = paypalService.getAuthUrl(authRequest.amount, authRequest.countryGroup, transactionId)
+        val authResponse = paypalService.getAuthUrl(authRequest.amount, authRequest.countryGroup, contributionIdGenerator.getNewId)
         authResponse match {
           case Right(url) => Ok(Json.toJson(AuthResponse(url)))
           case Left(error) => handleError(authRequest.countryGroup, s"Error getting PayPal auth url: $error")

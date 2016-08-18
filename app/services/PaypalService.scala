@@ -27,7 +27,7 @@ class PaypalService(config: PaypalApiConfig) {
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  def getAuthUrl(amount: BigDecimal, countryGroup: CountryGroup, transactionId: String): Either[String, String] = {
+  def getAuthUrl(amount: BigDecimal, countryGroup: CountryGroup, contributionId: String): Either[String, String] = {
     val cancelUrl = config.baseReturnUrl
     val returnUrl = s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute"
     val currencyCode = countryGroup.currency.toString
@@ -37,7 +37,7 @@ class PaypalService(config: PaypalApiConfig) {
     val transaction = new Transaction
     transaction.setAmount(paypalAmount)
     transaction.setDescription(description)
-    transaction.setCustom(transactionId)
+    transaction.setCustom(contributionId)
     transaction.setItemList(itemList)
 
     val transactions = List(transaction).asJava
