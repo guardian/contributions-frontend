@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import Main from 'src/components/Main.jsx';
 import store from 'src/store';
 import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT } from 'src/actions';
+import ophan from 'src/modules/analytics/ophan';
 
 export function init() {
     const container = document.getElementById('contribute');
@@ -24,6 +25,7 @@ export function init() {
     );
 
     attachCurrencyListeners();
+    setOphanId();
 }
 
 /**
@@ -77,7 +79,13 @@ function attachCurrencyListeners() {
             }
         });
 
-
         heading.innerText = `${countryGroup.name} (${countryGroup.currency.symbol})`;
+    }));
+}
+
+function setOphanId() {
+    ophan.loaded.then(o => store.dispatch({
+        type: SET_DATA,
+        data: { ophanId: o.viewId }
     }));
 }

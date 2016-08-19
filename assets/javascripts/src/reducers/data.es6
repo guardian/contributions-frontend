@@ -11,12 +11,13 @@ const initialState = {
         code: ''
     },
     cmpCode: '',
-    intCmpCode: ''
+    intCmpCode: '',
+    ophanId: null
 };
 
 /**
  * Core data for the app. This should only be set once on initialisation
- * with values provided by the server.
+ * with values provided by the server and when changing country group.
  */
 export default function dataReducer(state = initialState, action) {
     switch (action.type) {
