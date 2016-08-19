@@ -16,7 +16,7 @@ import play.api.libs.functional.syntax._
 import scala.util.Right
 
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices, contributionIdGenerator :ContributionIdGenerator) extends Controller {
+class PaypalController(ws: WSClient, paymentServices: PaymentServices, contributionIdGenerator: ContributionIdGenerator) extends Controller {
 
   implicit val countryGroupFormatter = new Formatter[CountryGroup] {
     type Result = Either[Seq[FormError], CountryGroup]
