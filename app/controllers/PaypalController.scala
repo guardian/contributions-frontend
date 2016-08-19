@@ -2,6 +2,7 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup
+import data.ContributionData
 import models.PaymentHook
 import play.api.data.{Form, FormError}
 import play.api.data.Forms._
@@ -17,7 +18,12 @@ import play.api.libs.functional.syntax._
 import scala.util.Right
 
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices, contributionIdGenerator: ContributionIdGenerator) extends Controller {
+class PaypalController(
+  ws: WSClient,
+  paymentServices: PaymentServices,
+  contributionIdGenerator: ContributionIdGenerator,
+  contributionData: ContributionData
+) extends Controller {
 
   implicit val countryGroupFormatter = new Formatter[CountryGroup] {
     type Result = Either[Seq[FormError], CountryGroup]
@@ -103,7 +109,6 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, contribut
   }
 
   def hook = NoCacheAction(BodyParsers.parse.tolerantText) { request =>
-    Logger.error(request.body)
     val bodyText = request.body
     val bodyJson = Json.parse(request.body)
 
@@ -112,6 +117,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, contribut
 
     bodyJson.validate[PaymentHook] match {
       case JsSuccess(paymentHook, _) if validHook =>
+        contributionData.insertPaymentHook(paymentHook)
         Logger.info(s"Received paymentHook: $paymentHook")
         Ok
       case JsError(errors) =>

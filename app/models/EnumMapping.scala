@@ -1,5 +1,8 @@
 package models
 
+import java.sql.PreparedStatement
+
+import anorm.{ParameterMetaData, ToStatement}
 import play.api.libs.json._
 
 trait EnumMapping[A] {
@@ -16,5 +19,16 @@ trait EnumMapping[A] {
       case JsString(value) => enumFromString(value).map(JsSuccess(_)).getOrElse(JsError(s"Unkown enum value: $value"))
       case _ => JsError("Wrong enum type, a JsString is expected")
     }
+  }
+
+  implicit val enumToStatement: ToStatement[A] = new ToStatement[A] {
+    override def set(s: PreparedStatement, index: Int, v: A): Unit = {
+      s.setString(index, enumToString(v))
+    }
+  }
+
+  implicit val enumParamMeta: ParameterMetaData[A] = new ParameterMetaData[A] {
+    override def sqlType: String = "VARCHAR"
+    override def jdbcType: Int = java.sql.Types.VARCHAR
   }
 }
