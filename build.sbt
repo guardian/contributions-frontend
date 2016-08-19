@@ -39,6 +39,7 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   filters,
+  jdbc,
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
     scalaUri,
     scalaz,
@@ -49,7 +50,8 @@ libraryDependencies ++= Seq(
     "com.softwaremill.macwire" %% "macros" % "2.2.2" % "provided",
     "com.softwaremill.macwire" %% "util" % "2.2.2",
     "com.softwaremill.macwire" %% "proxy" % "2.2.2",
-    "com.typesafe.play" %% "anorm" % "2.5.2"
+    "com.typesafe.play" %% "anorm" % "2.5.2",
+    "org.postgresql" % "postgresql" % "9.4.1209"
 )
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
