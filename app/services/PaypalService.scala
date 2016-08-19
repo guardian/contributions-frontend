@@ -62,7 +62,7 @@ class PaypalService(config: PaypalApiConfig) {
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     try {
       val createdPayment = payment.execute(apiContext, paymentExecution)
-      if (createdPayment.getState.toUpperCase == "FAILED") {
+      if (createdPayment.getState.toUpperCase != "APPROVED") {
         Left(s"payment returned with state: ${createdPayment.getState}")
       }
       else
