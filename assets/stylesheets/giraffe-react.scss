@@ -258,3 +258,8 @@ $currencies: gbp usd aud eur nzd cad;
         }
     }
 }
+
+:invalid {
+    box-shadow: none;
+    outline: 0;
+}
