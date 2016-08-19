@@ -93,14 +93,14 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       case None => UK
     }
 
-    redirectWithCampaignCodes(routes.Giraffe.contribute(countryGroup).url)
+    redirectWithQueryParams(routes.Giraffe.contribute(countryGroup).url)
   }
 
-  def redirectToUk = NoCacheAction { implicit request => redirectWithCampaignCodes(routes.Giraffe.contribute(UK).url) }
+  def redirectToUk = NoCacheAction { implicit request => redirectWithQueryParams(routes.Giraffe.contribute(UK).url) }
 
-  private def redirectWithCampaignCodes(destinationUrl: String)(implicit request: Request[Any]) = {
-    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy", "highlight")
-    Redirect(destinationUrl, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
+  private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) = {
+    val QueryParamsToForward = Set("INTCMP", "CMP", "mcopy", "skipAmount", "highlight")
+    Redirect(destinationUrl, request.queryString.filterKeys(QueryParamsToForward), SEE_OTHER)
   }
 
   def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
