@@ -13,7 +13,7 @@ import play.twirl.api.Html
 
 import scala.util.Random
 import scalaz.NonEmptyList
-import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage, paymentMethods}
+import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage, paymentMethods, paymentMethodsControl}
 
 trait TestTrait {
   type VariantFn
@@ -113,7 +113,7 @@ object PaymentMethodTest extends TestTrait {
   override type VariantFn = () => Html
 
   def variants = NonEmptyList(
-    Variant("Control", "control", 1, paymentMethods(Set("CARD"))),
+    Variant("Control", "control", 1, () => paymentMethodsControl()),
     Variant("Paypal", "paypal", 0, paymentMethods(Set("PAYPAL", "CARD")))
   )
 

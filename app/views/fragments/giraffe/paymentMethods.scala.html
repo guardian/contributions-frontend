@@ -1,10 +1,9 @@
 @(enabledMethods:Set[String])()
 <div>
 @if(enabledMethods.contains("CARD")){
-    <a class="action action--contribute js-advance action--advance payment-method-button" data-switches="js-details">Contribute with card</a>
-}
-@if(enabledMethods.contains("CARD") && enabledMethods.size>1){
     <a class="action action--contribute js-advance action--mobile-card-payment payment-method-button" id = "mobile-card-payment-button">Contribute with card</a>
+    <a class="action action--contribute js-advance action--advance payment-method-button" data-switches="js-details">Contribute with card</a>
+
 }
 @if(enabledMethods.contains("PAYPAL")){
     <a id="payWithPaypal" class="action action--contribute payment-method-button paypal">Contribute with</a>
