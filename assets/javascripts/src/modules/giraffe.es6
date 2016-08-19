@@ -42,9 +42,9 @@ export function init() {
         return;
     }
 
+    skipAmount();
     ophanId();
     carousel();
-    skipAmount();
 
     $CURRENCY_PICKER.each(el => el.addEventListener('click', ev => selectCurrencyElement(ev.currentTarget)));
 
