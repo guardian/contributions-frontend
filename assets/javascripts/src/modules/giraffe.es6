@@ -41,7 +41,7 @@ export function init() {
         return;
     }
 
-    skipAmount();
+    if (shouldSkipAmount()) transition(DETAILS_CLASS);
     ophanId();
     carousel();
 
@@ -131,9 +131,8 @@ function ophanId(){
     })
 }
 
-function skipAmount() {
-    let skip = getSkipAmountFromQueryString( window.location.search );
-    if (skip) transition(DETAILS_CLASS);
+function shouldSkipAmount() {
+    return getSkipAmountFromQueryString( window.location.search );
 }
 
 function getSkipAmountFromQueryString( query ) {
