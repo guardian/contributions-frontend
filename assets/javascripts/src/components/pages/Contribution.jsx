@@ -1,7 +1,7 @@
 import React from 'react';
 
 function setNoAmountError() {
-    document.getElementById("custom-amount").setCustomValidity("Please select a contribution amount.");
+    document.getElementById("custom-amount").setCustomValidity("Please select or enter a contribution amount.");
 }
 
 function setMaxContributionError(prefix, symbol, max) {
