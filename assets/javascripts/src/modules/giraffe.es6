@@ -19,7 +19,6 @@ const $CURRENCY_DISPLAY = $('.js-currency');
 const $CURRENCY_PICKER = $('.js-currency-switcher');
 const $CONTRIBUTION = $('.' + CONTRIBUTION_CLASS);
 const $DETAILS  = $('.' + DETAILS_CLASS);
-
 const $PAY = $('.js-payment');
 const ALL = Array.from($('.form__column'));
 
