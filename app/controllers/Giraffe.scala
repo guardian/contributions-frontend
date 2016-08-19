@@ -99,7 +99,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   def redirectToUk = NoCacheAction { implicit request => redirectWithQueryParams(routes.Giraffe.contribute(UK).url) }
 
   private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) = {
-    val QueryParamsToForward = Set("INTCMP", "CMP", "mcopy", "amount", "highlight")
+    val QueryParamsToForward = Set("INTCMP", "CMP", "mcopy", "skipAmount", "highlight")
     Redirect(destinationUrl, request.queryString.filterKeys(QueryParamsToForward), SEE_OTHER)
   }
 
