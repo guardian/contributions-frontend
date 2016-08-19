@@ -64,10 +64,10 @@ object AmountHighlightTest extends TestTrait {
   )
 
   def variants = NonEmptyList(
-    Variant("Amount - 50 highlight", "25", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(25)), notAustralia),
+    Variant("Amount - 25 highlight", "25", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(25)), notAustralia),
     Variant("Amount - 50 highlight", "50", 1, contributeAmountButtons(List(25, 50, 100, 250), Some(50)), notAustralia),
-    Variant("Amount - 50 highlight", "100", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(100)), notAustralia),
-    Variant("Amount - 50 highlight", "250", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(250)), notAustralia),
+    Variant("Amount - 100 highlight", "100", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(100)), notAustralia),
+    Variant("Amount - 250 highlight", "250", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(250)), notAustralia),
     Variant("Amount - 100 highlight Australia", "100-Australia", 1, contributeAmountButtons(List(50, 100, 250, 500), Some(100)), Set(Australia))
   )
 }
