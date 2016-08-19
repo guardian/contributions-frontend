@@ -27,8 +27,8 @@
                         data-ab-tests="@chosenVariants.asJson"
                         data-country-group="@countryGroup.asJson"
                         data-max-amount="@maxAmount"
-                        @cmpCode.map(code => s"""data-cmp-code="$code"""")
-                        @intCmpCode.map(code => s"""data-int-cmp-code="$code"""")>
+                        @cmpCode.map(code => Html(s"""data-cmp-code="${code}""""))
+                        @intCmpCode.map(code => Html(s"""data-int-cmp-code="${code}""""))>
             </section>
         </div>
     </main>

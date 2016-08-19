@@ -39,7 +39,9 @@ function appDataFrom(container) {
         abTests: JSON.parse(container.dataset.abTests),
         maxAmount: Number(JSON.parse(container.dataset.maxAmount)),
         countryGroup: countryGroup,
-        currency: currency
+        currency: currency,
+        cmpCode: container.dataset.cmpCode,
+        intCmpCode: container.dataset.intCmpCode
     };
 }
 

@@ -9,7 +9,9 @@ const initialState = {
         identifier: '',
         prefix: '',
         code: ''
-    }
+    },
+    cmpCode: '',
+    intCmpCode: ''
 };
 
 /**
