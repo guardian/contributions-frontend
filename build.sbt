@@ -34,7 +34,7 @@ val scalaz = "org.scalaz" %% "scalaz-core" % "7.1.1"
 val membershipCommon = "com.gu" %% "membership-common" % "0.225"
 val sentryRavenLogback = "com.getsentry.raven" % "raven-logback" % "7.6.0"
 val memsubCommonPlayAuth = "com.gu" %% "memsub-common-play-auth" % "1.0"
-val paypalSdk = "com.paypal.sdk" % "rest-api-sdk" % "1.9.2"
+val paypalSdk = "com.paypal.sdk" % "rest-api-sdk" % "1.9.2" exclude("org.apache.logging.log4j", "log4j-slf4j-impl")
 libraryDependencies ++= Seq(
   cache,
   ws,
