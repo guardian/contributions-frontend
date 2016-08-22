@@ -21,7 +21,6 @@ import play.api.mvc._
 import services.PaymentServices
 import utils.RequestCountry._
 import views.support._
-
 import scala.concurrent.Future
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
@@ -80,11 +79,6 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   val chargeId = "charge_id"
 
-  def maxAmountFor(currency: Currency): Int = currency match {
-    case Australia.currency => 3500
-    case _ => 2000
-  }
-
   def contributeRedirect = NoCacheAction { implicit request =>
 
     val countryGroup = request.getFastlyCountry match {
@@ -103,7 +97,8 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     Redirect(destinationUrl, request.queryString.filterKeys(QueryParamsToForward), SEE_OTHER)
   }
 
-  def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
+  def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
+    val errorMessage = error.map(_.message)
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
@@ -116,11 +111,11 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-
-    val maxAmountInLocalCurrency = maxAmountFor(countryGroup.currency)
+    val maxAmountInLocalCurrency = configuration.Payment.maxAmountFor(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
-    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
-      .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears, errorMessage))
+      .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2), Test.createCookie(chosenVariants.paymentMethodTest))
+
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
@@ -156,7 +151,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
-      val maxAmountInSmallestCurrencyUnit = maxAmountFor(f.currency) * 100
+      val maxAmountInSmallestCurrencyUnit = configuration.Payment.maxAmountFor(f.currency) * 100
       val res = stripe.Charge.create(min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit), f.currency, f.email, "Your contribution", f.token, metadata)
 
 

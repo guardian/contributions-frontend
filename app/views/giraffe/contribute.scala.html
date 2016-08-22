@@ -4,9 +4,14 @@
 @import views.support.Asset
 @import configuration.Links
 
-@(pageInfo:PageInfo,maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
-
-@main(pageInfo,Some(countryGroup)){
+@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int], errorMessage: Option[String])
+@containerVisibility = @{
+    if(errorMessage.isDefined) "hidden" else ""
+}
+@paymentDetailsClass = @{
+    if(chosenVariants.paymentMethodTest.variantName == "Control") "" else "hiddenOnMobile"
+}
+@main(pageInfo, Some(countryGroup)) {
     <div class="support-wrapper__outer__a">
         <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="giraffe__heading">
@@ -27,10 +32,19 @@
             -->
             </div>
 
-            <div class="form__container">
+            @for(message <- errorMessage) {
+                <div class="error_message" id="errorMessage">
+                        <h2 class="form__column-heading headline-text--bolder">There was a problem</h2>
+                        @message
+                        <a class="action action--contribute js-advance" id="error_tryAgain" >Try again</a>
+                </div >
+            }
+
+            <div class="form__container @containerVisibility">
                 <div class="form__switcher">
                     <a href="#" class="js-switcher-contribute form__container--active" data-switches="js-contribution"></a> <a class="js-switcher-details" href="#" data-switches="js-details"></a> <a class="js-switcher-pay" href="#" data-switches="js-payment"></a>
                 </div>
+                @fragments.giraffe.paypalForm(countryGroup)
                 <form id="form" class="form js-form" role="main" method="POST" autocomplete="on" novalidate action="@routes.Giraffe.pay()">
                     @fragments.giraffe.abFormTrack(chosenVariants)
 
@@ -63,12 +77,10 @@
                                     or less</div>
                             </li>
                         </ul>
-                        <a class="action action--contribute js-advance action--advance" data-switches="js-details">
-                            Next
-                        </a>
+                        @chosenVariants.paymentMethodTest.render()
                     </div>
 
-                    <div class="form__column js-hidden-tablet js-details">
+                    <div class="form__column js-hidden-tablet js-details @paymentDetailsClass">
                         <h3 class="form__column-heading form__column-heading--first headline-text--bolder">
                             Your details</h3>
                         <ul class="u-unstyled">
@@ -107,7 +119,7 @@
 
 
 
-                    <div class="form__column js-hidden-tablet js-payment">
+                    <div class="form__column js-hidden-tablet js-payment @paymentDetailsClass">
                         <span>
                             <h3 class="form__column-heading headline-text--bolder">Your payment</h3>
                             <div class="security-note">@fragments.inlineIcon("secure", List("icon-inline--small", "icon-inline--top"))

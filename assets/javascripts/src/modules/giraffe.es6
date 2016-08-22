@@ -17,6 +17,9 @@ const HIDDEN = 'js-hidden-tablet';
 const CURRENCY_FIELD = document.querySelector('.js-currency-field');
 const $CURRENCY_DISPLAY = $('.js-currency');
 const $CURRENCY_PICKER = $('.js-currency-switcher');
+const $PAY_WITH_PAYPAL = $('#payWithPaypal')
+const $MOBILE_CARD_PAYMENT_BUTTON = $('#mobile-card-payment-button')
+const $ERROR_TRY_AGAIN_BUTTON = $('#error_tryAgain')
 const $CONTRIBUTION = $('.' + CONTRIBUTION_CLASS);
 const $DETAILS  = $('.' + DETAILS_CLASS);
 const $PAY = $('.js-payment');
@@ -40,19 +43,21 @@ export function init() {
     if (!document.querySelector('.container-global--giraffe .js-form')) {
         return;
     }
-
     if (shouldSkipAmount()) transition(DETAILS_CLASS);
     ophanId();
     carousel();
 
     $CURRENCY_PICKER.each(el => el.addEventListener('click', ev => selectCurrencyElement(ev.currentTarget)));
 
+    $PAY_WITH_PAYPAL.each(p=>p.addEventListener('click', ev => payWithPaypal()));
+    $MOBILE_CARD_PAYMENT_BUTTON.each(p=>p.addEventListener('click', ev => showPaymentDetailsMobile()));
+    $ERROR_TRY_AGAIN_BUTTON.each(p=>p.addEventListener('click', ev => showContributionsForm()));
 
+    $CURRENCY_PICKER.each(el => el.addEventListener('click', ev => selectCurrencyElement(ev.currentTarget)));
     // Preset amount
     $AMOUNT_PICKER.each(el => el.addEventListener('click', ev => {
         let element = ev.currentTarget;
         let amount = element.getAttribute('data-amount') + '.00';
-
         select(element);
 
         // Force a validation pass if we pick a pre-selected amount
@@ -80,6 +85,23 @@ export function init() {
 
 
     getStuffFromIdentity();
+}
+
+function showPaymentDetailsMobile() {
+    $('.js-details').removeClass('hiddenOnMobile')
+    $('.js-payment').removeClass('hiddenOnMobile')
+    $MOBILE_CARD_PAYMENT_BUTTON.addClass('selected-method-mobile')
+}
+
+function payWithPaypal() {
+    let selectedAmount = $('.js-amount-hidden')[0].value;
+    let maxAmount = parseInt($("#other_amount")[0].getAttribute("data-max"), 10);
+
+    if (maxAmount >= selectedAmount) {
+        $('#paypalAmount').val(selectedAmount);
+        $('form#paypalForm').each(p => p.submit());
+
+    }
 }
 
 function select(el) {
@@ -123,6 +145,10 @@ function getStuffFromIdentity() {
             NAME_FIELD.value = resp.user.publicFields.displayName;
         }
     })
+}
+function showContributionsForm() {
+    $('.form__container').removeClass('hidden');
+    $('#errorMessage').addClass('hidden');
 }
 
 function ophanId(){
