@@ -1,17 +1,5 @@
 import React from 'react';
 
-function setNoAmountError() {
-    document.getElementById("custom-amount").setCustomValidity("Please select or enter a contribution amount.");
-}
-
-function setMaxContributionError(prefix, symbol, max) {
-    document.getElementById("custom-amount").setCustomValidity(`We are presently only able to accept contributions of ${prefix || ''}${symbol}${max} or less.`);
-}
-
-function clearError() {
-    document.getElementById("custom-amount").setCustomValidity("");
-}
-
 export default class Contribution extends React.Component {
     constructor(props) {
         super(props)
@@ -49,24 +37,32 @@ export default class Contribution extends React.Component {
         this.props.setAmount(amount);
     }
 
-    setValidation() {
+    setValidationError(message) {
+        this._input.setCustomValidity(message);
+    }
+
+    clearValidationError() {
+        this._input.setCustomValidity('');
+    }
+
+    validate() {
         if (this.state.inputAmount > this.props.max) {
-            return setMaxContributionError(this.props.currency.prefix ,this.props.currency.symbol, this.props.max);
+            return this.setValidationError(`We are presently only able to accept contributions of ${this.props.currency.prefix || ''}${this.props.currency.symbol}${this.props.max} or less.`);
         }
 
         if (!this.state.inputAmount && (!this.props.currentAmount || this.props.currentAmount === 0)) {
-            return setNoAmountError();
+            return this.setValidationError("Please select or enter a contribution amount.");
         }
 
-        clearError();
+        this.clearValidationError();
     }
 
     componentDidMount() {
-        this.setValidation();
+        this.validate();
     }
 
     componentDidUpdate() {
-        this.setValidation();
+        this.validate();
     }
 
     render() {
@@ -82,7 +78,7 @@ export default class Contribution extends React.Component {
             <span className="contribute-controls__input contribute-controls__input--amount input-text">
                 <span className={'symbol ' + (!!this.state.inputAmount ? 'active' : '')}>{this.props.currency.symbol}</span>
                 <input type="number"
-                       id="custom-amount"
+                       ref={c => this._input = c} // create a reference to this element for validation (see: https://facebook.github.io/react/docs/more-about-refs.html)
                        placeholder="Other amount" maxLength="10"
                        value={this.state.inputAmount}
                        onChange={this.updateInputAmount.bind(this)}

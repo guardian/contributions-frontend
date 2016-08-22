@@ -54,7 +54,9 @@ class Main extends React.Component {
     }
 
     submit(event) {
-        event.preventDefault();
+        event.preventDefault(); // we never want the standard submit behaviour, which triggers a reload
+
+        if (!event.target.checkValidity()) return;
 
         if (this.props.page === PAGES.PAYMENT) {
             this.props.pay();
