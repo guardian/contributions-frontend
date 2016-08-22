@@ -124,19 +124,18 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
-
+    val charge = request.session.get(chargeId)
     val title = countryGroup match {
       case Australia => "Thank you for supporting Guardian Australia"
       case _ => "Thank you for supporting the Guardian"
     }
 
-    val redirectUrl = routes.Giraffe.contribute(countryGroup).url
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,
       url = request.path,
       image = None,
       description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
-    ), social, countryGroup))
+    ), social, countryGroup, charge))
   }
 
   def pay = NoCacheAction.async { implicit request =>
