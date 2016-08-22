@@ -27,7 +27,7 @@
         @for(pageImage <- pageInfo.image) {
             <meta property="og:image" content="@pageImage"/>
         }
-        <meta property="og:url" content="@(Config.membershipUrl + pageInfo.url)"/>
+        <meta property="og:url" content="@(Config.contributeUrl + pageInfo.url)"/>
 
         <meta property="og:type" content="website"/>
         <meta property="fb:app_id" content="@Config.facebookAppId"/>
@@ -39,9 +39,9 @@
             {
                 "@@context": "http://schema.org",
                 "@@type": "Organization",
-                "name": "Guardian Members",
-                "url": "@(Config.membershipUrl)",
-                "logo": "@(Config.membershipUrl)@Asset.at("images/favicons/152x152.png")",
+                "name": "Contribute",
+                "url": "@(Config.contributeUrl)",
+                "logo": "@(Config.contributeUrl)@Asset.at("images/favicons/152x152.png")",
                 "sameAs" : [
                     "@(Social.youtube)",
                     "@(Social.googleplus)",
