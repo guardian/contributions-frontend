@@ -16,7 +16,7 @@ trait EnumMapping[A] {
   implicit val jf = new Format[A] {
     override def writes(o: A): JsValue = JsString(enumToString(o))
     override def reads(json: JsValue): JsResult[A] = json match {
-      case JsString(value) => enumFromString(value).map(JsSuccess(_)).getOrElse(JsError(s"Unkown enum value: $value"))
+      case JsString(value) => enumFromString(value).map(JsSuccess(_)).getOrElse(JsError(s"Unknown enum value: $value"))
       case _ => JsError("Wrong enum type, a JsString is expected")
     }
   }
