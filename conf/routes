@@ -17,6 +17,7 @@ POST           /paypal/auth                     controllers.PaypalController.aut
 POST           /paypal/ajaxAuth                 controllers.PaypalController.ajaxAuth
 
 GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID)
+POST           /paypal/hook                     controllers.PaypalController.hook
 
 
 

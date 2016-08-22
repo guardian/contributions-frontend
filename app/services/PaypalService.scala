@@ -2,6 +2,7 @@ package services
 
 import com.gu.i18n.CountryGroup
 import com.paypal.api.payments._
+import com.paypal.base.Constants
 import com.paypal.base.rest.{APIContext, PayPalRESTException}
 
 import scala.collection.JavaConverters._
@@ -9,14 +10,21 @@ import com.typesafe.config.Config
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
 
-case class PaypalApiConfig(envName: String, paypalMode: String, baseReturnUrl: String, credentials: PaypalCredentials)
+case class PaypalApiConfig(
+  envName: String,
+  paypalMode: String,
+  baseReturnUrl: String,
+  credentials: PaypalCredentials,
+  paypalWebhookId: String
+)
 
 object PaypalApiConfig {
   def from(config: Config, environmentName: String, variant: String = "api") = PaypalApiConfig(
     envName = environmentName,
     credentials = PaypalCredentials(config.getString("clientId"), config.getString("clientSecret")),
     paypalMode = config.getString("paypalMode"),
-    baseReturnUrl = config.getString("baseReturnUrl")
+    baseReturnUrl = config.getString("baseReturnUrl"),
+    paypalWebhookId = config.getString("paypalWebhookId")
   )
 }
 
@@ -70,6 +78,11 @@ class PaypalService(config: PaypalApiConfig) {
     } catch {
       case e: PayPalRESTException => Left(e.getMessage)
     }
+  }
+
+  def validateEvent(headers: Map[String, String], body: String): Boolean = {
+    val context = apiContext.addConfiguration(Constants.PAYPAL_WEBHOOK_ID, config.paypalWebhookId)
+    Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
 }

@@ -2,10 +2,12 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup
+import data.ContributionData
+import models.PaymentHook
 import play.api.data.{Form, FormError}
 import play.api.data.Forms._
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Controller, Result}
+import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
 import play.api.data.format.Formatter
@@ -16,7 +18,12 @@ import play.api.libs.functional.syntax._
 import scala.util.Right
 
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices, contributionIdGenerator: ContributionIdGenerator) extends Controller {
+class PaypalController(
+  ws: WSClient,
+  paymentServices: PaymentServices,
+  contributionIdGenerator: ContributionIdGenerator,
+  contributionData: ContributionData
+) extends Controller {
 
   implicit val countryGroupFormatter = new Formatter[CountryGroup] {
     type Result = Either[Seq[FormError], CountryGroup]
@@ -99,5 +106,26 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, contribut
   def handleError(countryGroup: CountryGroup, error: String) = {
     Logger.error(error)
     Redirect(routes.Giraffe.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
+  }
+
+  def hook = NoCacheAction(BodyParsers.parse.tolerantText) { request =>
+    val bodyText = request.body
+    val bodyJson = Json.parse(request.body)
+
+    val paypalService = paymentServices.paypalServiceFor(request)
+    val validHook = paypalService.validateEvent(request.headers.toSimpleMap, bodyText)
+
+    bodyJson.validate[PaymentHook] match {
+      case JsSuccess(paymentHook, _) if validHook =>
+        contributionData.insertPaymentHook(paymentHook)
+        Logger.info(s"Received paymentHook: $paymentHook")
+        Ok
+      case JsError(errors) =>
+        Logger.error(s"Unable to parse Json, parsing errors: $errors")
+        InternalServerError("Unable to parse json payload")
+      case _ =>
+        Logger.error(s"A webhook request wasn't valid: $request, headers: ${request.headers.toSimpleMap},body: $bodyText")
+        Forbidden("Request isn't signed by Paypal")
+    }
   }
 }
