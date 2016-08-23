@@ -22,7 +22,6 @@ import services.PaymentServices
 import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
-
 import scala.concurrent.Future
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
@@ -92,17 +91,18 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       case None => UK
     }
 
-    redirectWithCampaignCodes(routes.Giraffe.contribute(countryGroup).url)
+    redirectWithQueryParams(routes.Giraffe.contribute(countryGroup).url)
   }
 
-  def redirectToUk = NoCacheAction { implicit request => redirectWithCampaignCodes(routes.Giraffe.contribute(UK).url) }
+  def redirectToUk = NoCacheAction { implicit request => redirectWithQueryParams(routes.Giraffe.contribute(UK).url) }
 
-  private def redirectWithCampaignCodes(destinationUrl: String)(implicit request: Request[Any]) = {
-    val CampaignCodesToForward = Set("INTCMP", "CMP", "mcopy")
-    Redirect(destinationUrl, request.queryString.filterKeys(CampaignCodesToForward), SEE_OTHER)
+  private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) = {
+    val QueryParamsToForward = Set("INTCMP", "CMP", "mcopy", "skipAmount", "highlight")
+    Redirect(destinationUrl, request.queryString.filterKeys(QueryParamsToForward), SEE_OTHER)
   }
 
-  def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
+  def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
+    val errorMessage = error.map(_.message)
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
@@ -115,28 +115,26 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-
-
+    val maxAmountInLocalCurrency = configuration.Payment.maxAmountFor(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    Ok(views.html.giraffe.contributeReact(pageInfo, MaxAmount.forCurrency(countryGroup.currency), countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
+    Ok(views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
       .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
-
+    val charge = request.session.get(chargeId)
     val title = countryGroup match {
       case Australia => "Thank you for supporting Guardian Australia"
       case _ => "Thank you for supporting the Guardian"
     }
 
-    val redirectUrl = routes.Giraffe.contribute(countryGroup).url
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,
       url = request.path,
       image = None,
       description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
-    ), social, countryGroup))
+    ), social, countryGroup, charge))
   }
 
   def pay = NoCacheAction.async { implicit request =>
@@ -156,7 +154,8 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       ) ++ f.postCode.map("postcode" -> _)
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
-      val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(f.currency) * 100
+
+      val maxAmountInSmallestCurrencyUnit = configuration.Payment.maxAmountFor(f.currency) * 100
       val res = stripe.Charge.create(min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit), f.currency, f.email, "Your contribution", f.token, metadata)
 
       val redirect = f.currency match {

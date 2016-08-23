@@ -7,7 +7,6 @@ import com.gu.stripe.{StripeApiConfig, StripeCredentials, StripeService}
 import com.typesafe.config.Config
 import play.api.mvc.RequestHeader
 import services.PaymentServices.{Default, Mode, Testing}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -46,16 +45,31 @@ object PaymentServices {
 
   def stripeServicesFor(stripeConfig: Config):Map[Mode, StripeService]  =
     Mode.all.map(mode => mode -> stripeServiceFor(stripeConfig, mode)).toMap
+
+  def paypalServiceFor(paypalConfig: Config, universe: Mode): PaypalService = {
+    val paypalMode = paypalConfig.getString(universe.name)
+    val keys = paypalConfig.getConfig(paypalMode)
+    val apiConfig = PaypalApiConfig.from(keys, paypalMode)
+    new PaypalService(apiConfig)
+  }
+  def paypalServicesFor(paypalConfig: Config):Map[Mode, PaypalService] =
+    Mode.all.map(mode => mode -> paypalServiceFor(paypalConfig, mode)).toMap
+
 }
 
 case class PaymentServices(
   authProvider: AuthenticatedIdUser.Provider,
   testUsernames: TestUsernames,
-  stripeServices: Map[Mode, StripeService]
+  stripeServices: Map[Mode, StripeService],
+  paypalServices: Map[Mode, PaypalService]
 ) {
-  def stripeServiceFor(request: RequestHeader): StripeService = {
-    val isTestUser = authProvider(request).flatMap(_.displayName).exists(testUsernames.isValid)
 
-    stripeServices(if (isTestUser) Testing else Default)
-  }
+  private def isTestUser(request: RequestHeader): Boolean = authProvider(request).flatMap(_.displayName).exists(testUsernames.isValid)
+
+  private def modeFor(request: RequestHeader): Mode = if (isTestUser(request)) Testing else Default
+
+  def stripeServiceFor(request: RequestHeader): StripeService = stripeServices(modeFor(request))
+
+  def paypalServiceFor(request: RequestHeader): PaypalService = paypalServices(modeFor(request))
+
 }

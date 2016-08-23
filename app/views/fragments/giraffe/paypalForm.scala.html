@@ -1,0 +1,7 @@
+@import com.gu.i18n.CountryGroup
+
+@(countryGroup:CountryGroup)
+<form action="/paypal/auth" method="post" target="_top" id="paypalForm">
+    <input type="hidden" name="amount" value="" id="paypalAmount">
+    <input type="hidden" name="countryGroup" value="@countryGroup.id" id="paypalCountryGroup">
+</form>

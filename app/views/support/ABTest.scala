@@ -10,10 +10,10 @@ import com.gu.i18n.CountryGroup._
 import play.api.libs.json._
 import play.api.mvc.{Cookie, Request}
 import play.twirl.api.Html
-import scala.util.Random
 
+import scala.util.Random
 import scalaz.NonEmptyList
-import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage}
+import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage, paymentMethods, paymentMethodsControl}
 
 trait TestTrait {
   type VariantFn
@@ -64,18 +64,12 @@ object AmountHighlightTest extends TestTrait {
   )
 
   def variants = NonEmptyList(
-    Variant("Amount - 5 highlight", "5", 0, contributeAmountButtons(List(5, 25, 50, 100), Some(5))),
-    Variant("Amount - 25 highlight", "25", 0, contributeAmountButtons(List(5, 25, 50, 100), Some(25))),
-    Variant("Amount - no highlight", "None", 0, contributeAmountButtons(List(5, 25, 50, 100), None)),
-    Variant("Amount - 35 highlight", "35", 0, contributeAmountButtons(List(10, 35, 65, 100), Some(35))),
-    Variant("Amount - 35 highlight descending", "35-descending", 0, contributeAmountButtons(List(100, 65, 35, 10), Some(35))),
-    Variant("Amount - 100 highlight", "100", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(100))),
+    Variant("Amount - 25 highlight", "25", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(25)), notAustralia),
     Variant("Amount - 50 highlight", "50", 1, contributeAmountButtons(List(25, 50, 100, 250), Some(50)), notAustralia),
-    Variant("Amount - 15", "15", 0, contributeAmountButtons(List(15, 35, 65, 100), Some(35))),
-    Variant("Amount - 40 highlight", "40", 0, contributeAmountButtons(List(20, 40, 75, 100), Some(40))),
+    Variant("Amount - 100 highlight", "100", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(100)), notAustralia),
+    Variant("Amount - 250 highlight", "250", 0, contributeAmountButtons(List(25, 50, 100, 250), Some(250)), notAustralia),
     Variant("Amount - 100 highlight Australia", "100-Australia", 1, contributeAmountButtons(List(50, 100, 250, 500), Some(100)), Set(Australia))
   )
-
 }
 
 object MessageCopyTest extends TestTrait {
@@ -106,10 +100,23 @@ object MessageCopyTest extends TestTrait {
   )
 }
 
-case class ChosenVariants(v1: AmountHighlightTest.Variant, v2: MessageCopyTest.Variant) {
-  def asList: Seq[TestTrait#Variant] = Seq(v1,v2) //this makes me very sad
+object PaymentMethodTest extends TestTrait {
+
+  def name = "PaymentMethodTest"
+  def slug = "paymentMethod"
+  override type VariantFn = () => Html
+
+  def variants = NonEmptyList(
+    Variant("Control", "control", 1, () => paymentMethodsControl()),
+    Variant("Paypal", "paypal", 0, paymentMethods(Set("PAYPAL", "CARD")))
+  )
+
+}
+case class ChosenVariants(v1: AmountHighlightTest.Variant, v2: MessageCopyTest.Variant, paymentMethodTest:PaymentMethodTest.Variant) {
+  def asList: Seq[TestTrait#Variant] = Seq(v1,v2, paymentMethodTest) //this makes me very sad
   def asJson = Json.toJson(asList).toString()
   def encodeURL = URLEncoder.encode(asJson, StandardCharsets.UTF_8.name())
+
   implicit val writesVariant: Writes[TestTrait#Variant] = new Writes[TestTrait#Variant]{
     def writes(variant: TestTrait#Variant) =  Json.obj(
       "testName" -> variant.testName,
@@ -145,7 +152,11 @@ object Test {
   }
 
   def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
-    ChosenVariants(pickVariant(countryGroup, request, AmountHighlightTest), pickVariant(countryGroup, request, MessageCopyTest))
+    ChosenVariants(
+      v1 = pickVariant(countryGroup, request, AmountHighlightTest),
+      v2 = pickVariant(countryGroup, request, MessageCopyTest),
+      paymentMethodTest = pickVariant(countryGroup, request, PaymentMethodTest)
+    )
   }
 }
 
