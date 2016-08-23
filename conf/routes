@@ -16,7 +16,7 @@ GET            /healthcheck                     controllers.Healthcheck.healthch
 POST           /paypal/auth                     controllers.PaypalController.authorize
 POST           /paypal/ajaxAuth                 controllers.PaypalController.ajaxAuth
 
-GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID)
+GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], ophanId: Option[String])
 POST           /paypal/hook                     controllers.PaypalController.hook
 
 

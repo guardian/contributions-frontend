@@ -5,6 +5,7 @@ import com.gu.identity.testing.usernames.TestUsernames
 import com.gu.monitoring.ServiceMetrics
 import com.gu.stripe.{StripeApiConfig, StripeCredentials, StripeService}
 import com.typesafe.config.Config
+import data.ContributionData
 import play.api.mvc.RequestHeader
 import services.PaymentServices.{Default, Mode, Testing}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,14 +47,14 @@ object PaymentServices {
   def stripeServicesFor(stripeConfig: Config):Map[Mode, StripeService]  =
     Mode.all.map(mode => mode -> stripeServiceFor(stripeConfig, mode)).toMap
 
-  def paypalServiceFor(paypalConfig: Config, universe: Mode): PaypalService = {
+  def paypalServiceFor(paypalConfig: Config, universe: Mode, contributionData: ContributionData): PaypalService = {
     val paypalMode = paypalConfig.getString(universe.name)
     val keys = paypalConfig.getConfig(paypalMode)
     val apiConfig = PaypalApiConfig.from(keys, paypalMode)
-    new PaypalService(apiConfig)
+    new PaypalService(apiConfig, contributionData)
   }
-  def paypalServicesFor(paypalConfig: Config):Map[Mode, PaypalService] =
-    Mode.all.map(mode => mode -> paypalServiceFor(paypalConfig, mode)).toMap
+  def paypalServicesFor(paypalConfig: Config, contributionData: ContributionData):Map[Mode, PaypalService] =
+    Mode.all.map(mode => mode -> paypalServiceFor(paypalConfig, mode, contributionData)).toMap
 
 }
 
