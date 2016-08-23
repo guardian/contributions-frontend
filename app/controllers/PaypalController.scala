@@ -13,7 +13,6 @@ import play.api.Logger
 import play.api.data.format.Formatter
 import play.api.libs.json._
 import utils.ContributionIdGenerator
-import play.api.libs.functional.syntax._
 import views.support.Test
 
 import scala.util.Right
@@ -47,7 +46,8 @@ class PaypalController(
   ) = NoCacheAction { implicit request =>
     val chosenVariants = Test.getContributePageVariants(countryGroup, request)
     val paypalService = paymentServices.paypalServiceFor(request)
-    paypalService.executePayment(paymentId, token, payerId, chosenVariants, cmp, intCmp, ophanId) match {
+    val idUser = IdentityUser.fromRequest(request).map(_.id)
+    paypalService.executePayment(paymentId, token, payerId, chosenVariants, cmp, intCmp, ophanId, idUser) match {
       case Right(_) => Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
     }

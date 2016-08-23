@@ -10,12 +10,12 @@ import com.paypal.base.rest.{APIContext, PayPalRESTException}
 import scala.collection.JavaConverters._
 import com.typesafe.config.Config
 import data.ContributionData
-import models.ContributionMetaData
+import models.{ContributionMetaData, Contributor}
 import org.joda.time.DateTime
 import play.api.Logger
 import views.support.ChosenVariants
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
 
@@ -99,7 +99,8 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     chosenVariants: ChosenVariants,
     cmp: Option[String],
     intCmp: Option[String],
-    ophanId: Option[String]
+    ophanId: Option[String],
+    idUser: Option[String]
   ): Either[String, String] = {
     def execute(): Either[String, String] = {
       val payment = new Payment().setId(paymentId)
@@ -123,17 +124,28 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         transaction <- Try(payment.getTransactions.asScala.head)
         contributionId <- Try(UUID.fromString(transaction.getCustom))
         created <- Try(new DateTime(payment.getCreateTime))
+        payerInfo <- Try(payment.getPayer.getPayerInfo)
       } yield {
         val metadata = ContributionMetaData(
           contributionId = contributionId,
           created = created,
-          email = payment.getPayer.getPayerInfo.getEmail,
+          email = payerInfo.getEmail,
           ophanId = ophanId,
           abTests = chosenVariants.asJson,
           cmp = cmp,
           intCmp = intCmp
         )
+        val contributor = Contributor(
+          email = payerInfo.getEmail,
+          name = Some(s"${payerInfo.getFirstName} ${payerInfo.getLastName}"),
+          firstName = payerInfo.getFirstName,
+          lastName = payerInfo.getLastName,
+          idUser = idUser,
+          postCode = Option(payerInfo.getBillingAddress).flatMap(address => Option(address.getPostalCode)),
+          marketingOptIn = None
+        )
         contributionData.insertPaymentMetaData(metadata)
+        contributionData.insertContributor(contributor)
       }
       result recover {
         case exception: Exception => Logger.error("Unable to store contribution metadata", exception)
