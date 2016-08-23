@@ -253,26 +253,26 @@ $desktop-col-padding-right: 16px;
     }
 }
 
-.doSkip{
+.js-amount-heading{
     display:none;
 }
 
 
 @include mq($from: tablet) {
-    .doSkip.js-skip {
+    .js-amount-heading.js-skip {
         display:block;
     }
-    .doNotSkip.js-skip {
+    .js-default-heading.js-skip {
         display:none;
     }
 }
 
 
 @include mq($until: tablet) {
-    .doSkip.js-skip {
+    .js-amount-heading.js-skip {
         display:none;
     }
-    .doNotSkip.js-skip {
+    .js-default-heading.js-skip {
         display:block;
     }
 }

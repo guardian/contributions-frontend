@@ -42,8 +42,8 @@ export function init() {
     }
 
     if (shouldSkipAmount()) {
-        $('.doSkip').addClass('js-skip');
-        $('.doNotSkip').addClass('js-skip');
+        $('.js-amount-heading').addClass('js-skip');
+        $('.js-default-heading').addClass('js-skip');
         transition(DETAILS_CLASS);
     }
 
