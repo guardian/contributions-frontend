@@ -69,8 +69,14 @@
                     </div>
 
                     <div class="form__column js-hidden-tablet js-details">
-                        <h3 class="form__column-heading form__column-heading--first headline-text--bolder">
+                        <h3 class="form__column-heading form__column-heading--first headline-text--bolder details-heading doNotSkip">
                             Your details</h3>
+                        <h3 class="form__column-heading form__column-heading--first headline-text--bolder details-heading doSkip" >
+                            Continue with your
+                                <br>
+                                contribution of <span class="js-currency-pay">@countryGroup.currency.prefix@countryGroup.currency.glyph</span><span class="js-amount js-pay"></span>
+                        </h3>
+
                         <ul class="u-unstyled">
                             <li class="form-field">
                                 <label for="name" class="label">Full name</label>
@@ -103,6 +109,7 @@
                         <a class="action action--contribute js-advance action--advance" data-switches="js-payment">
                             Next
                         </a>
+
                     </div>
 
 

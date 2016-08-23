@@ -41,7 +41,13 @@ export function init() {
         return;
     }
 
-    if (shouldSkipAmount()) transition(DETAILS_CLASS);
+    if (shouldSkipAmount()) {
+        $('.doSkip').addClass('js-skip');
+        $('.doNotSkip').addClass('js-skip');
+        transition(DETAILS_CLASS);
+    }
+
+
     ophanId();
     carousel();
 
@@ -77,7 +83,6 @@ export function init() {
     if(!hiddenAmount){
         $('.js-currency-pay').addClass(HIDDEN_CLASS);
     }
-
 
     getStuffFromIdentity();
 }

@@ -186,6 +186,7 @@ $desktop-col-padding-right: 16px;
         padding-left: $desktop-col-padding-left;
         padding-right: $desktop-col-padding-right;
     }
+
 }
 
 /** Thanks */
@@ -251,6 +252,32 @@ $desktop-col-padding-right: 16px;
         font-size: 18px;
     }
 }
+
+.doSkip{
+    display:none;
+}
+
+
+@include mq($from: tablet) {
+    .doSkip.js-skip {
+        display:block;
+    }
+    .doNotSkip.js-skip {
+        display:none;
+    }
+}
+
+
+@include mq($until: tablet) {
+    .doSkip.js-skip {
+        display:none;
+    }
+    .doNotSkip.js-skip {
+        display:block;
+    }
+}
+
+
 
 @include mq($from: desktop) {
 
