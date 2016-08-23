@@ -2,7 +2,7 @@ package data
 
 import anorm._
 import data.AnormMappings._
-import models.{PaymentHook, ContributionMetaData}
+import models.{ContributionMetaData, Contributor, PaymentHook}
 import play.api.db.Database
 
 class ContributionData(db: Database) {
@@ -75,6 +75,39 @@ class ContributionData(db: Database) {
           abtests = excluded.abtests,
           cmp = excluded.cmp,
           intcmp = excluded.intcmp"""
+      request.execute()
+    }
+  }
+
+  def insertContributor(contributor: Contributor): Unit = {
+    db.withConnection(autocommit = true) { implicit conn =>
+      val request = SQL"""
+        INSERT INTO dev.live_contributors(
+          receipt_email,
+          name,
+          firstname,
+          lastname,
+          iduser,
+          postcode,
+          marketingoptin
+        ) VALUES (
+          ${contributor.email},
+          ${contributor.name},
+          ${contributor.firstName},
+          ${contributor.lastName},
+          ${contributor.idUser},
+          ${contributor.postCode},
+          ${contributor.marketingOptIn}
+        ) ON CONFLICT(receipt_email) DO
+        UPDATE SET
+          receipt_email = excluded.receipt_email,
+          name = COALESCE(excluded.name, live_contributors.name),
+          firstname = COALESCE(excluded.firstname, live_contributors.firstname),
+          lastname = COALESCE(excluded.lastname, live_contributors.lastname),
+          iduser = COALESCE(excluded.iduser, live_contributors.iduser),
+          postcode = COALESCE(excluded.postcode, live_contributors.postcode),
+          marketingoptin = COALESCE(excluded.marketingoptin, live_contributors.marketingoptin
+        )"""
       request.execute()
     }
   }
