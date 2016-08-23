@@ -1,7 +1,7 @@
 package controllers
 
 import actions.CommonActions._
-import com.gu.i18n.CountryGroup
+import com.gu.i18n.{CountryGroup, Currency}
 import data.ContributionData
 import models.PaymentHook
 import play.api.data.{Form, FormError}
@@ -55,13 +55,19 @@ class PaypalController(
     )(PaymentData.apply)(PaymentData.unapply)
   )
 
+  def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = {
+    val maxAllowedAmount = configuration.Payment.maxAmountFor(currency)
+    val cappedAmount = amount.min(maxAllowedAmount)
+    println(s"MAX ALLOWED AMOUNT IS $maxAllowedAmount required amount is $amount")
+    cappedAmount
+  }
+
   def authorize = NoCacheAction { implicit request =>
     paypalForm.bindFromRequest().fold[Result](
       hasErrors = form => handleError(CountryGroup.UK, form.errors.mkString(",")),
       success = form => {
         val paypalService = paymentServices.paypalServiceFor(request)
-        val maxAllowedAmount = configuration.Payment.maxAmountFor(form.countryGroup.currency)
-        val amount = form.amount.min(maxAllowedAmount)
+        val amount = capAmount(form.amount, form.countryGroup.currency)
         val authResponse = paypalService.getAuthUrl(amount, form.countryGroup, contributionIdGenerator.getNewId)
         authResponse match {
           case Right(url) => Redirect(url, SEE_OTHER)
@@ -91,7 +97,8 @@ class PaypalController(
     request.body.validate[AuthRequest] match {
       case JsSuccess(authRequest, _) =>
         val paypalService = paymentServices.paypalServiceFor(request)
-        val authResponse = paypalService.getAuthUrl(authRequest.amount, authRequest.countryGroup, contributionIdGenerator.getNewId)
+        val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
+        val authResponse = paypalService.getAuthUrl(amount, authRequest.countryGroup, contributionIdGenerator.getNewId)
         authResponse match {
           case Right(url) => Ok(Json.toJson(AuthResponse(url)))
           case Left(error) => handleError(authRequest.countryGroup, s"Error getting PayPal auth url: $error")
