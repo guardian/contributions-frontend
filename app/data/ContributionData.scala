@@ -2,7 +2,7 @@ package data
 
 import anorm._
 import data.AnormMappings._
-import models.PaymentHook
+import models.{PaymentHook, ContributionMetaData}
 import play.api.db.Database
 
 class ContributionData(db: Database) {
@@ -43,6 +43,38 @@ class ContributionData(db: Database) {
           convertedamount = excluded.convertedamount,
           status = excluded.status,
           email = excluded.email"""
+      request.execute()
+    }
+  }
+
+  def insertPaymentMetaData(pmd: ContributionMetaData): Unit = {
+    db.withConnection(autocommit = true) { implicit conn =>
+      val request = SQL"""
+        INSERT INTO contribution_metadata(
+          contributionid,
+          created,
+          email,
+          ophanid,
+          abtests,
+          cmp,
+          intcmp
+        ) VALUES (
+          ${pmd.contributionId}::uuid,
+          ${pmd.created},
+          ${pmd.email},
+          ${pmd.ophanId},
+          ${pmd.abTests},
+          ${pmd.cmp},
+          ${pmd.intCmp}
+        ) ON CONFLICT(contributionId) DO
+        UPDATE SET
+          contributionid = excluded.contributionid,
+          created = excluded.created,
+          email = excluded.email,
+          ophanid = excluded.ophanid,
+          abtests = excluded.abtests,
+          cmp = excluded.cmp,
+          intcmp = excluded.intcmp"""
       request.execute()
     }
   }
