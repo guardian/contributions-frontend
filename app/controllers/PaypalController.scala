@@ -13,7 +13,7 @@ import play.api.Logger
 import play.api.data.format.Formatter
 import play.api.libs.json._
 import utils.ContributionIdGenerator
-import play.api.libs.functional.syntax._
+import views.support.Test
 
 import scala.util.Right
 
@@ -35,23 +35,41 @@ class PaypalController(
     override def unbind(key: String, value: CountryGroup): Map[String, String] = Map(key -> value.id)
   }
 
-  def executePayment(countryGroup: CountryGroup, paymentId: String, token: String, payerId: String) = NoCacheAction { implicit request =>
+  def executePayment(
+    countryGroup: CountryGroup,
+    paymentId: String,
+    token: String,
+    payerId: String,
+    cmp: Option[String],
+    intCmp: Option[String],
+    ophanId: Option[String]
+  ) = NoCacheAction { implicit request =>
+    val chosenVariants = Test.getContributePageVariants(countryGroup, request)
     val paypalService = paymentServices.paypalServiceFor(request)
-    paypalService.executePayment(paymentId, token, payerId) match {
-      case Right(_) => Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
+    val idUser = IdentityUser.fromRequest(request).map(_.id)
+    paypalService.executePayment(paymentId, payerId) match {
+      case Right(_) =>
+        paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
+        Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
     }
   }
 
   case class PaymentData(
     countryGroup: CountryGroup,
-    amount: BigDecimal
+    amount: BigDecimal,
+    cmp: Option[String],
+    intCmp: Option[String],
+    ophanId: Option[String]
   )
 
   val paypalForm = Form(
     mapping(
       "countryGroup" -> of[CountryGroup],
-      "amount" -> bigDecimal(10, 2)
+      "amount" -> bigDecimal(10, 2),
+      "cmp" -> optional(text),
+      "intcmp" -> optional(text),
+      "ophanId" -> optional(text)
     )(PaymentData.apply)(PaymentData.unapply)
   )
 
@@ -62,7 +80,14 @@ class PaypalController(
         val paypalService = paymentServices.paypalServiceFor(request)
         val maxAllowedAmount = configuration.Payment.maxAmountFor(form.countryGroup.currency)
         val amount = form.amount.min(maxAllowedAmount)
-        val authResponse = paypalService.getAuthUrl(amount, form.countryGroup, contributionIdGenerator.getNewId)
+        val authResponse = paypalService.getAuthUrl(
+          amount = amount,
+          countryGroup = form.countryGroup,
+          contributionId = contributionIdGenerator.getNewId,
+          cmp = form.cmp,
+          intCmp = form.intCmp,
+          ophanId = form.ophanId
+        )
         authResponse match {
           case Right(url) => Redirect(url, SEE_OTHER)
           case Left(error) => handleError(form.countryGroup, s"Error getting PayPal auth url: $error")
@@ -71,7 +96,16 @@ class PaypalController(
     )
   }
 
-  case class AuthRequest(countryGroup: CountryGroup, amount: BigDecimal)
+  case class AuthRequest(
+    countryGroup: CountryGroup,
+    amount: BigDecimal,
+    cmp: Option[String],
+    intCmp: Option[String],
+    ophanId: Option[String]
+  )
+  object AuthRequest {
+    implicit val jf = Json.reads[AuthRequest]
+  }
   case class AuthResponse(approvalUrl:String)
 
   implicit val AuthResponseWrites = Json.writes[AuthResponse]
@@ -82,16 +116,18 @@ class PaypalController(
     }
 
   }
-  implicit val AuthRequestReads: Reads[AuthRequest] = (
-    (JsPath \ "countryGroup").read[CountryGroup] and
-      (JsPath \ "amount").read[BigDecimal]
-    ) (AuthRequest.apply _)
-
   def ajaxAuth = NoCacheAction(parse.json) { request =>
     request.body.validate[AuthRequest] match {
       case JsSuccess(authRequest, _) =>
         val paypalService = paymentServices.paypalServiceFor(request)
-        val authResponse = paypalService.getAuthUrl(authRequest.amount, authRequest.countryGroup, contributionIdGenerator.getNewId)
+        val authResponse = paypalService.getAuthUrl(
+          amount = authRequest.amount,
+          countryGroup = authRequest.countryGroup,
+          contributionId = contributionIdGenerator.getNewId,
+          cmp = authRequest.cmp,
+          intCmp = authRequest.intCmp,
+          ophanId = authRequest.ophanId
+        )
         authResponse match {
           case Right(url) => Ok(Json.toJson(AuthResponse(url)))
           case Left(error) => handleError(authRequest.countryGroup, s"Error getting PayPal auth url: $error")

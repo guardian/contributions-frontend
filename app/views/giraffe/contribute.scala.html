@@ -44,7 +44,7 @@
                 <div class="form__switcher">
                     <a href="#" class="js-switcher-contribute form__container--active" data-switches="js-contribution"></a> <a class="js-switcher-details" href="#" data-switches="js-details"></a> <a class="js-switcher-pay" href="#" data-switches="js-payment"></a>
                 </div>
-                @fragments.giraffe.paypalForm(countryGroup)
+                @fragments.giraffe.paypalForm(countryGroup, cmpCode, intCmpCode)
                 <form id="form" class="form js-form" role="main" method="POST" autocomplete="on" novalidate action="@routes.Giraffe.pay()">
                     @fragments.giraffe.abFormTrack(chosenVariants)
 

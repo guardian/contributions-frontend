@@ -1,5 +1,7 @@
 package services
 
+import java.util.UUID
+
 import com.gu.i18n.CountryGroup
 import com.paypal.api.payments._
 import com.paypal.base.Constants
@@ -7,6 +9,13 @@ import com.paypal.base.rest.{APIContext, PayPalRESTException}
 
 import scala.collection.JavaConverters._
 import com.typesafe.config.Config
+import data.ContributionData
+import models.{ContributionMetaData, Contributor}
+import org.joda.time.DateTime
+import play.api.Logger
+import views.support.ChosenVariants
+
+import scala.util.Try
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
 
@@ -28,16 +37,35 @@ object PaypalApiConfig {
   )
 }
 
-class PaypalService(config: PaypalApiConfig) {
+class PaypalService(config: PaypalApiConfig, contributionData: ContributionData) {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
 
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  def getAuthUrl(amount: BigDecimal, countryGroup: CountryGroup, contributionId: String): Either[String, String] = {
+  def getAuthUrl(
+    amount: BigDecimal,
+    countryGroup: CountryGroup,
+    contributionId: String,
+    cmp: Option[String],
+    intCmp: Option[String],
+    ophanId: Option[String]
+  ): Either[String, String] = {
+
+    def returnUrl: String = {
+      val extraParams = List(
+        cmp.map(value => s"CMP=$value"),
+        intCmp.map(value => s"INTCMP=$value"),
+        ophanId.map(value => s"ophanId=$value")
+      ).flatten match {
+        case Nil => ""
+        case params => params.mkString("?", "&", "")
+      }
+      s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
+    }
+
     val cancelUrl = config.baseReturnUrl
-    val returnUrl = s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute"
     val currencyCode = countryGroup.currency.toString
     val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(amount.toString)
     val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(amount.toString).setQuantity("1")
@@ -59,25 +87,66 @@ class PaypalService(config: PaypalApiConfig) {
       val links = createdPayment.getLinks.asScala
       val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url"))
       approvalLink.map(l => Right(l.getHref)).getOrElse(Left("No approval link returned from paypal"))
-    }
-    catch {
+    } catch {
       case e: PayPalRESTException => Left(e.getMessage)
     }
   }
 
-  def executePayment(paymentId: String, token: String, payerId: String): Either[String, Unit] = {
+  def executePayment(paymentId: String, payerId: String): Either[String, String] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     try {
       val createdPayment = payment.execute(apiContext, paymentExecution)
       if (createdPayment.getState.toUpperCase != "APPROVED") {
         Left(s"payment returned with state: ${createdPayment.getState}")
+      } else {
+        Right(createdPayment.getId)
       }
-      else
-        Right(Unit)
     } catch {
       case e: PayPalRESTException => Left(e.getMessage)
     }
+  }
+
+  def storeMetaData(
+    paymentId: String,
+    chosenVariants: ChosenVariants,
+    cmp: Option[String],
+    intCmp: Option[String],
+    ophanId: Option[String],
+    idUser: Option[String]
+  ): Right[String, String] = {
+    val result = for {
+      payment <- Try(Payment.get(apiContext, paymentId))
+      transaction <- Try(payment.getTransactions.asScala.head)
+      contributionId <- Try(UUID.fromString(transaction.getCustom))
+      created <- Try(new DateTime(payment.getCreateTime))
+      payerInfo <- Try(payment.getPayer.getPayerInfo)
+    } yield {
+      val metadata = ContributionMetaData(
+        contributionId = contributionId,
+        created = created,
+        email = payerInfo.getEmail,
+        ophanId = ophanId,
+        abTests = chosenVariants.asJson,
+        cmp = cmp,
+        intCmp = intCmp
+      )
+      val contributor = Contributor(
+        email = payerInfo.getEmail,
+        name = Some(s"${payerInfo.getFirstName} ${payerInfo.getLastName}"),
+        firstName = payerInfo.getFirstName,
+        lastName = payerInfo.getLastName,
+        idUser = idUser,
+        postCode = Option(payerInfo.getBillingAddress).flatMap(address => Option(address.getPostalCode)),
+        marketingOptIn = None
+      )
+      contributionData.insertPaymentMetaData(metadata)
+      contributionData.insertContributor(contributor)
+    }
+    result recover {
+      case exception: Exception => Logger.error("Unable to store contribution metadata", exception)
+    }
+    Right(paymentId)
   }
 
   def validateEvent(headers: Map[String, String], body: String): Boolean = {
