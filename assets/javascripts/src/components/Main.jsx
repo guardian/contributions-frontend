@@ -10,6 +10,7 @@ import DesktopWrapper from './form-wrapper/DesktopWrapper';
 import Contribution from './pages/Contribution';
 import Details from './pages/Details';
 import Payment from './pages/Payment';
+import AmountSummary from './AmountSummary';
 
 function mapStateToProps(state) {
     return {
@@ -66,7 +67,11 @@ class Main extends React.Component {
     }
 
     render() {
+        const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
+
         return <div>
+            <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={showSummary} />
+
             <MediaQuery query='(max-width: 740px)'>
                 <MobileWrapper submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
