@@ -100,7 +100,6 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       if (createdPayment.getState.toUpperCase != "APPROVED") {
         Left(s"payment returned with state: ${createdPayment.getState}")
       } else {
-        Payment.get(apiContext, paymentId)
         Right(createdPayment.getId)
       }
     } catch {
