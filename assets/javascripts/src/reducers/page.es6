@@ -6,7 +6,7 @@ const initialState = {
     processing: false,
     paymentError: {
         show: false,
-        error: ''
+        message: ''
     }
 };
 
@@ -21,7 +21,7 @@ export default function pageReducer(state = initialState, action) {
             else return Object.assign({}, state, { page: state.page + 1 });
 
         case SUBMIT_PAYMENT:
-            return Object.assign({}, state, { processing: true });
+            return Object.assign({}, state, { processing: true, paymentError: { show: false } });
 
         case PAYMENT_COMPLETE:
             window.location.href = action.response.redirect;
@@ -30,7 +30,7 @@ export default function pageReducer(state = initialState, action) {
         case PAYMENT_ERROR:
             return Object.assign({}, state, {
                 processing: false,
-                paymentError: { show: true, error: action.error }
+                paymentError: { show: true, message: action.error.message }
             });
 
         default:

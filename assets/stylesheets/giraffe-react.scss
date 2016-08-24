@@ -184,6 +184,11 @@
     position: relative;
 }
 
+.payment-error {
+    @include fs-textSans(3);
+    color: $c-error;
+}
+
 [data-shown] {
     display: none !important;
 }

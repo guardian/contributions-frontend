@@ -78,6 +78,8 @@ export default class Payment extends React.Component {
                             tabIndex="15"
                             required />
             </div>
+
+            {this.props.error.show && <div className="payment-error">{this.props.error.message}</div>}
         </div>
     }
 }
