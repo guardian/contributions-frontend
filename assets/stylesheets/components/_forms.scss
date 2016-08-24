@@ -290,6 +290,13 @@
     color: $c-neutral1;
     cursor: pointer;
     display: block;
+
+    .label-optional {
+        font-size: 13px;
+        color: $comment-support-1;
+        margin-left: 6px;
+        font-family: $f-sans-serif-text;
+    }
 }
 
 .label--inline {
