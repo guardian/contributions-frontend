@@ -82,7 +82,7 @@ class ContributionData(db: Database) {
   def insertContributor(contributor: Contributor): Unit = {
     db.withConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
-        INSERT INTO dev.live_contributors(
+        INSERT INTO live_contributors(
           receipt_email,
           name,
           firstname,
