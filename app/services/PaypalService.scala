@@ -92,71 +92,62 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     }
   }
 
-  def executePayment(
+  def executePayment(paymentId: String, payerId: String): Either[String, String] = {
+    val payment = new Payment().setId(paymentId)
+    val paymentExecution = new PaymentExecution().setPayerId(payerId)
+    try {
+      val createdPayment = payment.execute(apiContext, paymentExecution)
+      if (createdPayment.getState.toUpperCase != "APPROVED") {
+        Left(s"payment returned with state: ${createdPayment.getState}")
+      } else {
+        Payment.get(apiContext, paymentId)
+        Right(createdPayment.getId)
+      }
+    } catch {
+      case e: PayPalRESTException => Left(e.getMessage)
+    }
+  }
+
+  def storeMetaData(
     paymentId: String,
-    token: String,
-    payerId: String,
     chosenVariants: ChosenVariants,
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String],
     idUser: Option[String]
-  ): Either[String, String] = {
-    def execute(): Either[String, String] = {
-      val payment = new Payment().setId(paymentId)
-      val paymentExecution = new PaymentExecution().setPayerId(payerId)
-      try {
-        val createdPayment = payment.execute(apiContext, paymentExecution)
-        if (createdPayment.getState.toUpperCase != "APPROVED") {
-          Left(s"payment returned with state: ${createdPayment.getState}")
-        } else {
-          Payment.get(apiContext, paymentId)
-          Right(createdPayment.getId)
-        }
-      } catch {
-        case e: PayPalRESTException => Left(e.getMessage)
-      }
+  ): Right[String, String] = {
+    val result = for {
+      payment <- Try(Payment.get(apiContext, paymentId))
+      transaction <- Try(payment.getTransactions.asScala.head)
+      contributionId <- Try(UUID.fromString(transaction.getCustom))
+      created <- Try(new DateTime(payment.getCreateTime))
+      payerInfo <- Try(payment.getPayer.getPayerInfo)
+    } yield {
+      val metadata = ContributionMetaData(
+        contributionId = contributionId,
+        created = created,
+        email = payerInfo.getEmail,
+        ophanId = ophanId,
+        abTests = chosenVariants.asJson,
+        cmp = cmp,
+        intCmp = intCmp
+      )
+      val contributor = Contributor(
+        email = payerInfo.getEmail,
+        name = Some(s"${payerInfo.getFirstName} ${payerInfo.getLastName}"),
+        firstName = payerInfo.getFirstName,
+        lastName = payerInfo.getLastName,
+        idUser = idUser,
+        postCode = Option(payerInfo.getBillingAddress).flatMap(address => Option(address.getPostalCode)),
+        marketingOptIn = None
+      )
+      contributionData.insertPaymentMetaData(metadata)
+      contributionData.insertContributor(contributor)
     }
-
-    def metaData(paymentId: String): Right[String, String] = {
-      val result = for {
-        payment <- Try(Payment.get(apiContext, paymentId))
-        transaction <- Try(payment.getTransactions.asScala.head)
-        contributionId <- Try(UUID.fromString(transaction.getCustom))
-        created <- Try(new DateTime(payment.getCreateTime))
-        payerInfo <- Try(payment.getPayer.getPayerInfo)
-      } yield {
-        val metadata = ContributionMetaData(
-          contributionId = contributionId,
-          created = created,
-          email = payerInfo.getEmail,
-          ophanId = ophanId,
-          abTests = chosenVariants.asJson,
-          cmp = cmp,
-          intCmp = intCmp
-        )
-        val contributor = Contributor(
-          email = payerInfo.getEmail,
-          name = Some(s"${payerInfo.getFirstName} ${payerInfo.getLastName}"),
-          firstName = payerInfo.getFirstName,
-          lastName = payerInfo.getLastName,
-          idUser = idUser,
-          postCode = Option(payerInfo.getBillingAddress).flatMap(address => Option(address.getPostalCode)),
-          marketingOptIn = None
-        )
-        contributionData.insertPaymentMetaData(metadata)
-        contributionData.insertContributor(contributor)
-      }
-      result recover {
-        case exception: Exception => Logger.error("Unable to store contribution metadata", exception)
-      }
-      Right(paymentId)
+    result recover {
+      case exception: Exception => Logger.error("Unable to store contribution metadata", exception)
     }
-
-    execute() match {
-      case Right(paymentId) => metaData(paymentId)
-      case Left(error) => Left(error)
-    }
+    Right(paymentId)
   }
 
   def validateEvent(headers: Map[String, String], body: String): Boolean = {

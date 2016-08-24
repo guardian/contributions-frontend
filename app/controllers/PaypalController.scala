@@ -47,8 +47,10 @@ class PaypalController(
     val chosenVariants = Test.getContributePageVariants(countryGroup, request)
     val paypalService = paymentServices.paypalServiceFor(request)
     val idUser = IdentityUser.fromRequest(request).map(_.id)
-    paypalService.executePayment(paymentId, token, payerId, chosenVariants, cmp, intCmp, ophanId, idUser) match {
-      case Right(_) => Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
+    paypalService.executePayment(paymentId, payerId) match {
+      case Right(_) =>
+        paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
+        Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
     }
   }
