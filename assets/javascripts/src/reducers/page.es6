@@ -3,7 +3,11 @@ import { PAGES } from 'src/constants';
 
 const initialState = {
     page: 1,
-    processing: false
+    processing: false,
+    paymentError: {
+        show: false,
+        error: ''
+    }
 };
 
 export default function pageReducer(state = initialState, action) {
@@ -24,7 +28,10 @@ export default function pageReducer(state = initialState, action) {
             return state;
 
         case PAYMENT_ERROR:
-            return Object.assign({}, state, { processing: false });
+            return Object.assign({}, state, {
+                processing: false,
+                paymentError: { show: true, error: action.error }
+            });
 
         default:
             return state;

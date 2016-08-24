@@ -19,7 +19,8 @@ function mapStateToProps(state) {
         details: state.details,
         card: state.card,
         currency: state.data.currency,
-        maxAmount: state.data.maxAmount
+        maxAmount: state.data.maxAmount,
+        paymentError: state.page.paymentError
     };
 }
 
@@ -50,7 +51,8 @@ class Main extends React.Component {
 
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}
-                                updateCard={this.props.updateCard}/>;
+                                updateCard={this.props.updateCard}
+                                error={this.props.paymentError} />;
         }
     }
 
