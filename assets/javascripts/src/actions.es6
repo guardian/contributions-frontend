@@ -17,6 +17,8 @@ export const SUBMIT_PAYMENT = "SUBMIT_PAYMENT";
 export const PAYMENT_COMPLETE = "PAYMENT_COMPLETE";
 export const PAYMENT_ERROR = "PAYMENT_ERROR";
 
+export const PAYPAL_PAY = "PAYPAL_PAY";
+
 export function submitPayment(dispatch) {
     const state = store.getState();
 
@@ -34,6 +36,33 @@ export function submitPayment(dispatch) {
         .catch(error => dispatch({ type: PAYMENT_ERROR, error: error }));
 }
 
+export function paypalRedirect(dispatch) {
+    let state = store.getState();
+
+    dispatch({ type: SUBMIT_PAYMENT });
+
+    let postData = {
+            countryGroup: state.data.countryGroup.id ,
+            amount: state.card.amount //TODO should the amount be somewhere else rather than in the card section?
+        };
+    fetch('/paypal/ajaxAuth', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData)
+    })
+     .then( (res) => {
+        if (res.ok) {
+            return res.json();
+                }
+         }
+        )
+        .then((res) =>  window.location = res.approvalUrl)
+        .catch((res) => console.log(res))
+
+}
 /**
  * Convert app state to the structure required for payment posts
  *

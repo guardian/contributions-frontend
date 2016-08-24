@@ -57,9 +57,7 @@ class PaypalController(
 
   def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = {
     val maxAllowedAmount = configuration.Payment.maxAmountFor(currency)
-    val cappedAmount = amount.min(maxAllowedAmount)
-    println(s"MAX ALLOWED AMOUNT IS $maxAllowedAmount required amount is $amount")
-    cappedAmount
+    amount min maxAllowedAmount
   }
 
   def authorize = NoCacheAction { implicit request =>

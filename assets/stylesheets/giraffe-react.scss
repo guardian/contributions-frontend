@@ -3,6 +3,16 @@
 @import 'mixins';
 @import 'utilities/util-layout';
 
+.paypal__button {
+    margin-top: 10px;
+    background-repeat: no-repeat;
+    width: 100%;
+    background-color: $palBlue;
+    background-size: 93px;
+    background-image: url('/assets/images/form/ppcom-white.svg');
+    background-position: left 130px center;
+}
+
 .giraffe__wrapper {
     background: $dark-yellow;
 }
