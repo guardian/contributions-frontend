@@ -8,9 +8,9 @@ object IdentityUser {
   val decoder = new IdentityCookieDecoder(new ProductionKeys)
 
   def fromRequest(request: Request[_]): Option[User] = {
-    request.cookies.get("GU_U").flatMap { cookie =>
-      decoder.getUserDataForGuU(cookie.value)
-    } map(_.user)
+    request.cookies.get("SC_GU_U").flatMap { cookie =>
+      decoder.getUserDataForScGuU(cookie.value)
+    }
   }
 
 }
