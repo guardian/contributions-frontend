@@ -16,7 +16,7 @@ export default class Details extends React.Component {
                         onChange={ event => this.props.updateDetails({ email: event.target.value })}
                         required />
 
-            <InputField label="Postcode" id="postcode" type="text"
+            <InputField label="Postcode" id="postcode" type="text" optional="true"
                         value={this.props.details.postcode}
                         onChange={ event => this.props.updateDetails({ postcode: event.target.value })}
                         />
