@@ -35,7 +35,7 @@ trait AppComponents extends PlayComponents {
     recency = 2.days.standardDuration
   )
 
-  lazy val contributionData = wire[ContributionData]
+  lazy val contributionData: ContributionData = wire[ContributionData]
 
   lazy val identityAuthProvider =
     Cookies.authProvider(identityKeys).withDisplayNameProvider(Token.authProvider(identityKeys, "membership"))
@@ -44,7 +44,7 @@ trait AppComponents extends PlayComponents {
     identityAuthProvider,
     testUsernames,
     PaymentServices.stripeServicesFor(config.getConfig("stripe")),
-    PaymentServices.paypalServicesFor(config.getConfig("paypal"))
+    PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionData)
   )
   lazy val contributionIdGenerator = ContributionIdGeneratorImpl
   lazy val giraffeController = wire[Giraffe]

@@ -114,8 +114,9 @@ object PaymentMethodTest extends TestTrait {
 }
 case class ChosenVariants(v1: AmountHighlightTest.Variant, v2: MessageCopyTest.Variant, paymentMethodTest:PaymentMethodTest.Variant) {
   def asList: Seq[TestTrait#Variant] = Seq(v1,v2, paymentMethodTest) //this makes me very sad
-  def asJson = Json.toJson(asList).toString()
-  def encodeURL = URLEncoder.encode(asJson, StandardCharsets.UTF_8.name())
+  def asJson: JsValue = Json.toJson(asList)
+  def asStringifiedJson = Json.stringify(asJson)
+  def encodeURL = URLEncoder.encode(asStringifiedJson, StandardCharsets.UTF_8.name())
 
   implicit val writesVariant: Writes[TestTrait#Variant] = new Writes[TestTrait#Variant]{
     def writes(variant: TestTrait#Variant) =  Json.obj(
