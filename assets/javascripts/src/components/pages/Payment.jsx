@@ -79,7 +79,11 @@ export default class Payment extends React.Component {
                             required />
             </div>
 
-            {this.props.error.show && <div className="payment-error">{this.props.error.message}</div>}
+            {this.props.error.show &&
+                <div className="payment-error">
+                    {this.props.error.kind === 'card' ? this.props.error.message : 'Sorry, an error occurred, please try again.'}
+                </div>
+            }
         </div>
     }
 }

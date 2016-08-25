@@ -34,9 +34,9 @@ export function submitPayment(dispatch) {
         }))
         .then(response => {
             if (response.response.ok) dispatch({ type: PAYMENT_COMPLETE, response: response.json })
-            else dispatch({ type: PAYMENT_ERROR, error: response.json })
+            else dispatch({ type: PAYMENT_ERROR, kind: 'card', error: response.json })
         })
-        .catch(error => dispatch({ type: PAYMENT_ERROR, error: error }));
+        .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'network', error: error }));
 }
 
 /**

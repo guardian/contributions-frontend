@@ -6,6 +6,7 @@ const initialState = {
     processing: false,
     paymentError: {
         show: false,
+        kind: 'card',
         message: ''
     }
 };
@@ -28,9 +29,14 @@ export default function pageReducer(state = initialState, action) {
             return state;
 
         case PAYMENT_ERROR:
+            console.log(action);
             return Object.assign({}, state, {
                 processing: false,
-                paymentError: { show: true, message: action.error.message }
+                paymentError: {
+                    show: true,
+                    message: action.error.message,
+                    kind: action.kind
+                }
             });
 
         default:
