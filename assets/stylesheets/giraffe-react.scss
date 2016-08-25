@@ -143,13 +143,6 @@
     width: 100%;
 }
 
-.contribute-navigation__back {
-    @include font-smoothing();
-    @include fs-textSans(4);
-    float: left;
-    line-height: 36px;
-}
-
 .contribute-navigation__button {
     float: right;
 }

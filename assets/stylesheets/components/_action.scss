@@ -35,7 +35,7 @@
 
     color: $white;
     background-color: $c-button;
-    padding: 6px $gs-gutter;
+    padding: 3px 15px;
     border: 1px solid $c-button;
     @include circular;
 
@@ -46,24 +46,6 @@
         background-color: darken($c-button, 10%);
         border-color: darken($c-button, 10%);
         text-decoration: none;
-    }
-
-    /**
-     * TODO: Temporary inlining to help with removal of old icon sprite
-     * This should move to being an inline SVG. Requires a template refactor to get there.
-     */
-    &:after {
-        content: '';
-
-        display: inline-block;
-        background-repeat: no-repeat;
-        width: 30px;
-        height: 28px;
-        background-image: svg-url('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><path fill="white" stroke="white" d="M22.8 14.6L15.2 7l-.7.7 5.5 6.6H6v1.5h14l-5.5 6.6.7.7 7.6-7.6v-.9"/></svg>');
-        background-size: 100%;
-
-        float: right;
-        margin: rem(2px) rem(-$gs-gutter / 2) 0 rem($gs-gutter);
     }
 
     .action__label {
@@ -90,6 +72,36 @@
 .action--button {
     border: none;
     line-height: 30px;
+    height: 36px;
+
+    svg {
+        fill: white;
+    }
+}
+
+.action--button__arrow {
+    position: relative;
+    top: 5px;
+}
+
+.action--button--forward {
+    .action--button__arrow {
+        left: 7px;
+    }
+
+    span {
+        padding-right: 6px;
+    }
+}
+
+.action--button--back {
+    .action--button__arrow {
+        right: 7px;
+    }
+
+    span {
+        padding-left: 6px;
+    }
 }
 
 .action--slim {
@@ -127,27 +139,25 @@
  * Secondary modifier
  */
 .action--secondary {
-
-   color: $c-button;
+   color: color(news-main-1);
    background-color: transparent;
-   border: 1px solid transparentize($c-button, 0.5);
+   border: 1px solid transparentize(color(news-main-1), 0.3);
 
    &:focus,
    &:active,
    &:hover {
-       color: $c-button;
+       color: color(news-main-1);
        background-color: transparent;
    }
 
    &:hover,
    &:active {
-       border-color: $c-button;
+       border-color: color(news-main-1);
    }
 
-   &:after {
-       display: none;
-   }
-
+    svg {
+        fill: color(news-main-1);
+    }
 }
 
 /**
