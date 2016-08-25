@@ -29,7 +29,6 @@ export default function pageReducer(state = initialState, action) {
             return state;
 
         case PAYMENT_ERROR:
-            console.log(action);
             return Object.assign({}, state, {
                 processing: false,
                 paymentError: {
