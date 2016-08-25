@@ -4,9 +4,9 @@
 @import views.support.Asset
 @import configuration.Links
 
-@(pageInfo:PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
+@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
 
-@main(pageInfo,Some(countryGroup)){
+@main(pageInfo, Some(countryGroup)) {
     <div class="support-wrapper__outer__a">
         <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="giraffe__heading">
@@ -153,11 +153,12 @@
                                         <option value="12">12</option>
                                     </select>
                                     <span>/</span>
-                                    <label for="card_expiry_year" class="u-h form-field__note form-field__note--sub">Year</label>
+                                    <label for="card_expiry_year" class="u-h form-field__note form-field__note--sub">
+                                        Year</label>
                                     <select id="card_expiry_year" data-stripe="exp-year" tabindex="15" aria-required="true" class="js-credit-card-exp-year" data-validation="validCreditCardYear">
-                                        @for(year <- creditCardExpiryYears) {
+                                    @for(year <- creditCardExpiryYears) {
                                         <option value="@year">@year</option>
-                                        }
+                                    }
                                     </select>
                                 </div>
                                 @fragments.form.errorMessage("Sorry, the expiry date that you have entered is invalid. Please check and re-enter.")

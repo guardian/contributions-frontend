@@ -2,8 +2,17 @@
 
 @import views.support.Social
 @import com.gu.i18n.CountryGroup
-@(pageInfo: PageInfo, social: Set[Social], countryGroup: CountryGroup)
+@(pageInfo: PageInfo, social: Set[Social], countryGroup: CountryGroup, charge: Option[String])
     @main(pageInfo) {
+    <script type="text/javascript">
+        @if(charge.isDefined) {
+          guardian.productDetails = {
+            charge: '@charge.get'
+        };
+        }
+
+
+    </script>
         <div class="support-wrapper l-constrained support-thanks currency-@countryGroup.currency.toString.toLowerCase">
             <h1 class="support-thanks__title">@pageInfo.title</h1>
 
