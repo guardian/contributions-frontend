@@ -203,14 +203,14 @@
     right: 0;
     top: -32px;
 
-    display: none;
+   // display: none;
     text-align: right;
     margin-bottom: $gs-baseline;
     visibility: hidden;
 
-    @include mq(tablet) {
+    //@include mq(tablet) {
         display: block;
-    }
+    //}
 
     &.visible {
         visibility: visible;
