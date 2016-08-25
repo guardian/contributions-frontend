@@ -27,7 +27,8 @@ export default class DesktopWrapper extends React.Component {
                             currency={this.props.currency}
                             processing={this.props.processing}
                             pay={this.props.pay}
-                            payWithPaypal={this.props.payWithPaypal}/>
+                            payWithPaypal={this.props.payWithPaypal}
+                            payWithCard={this.props.payWithCard}/>
                     </form>
                 </section>
             )}

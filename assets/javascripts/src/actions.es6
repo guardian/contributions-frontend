@@ -18,6 +18,7 @@ export const PAYMENT_COMPLETE = "PAYMENT_COMPLETE";
 export const PAYMENT_ERROR = "PAYMENT_ERROR";
 
 export const PAYPAL_PAY = "PAYPAL_PAY";
+export const CARD_PAY = "CARD_PAY";
 
 export function submitPayment(dispatch) {
     const state = store.getState();

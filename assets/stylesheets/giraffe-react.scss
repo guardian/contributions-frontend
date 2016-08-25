@@ -11,8 +11,14 @@
     background-size: 93px;
     background-image: url('/assets/images/form/ppcom-white.svg');
     background-position: left 130px center;
-}
 
+    &:hover, &:focus {
+        background-color: darken($palBlue, 5%);
+    }
+}
+.contribute_card__button {
+    width: 100%;
+}
 .giraffe__wrapper {
     background: $dark-yellow;
 }
@@ -44,13 +50,13 @@
     margin-bottom: 2px;
     background: $light-yellow;
 
-    @include mq(tablet) {
+    //@include mq(tablet) {
         display: none;
 
         &.current {
             display: block;
         }
-    }
+   // }
 }
 
 .contribute-form__inner {
@@ -164,10 +170,6 @@
 }
 
 .contribute-navigation__next {
-    @include mq($until: tablet) {
-        display: none;
-    }
-
     background-color: $blue;
 
     &:hover, &:focus {

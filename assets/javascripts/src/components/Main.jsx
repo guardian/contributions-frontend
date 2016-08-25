@@ -2,7 +2,7 @@ import React from 'react';
 import MediaQuery from 'react-responsive';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment, PAYPAL_PAY, paypalRedirect} from 'src/actions';
+import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment, PAYPAL_PAY, CARD_PAY, paypalRedirect} from 'src/actions';
 import { PAGES } from 'src/constants';
 
 import MobileWrapper from './form-wrapper/MobileWrapper';
@@ -19,7 +19,8 @@ function mapStateToProps(state) {
         card: state.card,
         currency: state.data.currency,
         maxAmount: state.data.maxAmount,
-        paypalPay: state.page.paypalPay
+        paypalPay: state.page.paypalPay,
+        cardPay: state.page.cardPay
     };
 }
 
@@ -32,6 +33,7 @@ function mapDispatchToProps(dispatch) {
         updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
         pay: () => dispatch(submitPayment),
         payWithPaypal: () => dispatch({ type: PAYPAL_PAY }),
+        payWithCard: () => dispatch({ type: CARD_PAY }),
         paypalRedirect: () => dispatch(paypalRedirect)
     };
 }
@@ -65,7 +67,7 @@ class Main extends React.Component {
             this.props.paypalRedirect();
         }
         else {
-            if (this.props.page === PAGES.PAYMENT) {
+            if (this.props.cardPay) {
                 this.props.pay();
             } else {
                 this.props.goForward();
