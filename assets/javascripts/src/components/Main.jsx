@@ -10,6 +10,7 @@ import DesktopWrapper from './form-wrapper/DesktopWrapper';
 import Contribution from './pages/Contribution';
 import Details from './pages/Details';
 import Payment from './pages/Payment';
+import AmountSummary from './AmountSummary';
 
 function mapStateToProps(state) {
     return {
@@ -20,7 +21,8 @@ function mapStateToProps(state) {
         currency: state.data.currency,
         maxAmount: state.data.maxAmount,
         paypalPay: state.page.paypalPay,
-        cardPay: state.page.cardPay
+        cardPay: state.page.cardPay,
+        paymentError: state.page.paymentError
     };
 }
 
@@ -54,7 +56,8 @@ class Main extends React.Component {
 
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}
-                                updateCard={this.props.updateCard}/>;
+                                updateCard={this.props.updateCard}
+                                error={this.props.paymentError} />;
         }
     }
 
@@ -76,7 +79,11 @@ class Main extends React.Component {
     }
 
     render() {
+        const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
+
         return <div>
+            <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={showSummary} />
+
             <MediaQuery query='(max-width: 740px)'>
                 <MobileWrapper submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
@@ -93,4 +100,4 @@ export default connect(
     mapStateToProps,
     mapDispatchToProps
 )(Main);
-``
+
