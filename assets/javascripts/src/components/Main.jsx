@@ -2,7 +2,7 @@ import React from 'react';
 import MediaQuery from 'react-responsive';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment, PAYPAL_PAY, CARD_PAY, paypalRedirect} from 'src/actions';
+import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment, PAYPAL_PAY, CARD_PAY, paypalRedirect, JUMP_TO_PAGE} from 'src/actions';
 import { PAGES } from 'src/constants';
 
 import MobileWrapper from './form-wrapper/MobileWrapper';
@@ -31,6 +31,7 @@ function mapDispatchToProps(dispatch) {
         goBack: () => dispatch({ type: GO_BACK }),
         goForward: () => dispatch({ type: GO_FORWARD }),
         setAmount: a => dispatch({ type: SET_AMOUNT, amount: a }),
+        jumpToFirstPage: () => dispatch({type: JUMP_TO_PAGE, page: 1}),
         updateDetails: d => dispatch({ type: UPDATE_DETAILS, details: d }),
         updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
         pay: () => dispatch(submitPayment),

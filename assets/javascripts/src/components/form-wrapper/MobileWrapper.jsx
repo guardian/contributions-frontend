@@ -37,7 +37,9 @@ export default class MobileWrapper extends React.Component {
                         processing={this.props.processing}
                         pay={this.props.pay}
                         payWithPaypal={this.props.payWithPaypal}
-                        payWithCard={this.props.payWithCard}/>
+                        payWithCard={this.props.payWithCard}
+                        jumpToFirstPage={this.props.jumpToFirstPage}/>
+
 
                 </section>
             )}

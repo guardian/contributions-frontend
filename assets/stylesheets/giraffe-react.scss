@@ -3,6 +3,12 @@
 @import 'mixins';
 @import 'utilities/util-layout';
 
+.show-mobile {
+    display: none;
+    @include mq($until: tablet) {
+        display: block;
+    }
+}
 .paypal__button {
     margin-top: 10px;
     background-repeat: no-repeat;
