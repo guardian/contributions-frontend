@@ -44,7 +44,6 @@ export default function pageReducer(state = initialState, action) {
             if (state.page != PAGES.CONTRIBUTION) return state;
             else return Object.assign({}, state, { paypalPay: true });
         case CARD_PAY:
-            console.log("card PAY cliekcekdkekdkekd <-- clicked")
             if (state.page == PAGES.CONTRIBUTION) return state;
             else return Object.assign({}, state, { cardPay: true });
 
