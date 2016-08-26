@@ -12,6 +12,8 @@ import Details from './pages/Details';
 import Payment from './pages/Payment';
 import AmountSummary from './AmountSummary';
 
+import * as abTests from 'src/modules/abTests';
+
 function mapStateToProps(state) {
     return {
         page: state.page.page,
@@ -20,7 +22,8 @@ function mapStateToProps(state) {
         card: state.card,
         currency: state.data.currency,
         maxAmount: state.data.maxAmount,
-        paymentError: state.page.paymentError
+        paymentError: state.page.paymentError,
+        amounts: abTests.amounts(state.data.abTests)
     };
 }
 
@@ -39,7 +42,7 @@ class Main extends React.Component {
     componentFor(page) {
         switch (page) {
             case PAGES.CONTRIBUTION:
-                return <Contribution amounts={[25, 50, 100, 250]}
+                return <Contribution amounts={this.props.amounts}
                                      max={this.props.maxAmount}
                                      currency={this.props.currency}
                                      setAmount={this.props.setAmount}
