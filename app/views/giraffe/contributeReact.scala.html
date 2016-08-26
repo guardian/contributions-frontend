@@ -4,10 +4,23 @@
 @import views.support.Asset
 @import views.support.CountryGroupImplicits._
 
-@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
+@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int], errorMessage:Option[String])
 
 @main(pageInfo, Some(countryGroup), Some(maxAmount)) {
     <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
+
+            <!--TODO do this in a better way!! -->
+        @for(message <- errorMessage) {
+            <div id="errorDialog" class="overlay">
+                <div class="errorContainer">
+                    <h1 class="GuardianEgyptianWeb-RegularItalic errorHeader">We're sorry</h1>
+                    <p class="GuardianTextSansWeb-Black errorMessage">@message</p>
+                    <button class="action" id="errorDialogButton">OK</button>
+
+                </div>
+            </div>
+        }
+
         <div class="giraffe__inner page-slice l-constrained flex-horizontal-from-tablet">
             <section class="giraffe__heading">
                 <h1 class="giraffe__heading--main">

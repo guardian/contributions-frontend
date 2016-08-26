@@ -27,6 +27,7 @@ export function init() {
 
     attachCurrencyListeners();
     setOphanId();
+    attachErrorDialogListener();
 }
 
 /**
@@ -82,6 +83,12 @@ function attachCurrencyListeners() {
 
         heading.innerText = `${countryGroup.name} (${countryGroup.currency.symbol})`;
     }));
+}
+function attachErrorDialogListener() {
+    document.getElementById('errorDialogButton').onclick=function(){
+        console.log(document.getElementById('errorDialog'))
+        document.getElementById('errorDialog').style.visibility= 'hidden';
+    }
 }
 
 function setOphanId() {
