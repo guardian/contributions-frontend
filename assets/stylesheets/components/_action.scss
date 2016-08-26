@@ -12,6 +12,7 @@
 .action-group {
     clear: both;
 }
+
 .action-group > .action {
     margin-right: rem($gs-gutter / 2);
     margin-bottom: rem($gs-gutter / 2);
@@ -54,7 +55,8 @@
     }
 
     .action__icon {
-        width: 21px; height: 21px;
+        width: 21px;
+        height: 21px;
     }
     .action__icon--left {
         float: left;
@@ -86,7 +88,7 @@
 
 .action--button--forward {
     .action--button__arrow {
-        left: 7px;
+        float: right;
     }
 
     span {
@@ -96,7 +98,7 @@
 
 .action--button--back {
     .action--button__arrow {
-        right: 7px;
+        float: left;
     }
 
     span {
@@ -139,21 +141,21 @@
  * Secondary modifier
  */
 .action--secondary {
-   color: color(news-main-1);
-   background-color: transparent;
-   border: 1px solid transparentize(color(news-main-1), 0.3);
+    color: color(news-main-1);
+    background-color: transparent;
+    border: 1px solid transparentize(color(news-main-1), 0.3);
 
-   &:focus,
-   &:active,
-   &:hover {
-       color: color(news-main-1);
-       background-color: transparent;
-   }
+    &:focus,
+    &:active,
+    &:hover {
+        color: color(news-main-1);
+        background-color: transparent;
+    }
 
-   &:hover,
-   &:active {
-       border-color: color(news-main-1);
-   }
+    &:hover,
+    &:active {
+        border-color: color(news-main-1);
+    }
 
     svg {
         fill: color(news-main-1);
@@ -168,26 +170,25 @@
  * on a solid tone background.
  */
 .action--external {
-   background-color: transparent;
-   border: 1px solid transparentize($white, 0.5);
-   width: 100%;
+    background-color: transparent;
+    border: 1px solid transparentize($white, 0.5);
+    width: 100%;
 
-   &:hover,
-   &:focus,
-   &:active {
-       border-color: $white;
-       background-color: transparent;
-   }
+    &:hover,
+    &:focus,
+    &:active {
+        border-color: $white;
+        background-color: transparent;
+    }
 
-   &:after {
-       display: none;
-   }
+    &:after {
+        display: none;
+    }
 
-   @include mq(tablet) {
-       width: auto;
-   }
+    @include mq(tablet) {
+        width: auto;
+    }
 }
-
 
 /**
  * Snap modifier
@@ -227,22 +228,26 @@
 .action-jump {
     display: block;
 }
+
 .action-jump:link,
 .action-jump:visited,
 .action-jump:hover,
 .action-jump:active {
     text-decoration: none;
 }
+
 .action-jump:hover .icon-holder {
     background-color: darken($c-button, 10%);
     border-color: darken($c-button, 10%);
 }
+
 .action-jump__label {
     @include fs-data(4);
     color: $c-neutral2;
     vertical-align: middle;
     padding-left: .2em;
 }
+
 .action-jump--block {
     margin: $gs-baseline 0;
 
