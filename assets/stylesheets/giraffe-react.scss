@@ -54,6 +54,12 @@
 
 .contribute-navigation {
     margin-top: auto;
+
+    &.contribution, &.details {
+        .spinner-outer {
+            display: none;
+        }
+    }
 }
 
 .contribute-form__heading {
