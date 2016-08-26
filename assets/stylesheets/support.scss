@@ -62,8 +62,29 @@
     }
 }
 
-@include mq($from: desktop) {
+.js-amount-heading {
+    display: none;
+}
 
+@include mq($from: tablet) {
+    .js-amount-heading.js-skip {
+        display: block;
+    }
+    .js-default-heading.js-skip {
+        display: none;
+    }
+}
+
+@include mq($until: tablet) {
+    .js-amount-heading.js-skip {
+        display: none;
+    }
+    .js-default-heading.js-skip {
+        display: block;
+    }
+}
+
+@include mq($from: desktop) {
     .support-thanks__one-col:last-child {
         border-right: none;
     }
@@ -73,7 +94,7 @@
     }
 
     .support-thanks {
-        padding: 40px 60px;
+        padding: 0 60px;
     }
 
     .support-thanks__title {

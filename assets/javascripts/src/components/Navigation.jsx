@@ -23,7 +23,6 @@ export default class Navigation extends React.Component {
         const isFirstPage = !this.props.processing && this.props.page === PAGES.CONTRIBUTION;
         const showProcessing = this.props.processing && this.props.page != PAGES.DETAILS;
         const showMobileBack = !this.props.processing && this.props.page == PAGES.PAYMENT;
-        //todo if I make the button say "contribute with debit/credit card" the text is too long and the button goes into 2 lines
         //todo for some reason hidden-desktop doesn't work so for now i made up my own css class to show only on mobile
 
         return <div className={'contribute-navigation ' + this.classNameFor(this.props.page)}>
@@ -32,11 +31,8 @@ export default class Navigation extends React.Component {
         {showPay && <Forward className='contribute-navigation__button contribute-navigation__pay action--pay' onClick={this.props.payWithCard}>Contribute {this.props.currency.prefix}{this.props.currency.symbol}{this.props.amount}</Forward>}
         {showMobileBack && <Back className="action--secondary contribute-navigation__back show-mobile" onClick={this.props.jumpToFirstPage}>Back</Back>}
         {isFirstPage && <Forward className="contribute-navigation__button contribute-navigation__next action action--button action--next contribute_card__button">Contribute with debit/credit card</Forward>}
-        {isFirstPage &&
-        <Forward className="contribute-navigation__button action action--button  paypal__button" onClick={this.props.payWithPaypal}>Contribute with
-            {/*<img width="100"  src="/assets/images/form/ppcom-white.svg"/>*/}
-        </Forward>}
-        {showProcessing && <Spinner text="Processing" />}
+        {isFirstPage && <Forward className="contribute-navigation__button action action--button  paypal__button" onClick={this.props.payWithPaypal}>Contribute with</Forward>}
+        {this.props.processing && <Spinner text="Processing" />}
         </div>;
     }
 }

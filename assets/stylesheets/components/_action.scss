@@ -141,22 +141,17 @@
  * Secondary modifier
  */
 .action--secondary {
-    color: color(news-main-1);
-    background-color: transparent;
-    border: 1px solid transparentize(color(news-main-1), 0.3);
+   color: color(news-main-1);
+   background-color: transparent;
+   border: 1px solid transparentize(color(news-main-1), 0.3);
 
-    &:focus,
-    &:active,
-    &:hover {
-        color: color(news-main-1);
-        background-color: transparent;
-    }
-
-    &:hover,
-    &:active {
-        border-color: color(news-main-1);
-    }
-
+   &:focus,
+   &:active,
+   &:hover {
+       color: color(news-main-1);
+       background-color: transparent;
+       border-color: color(news-main-1);
+   }
     svg {
         fill: color(news-main-1);
     }
