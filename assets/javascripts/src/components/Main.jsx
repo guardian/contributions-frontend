@@ -2,7 +2,19 @@ import React from 'react';
 import MediaQuery from 'react-responsive';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment } from 'src/actions';
+import {
+    GO_FORWARD,
+    GO_BACK,
+    UPDATE_DETAILS,
+    UPDATE_CARD,
+    SET_AMOUNT,
+    JUMP_TO_PAGE,
+    PAYPAL_PAY,
+    CARD_PAY,
+    paypalRedirect,
+    submitPayment
+} from 'src/actions';
+
 import { PAGES } from 'src/constants';
 
 import MobileWrapper from './form-wrapper/MobileWrapper';
@@ -26,7 +38,7 @@ function mapStateToProps(state) {
         cardPay: state.page.cardPay,
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests)
-    };
+    }
 }
 
 function mapDispatchToProps(dispatch) {
