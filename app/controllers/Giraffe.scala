@@ -119,7 +119,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
     Ok(views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears, errorMessage))
-      .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
+      .withCookies(chosenVariants.variants.map(Test.createCookie):_*)
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>

@@ -7,7 +7,8 @@ require([
     'src/modules/dropdown',
     'src/modules/identityPopup',
     'src/modules/identityPopupDetails',
-    'src/modules/userDetails'
+    'src/modules/userDetails',
+    'src/modules/abTests'
 ], function (
     analytics,
     images,
@@ -17,7 +18,8 @@ require([
     dropdown,
     identityPopup,
     identityPopupDetails,
-    userDetails
+    userDetails,
+    abTests
 ) {
     'use strict';
 
@@ -31,4 +33,6 @@ require([
     identityPopup.init();
     identityPopupDetails.init();
     userDetails.init();
+
+    abTests.init();
 });

@@ -4,6 +4,7 @@
 @import views.support.Asset
 @import views.support.CountryGroupImplicits._
 
+@import play.api.libs.json.Json
 @(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int], errorMessage:Option[String])
 
 @main(pageInfo, Some(countryGroup), Some(maxAmount)) {
@@ -37,8 +38,8 @@
 
             <!-- react injects its components here -->
             <section    id="contribute" class="contribute-container"
-                        data-ab-tests="@chosenVariants.asJson"
-                        data-country-group="@countryGroup.asJson"
+                        data-ab-tests="@Json.stringify(chosenVariants.asJson)"
+                        data-country-group="@Json.stringify(Json.toJson(countryGroup))"
                         data-max-amount="@maxAmount"
                         @cmpCode.map(code => Html(s"""data-cmp-code="${code}""""))
                         @intCmpCode.map(code => Html(s"""data-int-cmp-code="${code}""""))>
@@ -49,7 +50,6 @@
 
 
     <section class="disclaimer">
-        <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
         <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="feedback">
 

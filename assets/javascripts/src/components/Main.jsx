@@ -2,7 +2,7 @@ import React from 'react';
 import MediaQuery from 'react-responsive';
 import { connect } from 'react-redux';
 
-import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment, PAYPAL_PAY, CARD_PAY, paypalRedirect, JUMP_TO_PAGE} from 'src/actions';
+import { GO_FORWARD, GO_BACK, UPDATE_DETAILS, UPDATE_CARD, SET_AMOUNT, submitPayment } from 'src/actions';
 import { PAGES } from 'src/constants';
 
 import MobileWrapper from './form-wrapper/MobileWrapper';
@@ -11,6 +11,8 @@ import Contribution from './pages/Contribution';
 import Details from './pages/Details';
 import Payment from './pages/Payment';
 import AmountSummary from './AmountSummary';
+
+import * as abTests from 'src/modules/abTests';
 
 function mapStateToProps(state) {
     return {
@@ -22,7 +24,8 @@ function mapStateToProps(state) {
         maxAmount: state.data.maxAmount,
         paypalPay: state.page.paypalPay,
         cardPay: state.page.cardPay,
-        paymentError: state.page.paymentError
+        paymentError: state.page.paymentError,
+        amounts: abTests.amounts(state.data.abTests)
     };
 }
 
@@ -45,7 +48,7 @@ class Main extends React.Component {
     componentFor(page) {
         switch (page) {
             case PAGES.CONTRIBUTION:
-                return <Contribution amounts={[25, 50, 100, 250]}
+                return <Contribution amounts={this.props.amounts}
                                      max={this.props.maxAmount}
                                      currency={this.props.currency}
                                      setAmount={this.props.setAmount}
@@ -101,4 +104,3 @@ export default connect(
     mapStateToProps,
     mapDispatchToProps
 )(Main);
-

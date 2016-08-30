@@ -108,13 +108,7 @@
     margin-bottom: 2px;
     background: $light-yellow;
 
-    //@include mq(tablet) {
-        display: none;
 
-        &.current {
-            display: block;
-        }
-   // }
 }
 
 .contribute-form__inner {
@@ -227,6 +221,10 @@
 }
 
 .contribute-navigation__next {
+  //  @include mq($until: tablet) {
+  //      display: none;
+  //  }
+
     background-color: $blue;
 
     &:hover, &:focus {

@@ -2,7 +2,7 @@ package views.support
 
 import com.gu.i18n._
 import com.gu.i18n.Currency.{all => allCurrencies}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Writes}
 
 object CountryGroupImplicits {
   implicit class JsonCurrency(c: Currency) {
@@ -22,8 +22,8 @@ object CountryGroupImplicits {
     )
   }
 
-  implicit class JsonCountryGroup(cg: CountryGroup) {
-    val asJson: JsValue = Json.obj(
+  implicit val countryGroupFormat: Writes[CountryGroup] = new Writes[CountryGroup] {
+    override def writes(cg: CountryGroup): JsValue = Json.obj(
       "name" -> cg.name,
       "id" -> cg.id,
       "currency" -> cg.currency.asJson,

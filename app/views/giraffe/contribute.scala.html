@@ -8,9 +8,7 @@
 @containerVisibility = @{
     if(errorMessage.isDefined) "hidden" else ""
 }
-@paymentDetailsClass = @{
-    if(chosenVariants.paymentMethodTest.variantName == "Control") "" else "hiddenOnMobile"
-}
+
 @main(pageInfo, Some(countryGroup)) {
     <div class="support-wrapper__outer__a">
         <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
@@ -67,7 +65,6 @@
                             <li id="amount_field" class="form-field">
                                 <label for="amount" class="label u-h">Amount</label>
                                 <div class="input">
-                                @chosenVariants.v1.render(countryGroup, maxAmount)
                                 </div>
                             </li>
 
@@ -77,10 +74,12 @@
                                     or less</div>
                             </li>
                         </ul>
-                        @chosenVariants.paymentMethodTest.render()
+                        <a class="action action--contribute js-advance action--advance" data-switches="js-details">
+                            Next
+                        </a>
                     </div>
 
-                    <div class="form__column js-hidden-tablet js-details @paymentDetailsClass">
+                    <div class="form__column js-hidden-tablet js-details">
                         <h3 class="form__column-heading form__column-heading--first headline-text--bolder">
                             Your details</h3>
                         <ul class="u-unstyled">
@@ -119,7 +118,7 @@
 
 
 
-                    <div class="form__column js-hidden-tablet js-payment @paymentDetailsClass">
+                    <div class="form__column js-hidden-tablet js-payment">
                         <span>
                             <h3 class="form__column-heading headline-text--bolder">Your payment</h3>
                             <div class="security-note">@fragments.inlineIcon("secure", List("icon-inline--small", "icon-inline--top"))

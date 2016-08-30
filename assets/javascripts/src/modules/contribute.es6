@@ -27,7 +27,7 @@ export function init() {
 
     attachCurrencyListeners();
     setOphanId();
-    attachErrorDialogListener();
+   // attachErrorDialogListener();
 }
 
 /**
@@ -85,8 +85,8 @@ function attachCurrencyListeners() {
     }));
 }
 function attachErrorDialogListener() {
+    //TODO only do this if the dialog is there!
     document.getElementById('errorDialogButton').onclick=function(){
-        console.log(document.getElementById('errorDialog'))
         document.getElementById('errorDialog').style.visibility= 'hidden';
     }
 }
