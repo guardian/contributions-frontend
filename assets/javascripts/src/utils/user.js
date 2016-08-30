@@ -1,7 +1,8 @@
 define([
     'src/utils/atob',
-    'src/utils/cookie',
-], function(AtoB, cookie){
+    'ajax',
+    'src/utils/cookie'
+], function(AtoB, ajax, cookie){
     'use strict';
 
     var isLoggedIn = function(){
@@ -27,6 +28,7 @@ define([
         }
         return userFromCookieCache;
     };
+
 
     return {
         isLoggedIn: isLoggedIn,

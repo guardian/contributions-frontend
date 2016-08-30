@@ -6,12 +6,10 @@
 
 
     @* Critical scripts that should execute as soon as possible, preventing layout thrashing *@
-<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
 
-        <!--[if IE 9]>
-    <script src="@Asset.at("javascripts/lib/polyfills.min.js")"></script>
+    <!--[if IE 9]>
+<script src="@Asset.at("javascripts/lib/polyfills.min.js")"></script>
 <![endif]-->
-
 <script id="gu">
     var guardian = {
         isModernBrowser: (
@@ -39,79 +37,82 @@
         analyticsEnabled: true,
         isDev: @(Config.stage == "DEV")
     };
-    
-    (function (isModern) {
+
+    (function(isModern) {
+
         @* we want to add/remove classes to HTML ASAP to avoid FOUC *@
         var htmlClassNames = ['js-on']; // we know we have JS
+
         document.documentElement.className = document.documentElement.className.replace(/\bjs-off\b/g, '') + ' ' + htmlClassNames.join(' ');
+
         if (!isModern) {
             // we add this class so it's off by default (avoiding FOUC)
             document.documentElement.className += ' js-ancient-browser';
         }
+
         var areClipPathShapesSupported = (function () {
             var base = 'clipPath',
-                prefixes = ['webkit', 'moz', 'ms', 'o'],
-                properties = [base],
-                testElement = document.createElement('testelement'),
+                prefixes = [ 'webkit', 'moz', 'ms', 'o' ],
+                properties = [ base ],
+                testElement = document.createElement( 'testelement' ),
                 attribute = 'polygon(50% 0%, 0% 100%, 100% 100%)';
-            for (var i = 0, l = prefixes.length; i < l; i++) {
-                var prefixedProperty = prefixes[i] + base.charAt(0).toUpperCase() + base.slice(1);
-                properties.push(prefixedProperty);
+            for ( var i = 0, l = prefixes.length; i < l; i++ ) {
+                var prefixedProperty = prefixes[i] + base.charAt( 0 ).toUpperCase() + base.slice( 1 );
+                properties.push( prefixedProperty );
             }
-            for (var i = 0, l = properties.length; i < l; i++) {
+            for ( var i = 0, l = properties.length; i < l; i++ ) {
                 var property = properties[i];
-                if (testElement.style[property] === '') {
+                if ( testElement.style[property] === '' ) {
                     testElement.style[property] = attribute;
-                    if (testElement.style[property] !== '') {
+                    if ( testElement.style[property] !== '' ) {
                         return true;
                     }
                 }
             }
             return false;
         }());
-        if (areClipPathShapesSupported) {
+
+        if(areClipPathShapesSupported) {
             document.documentElement.className += ' supports-clippath-shapes';
         }
+
         @* Disable lazySizes auto-init so we can control when it runs *@
         window.lazySizesConfig = window.lazySizesConfig || {};
         window.lazySizesConfig.init = false;
+
         @* Load SVG icon sprite, store in localStorage where possible *@
         @* Based on: https://github.com/guardian/frontend/blob/master/common/app/views/fragments/loadCss.scala.html *@
+
         /**
          * Simple XHR abstraction
          */
-        function loadData(url, cb) {
+        function loadData( url, cb ) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
-            xhr.onreadystatechange = function () {
+            xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    if (cb) {
-                        cb.call(this, xhr);
-                    }
+                    if (cb) { cb.call(this, xhr); }
                 }
             }
             xhr.timeout = 5000;
             xhr.send();
         }
-
         /**
          * Add data to local storage, with buildNumber key
          * Break cache if buildNumber has changed.
          */
         function updateLocalStorage(prefix, data) {
             var expr = new RegExp('^' + prefix + '.', 'g');
-            Object.keys(localStorage).forEach(function (key) {
+            Object.keys(localStorage).forEach(function(key) {
                 if (key.match(expr)) {
                     try {
                         localStorage.removeItem(key);
-                    } catch (e) {
-                    }
+                    } catch(e) { }
                 }
             });
             try {
                 localStorage.setItem(prefix + '.' + guardian.membership.buildNumber, data);
-            } catch (e) {
-            }
+            } catch(e) {}
         }
 
         /**
@@ -129,7 +130,7 @@
             if (data) {
                 inlineSvg(data);
             } else {
-                loadData(guardian.membership.svgSprite, function (xhr) {
+                loadData(guardian.membership.svgSprite, function(xhr) {
                     inlineSvg(xhr.responseText);
                     updateLocalStorage('icons', xhr.responseText);
                 });
@@ -141,5 +142,3 @@
         }
     })(guardian.isModernBrowser);
 </script>
-
-

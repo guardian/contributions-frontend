@@ -7,7 +7,7 @@
  *     <div id="js-foo" class="js-dropdown-menu is-hidden">all the foo (initially hidden)</div>
  *
  */
-define(['src/utils/$', 'bean'], function ($, bean) {
+define(['$', 'bean'], function ($, bean) {
     'use strict';
 
     var DROPDOWN_CLASS = 'js-dropdown',
@@ -16,12 +16,12 @@ define(['src/utils/$', 'bean'], function ($, bean) {
         DROPDOWN_DISABLED_CLASS = 'js-dropdown-disabled';
 
     function bindHandlers() {
-        bean.on(document, 'click', function (event) {
+        bean.on(document, 'click', function(event) {
             var dropdown = closest(event.target, DROPDOWN_CLASS);
             var isHidden;
 
             if (dropdown && isEnabled(dropdown)) {
-                var $menu = $('#' + $(dropdown).data('dropdown-menu'));
+                var $menu = $('#'+$(dropdown).data('dropdown-menu'));
                 isHidden = $menu.hasClass(HIDDEN_CLASS);
                 hideAllMenus();
                 if (isHidden) {

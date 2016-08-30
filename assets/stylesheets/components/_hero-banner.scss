@@ -1,0 +1,185 @@
+/* ==========================================================================
+   Hero Banner
+   ========================================================================== */
+.hero-banner {
+    height: 70vh;
+    @include mq(mobileLandscape) {
+        background-position: center center;
+        height: 74vh;
+    }
+
+    @include mq(tablet) {
+        height: 460px;
+    }
+}
+
+.hero-banner__image {
+    will-change: transform;
+    overflow: hidden;
+    position: fixed;
+    display: flex;
+    z-index: -1;
+    top: 0;
+
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    > img {
+        min-width: 100%;
+        min-height: 100%;
+        flex: none;
+    }
+
+    // mobile
+    height: calc(70vh + #{$global-header-height-mobile});
+
+    @include mq(mobileLandscape) {
+        height: calc(74vh + #{$global-header-height-mobile});
+    }
+
+    // tablet & above
+    @include mq(tablet) {
+        height: calc(460px + #{$global-header-height});
+    }
+}
+
+.hero-banner__image--eu {
+    @include mq($from: mem-full) {
+        margin-top: -100px; //hopefully temporary
+    }
+}
+
+.hero-banner__image--left {
+    justify-content: flex-start;
+}
+
+.hero-banner__image--right {
+    justify-content: flex-end;
+}
+
+.hero-banner__image--top {
+    align-items: flex-start;
+}
+
+.hero-banner__image--bottom {
+    align-items: flex-end;
+}
+
+.hero-banner__inner {
+    position: relative;
+    height: 100%;
+}
+.hero-banner__sections {
+    position: absolute;
+    bottom: -1px;
+    right: 0;
+    left: 0;
+
+    @include mq(tablet) {
+        margin-left: $gs-gutter;
+        right: auto;
+        left: auto;
+    }
+    @include mq(mem-full) {
+        margin-left: 0;
+    }
+}
+
+.hero-banner--alt-accent{
+    .hero-banner__accent {
+        background-color: color(brand-supporting-2);
+    }
+}
+
+.hero-banner__accent {
+    position: absolute;
+    top: -5px;
+    right: 0;
+    left: -15px;
+    bottom: 0;
+    background: color(brand-main);
+    opacity: 0.5;
+    display: none;
+
+    @include clip-path('accent-top-slice') {
+        display: block;
+        padding-top: $gs-gutter * 2;
+    }
+    @include mq(tablet) {
+        display: block;
+        padding: $gs-gutter ($gs-gutter * 2);
+        clip-path: none !important;
+        transform: rotate(-6deg);
+        height: 190px;
+        width: 605px;
+        top: 2px;
+    }
+    @include mq(mem-full) {
+        left: 163px;
+    }
+}
+.hero-banner__secondary_accent {
+    position: absolute;
+    bottom: 0;
+    top: 86px;
+    right: -26px;
+    background: $white;
+    opacity: 0.6;
+    width:50px;
+    display:none;
+    transform: rotate(9deg);
+
+    @include mq(tablet) {
+        display: block;
+    }
+}
+.hero-banner__content {
+    padding: ($gs-gutter / 2);
+    padding-bottom: 12px;
+    color: $black;
+    background-color: rgb(255, 255, 255);
+    position: relative;
+    z-index: 1;
+
+    @include clip-path('top-slice') {
+        padding-top: 24px;
+    }
+
+    @include mq(tablet) {
+        @include clip-path('top-slice') {
+            padding-top: 45px;
+        }
+        margin-left: 0;
+        width: 620px;
+        padding: $gs-gutter;
+        padding-right: 50px;
+    }
+
+    @include mq(mem-full) {
+        margin-left: gs-span(2.5);
+    }
+}
+.hero-banner__title {
+    @include fs-header(5);
+    line-height: 26px;
+
+    @include mq(tablet) {
+        font-size: 36px;
+        line-height: 38px;
+    }
+}
+.hero-banner__description {
+    @include fs-headline(2);
+    margin-bottom: $gs-baseline / 2;
+
+    @include mq(tablet) {
+        font-size: 22px;
+        line-height: 26px;
+    }
+}
+.hero-banner__action {
+    .action-jump {
+        margin: 0;
+    }
+}

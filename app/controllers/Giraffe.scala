@@ -19,25 +19,26 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.{JsArray, JsString, JsValue, Json}
 import play.api.mvc._
 import services.PaymentServices
-import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
 
 import scala.concurrent.Future
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
+  val abTestFormatter: Formatter[JsValue] = new Formatter[JsValue] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError],JsValue] = {
+      val parse: JsValue = Json.parse(URLDecoder.decode(data(key),StandardCharsets.UTF_8.name()))
+      Right(parse)
+    }
+    override def unbind(key: String, data: JsValue): Map[String,String] = Map()
+
+  }
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
     override def bind(key: String, data: Map[String, String]): Result =
       data.get(key).map(_.toUpperCase).flatMap(Currency.fromString).fold[Result](Left(Seq.empty))(currency => Right(currency))
     override def unbind(key: String, value: Currency): Map[String, String] =
       Map(key -> value.identifier)
-  }
-
-  case class JsonAbTest(testName: String, testSlug: String, variantName: String, variantSlug: String)
-
-  object JsonAbTest {
-    implicit val abTestFormat = Json.format[JsonAbTest]
   }
 
   case class SupportForm(
@@ -48,28 +49,22 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
                           token: String,
                           marketing: Boolean,
                           postCode: Option[String],
-                          abTests: Set[JsonAbTest],
+                          abTests: JsValue,
                           ophanId: String,
                           cmp: Option[String],
                           intcmp: Option[String]
 
                         )
-
   val supportForm: Form[SupportForm] = Form(
     mapping(
       "name" -> nonEmptyText,
       "currency" -> of[Currency],
       "amount" -> bigDecimal(10, 2),
       "email" -> email,
-      "token" -> nonEmptyText,
-      "marketing" -> boolean,
+      "payment.token" -> nonEmptyText,
+      "guardian-opt-in" -> boolean,
       "postcode" -> optional(nonEmptyText),
-      "abTests" -> set(mapping(
-        "testName" -> text,
-        "testSlug" -> text,
-        "variantName" -> text,
-        "variantSlug" -> text
-      )(JsonAbTest.apply)(JsonAbTest.unapply)),
+      "abTest" -> FieldMapping[JsValue]()(abTestFormatter),
       "ophanId" -> text,
       "cmp" -> optional(text),
       "intcmp" -> optional(text)
@@ -82,7 +77,13 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     Facebook("https://membership.theguardian.com/contribute")
   )
 
+
   val chargeId = "charge_id"
+
+  def maxAmountFor(currency: Currency): Int = currency match {
+    case Australia.currency => 3500
+    case _ => 2000
+  }
 
   def contributeRedirect = NoCacheAction { implicit request =>
 
@@ -116,11 +117,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
 
-
+    val maxAmountInLocalCurrency = maxAmountFor(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
-
-    Ok(views.html.giraffe.contributeReact(pageInfo, MaxAmount.forCurrency(countryGroup.currency), countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
-      .withCookies(chosenVariants.variants.map(Test.createCookie):_*)
+    Ok(views.html.giraffe.contribute(pageInfo,maxAmountInLocalCurrency,countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
+      .withCookies(Test.createCookie(chosenVariants.v1), Test.createCookie(chosenVariants.v2))
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
@@ -143,20 +143,22 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
     supportForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
       Future.successful(BadRequest(JsArray(withErrors.errors.map(k => JsString(k.key)))))
-    }, { f =>
+    },{ f =>
       val metadata = Map(
         "marketing-opt-in" -> f.marketing.toString,
         "email" -> f.email,
         "name" -> f.name,
-        "abTests" -> Json.toJson(f.abTests).toString,
+        "abTests" -> f.abTests.toString,
         "ophanId" -> f.ophanId,
         "cmp" -> f.cmp.mkString,
         "intcmp" -> f.intcmp.mkString
-      ) ++ f.postCode.map("postcode" -> _)
+      )  ++ f.postCode.map("postcode" -> _)
+
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
-      val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(f.currency) * 100
+      val maxAmountInSmallestCurrencyUnit = maxAmountFor(f.currency) * 100
       val res = stripe.Charge.create(min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit), f.currency, f.email, "Your contribution", f.token, metadata)
+
 
       val redirect = f.currency match {
         case USD => routes.Giraffe.thanks(US).url

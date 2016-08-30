@@ -1,5 +1,5 @@
 define([
-    'src/utils/$',
+    '$',
     'src/utils/user'
 ], function ($, userUtil) {
     'use strict';

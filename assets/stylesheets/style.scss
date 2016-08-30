@@ -56,13 +56,39 @@
 @import 'components/controls';
 @import 'components/blocks';
 @import 'components/panels';
+//@import 'components/listings';
+//@import 'components/header-bar';
+//@import 'components/event-items';
+//@import 'components/event-filters';
+//@import 'components/event-detail';
+//@import 'components/event-info-panel';
+//@import 'components/articles';
+//@import 'components/series';
+//@import 'components/comparison-table';
+//@import 'components/benefits';
 @import 'components/payment';
+//@import 'components/packages';
+//@import 'components/pricing';
+//@import 'components/stats';
+//@import 'components/tier';
 @import 'components/user';
-@import 'components/spinner';
+//@import 'components/faqs';
+//@import 'components/modal';
+@import 'components/loader';
 @import 'components/social';
 @import 'components/signpost';
+//@import 'components/hero-banner';
+//@import 'components/roundel';
+//@import 'components/slideshow';
+//@import 'components/promos';
+//@import 'components/quote';
+//@import 'components/features';
+//@import 'components/messages';
 @import 'components/warnings';
 @import 'components/letterbox';
+//@import 'components/video';
+//@import 'components/patterns';
+//@import 'components/promo-code';
 
 // =============================================================================
 // Scopes
@@ -80,13 +106,12 @@
 @import 'utilities/util-user';
 @import 'utilities/util-visibility';
 
-// =============================================================================q
+// =============================================================================
 // Print
 // =============================================================================
 
 @import 'print';
 
 // Giraffe
-@import 'components/giraffe-header';
-@import 'giraffe-react';
-@import 'support';
+@import 'giraffe';
+
