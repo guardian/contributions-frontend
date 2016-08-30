@@ -1,3 +1,4 @@
+
 @mixin jaunty($indents--main,$indents--sub) {
     .giraffe__heading--main--jaunty {
         @for $i from 1 through length($indents--main) {
@@ -49,73 +50,3 @@
     }
 @include jaunty((0,40px,80px,0),(80px,0,40px));
 
-//Styles which make giraffe appear in global gu branding
-.container-global.container-global--giraffe, .global-footer.global-footer--giraffe {
-
-    .control__icon {
-        border: 1px solid rgba(255, 255, 255, 0.3)
-    }
-
-    .control__icon, .control__info, .control__item {
-        color: white;
-    }
-
-    .global-header {
-        @include mq($until: tablet) {
-            height: unset;
-        }
-        background-color: #005689;
-    }
-
-    .global-header__inner {
-        height: 57px;
-
-        @include mq(tablet) {
-            height: 130px;
-        }
-    }
-
-    .mobile-menu {
-        display: none;
-    }
-
-    .global-header__branding, .global-header__inner {
-        background: #005689;
-        padding-bottom: 0;
-    }
-
-    .global-header__inner {
-        @include mq(tablet) {
-            padding-bottom: 2 * $gs-gutter;
-        }
-    }
-
-    .global-header__logo {
-        svg {
-            height: 30px;
-            width: 160px;
-        }
-
-        @include mq(tablet) {
-            svg {
-                height: 60px;
-                width: 320px;
-            }
-        }
-    }
-    .global-navigation {
-        display: none;
-        @include mq(tablet) {
-            display: block;
-        }
-    }
-    .global-navigation, .global-brandbar {
-        background: #00507f;
-        //display: none; //for mobile
-    }
-
-    .global-navigation__scroll {
-        background: #00456e;
-        width: 100%;
-    }
-}

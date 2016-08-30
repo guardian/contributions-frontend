@@ -116,32 +116,3 @@
 .u-no-bottom-margin {
     margin-bottom: 0 !important;
 }
-
-/**
- * Flexbox stuff
- */
-.flex-vertical {
-    display: flex;
-    flex-direction: column;
-}
-
-.flex-horizontal {
-    display: flex;
-    flex-direction: row;
-}
-
-.flex-horizontal-from-tablet {
-    @include mq(tablet) {
-        display: flex;
-        flex-direction: row;
-    }
-}
-
-.half-width {
-    width: 50%;
-    margin-right: $gs-gutter;
-
-    &:last-of-type {
-        margin-right: 0;
-    }
-}

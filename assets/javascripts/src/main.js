@@ -1,38 +1,61 @@
 require([
+    'babel-polyfill',
+    'ajax',
+    'src/modules/raven',
     'src/modules/analytics/setup',
     'src/modules/images',
-    'src/modules/metrics',
-    'src/modules/contribute',
-    'src/modules/stripe',
+    'src/modules/toggle',
     'src/modules/dropdown',
+    'src/modules/navigation',
+    'src/modules/userDetails',
+    'src/modules/form',
+    'src/modules/form/processSubmit',
     'src/modules/identityPopup',
     'src/modules/identityPopupDetails',
-    'src/modules/userDetails',
+    'src/modules/metrics',
+    'src/modules/giraffe',
     'src/modules/abTests'
-], function (
+], function(
+    b,
+    ajax,
+    raven,
     analytics,
     images,
-    metrics,
-    contribute,
-    stripe,
+    toggle,
     dropdown,
+    navigation,
+    userDetails,
+    form,
+    processSubmit,
     identityPopup,
     identityPopupDetails,
-    userDetails,
+    metrics,
+    giraffe,
     abTests
 ) {
     'use strict';
 
-    analytics.init();
-    images.init();
-    metrics.init();
-    contribute.init();
-    stripe.init();
+    ajax.init({page: {ajaxUrl: ''}});
 
+    analytics.init();
+
+    // Global
+    images.init();
+    toggle.init();
     dropdown.init();
     identityPopup.init();
     identityPopupDetails.init();
+    navigation.init();
     userDetails.init();
 
+    // Forms
+    form.init();
+    processSubmit.init();
+
+    // Metrics
+    metrics.init();
+
+
+    giraffe.init();
     abTests.init();
 });

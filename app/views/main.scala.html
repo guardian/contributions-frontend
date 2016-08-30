@@ -2,8 +2,7 @@
 @import com.gu.i18n.CountryGroup
 @import org.joda.time.DateTime
 @(  pageInfo: PageInfo = views.support.PageInfo(),
-    countryGroup: Option[CountryGroup] = None,
-    maxAmount: Option[Int] = None
+    countryGroup: Option[CountryGroup] = None
 )(content: Html)
 @import play.api.libs.json.Json
 @import configuration.{Config, Social}
@@ -63,6 +62,7 @@
         <link rel="stylesheet" type="text/css" href="@Asset.at("stylesheets/ie9.css")" />
             <![endif]-->
 
+        @fragments.javaScriptLaterSteps()
 
         <link rel="shortcut icon" type="image/png" href="@Asset.at("images/favicons/32x32.ico")">
         <link rel="apple-touch-icon" sizes="152x152" href="@Asset.at("images/favicons/152x152.png")">
@@ -93,7 +93,7 @@
                 <div class="global-header__inner">
                     <div class="global-header__branding l-constrained">
                         <div class="global-header__primary">
-                        @fragments.global.controlNavigation(pageInfo, countryGroup, maxAmount)
+                        @fragments.global.controlNavigation(pageInfo, countryGroup)
                         </div>
                         @* Branding *@
                         <div class="global-header__logo">
@@ -136,7 +136,7 @@
             </header>
 
             <div id="container" class="giraffe-container">
-                @content
+            @content
             </div>
         </div>
 
@@ -172,8 +172,16 @@
                 </div>
             </div>
         </footer>
-        @fragments.javaScriptLaterSteps(pageInfo)
-
+        <script>
+            (function(isModern) {
+                if (isModern) {
+                    // only load JS if the browser cuts the mustard
+                    var newElm = document.createElement('script');
+                    newElm.src = '@Asset.at("javascripts/main.js")';
+                    document.getElementsByTagName("head")[0].appendChild(newElm);
+                }
+            })(guardian.isModernBrowser);
+        </script>
             <!-- build-commit-id: @app.BuildInfo.gitCommitId -->
     </body>
 </html>

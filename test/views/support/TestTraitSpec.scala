@@ -4,7 +4,6 @@ import com.gu.i18n.CountryGroup
 import org.scalatest.{MustMatchers, WordSpec}
 import CountryGroup._
 import org.scalatest.matchers.{MatchResult, Matcher}
-import views.support.MessageCopyTest.CopyVariantData
 
 import scalaz.NonEmptyList
 
@@ -46,10 +45,13 @@ class TestTraitSpec extends WordSpec with MustMatchers {
 
   def getTestTrait(weights: NonEmptyList[(String, Double, List[CountryGroup])]): TestTrait = {
     object TestImp extends TestTrait {
+      override type VariantFn = String
+
       override def name: String = "something"
+
       override def slug: String = "somethingElse"
 
-      override def variants: NonEmptyList[Variant] = weights.map { case (name, weight, countries) => makeVariant(name, "slug", weight, CopyVariantData("render"), countries.toSet) }
+      override def variants: NonEmptyList[TestImp.Variant] = weights.map { case (name, weight, countries) => Variant(name, "slug", weight, "render", countries.toSet) }
     }
     TestImp
   }

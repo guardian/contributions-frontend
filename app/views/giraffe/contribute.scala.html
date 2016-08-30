@@ -4,9 +4,9 @@
 @import views.support.Asset
 @import configuration.Links
 
-@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
+@(pageInfo:PageInfo,maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int])
 
-@main(pageInfo, Some(countryGroup)) {
+@main(pageInfo,Some(countryGroup)){
     <div class="support-wrapper__outer__a">
         <div class="support-wrapper page-slice l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="giraffe__heading">
@@ -53,6 +53,7 @@
                             <li id="amount_field" class="form-field">
                                 <label for="amount" class="label u-h">Amount</label>
                                 <div class="input">
+                                @chosenVariants.v1.render(countryGroup, maxAmount)
                                 </div>
                             </li>
 
@@ -68,8 +69,14 @@
                     </div>
 
                     <div class="form__column js-hidden-tablet js-details">
-                        <h3 class="form__column-heading form__column-heading--first headline-text--bolder">
+                        <h3 class="form__column-heading form__column-heading--first headline-text--bolder details-heading js-default-heading">
                             Your details</h3>
+                        <h3 class="form__column-heading form__column-heading--first headline-text--bolder details-heading js-amount-heading" >
+                            Continue with your
+                                <br>
+                                contribution of <span class="js-currency-pay">@countryGroup.currency.prefix@countryGroup.currency.glyph</span><span class="js-amount js-pay"></span>
+                        </h3>
+
                         <ul class="u-unstyled">
                             <li class="form-field">
                                 <label for="name" class="label">Full name</label>
@@ -102,6 +109,7 @@
                         <a class="action action--contribute js-advance action--advance" data-switches="js-payment">
                             Next
                         </a>
+
                     </div>
 
 
@@ -152,12 +160,11 @@
                                         <option value="12">12</option>
                                     </select>
                                     <span>/</span>
-                                    <label for="card_expiry_year" class="u-h form-field__note form-field__note--sub">
-                                        Year</label>
+                                    <label for="card_expiry_year" class="u-h form-field__note form-field__note--sub">Year</label>
                                     <select id="card_expiry_year" data-stripe="exp-year" tabindex="15" aria-required="true" class="js-credit-card-exp-year" data-validation="validCreditCardYear">
-                                    @for(year <- creditCardExpiryYears) {
+                                        @for(year <- creditCardExpiryYears) {
                                         <option value="@year">@year</option>
-                                    }
+                                        }
                                     </select>
                                 </div>
                                 @fragments.form.errorMessage("Sorry, the expiry date that you have entered is invalid. Please check and re-enter.")
