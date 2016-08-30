@@ -99,7 +99,7 @@ module.exports = function (grunt) {
             options: {
                 map: isDev ? true : false,
                 processors: [
-                    require('autoprefixer-core')({browsers: ['> 5%', 'last 2 versions', 'IE 9', 'Safari 6']}),
+                    require('autoprefixer')({browsers: ['last 2 versions', 'IE 9', 'Safari 7']}),
                     require('postcss-pxtorem')()
                 ]
             },
@@ -123,21 +123,15 @@ module.exports = function (grunt) {
                 src: '<%= dirs.assets.javascripts %>/lib/polyfills.min.js',
                 dest: '<%= dirs.publicDir.javascripts %>/lib/polyfills.min.js'
             },
-            bundles: {
-                src: '<%= dirs.publicDir.root %>/bundles/*.js',
-                dest: '<%= dirs.publicDir.root %>/dist/javascripts/bundles/',
-                expand: true,
-                flatten: true
-            },
             curl: {
                 src: 'node_modules/curl-amd/dist/curl-with-js-and-domReady/curl.js',
                 dest: '<%= dirs.publicDir.javascripts %>/lib/curl/',
                 expand: true,
                 flatten: true
             },
-            zxcvbn: {
-                src: '<%= dirs.assets.javascripts %>/lib/bower-components/zxcvbn/dist/zxcvbn.js',
-                dest: '<%= dirs.publicDir.javascripts %>/lib/zxcvbn/',
+            bundles: {
+                src: '<%= dirs.publicDir.root %>/bundles/*.js',
+                dest: '<%= dirs.publicDir.root %>/dist/javascripts/bundles/',
                 expand: true,
                 flatten: true
             },
@@ -193,6 +187,13 @@ module.exports = function (grunt) {
             compile_images: {
                 files: ['<%= dirs.assets.images %>/**/*'],
                 tasks: ['compile:images'],
+                options: {
+                    atBegin: true
+                }
+            },
+            compile_js: {
+                files: ['<%= dirs.assets.javascripts %>/**/*.js'],
+                tasks: ['compile:js'],
                 options: {
                     atBegin: true
                 }
@@ -338,13 +339,12 @@ module.exports = function (grunt) {
         'clean:images',
         'build:images'
     ]);
-    grunt.registerTask('compile:js', function() {
+    grunt.registerTask('compile:js', function () {
         if (!isDev) {
             grunt.task.run(['validate']);
         }
         grunt.task.run([
             'clean:js',
-            'webpack',
             'copy:polyfills',
             'copy:curl'
         ]);

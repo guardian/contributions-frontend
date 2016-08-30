@@ -1,6 +1,23 @@
 @import views.support.Asset
+@import views.support.PageInfo
 
-@* Scripts that should be executed after CSS is loaded *@
+@(pageInfo: PageInfo = views.support.PageInfo())
+
+
+@* TODO: improve this *@
+@if(!pageInfo.url.contains("thank-you")) {
+    <script>
+            (function (isModern) {
+                if (isModern) {
+                    // only load JS if the browser cuts the mustard
+                    var newElm = document.createElement('script');
+                    newElm.src = '@Asset.at("javascripts/main.js")';
+                    document.getElementsByTagName("head")[0].appendChild(newElm);
+                }
+            })(guardian.isModernBrowser);
+    </script>
+}
+
 
 <script>
     var curl = {
@@ -11,4 +28,5 @@
     };
 </script>
 <script src='@Asset.at("javascripts/lib/curl/curl.js")'></script>
-<noscript><img src="//bat.bing.com/action/0?ti=5039324&Ver=2" height="0" width="0" style="display:none; visibility: hidden;" /></noscript>
+<noscript><img src="//bat.bing.com/action/0?ti=5039324&Ver=2" height="0" width="0" style="display: none; visibility: hidden;" /></noscript>
+
