@@ -10,7 +10,6 @@
 @main(pageInfo, Some(countryGroup), Some(maxAmount)) {
     <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
 
-            <!--TODO do this in a better way!! -->
         @for(message <- errorMessage) {
             <div id="errorDialog" class="overlay">
                 <div class="errorContainer">
