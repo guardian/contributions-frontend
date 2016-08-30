@@ -271,12 +271,32 @@
 /* ==========================================================================
    Forms: Labels & Inputs
    ========================================================================== */
+.giraffe-checkbox {
+    position: relative;
+
+    label {
+        @include fs-textSans(2);
+        padding-left: $gs-gutter;
+        display: block;
+    }
+    input {
+        position: absolute;
+        top: 1px;
+    }
+}
 
 .label {
     @include fs-bodyCopy(2);
     color: $c-neutral1;
     cursor: pointer;
     display: block;
+
+    .label-optional {
+        font-size: 13px;
+        color: $comment-support-1;
+        margin-left: 6px;
+        font-family: $f-sans-serif-text;
+    }
 }
 
 .label--inline {
@@ -286,9 +306,9 @@
 .input-text,
 .input-textarea {
     color: $c-body;
-    border: 1px solid $white;
+    border: none;
+    padding: 0 10px;
     @include fs-textSans(5);
-    padding: 8px 8px 7px;
     outline: none;
     width: 100%;
     -webkit-appearance: none;
@@ -298,9 +318,17 @@
         border-color: $c-border-brand;
     }
 
+    &.center-text {
+        text-align: center;
+    }
+
     @include mq(tablet) {
         font-size: 14px;
     }
+}
+
+.input-text {
+    margin-bottom: 12px;
 }
 
 .input-text--small {
@@ -408,24 +436,10 @@ input[type=radio]:checked ~ .pseudo-radio {
 /* ==========================================================================
    Payment credit card types
    ========================================================================== */
-
-$small-card: 32px;
-$large-card: 35px;
-$card-icon-offset: 1px;
-
-.credit-card-container {
-    position: relative;
-}
-
-.credit-card {
-    width: 54px;
-    height: $large-card;
-}
-
 .credit-card--input-visualisation {
     position: absolute;
-    right: $card-icon-offset;
-    top: $card-icon-offset;
+    top: 29px;
+    right: 13px;
 }
 
 
@@ -440,11 +454,6 @@ $card-icon-offset: 1px;
 .credit-card-note__header {
     @include fs-textSans(3);
     color: $c-neutral1;
-}
-
-.credit-card-input {
-    // bit messy but needs to account for outline plus icon offset
-    height: ($large-card + $card-icon-offset + 2px);
 }
 
 /* ==========================================================================

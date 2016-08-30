@@ -1,0 +1,298 @@
+@import 'vars';
+@import 'functions';
+@import 'mixins';
+@import 'utilities/util-layout';
+
+.giraffe__wrapper {
+    background: $dark-yellow;
+}
+
+.giraffe__inner {
+    background: $medium-yellow;
+    padding: 0 $gs-baseline $gs-gutter;
+
+    @include mq(tablet) {
+        padding-top: 50px;
+    }
+
+    @include mq(mem-full) {
+        padding-left: $gs-gutter * 2;
+        padding-right: $gs-gutter * 2;
+    }
+}
+
+.contribute-container {
+    margin-left: auto;
+    position: relative;
+
+    @include mq(tablet) {
+        width: 300px;
+    }
+}
+
+.contribute-section {
+    padding: 10px;
+    margin-bottom: 2px;
+    background: $light-yellow;
+}
+
+.contribute-form__inner {
+    margin-bottom: auto;
+
+    @include mq(tablet) {
+        height: 305px;
+    }
+}
+
+.contribute-navigation {
+    margin-top: auto;
+
+    &.contribution, &.details {
+        .spinner-outer {
+            display: none;
+        }
+    }
+}
+
+.contribute-form__heading {
+    @include clearfix();
+    width: 100%;
+    height: 60px;
+}
+
+.contribute-form__title-outer {
+    float: left;
+}
+
+.contribute-form__title {
+    @include fs-headline(3);
+    color: color(neutral-1);
+    font-weight: 900;
+}
+
+.contribute-form__progress {
+    @include mq($until: tablet) {
+        display: none;
+    }
+
+    float: right;
+
+    > span {
+        &:after {
+            $dot-size: 8px;
+
+            content: '';
+            display: inline-block;
+            height: $dot-size;
+            width: $dot-size;
+            border-radius: $dot-size;
+            margin-left: $dot-size;
+            margin-right: $dot-size;
+            background: white;
+        }
+
+        &.active:after {
+            background: color(neutral-1);
+        }
+    }
+}
+
+.contribute-controls {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+.contribute-controls__input {
+    line-height: 36px;
+}
+
+.contribute-controls__input--amount {
+    background: white;
+
+    input {
+        padding: 0 4px;
+        border: 0;
+        line-height: 36px;
+        width: 95%;
+        text-align: center;
+
+        &:active, &:focus {
+            outline: 0;
+        }
+    }
+
+    .symbol {
+        color: color(neutral-3);
+
+        &.active {
+            color: color(neutral-1);
+        }
+    }
+}
+
+.contribute-controls__button {
+    flex: 1;
+    margin-bottom: 7px;
+    height: 36px;
+}
+
+.contribute-controls__input {
+    width: 100%;
+}
+
+.contribute-navigation__button {
+    float: right;
+}
+
+.contribute-navigation__next {
+    @include mq($until: tablet) {
+        display: none;
+    }
+
+    background-color: $blue;
+
+    &:hover, &:focus {
+        background-color: darken($blue, 5%);
+    }
+}
+
+.option-button {
+    @include button();
+    text-align: center;
+    margin-right: 5px;
+
+    &:last-of-type {
+        margin-right: 0;
+    }
+}
+
+.option-button--bold {
+    font-weight: bold;
+}
+
+.with-card-icon {
+    position: relative;
+}
+
+.payment-error {
+    @include fs-textSans(3);
+    color: $c-error;
+}
+
+[data-shown] {
+    display: none !important;
+}
+
+.amount-summary {
+    position: absolute;
+    right: 0;
+    top: -32px;
+
+    display: none;
+    text-align: right;
+    margin-bottom: $gs-baseline;
+    visibility: hidden;
+
+    @include mq(tablet) {
+        display: block;
+    }
+
+    &.visible {
+        visibility: visible;
+    }
+}
+
+.amount-summary__text,
+.amount-summary__amount {
+    @include fs-textSans(2);
+}
+
+.amount-summary__text {
+    margin-right: $gs-gutter / 3;
+}
+
+.amount-summary__amount {
+    color: white;
+    text-align: center;
+    background: color(neutral-1);
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+$currencies: gbp usd aud eur nzd cad;
+@each $currency in $currencies {
+    .currency-#{$currency} {
+        [data-shown*=#{$currency}] {
+            display: block !important;
+        }
+    }
+}
+
+.hidden-desktop {
+    @include mq(tablet) {
+        display: none;
+    }
+}
+
+.contribute-navigation--contribution,
+.contribute-navigation--details {
+    .action--pay {
+        display: none;
+    }
+}
+
+.disclaimer {
+    background: #E7E7E7;
+
+    .l-constrained {
+        padding-top: $gs-baseline;
+        padding-bottom: $gs-baseline;
+
+        @include mq(desktop) {
+            padding-top: $gs-baseline * 4;
+        }
+
+        @include mq($until: tablet) {
+            width: 100%;
+        }
+        @include mq(tablet) {
+            flex-direction: row;
+        }
+    }
+}
+
+.feedback {
+    $tablet-col-padding-left: $gs-gutter/2;
+    $tablet-col-padding-right: ($gs-gutter/2) + 1;
+
+    background: white;
+
+    @include fs-textSans(2);
+
+    padding: 16px;
+
+    @include mq(tablet) {
+        width: $tablet-form-width;
+    }
+
+    @include mq(desktop) {
+        padding: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        p {
+            display: block;
+            padding-left: $tablet-col-padding-left;
+            padding-right: $tablet-col-padding-right;
+            width: 300px;
+            height: 400px;
+        }
+    }
+}
+
+:invalid {
+    box-shadow: none;
+    outline: 0;
+}
