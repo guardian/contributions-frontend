@@ -56,7 +56,7 @@ function paymentFormData(state, token) {
         postCode: state.details.postCode,
         abTests: state.data.abTests,
         ophanId: state.data.ophanId,
-        cmp: state.data.cmp,
-        intcmp: state.data.intcmp
+        cmp: state.data.cmpCode,
+        intcmp: state.data.intCmpCode
     };
 }
