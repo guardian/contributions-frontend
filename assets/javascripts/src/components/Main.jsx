@@ -70,8 +70,7 @@ class Main extends React.Component {
 
             case PAGES.DETAILS:
                 return <Details details={this.props.details}
-                                updateDetails={this.props.updateDetails}
-                                paymentMethods={this.props.paymentMethods}/>;
+                                updateDetails={this.props.updateDetails}/>;
 
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}

@@ -37,9 +37,7 @@ export function amounts(tests) {
 }
 
 export function paymentMethods(tests) {
-    let data = testDataFor(tests, 'PaymentMethodTest');
-    console.log(data);
-    return data;
+    return testDataFor(tests, 'PaymentMethodTest').paymentMethods;
 }
 
 export function presetAmount(tests) {
