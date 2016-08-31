@@ -66,6 +66,8 @@ class Main extends React.Component {
                                      currency={this.props.currency}
                                      setAmount={this.props.setAmount}
                                      currentAmount={this.props.card.amount}
+                                     error={this.props.paymentError}
+                                     paymentMethods={this.props.paymentMethods}
                                     />;
 
             case PAGES.DETAILS:

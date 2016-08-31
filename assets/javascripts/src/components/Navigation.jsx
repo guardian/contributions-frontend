@@ -39,9 +39,6 @@ export default class Navigation extends React.Component {
         {showCard &&  <Forward className="contribute-navigation__button action action--button contribute-navigation__next action--next contribute_card__button">{cardButtonLabel}</Forward>}
         {showPaypal && <Forward className="contribute-navigation__button action action--button  paypal__button" onClick={this.props.payWithPaypal}>Contribute with</Forward>}
         {showProcessing && <Spinner text="Processing" />}
-
-
-
         </div>;
     }
 

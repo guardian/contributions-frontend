@@ -67,8 +67,7 @@ export function paypalRedirect(dispatch) {
          }
         )
         .then((res) =>  window.location = res.approvalUrl)
-        .catch((res) => console.log(res))//TODO!
-
+        .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: 'Sorry, an error occurred, please try again or use another payment method.' }));
 }
 /**
  * Convert app state to the structure required for payment posts
