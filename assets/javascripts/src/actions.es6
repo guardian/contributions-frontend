@@ -54,7 +54,7 @@ function paymentFormData(state, token) {
         token: token,
         marketing: state.details.optIn,
         postCode: state.details.postCode,
-        abTests: state.abTests,
+        abTests: state.data.abTests,
         ophanId: state.data.ophanId,
         cmp: state.data.cmp,
         intcmp: state.data.intcmp
