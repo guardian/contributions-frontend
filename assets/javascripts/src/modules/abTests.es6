@@ -26,7 +26,7 @@ export function init() {
 }
 
 function testDataFor(tests, testName) {
-    const test = tests.find(t => t.testName = testName);
+    const test = tests.find(t => t.testName == testName);
     return test && test.data;
 }
 
