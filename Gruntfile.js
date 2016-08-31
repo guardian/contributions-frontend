@@ -345,6 +345,7 @@ module.exports = function (grunt) {
         }
         grunt.task.run([
             'clean:js',
+            'webpack',
             'copy:polyfills',
             'copy:curl'
         ]);
@@ -354,7 +355,7 @@ module.exports = function (grunt) {
             'clean:public',
             'compile:css',
             'compile:images',
-            'compile:js',
+            'compile:js'
         ]);
         /**
          * Only version files for prod builds
