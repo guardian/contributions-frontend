@@ -24,7 +24,7 @@ export default class Navigation extends React.Component {
         return <div className={'contribute-navigation ' + this.classNameFor(this.props.page)}>
           {showBack && <Back type="button" className="action--secondary contribute-navigation__back hidden-mobile" onClick={this.props.goBack}>Back</Back>}
           {showForward && <Forward className="contribute-navigation__button contribute-navigation__next hidden-mobile">Next</Forward>}
-          {showPay && <Forward className='contribute-navigation__button contribute-navigation__pay action--pay'>Contribute {this.props.currency.prefix}{this.props.currency.symbol}{this.props.amount}</Forward>}
+          {showPay && <Forward className='contribute-navigation__button action--pay'>Contribute {this.props.currency.prefix}{this.props.currency.symbol}{this.props.amount}</Forward>}
           {this.props.processing && <Spinner text="Processing" />}
         </div>;
     }
