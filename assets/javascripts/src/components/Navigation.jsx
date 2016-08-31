@@ -17,15 +17,16 @@ export default class Navigation extends React.Component {
     }
 
     render() {
+        const paymentMethods = this.props.paymentMethods;
+        const isPaymentMethodsControl = paymentMethods.indexOf("CARD") >= 0 && paymentMethods.length == 1;
         const showForward = !this.props.processing && this.props.page == PAGES.DETAILS;
         const showBack = !this.props.processing && this.props.page !== PAGES.CONTRIBUTION;
         const showPay = !this.props.processing && !!this.props.amount && this.props.page === PAGES.PAYMENT;
         const isFirstPage = !this.props.processing && this.props.page === PAGES.CONTRIBUTION;
-        const showMobileBack = !this.props.processing && this.props.page == PAGES.PAYMENT;
-        const paymentMethods = this.props.paymentMethods;
+        const showMobileBack = !this.props.processing && this.props.page == PAGES.PAYMENT && !(isPaymentMethodsControl && this.props.mobile);
+
 
         const showPaypal = isFirstPage && paymentMethods.indexOf("PAYPAL") >= 0;
-        const isPaymentMethodsControl = paymentMethods.indexOf("CARD") >= 0 && paymentMethods.length == 1;
         const showCard = isFirstPage && paymentMethods.indexOf("CARD") >= 0 && !(isPaymentMethodsControl && this.props.mobile);
         const cardButtonLabel = isPaymentMethodsControl ? "Next" : "Contribute with debit/credit card";
         const showProcessing = this.props.processing && !(this.props.page == PAGES.CONTRIBUTION && isPaymentMethodsControl);
