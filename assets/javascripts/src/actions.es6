@@ -67,7 +67,7 @@ export function paypalRedirect(dispatch) {
          }
         )
         .then((res) =>  window.location = res.approvalUrl)
-        .catch((res) => console.log(res))
+        .catch((res) => console.log(res))//TODO!
 
 }
 /**

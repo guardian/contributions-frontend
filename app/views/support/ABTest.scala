@@ -142,18 +142,38 @@ object MessageCopyTest extends TestTrait {
 
 object PaymentMethodTest extends TestTrait {
 
+  case class PaymentMethodData(name: String, buttonLabel: String, action: String, buttonStyle: String)
+
+  object PaymentMethodData {
+    val CardPayment = PaymentMethodData(
+      name = "card",
+      buttonLabel = "Contribute with debit/credit card",
+      action = "CARD_PAY",
+      buttonStyle = "contribute-navigation__next action--next contribute_card__button"
+    )
+    val PaypalPayment = PaymentMethodData(
+      name = "card",
+      buttonLabel = "Contribute with ",
+      action = "PAYPAL_PAY",
+      buttonStyle = "paypal__button"
+    )
+
+    implicit val format: Format[PaymentMethodData] = Json.format[PaymentMethodData]
+  }
+
+
   def name = "PaymentMethodTest"
   def slug = "paymentMethod"
 
-  //TODO use a sealed trait for the payment methods
-  case class PaymentMethodVariantData(paymentMethods: Set[String]) extends VariantData
+  case class PaymentMethodVariantData(paymentMethods: List[PaymentMethodData]) extends VariantData
+
   object PaymentMethodVariantData {
     implicit val format: Format[PaymentMethodVariantData] = Json.format[PaymentMethodVariantData]
   }
 
   def variants = NonEmptyList(
-    makeVariant("Control", "control", 1, PaymentMethodVariantData(Set("CARD"))),
-    makeVariant("Paypal", "paypal", 0, PaymentMethodVariantData(Set("PAYPAL", "CARD")))
+    makeVariant("Control", "control", 0, PaymentMethodVariantData(List(PaymentMethodData.CardPayment))),
+    makeVariant("Paypal", "paypal", 1, PaymentMethodVariantData(List(PaymentMethodData.CardPayment, PaymentMethodData.PaypalPayment)))
   )
 
 }

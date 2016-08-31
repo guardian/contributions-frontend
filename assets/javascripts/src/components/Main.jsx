@@ -37,7 +37,8 @@ function mapStateToProps(state) {
         paypalPay: state.page.paypalPay,
         cardPay: state.page.cardPay,
         paymentError: state.page.paymentError,
-        amounts: abTests.amounts(state.data.abTests)
+        amounts: abTests.amounts(state.data.abTests),
+        paymentMethods: abTests.paymentMethods(state.data.abTests)
     }
 }
 
@@ -64,16 +65,18 @@ class Main extends React.Component {
                                      max={this.props.maxAmount}
                                      currency={this.props.currency}
                                      setAmount={this.props.setAmount}
-                                     currentAmount={this.props.card.amount}/>;
+                                     currentAmount={this.props.card.amount}
+                                    />;
 
             case PAGES.DETAILS:
                 return <Details details={this.props.details}
-                                updateDetails={this.props.updateDetails}/>;
+                                updateDetails={this.props.updateDetails}
+                                paymentMethods={this.props.paymentMethods}/>;
 
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}
                                 updateCard={this.props.updateCard}
-                                error={this.props.paymentError} />;
+                                error={this.props.paymentError}/>;
         }
     }
 

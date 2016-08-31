@@ -26,15 +26,20 @@ export function init() {
 }
 
 function testDataFor(tests, testName) {
-    const test = tests.find(t => t.testName = testName);
+    const test = tests.find(t => t.testName == testName);
     return test && test.data;
 }
 
 export function amounts(tests) {
     const data = testDataFor(tests, 'AmountHighlightTest');
     const defaultAmounts = [25, 50, 100, 250];
-
     return (data && data.values) || defaultAmounts;
+}
+
+export function paymentMethods(tests) {
+    let data = testDataFor(tests, 'PaymentMethodTest');
+    console.log(data);
+    return data;
 }
 
 export function presetAmount(tests) {

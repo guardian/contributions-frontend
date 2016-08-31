@@ -7,7 +7,7 @@ import Navigation from '../Navigation.jsx';
 export default class DesktopWrapper extends React.Component {
     render() {
         return <div>
-            <section className='contribute-section' key={this.props.page}>
+           <section className='contribute-section' key={this.props.page}>
                 <div className="contribute-form__heading">
                     <Title page={this.props.page}/>
                     <ProgressIndicator page={this.props.page}/>
@@ -25,7 +25,9 @@ export default class DesktopWrapper extends React.Component {
                         processing={this.props.processing}
                         pay={this.props.pay}
                         payWithPaypal={this.props.payWithPaypal}
-                        payWithCard={this.props.payWithCard}/>
+                        payWithCard={this.props.payWithCard}
+                        paymentMethods={this.props.paymentMethods}
+                    />
                 </form>
             </section>
         </div>;
