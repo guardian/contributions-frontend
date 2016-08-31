@@ -49,7 +49,7 @@ export default class Payment extends React.Component {
                         onBlur={this.validateCardNumber.bind(this)}
                         tabIndex="13" size="20" id="cc-num" data-stripe="number"
                         pattern="[0-9 ]*" placeholder="0000 0000 0000 0000" maxLength="19" autoComplete="off"
-                        outerClassName="with-card-icon" required autoFocus>
+                        outerClassName="with-card-icon" required>
                 <CardIcon number={this.props.card.number} />
             </InputField>
 
