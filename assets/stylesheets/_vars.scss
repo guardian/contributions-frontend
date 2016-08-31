@@ -43,6 +43,12 @@ $c-warning: #e9e939;
 $multimedia-support-4: #484848;
 $comment-support-1: #7d7569;
 
+$dark-yellow: #E6A226;
+$medium-yellow: #ffbb00;
+$light-yellow: #ffd359;
+
+$blue: #005689;
+
 /**
  * Access palette
  * access these through the color($name) function
@@ -241,3 +247,6 @@ $font-scale: (
         5: (font-size: 16, line-height: 22)
     )
 ) !default;
+
+$tablet-form-width: map_get($max-widths, max-tablet);
+$desktop-form-width: 936px;
