@@ -183,9 +183,6 @@
 .fieldset__note {
     @include fs-textSans(2);
     color: $multimedia-support-4;
-    p {
-        margin-bottom: 0;
-    }
 }
 .fieldset__fields {
     vertical-align: top;
