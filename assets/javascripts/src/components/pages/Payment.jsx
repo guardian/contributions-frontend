@@ -1,7 +1,8 @@
 import React from 'react';
 
-import InputField from '../InputField.jsx';
-import CardIcon from '../CardIcon.jsx';
+import InputField from '../InputField';
+import CardIcon from '../CardIcon';
+import LegalNotice from '../LegalNotice';
 
 export default class Payment extends React.Component {
     formatExpiry(expiry) {
@@ -84,6 +85,8 @@ export default class Payment extends React.Component {
                     {this.props.error.kind === 'card' ? this.props.error.message : 'Sorry, an error occurred, please try again.'}
                 </div>
             }
+
+            <LegalNotice countryGroup={this.props.countryGroup} />
         </div>
     }
 }

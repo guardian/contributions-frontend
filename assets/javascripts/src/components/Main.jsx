@@ -23,7 +23,8 @@ function mapStateToProps(state) {
         currency: state.data.currency,
         maxAmount: state.data.maxAmount,
         paymentError: state.page.paymentError,
-        amounts: abTests.amounts(state.data.abTests)
+        amounts: abTests.amounts(state.data.abTests),
+        countryGroup: state.data.countryGroup
     };
 }
 
@@ -55,7 +56,9 @@ class Main extends React.Component {
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}
                                 updateCard={this.props.updateCard}
-                                error={this.props.paymentError} />;
+                                error={this.props.paymentError}
+                                countryGroup={this.props.countryGroup}
+                />;
         }
     }
 

@@ -242,6 +242,12 @@ $currencies: gbp usd aud eur nzd cad;
     }
 }
 
+.contribute-payment {
+    .fieldset__note {
+        margin-top: 2rem;
+    }
+}
+
 .disclaimer {
     background: #E7E7E7;
 
