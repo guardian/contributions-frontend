@@ -44,11 +44,11 @@ export function submitPayment(dispatch) {
 }
 
 export function paypalRedirect(dispatch) {
-    let state = store.getState();
+    const state = store.getState();
 
     dispatch({ type: SUBMIT_PAYMENT });
 
-    let postData = {
+    const postData = {
             countryGroup: state.data.countryGroup.id ,
             amount: state.card.amount //TODO should the amount be somewhere else rather than in the card section?
         };

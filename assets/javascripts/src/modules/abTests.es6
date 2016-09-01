@@ -37,7 +37,12 @@ export function amounts(tests) {
 }
 
 export function paymentMethods(tests) {
-    return testDataFor(tests, 'PaymentMethodTest').paymentMethods;
+    return {
+        paymentMethods: testDataFor(tests, 'PaymentMethodTest').paymentMethods,
+        isControl: function () {
+            return (this.paymentMethods.indexOf("CARD") >= 0 && this.paymentMethods.length == 1);
+        }
+    }
 }
 
 export function presetAmount(tests) {

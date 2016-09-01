@@ -17,8 +17,8 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-        const paymentMethods = this.props.paymentMethods;
-        const isPaymentMethodsControl = paymentMethods.indexOf("CARD") >= 0 && paymentMethods.length == 1;
+        const paymentMethods = this.props.paymentMethodsTest.paymentMethods;
+        const isPaymentMethodsControl = this.props.paymentMethodsTest.isControl();
         const showForward = !this.props.processing && this.props.page == PAGES.DETAILS;
         const showBack = !this.props.processing && this.props.page !== PAGES.CONTRIBUTION;
         const showPay = !this.props.processing && !!this.props.amount && this.props.page === PAGES.PAYMENT;

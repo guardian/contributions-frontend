@@ -38,7 +38,7 @@ function mapStateToProps(state) {
         cardPay: state.page.cardPay,
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests),
-        paymentMethods: abTests.paymentMethods(state.data.abTests)
+        paymentMethodsTest: abTests.paymentMethods(state.data.abTests)
     }
 }
 
@@ -67,7 +67,7 @@ class Main extends React.Component {
                                      setAmount={this.props.setAmount}
                                      currentAmount={this.props.card.amount}
                                      error={this.props.paymentError}
-                                     paymentMethods={this.props.paymentMethods}
+                                     paymentMethodsTest={this.props.paymentMethodsTest}
                                     />;
 
             case PAGES.DETAILS:

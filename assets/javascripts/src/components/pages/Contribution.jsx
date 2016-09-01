@@ -66,7 +66,7 @@ export default class Contribution extends React.Component {
     }
 
     render() {
-        const isPaymentMethodsControl = this.props.paymentMethods.indexOf("CARD") >= 0 && this.props.paymentMethods.length == 1;
+
         return <div className='contribute-controls contribute-fields'>
             {this.props.amounts.map(amount =>
                 <button type="button"
@@ -87,7 +87,7 @@ export default class Contribution extends React.Component {
                        onBlur={this.handleBlur.bind(this)} />
             </span>
 
-            {this.props.error.show && !isPaymentMethodsControl &&
+            {this.props.error.show && !this.props.paymentMethodsTest.isControl() &&
             <div className="payment-error"> Sorry, an error occurred, please try again or use another payment method.</div>
             }
         </div>;

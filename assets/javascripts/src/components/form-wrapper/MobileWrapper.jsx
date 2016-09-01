@@ -9,10 +9,7 @@ import {ALL_PAGES, PAGES} from 'src/constants';
 export default class MobileWrapper extends React.Component {
 
     render() {
-
-        const isPaymentMethodsControl =  this.props.paymentMethods.indexOf("CARD") >= 0 && this.props.paymentMethods.length == 1;
-
-        if (isPaymentMethodsControl)
+        if (this.props.paymentMethodsTest.isControl())
             return this.renderInForm(ALL_PAGES);
         else
         if (this.props.page == PAGES.CONTRIBUTION)
@@ -23,11 +20,9 @@ export default class MobileWrapper extends React.Component {
     }
 
     renderInForm(pages) {
-
         return <form className={'flex-vertical contribute-form__inner'} onSubmit={this.props.submit.bind(this)}>
             {pages.map(p =>
                 <section className="contribute-section" key={p}>
-
                     <div className="contribute-form__heading">
                         <Title page={p}/>
                         <ProgressIndicator page={this.props.page}/>
@@ -45,7 +40,7 @@ export default class MobileWrapper extends React.Component {
                         payWithPaypal={this.props.payWithPaypal}
                         payWithCard={this.props.payWithCard}
                         jumpToFirstPage={this.props.jumpToFirstPage}
-                        paymentMethods={this.props.paymentMethods}
+                        paymentMethodsTest={this.props.paymentMethodsTest}
                         mobile={true}/>
 
 
