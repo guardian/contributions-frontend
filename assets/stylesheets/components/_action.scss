@@ -251,6 +251,18 @@
     }
 }
 
+.action--pay {
+    background: $green;
+
+    &:focus,
+    &:active,
+    &:hover {
+        background: darken($green, 10%);
+    }
+}
+
+
+
 /* Actions - Disabled
    ========================================================================== */
 

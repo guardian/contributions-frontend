@@ -38,8 +38,9 @@ function mapStateToProps(state) {
         cardPay: state.page.cardPay,
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests),
-        paymentMethodsTest: abTests.paymentMethods(state.data.abTests)
-    }
+        paymentMethodsTest: abTests.paymentMethods(state.data.abTests),
+        countryGroup: state.data.countryGroup
+    };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -77,7 +78,9 @@ class Main extends React.Component {
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}
                                 updateCard={this.props.updateCard}
-                                error={this.props.paymentError}/>;
+                                error={this.props.paymentError}
+                                countryGroup={this.props.countryGroup}
+                />;
         }
     }
 

@@ -5,6 +5,8 @@ import store from 'src/store';
 import { SET_AMOUNT } from 'src/actions';
 
 export function init() {
+    const state = store.getState();
+
     if ("abTests" in window) {
         var data = {};
 
@@ -22,7 +24,11 @@ export function init() {
         });
     }
 
-    store.dispatch({ type: SET_AMOUNT, amount: presetAmount(store.getState().data.abTests) });
+    // only set the amount from the A/B test if it isn't already set
+    // this prevents the A/B test overriding the preset amount (query param) functionality)
+    if (isNaN(parseInt(state.card.amount))) {
+        store.dispatch({ type: SET_AMOUNT, amount: presetAmount(state.data.abTests) });
+    }
 }
 
 function testDataFor(tests, testName) {
