@@ -52,7 +52,7 @@ export function paypalRedirect(dispatch) {
             countryGroup: state.data.countryGroup.id ,
             amount: state.card.amount //TODO should the amount be somewhere else rather than in the card section?
         };
-    fetch('/paypal/ajaxAuth', {
+    fetch('/paypal/auth', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',

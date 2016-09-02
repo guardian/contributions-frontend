@@ -14,7 +14,6 @@ GET            /assets/*file                    controllers.Assets.versioned(pat
 GET            /                                controllers.Giraffe.contributeRedirect
 GET            /healthcheck                     controllers.Healthcheck.healthcheck
 POST           /paypal/auth                     controllers.PaypalController.authorize
-POST           /paypal/ajaxAuth                 controllers.PaypalController.ajaxAuth
 
 GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], ophanId: Option[String])
 POST           /paypal/hook                     controllers.PaypalController.hook

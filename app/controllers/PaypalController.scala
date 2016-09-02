@@ -55,50 +55,9 @@ class PaypalController(
     }
   }
 
-  case class PaymentData(
-    countryGroup: CountryGroup,
-    amount: BigDecimal,
-    cmp: Option[String],
-    intCmp: Option[String],
-    ophanId: Option[String]
-  )
-
-  val paypalForm = Form(
-    mapping(
-      "countryGroup" -> of[CountryGroup],
-      "amount" -> bigDecimal(10, 2),
-      "cmp" -> optional(text),
-      "intcmp" -> optional(text),
-      "ophanId" -> optional(text)
-    )(PaymentData.apply)(PaymentData.unapply)
-  )
-
   def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = {
     val maxAllowedAmount = MaxAmount.forCurrency(currency)
     amount min maxAllowedAmount
-  }
-
-  def authorize = NoCacheAction { implicit request =>
-    paypalForm.bindFromRequest().fold[Result](
-      hasErrors = form => handleError(CountryGroup.UK, form.errors.mkString(",")),
-      success = form => {
-        val paypalService = paymentServices.paypalServiceFor(request)
-        val maxAllowedAmount = MaxAmount.forCurrency(form.countryGroup.currency)
-        val amount = capAmount(form.amount, form.countryGroup.currency)
-        val authResponse = paypalService.getAuthUrl(
-          amount = amount,
-          countryGroup = form.countryGroup,
-          contributionId = contributionIdGenerator.getNewId,
-          cmp = form.cmp,
-          intCmp = form.intCmp,
-          ophanId = form.ophanId
-        )
-        authResponse match {
-          case Right(url) => Redirect(url, SEE_OTHER)
-          case Left(error) => handleError(form.countryGroup, s"Error getting PayPal auth url: $error")
-        }
-      }
-    )
   }
 
   case class AuthRequest(
@@ -114,14 +73,15 @@ class PaypalController(
   case class AuthResponse(approvalUrl:String)
 
   implicit val AuthResponseWrites = Json.writes[AuthResponse]
+
   implicit val CountryGroupReads = new Reads[CountryGroup] {
     override def reads(json: JsValue): JsResult[CountryGroup] = json match {
-      case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid countrygroup id"))
+      case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid CountryGroup id"))
       case _ => JsError("invalid value for country group")
     }
-
   }
-  def ajaxAuth = NoCacheAction(parse.json) { request =>
+
+  def authorize = NoCacheAction(parse.json) { request =>
     request.body.validate[AuthRequest] match {
       case JsSuccess(authRequest, _) =>
         val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)

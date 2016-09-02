@@ -14,7 +14,7 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{FieldMapping, Form, FormError}
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.json.{JsArray, JsString, JsValue, Json}
+import play.api.libs.json.{JsArray, JsString, Json}
 import play.api.mvc._
 import services.PaymentServices
 import utils.MaxAmount
@@ -152,7 +152,6 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       ) ++ f.postCode.map("postcode" -> _)
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
-
       val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(f.currency) * 100
       val res = stripe.Charge.create(min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit), f.currency, f.email, "Your contribution", f.token, metadata)
 
