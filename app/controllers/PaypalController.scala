@@ -82,7 +82,6 @@ class PaypalController(
     request.body.validate[AuthRequest] match {
       case JsSuccess(authRequest, _) =>
         val paypalService = paymentServices.paypalServiceFor(request)
-        println("BLA")
         val authResponse = paypalService.getAuthUrl(
           amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
           countryGroup = authRequest.countryGroup,
