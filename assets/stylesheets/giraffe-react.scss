@@ -28,10 +28,6 @@
     color: #333;
 }
 
-.overlay.errorContainer {
-
-}
-
 .errorHeader {
     font-size: 20px;
     font-weight: 900;
@@ -71,6 +67,9 @@
     }
 }
 .contribute_card__button {
+    @include mq($until: tablet) {
+        margin-top: 24px;
+    }
     width: 100%;
 }
 .giraffe__wrapper {
