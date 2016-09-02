@@ -14,7 +14,7 @@ import play.api.data.format.Formatter
 import play.api.libs.json._
 import utils.ContributionIdGenerator
 import views.support.Test
-
+import utils.MaxAmount
 import scala.util.Right
 
 
@@ -74,7 +74,7 @@ class PaypalController(
   )
 
   def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = {
-    val maxAllowedAmount = configuration.Payment.maxAmountFor(currency)
+    val maxAllowedAmount = MaxAmount.forCurrency(currency)
     amount min maxAllowedAmount
   }
 
@@ -83,7 +83,7 @@ class PaypalController(
       hasErrors = form => handleError(CountryGroup.UK, form.errors.mkString(",")),
       success = form => {
         val paypalService = paymentServices.paypalServiceFor(request)
-        val maxAllowedAmount = configuration.Payment.maxAmountFor(form.countryGroup.currency)
+        val maxAllowedAmount = MaxAmount.forCurrency(form.countryGroup.currency)
         val amount = capAmount(form.amount, form.countryGroup.currency)
         val authResponse = paypalService.getAuthUrl(
           amount = amount,

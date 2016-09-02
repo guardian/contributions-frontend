@@ -1,8 +1,6 @@
 package controllers
 
 import java.lang.Math.min
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 import actions.CommonActions.NoCacheAction
@@ -115,10 +113,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-    val maxAmountInLocalCurrency = configuration.Payment.maxAmountFor(countryGroup.currency)
+    val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    Ok(views.html.giraffe.contributeReact(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears, errorMessage))
+    Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears, errorMessage))
       .withCookies(chosenVariants.variants.map(Test.createCookie):_*)
   }
 
@@ -155,7 +153,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
 
-      val maxAmountInSmallestCurrencyUnit = configuration.Payment.maxAmountFor(f.currency) * 100
+      val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(f.currency) * 100
       val res = stripe.Charge.create(min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit), f.currency, f.email, "Your contribution", f.token, metadata)
 
       val redirect = f.currency match {
