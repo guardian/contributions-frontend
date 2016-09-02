@@ -31,7 +31,7 @@
 .overlay.errorContainer {
 
 }
-//TODO see if there is a better way of assigning these styles by element inside erroContainer or something
+
 .errorHeader {
     font-size: 20px;
     font-weight: 900;
@@ -50,9 +50,6 @@
     width: 60px;
     text-align: center;
 }
-
-//////////////////////
-
 
 .show-mobile {
     display: none;
@@ -221,9 +218,6 @@
 }
 
 .contribute-navigation__next {
-  //  @include mq($until: tablet) {
-  //      display: none;
-  //  }
 
     background-color: $blue;
 
@@ -264,14 +258,12 @@
     right: 0;
     top: -32px;
 
-   // display: none;
+
     text-align: right;
     margin-bottom: $gs-baseline;
     visibility: hidden;
+    display: block;
 
-    //@include mq(tablet) {
-        display: block;
-    //}
 
     &.visible {
         visibility: visible;
