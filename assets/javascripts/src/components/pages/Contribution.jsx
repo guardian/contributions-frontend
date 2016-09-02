@@ -2,7 +2,7 @@ import React from 'react';
 
 export default class Contribution extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
 
         this.state = {
             highlightButton: true,
@@ -17,6 +17,7 @@ export default class Contribution extends React.Component {
     updateInputAmount(event) {
         const amount = event.target.value === '' ? event.target.value : parseInt(event.target.value);
         this.setState({ inputAmount: amount });
+        this.props.setAmount(amount);
     }
 
     handleFocus() {
