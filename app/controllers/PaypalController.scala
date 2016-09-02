@@ -55,11 +55,6 @@ class PaypalController(
     }
   }
 
-  def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = {
-    val maxAllowedAmount = MaxAmount.forCurrency(currency)
-    amount min maxAllowedAmount
-  }
-
   case class AuthRequest(
     countryGroup: CountryGroup,
     amount: BigDecimal,
@@ -81,13 +76,15 @@ class PaypalController(
     }
   }
 
+  private def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = amount min MaxAmount.forCurrency(currency)
+
   def authorize = NoCacheAction(parse.json) { request =>
     request.body.validate[AuthRequest] match {
       case JsSuccess(authRequest, _) =>
-        val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
         val paypalService = paymentServices.paypalServiceFor(request)
+        println("BLA")
         val authResponse = paypalService.getAuthUrl(
-          amount = amount,
+          amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
           countryGroup = authRequest.countryGroup,
           contributionId = contributionIdGenerator.getNewId,
           cmp = authRequest.cmp,
