@@ -142,9 +142,8 @@ object MessageCopyTest extends TestTrait {
 
 object PaymentMethodTest extends TestTrait {
 
-  case class PaymentMethodData(name: String, buttonLabel: String, action: String, buttonStyle: String)
-
   def name = "PaymentMethodTest"
+
   def slug = "paymentMethods"
 
   case class PaymentMethodVariantData(paymentMethods: Set[String]) extends VariantData
@@ -156,7 +155,7 @@ object PaymentMethodTest extends TestTrait {
   def variants = NonEmptyList(
     makeVariant("Control", "control", 1, PaymentMethodVariantData(Set("CARD"))),
     makeVariant("Paypal", "paypal", 0, PaymentMethodVariantData(Set("CARD", "PAYPAL"))),
-    makeVariant("onlyPaypal", "ponlyaypal", 0, PaymentMethodVariantData(Set("PAYPAL")))
+    makeVariant("onlyPaypal", "onlyPaypal", 0, PaymentMethodVariantData(Set("PAYPAL")))
   )
 
 }
