@@ -3,7 +3,6 @@ package controllers
 import actions.CommonActions._
 import com.gu.i18n.{CountryGroup, Currency}
 import models.PaymentHook
-import play.api.data.{ FormError}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
@@ -17,8 +16,7 @@ import scala.util.Right
 
 class PaypalController(
   ws: WSClient,
-  paymentServices: PaymentServices,
-  contributionIdGenerator: ContributionIdGenerator
+  paymentServices: PaymentServices
 ) extends Controller {
 
   def executePayment(
@@ -71,7 +69,7 @@ class PaypalController(
         val authResponse = paypalService.getAuthUrl(
           amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
           countryGroup = authRequest.countryGroup,
-          contributionId = contributionIdGenerator.getNewId,
+          contributionId = ContributionIdGenerator.getNewId,
           cmp = authRequest.cmp,
           intCmp = authRequest.intCmp,
           ophanId = authRequest.ophanId

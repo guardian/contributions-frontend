@@ -16,7 +16,6 @@ import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services.PaymentServices
-import utils.ContributionIdGeneratorImpl
 import router.Routes
 
 //Sometimes intellij deletes this -> (import router.Routes)
@@ -57,7 +56,6 @@ trait AppComponents extends PlayComponents {
     PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionDataPerMode)
 
   )
-  lazy val contributionIdGenerator = ContributionIdGeneratorImpl
   lazy val giraffeController = wire[Giraffe]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
