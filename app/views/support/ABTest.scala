@@ -146,16 +146,25 @@ object PaymentMethodTest extends TestTrait {
 
   def slug = "paymentMethods"
 
-  case class PaymentMethodVariantData(paymentMethods: Set[String]) extends VariantData
+  case class PaymentMethodVariantData(paymentMethods: Set[PaymentMethod]) extends VariantData
 
   object PaymentMethodVariantData {
-    implicit val format: Format[PaymentMethodVariantData] = Json.format[PaymentMethodVariantData]
+    implicit val format: Writes[PaymentMethodVariantData] = Json.writes[PaymentMethodVariantData]
+  }
+
+  sealed trait PaymentMethod
+
+  case object CARD extends PaymentMethod
+
+  case object PAYPAL extends PaymentMethod
+
+  implicit val paymentMethodFormatter: Writes[PaymentMethod] = new Writes[PaymentMethod] {
+    def writes(method: PaymentMethod): JsValue = JsString(method.toString)
   }
 
   def variants = NonEmptyList(
-    makeVariant("Control", "control", 1, PaymentMethodVariantData(Set("CARD"))),
-    makeVariant("Paypal", "paypal", 0, PaymentMethodVariantData(Set("CARD", "PAYPAL"))),
-    makeVariant("onlyPaypal", "onlyPaypal", 0, PaymentMethodVariantData(Set("PAYPAL")))
+    makeVariant("Control", "control", 1, PaymentMethodVariantData(Set(CARD))),
+    makeVariant("Paypal", "paypal", 0, PaymentMethodVariantData(Set(CARD, PAYPAL)))
   )
 
 }
