@@ -15,7 +15,7 @@ import org.joda.time.DateTime
 import play.api.Logger
 import views.support.ChosenVariants
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
 
@@ -64,7 +64,6 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       }
       s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
     }
-
     val cancelUrl = config.baseReturnUrl
     val currencyCode = countryGroup.currency.toString
     val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(amount.toString)
@@ -82,28 +81,30 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     val redirectUrls = new RedirectUrls().setCancelUrl(cancelUrl).setReturnUrl(returnUrl)
 
     val payment = new Payment().setIntent("sale").setPayer(payer).setTransactions(transactions).setRedirectUrls(redirectUrls)
-    try {
-      val createdPayment: Payment = payment.create(apiContext)
-      val links = createdPayment.getLinks.asScala
-      val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url"))
-      approvalLink.map(l => Right(l.getHref)).getOrElse(Left("No approval link returned from paypal"))
-    } catch {
-      case e: PayPalRESTException => Left(e.getMessage)
+
+    Try {
+      val createdPayment = payment.create(apiContext)
+      createdPayment.getLinks.asScala
+    } match {
+      case Success(links) =>
+        val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url"))
+        approvalLink.map(l => Right(l.getHref)).getOrElse(Left("No approval link returned from paypal"))
+      case Failure(exception) => Left(exception.getMessage)
     }
   }
 
   def executePayment(paymentId: String, payerId: String): Either[String, String] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
-    try {
-      val createdPayment = payment.execute(apiContext, paymentExecution)
-      if (createdPayment.getState.toUpperCase != "APPROVED") {
-        Left(s"payment returned with state: ${createdPayment.getState}")
-      } else {
-        Right(createdPayment.getId)
-      }
-    } catch {
-      case e: PayPalRESTException => Left(e.getMessage)
+
+    Try(payment.execute(apiContext, paymentExecution)) match {
+      case Success(payment) =>
+        if (payment.getState.toUpperCase != "APPROVED") {
+          Left(s"payment returned with state: ${payment.getState}")
+        } else {
+          Right(payment.getId)
+        }
+      case Failure(exception) => Left(exception.getMessage)
     }
   }
 
