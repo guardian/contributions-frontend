@@ -10,6 +10,5 @@ import scala.concurrent.ExecutionContext
 trait PlayComponents extends BuiltInComponents with AhcWSComponents with DBComponents with HikariCPComponents {
   implicit val executionContext: ExecutionContext = actorSystem.dispatcher
   implicit val as: ActorSystem = actorSystem
-  implicit val database: Database = dbApi.database("default")
 }
 

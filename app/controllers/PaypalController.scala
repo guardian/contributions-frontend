@@ -2,15 +2,12 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.i18n.{CountryGroup, Currency}
-import data.ContributionData
 import models.PaymentHook
-import play.api.data.{Form, FormError}
-import play.api.data.Forms._
+import play.api.data.{ FormError}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
-import play.api.data.format.Formatter
 import play.api.libs.json._
 import utils.ContributionIdGenerator
 import views.support.Test
@@ -21,19 +18,8 @@ import scala.util.Right
 class PaypalController(
   ws: WSClient,
   paymentServices: PaymentServices,
-  contributionIdGenerator: ContributionIdGenerator,
-  contributionData: ContributionData
+  contributionIdGenerator: ContributionIdGenerator
 ) extends Controller {
-
-  implicit val countryGroupFormatter = new Formatter[CountryGroup] {
-    type Result = Either[Seq[FormError], CountryGroup]
-
-    override def bind(key: String, data: Map[String, String]): Result = {
-      data.get(key).flatMap(CountryGroup.byId(_)).fold[Result](Left(Seq.empty))(countryGroup => Right(countryGroup))
-    }
-
-    override def unbind(key: String, value: CountryGroup): Map[String, String] = Map(key -> value.id)
-  }
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -115,7 +101,7 @@ class PaypalController(
 
     bodyJson.validate[PaymentHook] match {
       case JsSuccess(paymentHook, _) if validHook =>
-        contributionData.insertPaymentHook(paymentHook)
+        paypalService.processPaymentHook(paymentHook)
         Logger.info(s"Received paymentHook: $paymentHook")
         Ok
       case JsError(errors) =>

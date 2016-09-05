@@ -10,7 +10,7 @@ import com.paypal.base.rest.{APIContext, PayPalRESTException}
 import scala.collection.JavaConverters._
 import com.typesafe.config.Config
 import data.ContributionData
-import models.{ContributionMetaData, Contributor}
+import models.{ContributionMetaData, Contributor, PaymentHook}
 import org.joda.time.DateTime
 import play.api.Logger
 import views.support.ChosenVariants
@@ -153,5 +153,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     val context = apiContext.addConfiguration(Constants.PAYPAL_WEBHOOK_ID, config.paypalWebhookId)
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
+
+  def processPaymentHook(paymentHook: PaymentHook) = contributionData.insertPaymentHook(paymentHook)
 
 }

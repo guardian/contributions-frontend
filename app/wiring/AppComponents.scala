@@ -9,6 +9,9 @@ import com.typesafe.config.ConfigFactory
 import controllers._
 import data.ContributionData
 import filters.CheckCacheHeadersFilter
+import models.ContributionMetaData
+import play.api.db.Database
+import services.PaymentServices.Mode
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
@@ -34,17 +37,25 @@ trait AppComponents extends PlayComponents {
     com.gu.identity.testing.usernames.Encoder.withSecret(idConfig.getString("test.users.secret")),
     recency = 2.days.standardDuration
   )
-
-  lazy val contributionData: ContributionData = wire[ContributionData]
-
   lazy val identityAuthProvider =
     Cookies.authProvider(identityKeys).withDisplayNameProvider(Token.authProvider(identityKeys, "membership"))
+
+  val contributionDataPerMode: Map[Mode, ContributionData] = {
+    val dbConfig = config.getConfig("dbConf")
+    def contributionDataFor(mode: Mode) = {
+      val modeKey = dbConfig.getString(mode.name)
+      new ContributionData(dbApi.database(modeKey))
+    }
+    Mode.all.map(mode => mode -> contributionDataFor(mode)).toMap
+  }
+
 
   lazy val paymentServices = PaymentServices(
     identityAuthProvider,
     testUsernames,
     PaymentServices.stripeServicesFor(config.getConfig("stripe")),
-    PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionData)
+    PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionDataPerMode)
+
   )
   lazy val contributionIdGenerator = ContributionIdGeneratorImpl
   lazy val giraffeController = wire[Giraffe]
