@@ -29,6 +29,7 @@ export function submitPayment(dispatch) {
     stripe.createToken(state.card)
         .then(token => paymentFormData(state, token))
         .then(data => fetch(urls.pay, {
+            credentials: 'same-origin',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -53,6 +54,7 @@ export function paypalRedirect(dispatch) {
             amount: state.card.amount //TODO should the amount be somewhere else rather than in the card section?
         };
     fetch('/paypal/auth', {
+        credentials: 'same-origin',
         method: 'POST',
         headers: {
             'Accept': 'application/json',
