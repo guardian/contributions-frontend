@@ -1,8 +1,6 @@
 package controllers
 
 import java.lang.Math.min
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 import actions.CommonActions.NoCacheAction
@@ -16,13 +14,12 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{FieldMapping, Form, FormError}
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.json.{JsArray, JsString, JsValue, Json}
+import play.api.libs.json.{JsArray, JsString, Json}
 import play.api.mvc._
 import services.PaymentServices
 import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
-
 import scala.concurrent.Future
 
 class Giraffe(paymentServices: PaymentServices) extends Controller {
@@ -102,7 +99,8 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
     Redirect(destinationUrl, request.queryString.filterKeys(QueryParamsToForward), SEE_OTHER)
   }
 
-  def contribute(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
+  def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
+    val errorMessage = error.map(_.message)
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
@@ -115,11 +113,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-
-
+    val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    Ok(views.html.giraffe.contributeReact(pageInfo, MaxAmount.forCurrency(countryGroup.currency), countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears))
+    Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears, errorMessage))
       .withCookies(chosenVariants.variants.map(Test.createCookie):_*)
   }
 

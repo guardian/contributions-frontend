@@ -47,6 +47,7 @@
     line-height: 2.8rem;
 }
 
+
 /* desktop */
 
 $tablet-col-padding-left: $gs-gutter/2;
@@ -87,6 +88,15 @@ $tablet-col-padding-right: ($gs-gutter/2) + 1;
         justify-content: space-between;
     }
 
+    .support-wrapper .error_message {
+        padding-left: $tablet-col-padding-left;
+        padding-right: $tablet-col-padding-right;
+        width: 300px;
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
     .support-wrapper .form__column:first-child {
         padding-left: 0;
         border: none;
@@ -135,6 +145,13 @@ $desktop-col-padding-right: 16px;
     }
 }
 
+.action--mobile-card-payment {
+    display: block;
+    @include mq(tablet) {
+        display: none;
+    }
+}
+
 .action--button {
     border: none;
     line-height: 30px;
@@ -150,6 +167,67 @@ $desktop-col-padding-right: 16px;
         background-size: 100%;
         float: right;
     }
+}
+.hiddenOnMobile {
+   display: none;
+    @include mq(tablet) {
+        display: block;
+    }
+}
+
+.hidden {
+    display: none !important;
+}
+
+.payment-method-button {
+    background-repeat: no-repeat;
+    margin-top: 10px;
+    background-color: #AFAFAF;
+    color: black;
+
+    &:hover {
+        background-color: #7d7569;
+        color: $white;
+    }
+
+    &:after {
+        content: '';
+        display: inline-block;
+        background-repeat: no-repeat;
+        width: 30px;
+        height: 28px;
+        background-image: svg-url('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><path fill="black" stroke="black" d="M22.8 14.6L15.2 7l-.7.7 5.5 6.6H6v1.5h14l-5.5 6.6.7.7 7.6-7.6v-.9"/></svg>');
+        background-size: 100%;
+        float: right;
+    }
+}
+.selected-method-mobile {
+    background-repeat: no-repeat;
+    margin-top: 10px;
+    background-color: transparent;
+    color: black;
+
+    &:hover {
+        background-color: transparent;
+        color: black;
+    }
+
+    &:after {
+        content: '';
+        display: inline-block;
+        background-repeat: no-repeat;
+        width: 30px;
+        height: 28px;
+        background-image: svg-url('<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 28 28"><path fill="green" stroke="green" d="M7.885 25.741L0 14.821l3.219-3.218 5.082 5.136 16.393-14.48L28 5.566"/></svg>');
+        background-size: 100%;
+        float: right;
+    }
+}
+
+.error_message {
+    background-color: #ffd359;
+    padding: 10px;
+    margin-top: 2px;
 }
 
 .giraffe-container {

@@ -86,6 +86,8 @@ export default class Contribution extends React.Component {
                        onFocus={this.handleFocus.bind(this)}
                        onBlur={this.handleBlur.bind(this)} />
             </span>
+
+            {this.props.error.show && !this.props.paymentMethodsTest.isControl() && <div className="payment-error"> {this.props.error.message}</div>}
         </div>;
     }
 }

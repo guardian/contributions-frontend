@@ -10,14 +10,13 @@ import com.gu.i18n.CountryGroup._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Cookie, Request}
-import play.twirl.api.Html
+
 
 import scala.util.Random
 import scalaz.NonEmptyList
-import views.html.fragments.giraffe.{contributeAmountButtons, contributeMessage}
 import views.support.AmountHighlightTest.AmountVariantData
-import views.support.CountryGroupImplicits._
 import views.support.MessageCopyTest.CopyVariantData
+import views.support.PaymentMethodTest.PaymentMethodVariantData
 
 sealed trait VariantData
 
@@ -27,6 +26,8 @@ object VariantData {
       o match {
         case amount: AmountVariantData => AmountVariantData.format.writes(amount)
         case copy: CopyVariantData => CopyVariantData.format.writes(copy)
+        case paymentMethods: PaymentMethodVariantData => PaymentMethodVariantData.format.writes(paymentMethods)
+
       }
     }
   }
@@ -139,6 +140,34 @@ object MessageCopyTest extends TestTrait {
   )
 }
 
+object PaymentMethodTest extends TestTrait {
+
+  def name = "PaymentMethodTest"
+
+  def slug = "paymentMethods"
+
+  case class PaymentMethodVariantData(paymentMethods: Set[PaymentMethod]) extends VariantData
+
+  object PaymentMethodVariantData {
+    implicit val format: Writes[PaymentMethodVariantData] = Json.writes[PaymentMethodVariantData]
+  }
+
+  sealed trait PaymentMethod
+
+  case object CARD extends PaymentMethod
+
+  case object PAYPAL extends PaymentMethod
+
+  implicit val paymentMethodFormatter: Writes[PaymentMethod] = new Writes[PaymentMethod] {
+    def writes(method: PaymentMethod): JsValue = JsString(method.toString)
+  }
+
+  def variants = NonEmptyList(
+    makeVariant("Control", "control", 1, PaymentMethodVariantData(Set(CARD))),
+    makeVariant("Paypal", "paypal", 0, PaymentMethodVariantData(Set(CARD, PAYPAL)))
+  )
+
+}
 case class ChosenVariants(variants: Seq[Variant]) {
   def asJson = Json.toJson(variants)
   def encodeURL = URLEncoder.encode(asJson.toString, StandardCharsets.UTF_8.name())
@@ -169,7 +198,7 @@ object Test {
   }
 
   def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
-    ChosenVariants(Seq(pickVariant(countryGroup, request, AmountHighlightTest), pickVariant(countryGroup, request, MessageCopyTest)))
+    ChosenVariants(Seq(pickVariant(countryGroup, request, AmountHighlightTest), pickVariant(countryGroup, request, MessageCopyTest), pickVariant(countryGroup, request, PaymentMethodTest)))
   }
 }
 

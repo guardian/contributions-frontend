@@ -4,12 +4,10 @@ import Title from '../Title.jsx';
 import ProgressIndicator from '../ProgressIndicator.jsx';
 import Navigation from '../Navigation.jsx';
 
-import {ALL_PAGES} from 'src/constants';
-
 export default class DesktopWrapper extends React.Component {
     render() {
         return <div>
-            <section className='contribute-section' key={this.props.page}>
+           <section className='contribute-section' key={this.props.page}>
                 <div className="contribute-form__heading">
                     <Title page={this.props.page}/>
                     <ProgressIndicator page={this.props.page}/>
@@ -25,7 +23,11 @@ export default class DesktopWrapper extends React.Component {
                         amount={this.props.card.amount}
                         currency={this.props.currency}
                         processing={this.props.processing}
-                        pay={this.props.pay}/>
+                        pay={this.props.pay}
+                        payWithPaypal={this.props.payWithPaypal}
+                        payWithCard={this.props.payWithCard}
+                        paymentMethodsTest={this.props.paymentMethodsTest}
+                        mobile = {false}/>
                 </form>
             </section>
         </div>;

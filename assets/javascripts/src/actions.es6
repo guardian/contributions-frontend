@@ -17,6 +17,10 @@ export const SUBMIT_PAYMENT = "SUBMIT_PAYMENT";
 export const PAYMENT_COMPLETE = "PAYMENT_COMPLETE";
 export const PAYMENT_ERROR = "PAYMENT_ERROR";
 
+export const PAYPAL_PAY = "PAYPAL_PAY";
+export const CARD_PAY = "CARD_PAY";
+export const JUMP_TO_PAGE = "JUMP_TO_PAGE";
+
 export function submitPayment(dispatch) {
     const state = store.getState();
 
@@ -39,6 +43,32 @@ export function submitPayment(dispatch) {
         .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'network', error: error }));
 }
 
+export function paypalRedirect(dispatch) {
+    const state = store.getState();
+
+    dispatch({ type: SUBMIT_PAYMENT });
+
+    const postData = {
+            countryGroup: state.data.countryGroup.id ,
+            amount: state.card.amount //TODO should the amount be somewhere else rather than in the card section?
+        };
+    fetch('/paypal/auth', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData)
+    })
+     .then( (res) => {
+        if (res.ok) {
+            return res.json();
+                }
+         }
+        )
+        .then((res) =>  window.location = res.approvalUrl)
+        .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
+}
 /**
  * Convert app state to the structure required for payment posts
  *

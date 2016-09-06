@@ -3,6 +3,75 @@
 @import 'mixins';
 @import 'utilities/util-layout';
 
+
+.overlay {
+    position: fixed;
+    display: flex;
+    z-index: 1000;
+    background: rgba(0,0,0,0.6);
+    align-items: center;
+    left: 0px;
+    top: 0px;
+    width:100%;
+    height:100%;
+    text-align:left;
+
+
+}
+.overlay div {
+    width:300px;
+    margin: 0 auto;
+    top: 0; left: 0; bottom: 0; right: 0;
+    border:1px solid #000;
+    padding:20px;
+    background: #ffbb00;
+    color: #333;
+}
+
+.errorHeader {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 24px;
+}
+.errorMessage {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 18px;
+
+}
+
+.overlay button {
+    background-color: #005689;
+    height: 36px;
+    width: 60px;
+    text-align: center;
+}
+
+.show-mobile {
+    display: none;
+    @include mq($until: tablet) {
+        display: block;
+    }
+}
+.paypal__button {
+    margin-top: 10px;
+    background-repeat: no-repeat;
+    width: 100%;
+    background-color: $palBlue;
+    background-size: 93px;
+    background-image: url('/assets/images/form/ppcom-white.svg');
+    background-position: left 130px center;
+
+    &:hover, &:focus {
+        background-color: darken($palBlue, 5%);
+    }
+}
+.contribute_card__button {
+    @include mq($until: tablet) {
+        margin-top: 24px;
+    }
+    width: 100%;
+}
 .giraffe__wrapper {
     background: $dark-yellow;
 }
@@ -34,6 +103,8 @@
     padding: 10px;
     margin-bottom: 2px;
     background: $light-yellow;
+
+
 }
 
 .contribute-form__inner {
@@ -47,7 +118,7 @@
 .contribute-navigation {
     margin-top: auto;
 
-    &.contribution, &.details {
+    &.details {
         .spinner-outer {
             display: none;
         }
@@ -146,9 +217,6 @@
 }
 
 .contribute-navigation__next {
-    @include mq($until: tablet) {
-        display: none;
-    }
 
     background-color: $blue;
 
@@ -189,14 +257,12 @@
     right: 0;
     top: -32px;
 
-    display: none;
+
     text-align: right;
     margin-bottom: $gs-baseline;
     visibility: hidden;
+    display: block;
 
-    @include mq(tablet) {
-        display: block;
-    }
 
     &.visible {
         visibility: visible;

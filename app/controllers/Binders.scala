@@ -25,4 +25,7 @@ object Binders {
     alpha2 => CountryGroup.countryByCode(alpha2).get, _.alpha2, (key: String, _: Exception) => s"Cannot parse parameter $key as a Country"
   )
 
+  implicit object bindablePaymentError extends QueryParsing[PaymentError](
+    errorCode => PaymentError.fromString(errorCode).get, _.toString, (key: String, _: Exception) => s"Cannot parse parameter $key as an ErrorCode"
+  )
 }
