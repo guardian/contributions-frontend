@@ -14,10 +14,14 @@ export default class Contribution extends React.Component {
         return this.props.amounts.some(a => a === this.props.currentAmount);
     }
 
+    formatCurrency(value) {
+        if (String(value).indexOf('.') === -1) return value;
+        else return parseFloat(value).toFixed(2);
+    }
+
     updateInputAmount(event) {
-        const amount = event.target.value === '' ? event.target.value : parseInt(event.target.value);
-        this.setState({ inputAmount: amount });
-        this.props.setAmount(amount);
+        this.setState({ inputAmount: event.target.value });
+        this.props.setAmount(this.formatCurrency(event.target.value));
     }
 
     handleFocus() {
