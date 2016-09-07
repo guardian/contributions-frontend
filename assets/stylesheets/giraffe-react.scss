@@ -354,7 +354,7 @@ $currencies: gbp usd aud eur nzd cad;
         display: flex;
         flex-direction: row;
         justify-content: space-around;
-        p {
+        section {
             display: block;
             padding-left: $tablet-col-padding-left;
             padding-right: $tablet-col-padding-right;
