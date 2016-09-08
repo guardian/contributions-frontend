@@ -103,24 +103,10 @@ To make the site reachable as `contributions.thegulocal.com` (necessary for regi
 
 
 ```
-cd frontend/
 npm test
 ```
 
-
-#### Scala unit tests
-
-`sbt fast-test`
-
-#### Acceptance tests
-
-1. Run local membership-frontend: `sbt devrun`
-2. Run local [idenity-frontend](https://github.com/guardian/identity-frontend): `sbt devrun`
-3. `sbt acceptance-test`
-
-These are browser driving Selenium tests.
-
-#### All tests
+#### Scala tests
 
 `sbt test`
 
