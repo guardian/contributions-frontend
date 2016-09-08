@@ -16,46 +16,44 @@
     <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
         <div class="giraffe__inner page-slice l-constrained flex-horizontal-from-tablet thanks">
             <section>
-            <h1 class="thanks--header">@pageInfo.title</h1>
+            <h1>@pageInfo.title<br/>
 
-            <p class="thanks--body">@pageInfo.description</p>
-
-            <p>
-
-                We report for everyone. Let your friends and followers know.
-            </p>
-                <p>
-                @fragments.social(social)
-                </p>
+            <span class="thanks--description">@pageInfo.description</span>
+                </h1>
             </section>
  </div>
 </main>
     <section class="disclaimer">
         <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="feedback">
-                <section>
-                    <p>If you have any questions about contributing to the Guardian, please
-                        <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">
-                            contact us here</a>.
-                    </p>
-
-                </section>
-                <section>
+                <section class="thanks--social">
+                    <h2>
+                        Spread the word
+                    </h2>
                     <p>
-                        The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
+                        We report for everyone. Let your friends and followers know that you support independent journalism.
                     </p>
+                    <p>
+                        @fragments.social(social)
+                    </p>
+                </section>
+                <section>
+                 <h2>Get the Guardian app</h2>
+                    <p>Up-to-the-minute coverage, personalised alerts, offline reading and more.</p>
+                    <ul class="o-bulleted-list thanks__list">
+                        <li><a href="#">iPhone and iPad app</a></li>
+                        <li><a href="#">Android app</a></li>
+                    </ul>
+
+                    <h2>Subscribe to our daily email</h2>
+                    <p><a href="#">Get the must-read stories delivered straight to your inbox each morning in one handy email.</a></p>
 
                 </section>
                 <section>
-                    <p data-shown="gbp aud eur">
-                        Please note that your support of the Guardian’s journalism does not constitute a charitable donation, as such your contribution is not eligible for Gift Aid in the UK nor a tax-deduction elsewhere.
-                    </p>
-                    <p data-shown="usd">
-                        Please note that the Guardian is not a charity, will not use your support for charitable
-                        programs, and your support of the Guardian’s journalism does not constitute a
-                        charitable donation. As such your contribution is not eligible to be treated as a
-                        charitable deduction for federal or state taxes in the United States or elsewhere.
-                    </p>
+                    <h2>Follow us on Facebook</h2>
+                    <p><a href="#">Follow the Guardian's daily reporting, features and investigative journalism.</a></p>
+                    <h2>Questions?</h2>
+                    <p>If you have any questions about contributing to the Guardian, please <a href="#">contact us here</a></p>
                 </section>
             </div>
         </div>
