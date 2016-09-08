@@ -3,6 +3,9 @@
 @import 'mixins';
 @import 'utilities/util-layout';
 
+.legal_notice {
+    padding-top: 15px;
+}
 
 .overlay {
     position: fixed;
@@ -117,6 +120,7 @@
 
 .contribute-navigation {
     margin-top: auto;
+    overflow: hidden;
 
     &.details {
         .spinner-outer {
@@ -354,7 +358,7 @@ $currencies: gbp usd aud eur nzd cad;
         display: flex;
         flex-direction: row;
         justify-content: space-around;
-        p {
+        section {
             display: block;
             padding-left: $tablet-col-padding-left;
             padding-right: $tablet-col-padding-right;

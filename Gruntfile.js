@@ -362,6 +362,15 @@ module.exports = function (grunt) {
         }
     });
 
+    grunt.registerTask('runWatch', function() {
+        grunt.task.run([
+            'clean:js',
+            'copy:polyfills',
+            'copy:curl',
+            'watch'
+        ]);
+    });
+
     /***********************************************************************
      * Test
      ***********************************************************************/
