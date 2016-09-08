@@ -1,5 +1,4 @@
 import React from 'react';
-import { formatCurrency } from 'src/utils/formatters';
 
 export default class Contribution extends React.Component {
     constructor(props) {
@@ -17,7 +16,7 @@ export default class Contribution extends React.Component {
 
     updateInputAmount(event) {
         this.setState({ inputAmount: event.target.value });
-        this.props.setAmount(formatCurrency(event.target.value));
+        this.props.setAmount(event.target.value);
     }
 
     handleFocus() {
