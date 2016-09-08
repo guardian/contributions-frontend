@@ -3,6 +3,9 @@
 @import 'mixins';
 @import 'utilities/util-layout';
 
+.legal_notice {
+    padding-top: 15px;
+}
 
 .overlay {
     position: fixed;
@@ -117,6 +120,7 @@
 
 .contribute-navigation {
     margin-top: auto;
+    overflow: hidden;
 
     &.details {
         .spinner-outer {

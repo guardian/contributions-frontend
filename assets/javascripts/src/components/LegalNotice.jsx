@@ -14,7 +14,7 @@ export default class LegalNotice extends React.Component {
         const termsURL = urls[this.props.countryGroup.id] || defaultURL;
 
         return (
-            <div className="fieldset__note">
+            <div className="fieldset__note legal_notice">
                 <p>By proceeding, you are agreeing to our <a href={termsURL} className="text-link" target="_blank">Terms &amp; Conditions</a> and <a href="http://www.theguardian.com/help/privacy-policy" className="text-link" target="_blank">Privacy Policy</a></p>
             </div>
         );
