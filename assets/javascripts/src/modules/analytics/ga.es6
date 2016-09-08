@@ -1,5 +1,5 @@
-import * as user  from 'src/utils/user'
-import * as cookie from 'src/utils/cookie'
+import * as user  from 'src/utils/user';
+import * as cookie from 'src/utils/cookie';
 
 const dimensions = {
     signedIn: 'dimension1',
@@ -17,6 +17,7 @@ const dimensions = {
 };
 
 const defaultTracker = 'membershipPropertyTracker';
+var gaEnabled = true;
 
 function create(){
     /*eslint-disable */
@@ -41,12 +42,18 @@ function create(){
 }
 
 export function gaProxy() {
-    let allArgs = Array.from(arguments);
-    allArgs[0] = defaultTracker + '.' + allArgs[0];
-    window.ga.apply(window.ga, allArgs);
+    if (gaEnabled) {
+        let allArgs = Array.from(arguments);
+        allArgs[0] = defaultTracker + '.' + allArgs[0];
+        window.ga.apply(window.ga, allArgs);
+    }
 }
 
-export function init() {
+export function init(enabled) {
+    if (!enabled) {
+        gaEnabled = false;
+        return gaProxy;
+    }
     let guardian = window.guardian;
     let ga = create();
 
@@ -83,11 +90,21 @@ export function init() {
     if (intcmp && intcmp[1]){
         ga('set',dimensions.intcmp,intcmp[1]);
     }
-    //Send the pageview.
-    ga('send', 'pageview');
+
+    return ga;
 }
 
-export function pageView(name) {
-    ga('set', 'page', '/#' + name);
-    ga('send', 'pageview');
+export function pageView() {
+    gaProxy('send', 'pageview');
+}
+
+export function setCheckoutStep(checkoutStep) {
+    gaProxy('ec:setAction', 'checkout', {
+        'step': checkoutStep
+    });
+}
+
+export function trackCheckout(checkoutStep, actionName) {
+    setCheckoutStep(checkoutStep);
+    gaProxy('send', 'event', 'Checkout', actionName);
 }

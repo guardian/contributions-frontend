@@ -3,6 +3,7 @@ import 'whatwg-fetch';
 import store from 'src/store';
 import { urls } from 'src/constants';
 import * as stripe from 'src/modules/stripe';
+import {trackCheckout} from 'src/modules/analytics/ga';
 
 export const SET_DATA = "SET_DATA";
 export const SET_COUNTRY_GROUP = "SET_COUNTRY_GROUP";
@@ -21,6 +22,8 @@ export const PAYPAL_PAY = "PAYPAL_PAY";
 export const CARD_PAY = "CARD_PAY";
 export const JUMP_TO_PAGE = "JUMP_TO_PAGE";
 export const CLEAR_PAYMENT_FLAGS = "CLEAR_PAYMENT_FLAGS";
+
+export const TRACKING = "TRACKING";
 
 export function submitPayment(dispatch) {
     const state = store.getState();
@@ -74,6 +77,19 @@ export function paypalRedirect(dispatch) {
         .then((res) =>  window.location = res.approvalUrl)
         .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
 }
+
+export function trackCheckoutStep(checkoutStep, actionName) {
+    return (dispatch) => {
+        const state = store.getState();
+
+        // this condition is here to debounce events
+        if (!state.gaTracking[checkoutStep]) {
+            trackCheckout(checkoutStep, actionName);
+            dispatch({type: TRACKING, step: checkoutStep});
+        }
+    }
+}
+
 /**
  * Convert app state to the structure required for payment posts
  *
