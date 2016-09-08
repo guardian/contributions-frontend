@@ -108,8 +108,9 @@ npm test
 
 #### Scala tests
 
-`sbt test`
-
+```
+sbt test
+```
 
 ## Deployment
 
