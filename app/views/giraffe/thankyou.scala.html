@@ -13,65 +13,52 @@
 
 
     </script>
-        <div class="support-wrapper l-constrained support-thanks currency-@countryGroup.currency.toString.toLowerCase">
-            <h1 class="support-thanks__title">@pageInfo.title</h1>
+    <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
+        <div class="giraffe__inner page-slice l-constrained flex-horizontal-from-tablet thanks">
+            <section>
+            <h1 class="thanks--header">@pageInfo.title</h1>
 
-            <p class="support-thanks__message">@pageInfo.description</p>
+            <p class="thanks--body">@pageInfo.description</p>
 
-            <h1 class="support-thanks__title">Spread the word</h1>
-            <p class="support-thanks__message" data-shown="gbp eur usd nzd cad">
-                We report for everyone. Do tell your friends and family how they can support the Guardian too.
+            <p>
+
+                We report for everyone. Let your friends and followers know.
             </p>
-            <p class="support-thanks__message" data-shown="aud">
-                Your contribution is much appreciated, and will help us to maintain our fearless, independent, journalism in Australia.
-            </p>
-
-            <div class="support-thanks__message">
-            @fragments.social(social)
-            </div>
-
-            <p class="support-thanks__message" data-shown="gbp eur">
-                Enjoy more of the Guardian's journalism from breaking investigations to politics, sport, culture and more.
-            </p>
-
-            <p class="support-thanks__message" data-shown="usd cad">
-                Enjoy more of the Guardian's journalism from breaking investigations to politics, sports, arts and more.
-            </p>
-
-            <p class="support-thanks__message" data-shown="aud">
-                Enjoy more of the Guardian's journalism from breaking investigations to politics, sports, arts and more.
-            </p>
-
-            <div class="support-thanks__row blue-border u-cf">
-                <div class="support-thanks__one-col">
-                    <h3 class="support-thanks__sub-subtitle headline-text--bolder">Get the app </h3>
-                    <p>Up-to-the-minute coverage, personalised alerts, off​line​ reading and more. <br>
-                        <a data-shown="gbp eur" href="https://itunes.apple.com/gb/app/the-guardian/id409128287?mt=8" class="support-thanks__link" onClick="s.tl(true,'o','iApp')">iPhone and iPad app</a>
-                        <a data-shown="aud" href="https://itunes.apple.com/au/app/the-guardian/id409128287?mt=8" class="support-thanks__link" onClick="s.tl(true,'o','iApp')">iPhone and iPad app</a>
-                        <a data-shown="usd cad" href="https://itunes.apple.com/us/app/the-guardian/id409128287?mt=8" class="support-thanks__link" onClick="s.tl(true,'o','iApp')">iPhone and iPad app</a>
-                        <br><a href="https://play.google.com/store/apps/details?id=com.guardian" class="support-thanks__link" onClick="s.tl(true,'o','aApp')">Android app</a></p>
-                </div>
-                <div class="support-thanks__one-col">
-                    <h3 class="support-thanks__sub-subtitle headline-text--bolder">Subscribe to daily email</h3>
-                    <p>
-                        <a data-shown="gbp eur" href="https://www.theguardian.com/info/2015/dec/08/daily-email-uk?CMP=contribution_thankyou" class="support-thanks__link" onClick="s.tl(true,'o','email')">Get the must-read stories</a>
-                        <a data-shown="aud" href="https://www.theguardian.com/info/2015/dec/08/daily-email-au?CMP=contribution_thankyou" class="support-thanks__link" onClick="s.tl(true,'o','email')">Get the must-read stories</a>
-                        <a data-shown="usd cad" href="https://www.theguardian.com/info/2015/dec/08/daily-email-us?CMP=contribution_thankyou" class="support-thanks__link" onClick="s.tl(true,'o','email')">Get the must-read stories</a>
-                        delivered straight to your inbox each morning in one handy email
+                <p>
+                @fragments.social(social)
+                </p>
+            </section>
+ </div>
+</main>
+    <section class="disclaimer">
+        <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
+            <div class="feedback">
+                <section>
+                    <p>If you have any questions about contributing to the Guardian, please
+                        <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">
+                            contact us here</a>.
                     </p>
-                </div>
-                <div class="support-thanks__one-col">
-                    <h3 class="support-thanks__sub-subtitle headline-text--bolder">Follow on Facebook</h3>
-                    <p>
-                        <a data-shown="gbp eur usd cad nzd" href="https://www.facebook.com/theguardian" class="support-thanks__link" onClick="s.tl(true,'o','follow')">Follow the Guardian's daily reporting,</a>
-                        <a data-shown="aud" href="https://www.facebook.com/theguardianaustralia" class="support-thanks__link" onClick="s.tl(true,'o','follow')">Follow the Guardian's daily reporting,</a>
-                        features and investigative journalism
-                    </p>
-                </div>
-            </div>
 
-            <div class="support-thanks__feedback">
-                If you have any questions about contributing to the Guardian, please <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link" onClick="s.tl(true,'o','emailUs')">contact us here</a>.
+                </section>
+                <section>
+                    <p>
+                        The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
+                    </p>
+
+                </section>
+                <section>
+                    <p data-shown="gbp aud eur">
+                        Please note that your support of the Guardian’s journalism does not constitute a charitable donation, as such your contribution is not eligible for Gift Aid in the UK nor a tax-deduction elsewhere.
+                    </p>
+                    <p data-shown="usd">
+                        Please note that the Guardian is not a charity, will not use your support for charitable
+                        programs, and your support of the Guardian’s journalism does not constitute a
+                        charitable donation. As such your contribution is not eligible to be treated as a
+                        charitable deduction for federal or state taxes in the United States or elsewhere.
+                    </p>
+                </section>
             </div>
         </div>
+    </section>
+
     }

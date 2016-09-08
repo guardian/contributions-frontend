@@ -46,23 +46,5 @@ object Social {
     case l: LinkedIn => "share-linkedin"
     case g: GooglePlus => "share-gplus"
   }
-/*
-  def eventDetail(event: RichEvent): Set[Social] = Set(
-    Email(event.name.text, s"The Guardian is coming to life through Guardian Live events like this one. Shall we go?\n\n${event.name.text}\n${event.memUrl}"),
-    Twitter(s"${event.name.text} ${event.memUrl} ${event.metadata.socialHashtag.mkString}"),
-    Facebook(event.memUrl)
-  )
 
-  def eventThankyou(event: RichEvent): Set[Social] = Set(
-    Email(s"I'm going to ${event.name.text}!", s"I've just booked my ticket for ${event.name.text}. Come along too!\n\n${event.memUrl}"),
-    Twitter(s"I'm going to: ${event.name.text} ${event.memUrl} ${event.metadata.socialHashtag.mkString}"),
-    Facebook(event.memUrl)
-  )
-
-  val joinThankyou: Set[Social] = Set(
-    Email("I'm the newest Guardian member", s"I'm the newest Guardian member ${Config.membershipUrl}"),
-    Twitter(s"I'm the newest Guardian member ${Config.membershipUrl} ${SocialConfig.twitterHashtag}"),
-    Facebook(Config.membershipUrl)
-  )
-*/
 }
