@@ -4,7 +4,9 @@ import { Provider } from 'react-redux';
 
 import Main from 'src/components/Main.jsx';
 import store from 'src/store';
+
 import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT, GO_FORWARD } from 'src/actions';
+import { attachCurrencyListeners, attachErrorDialogListener } from 'src/modules/domListeners';
 import ophan from 'src/modules/analytics/ophan';
 
 export function init() {
@@ -26,8 +28,8 @@ export function init() {
     );
 
     attachCurrencyListeners();
-    setOphanId();
     attachErrorDialogListener();
+    setOphanId();
 }
 
 /**
@@ -58,39 +60,6 @@ function getUrlParameter(rawName, url) {
     if (!results[2]) return '';
 
     return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
-
-function attachCurrencyListeners() {
-    const currencyLinks = [].slice.call(document.getElementById('js-country-switcher').getElementsByTagName('a'));
-    const heading = document.getElementById('js-country-name');
-
-    currencyLinks.forEach(el => el.addEventListener('click', event => {
-        const countryGroup = JSON.parse(event.target.dataset.countryGroup);
-
-        event.preventDefault();
-
-        store.dispatch({
-            type: SET_COUNTRY_GROUP,
-            countryGroup: countryGroup
-        });
-
-        store.dispatch({
-            type: SET_DATA,
-            data: {
-                maxAmount: event.target.dataset.maxAmount
-            }
-        });
-
-        heading.innerText = `${countryGroup.name} (${countryGroup.currency.symbol})`;
-    }));
-}
-function attachErrorDialogListener() {
-    let errorDialog = document.getElementById('errorDialogButton');
-    if (errorDialog) {
-        errorDialog.onclick = function () {
-            document.getElementById('errorDialog').style.visibility = 'hidden';
-        }
-    }
 }
 
 function setOphanId() {
