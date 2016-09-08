@@ -163,8 +163,8 @@ object PaymentMethodTest extends TestTrait {
   }
 
   def variants = NonEmptyList(
-    makeVariant("Control", "control", 0.75, PaymentMethodVariantData(Set(CARD))),
-    makeVariant("Paypal", "paypal", 0.25, PaymentMethodVariantData(Set(CARD, PAYPAL)))
+    makeVariant("Control", "control", 1, PaymentMethodVariantData(Set(CARD))),
+    makeVariant("Paypal", "paypal", 0, PaymentMethodVariantData(Set(CARD, PAYPAL)))
   )
 
 }
