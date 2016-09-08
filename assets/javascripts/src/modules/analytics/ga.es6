@@ -16,8 +16,9 @@ const dimensions = {
     intcmp: 'dimension12'
 };
 
+const defaultTracker = 'membershipPropertyTracker';
+
 function create(){
-    const tracker = 'membershipPropertyTracker';
     /*eslint-disable */
     (function (i, s, o, g, r, a, m) {
         i['GoogleAnalyticsObject'] = r;
@@ -33,10 +34,16 @@ function create(){
     /*eslint-enable */
     window.ga('create', guardian.googleAnalytics.trackingId, {
         'allowLinker': true,
-        'name': tracker,
+        'name': defaultTracker,
         'cookieDomain': guardian.googleAnalytics.cookieDomain
     });
-    return (a,b,c) => window.ga(tracker+ '.' + a,b,c);
+    return gaProxy
+}
+
+export function gaProxy() {
+    let allArgs = Array.from(arguments);
+    allArgs[0] = defaultTracker + '.' + allArgs[0];
+    window.ga.apply(window.ga, allArgs);
 }
 
 export function init() {
@@ -51,6 +58,7 @@ export function init() {
      */
     ga('require', 'linkid', 'linkid.js');
 
+    ga('require', 'ec');
 
     //Set the custom dimensions.
     let u = user.getUserFromCookie();
@@ -77,8 +85,6 @@ export function init() {
     }
     //Send the pageview.
     ga('send', 'pageview');
-
-
 }
 
 export function pageView(name) {
