@@ -15,9 +15,8 @@ export default class Contribution extends React.Component {
     }
 
     updateInputAmount(event) {
-        const amount = event.target.value === '' ? event.target.value : parseInt(event.target.value);
-        this.setState({ inputAmount: amount });
-        this.props.setAmount(amount);
+        this.setState({ inputAmount: event.target.value });
+        this.props.setAmount(event.target.value);
     }
 
     handleFocus() {
