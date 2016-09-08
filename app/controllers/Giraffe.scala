@@ -76,7 +76,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),
-    Facebook("https://membership.theguardian.com/contribute")
+    Facebook("https://contribute.theguardian.com/?INTCMP=social")
   )
 
   val chargeId = "charge_id"
@@ -122,16 +122,13 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val charge = request.session.get(chargeId)
-    val title = countryGroup match {
-      case Australia => "Thank you for supporting Guardian Australia"
-      case _ => "Thank you for supporting the Guardian"
-    }
+    val title = "Thank You"
 
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,
       url = request.path,
       image = None,
-      description = Some("Your contribution is much appreciated, and will help us to maintain our independent, investigative journalism.")
+      description = Some("You’ve made a vital contribution that will help us maintain our independent, investigative journalism.")
     ), social, countryGroup, charge))
   }
 
