@@ -39,15 +39,15 @@ export function init() {
  * @returns {{abTests, maxAmount: number, countryGroup, currency}}
  */
 function appDataFrom(container) {
-    const { currency, ...countryGroup } = JSON.parse(container.dataset.countryGroup)
+    const { currency, ...countryGroup } = JSON.parse(container.getAttribute('data-country-group'))
 
     return {
-        abTests: JSON.parse(container.dataset.abTests),
-        maxAmount: Number(JSON.parse(container.dataset.maxAmount)),
+        abTests: JSON.parse(container.getAttribute('data-ab-tests')),
+        maxAmount: Number(JSON.parse(container.getAttribute('data-max-amount'))),
         countryGroup: countryGroup,
         currency: currency,
-        cmpCode: container.dataset.cmpCode,
-        intCmpCode: container.dataset.intCmpCode
+        cmpCode: container.getAttribute('data-cmp-code'),
+        intCmpCode: container.getAttribute('data-int-cmp-code')
     };
 }
 
