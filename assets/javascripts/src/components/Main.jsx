@@ -11,6 +11,7 @@ import {
     JUMP_TO_PAGE,
     PAYPAL_PAY,
     CARD_PAY,
+    CLEAR_PAYMENT_FLAGS,
     paypalRedirect,
     submitPayment
 } from 'src/actions';
@@ -54,7 +55,8 @@ function mapDispatchToProps(dispatch) {
         pay: () => dispatch(submitPayment),
         payWithPaypal: () => dispatch({ type: PAYPAL_PAY }),
         payWithCard: () => dispatch({ type: CARD_PAY }),
-        paypalRedirect: () => dispatch(paypalRedirect)
+        paypalRedirect: () => dispatch(paypalRedirect),
+        clearPaymentFlags: () => dispatch({ type: CLEAR_PAYMENT_FLAGS }),
     };
 }
 
