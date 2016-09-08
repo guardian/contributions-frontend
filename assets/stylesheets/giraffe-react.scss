@@ -179,7 +179,7 @@
 }
 
 .contribute-controls__input {
-    line-height: 36px;
+    height: 36px;
 }
 
 .contribute-controls__input--amount {
@@ -188,7 +188,7 @@
     input {
         padding: 0 4px;
         border: 0;
-        line-height: 36px;
+        height: 36px;
         width: 95%;
         text-align: center;
 
@@ -214,6 +214,7 @@
 
 .contribute-controls__input {
     width: 100%;
+    display: block;
 }
 
 .contribute-navigation__button {
