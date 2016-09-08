@@ -23,6 +23,10 @@ export function attachCurrencyListeners() {
         });
 
         heading.innerText = `${countryGroup.name} (${countryGroup.currency.symbol})`;
+
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, '', countryGroup.id);
+        }
     }));
 }
 
