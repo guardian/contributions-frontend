@@ -1,5 +1,5 @@
 import React from 'react';
-
+import LegalNotice from '../LegalNotice';
 import Title from '../Title.jsx';
 import ProgressIndicator from '../ProgressIndicator.jsx';
 import Navigation from '../Navigation.jsx';
@@ -43,7 +43,7 @@ export default class MobileWrapper extends React.Component {
                         paymentMethodsTest={this.props.paymentMethodsTest}
                         mobile={true}/>
 
-
+                    {(!this.props.processing || this.props.paymentMethodsTest.isControl()) && p== PAGES.CONTRIBUTION && <LegalNotice countryGroup={this.props.countryGroup}/>}
                 </section>
             )}
         </form>;

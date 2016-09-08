@@ -69,7 +69,8 @@ class Main extends React.Component {
                                      currentAmount={this.props.card.amount}
                                      error={this.props.paymentError}
                                      paymentMethodsTest={this.props.paymentMethodsTest}
-                                    />;
+                                     countryGroup={this.props.countryGroup}
+                />;
 
             case PAGES.DETAILS:
                 return <Details details={this.props.details}

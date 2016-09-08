@@ -2,7 +2,6 @@ import React from 'react';
 
 import InputField from '../InputField';
 import CardIcon from '../CardIcon';
-import LegalNotice from '../LegalNotice';
 
 export default class Payment extends React.Component {
     formatExpiry(expiry) {
@@ -86,7 +85,6 @@ export default class Payment extends React.Component {
                 </div>
             }
 
-            <LegalNotice countryGroup={this.props.countryGroup} />
         </div>
     }
 }
