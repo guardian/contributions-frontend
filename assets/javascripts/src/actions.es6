@@ -53,7 +53,8 @@ export function paypalRedirect(dispatch) {
             countryGroup: state.data.countryGroup.id ,
             amount: state.card.amount, //TODO should the amount be somewhere else rather than in the card section?,
             cmp: state.data.cmpCode,
-            intCmp: state.data.intCmpCode
+            intCmp: state.data.intCmpCode,
+            ophanId: state.data.ophanId
         };
     fetch('/paypal/auth', {
         credentials: 'same-origin',
