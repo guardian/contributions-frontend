@@ -57,7 +57,7 @@ npm run compile
 npm run watch
 ```
 
-**Client-side Principles**: See [client-side-principles.md](docs/client-side-principles.md) for high-level client-side principles for Membership.
+**Client-side Principles**: See [client-side-principles.md](https://github.com/guardian/membership-frontend/blob/master/docs/client-side-principles.md) for high-level client-side principles for Membership.
 
 ### Setup NGINX
 
