@@ -366,6 +366,7 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:js',
             'copy:polyfills',
+            'copy:curl',
             'watch'
         ]);
     });
