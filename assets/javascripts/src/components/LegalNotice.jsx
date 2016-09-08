@@ -15,7 +15,7 @@ export default class LegalNotice extends React.Component {
 
         return (
             <div className="fieldset__note">
-                <p>By proceeding, you are agreeing to our <a href={termsURL} className="text-link" target="_blank">Terms & Conditions</a> and <a href="http://www.theguardian.com/help/privacy-policy" className="text-link" target="_blank">Privacy Policy</a></p>
+                <p>By proceeding, you are agreeing to our <a href={termsURL} className="text-link" target="_blank">Terms &amp; Conditions</a> and <a href="http://www.theguardian.com/help/privacy-policy" className="text-link" target="_blank">Privacy Policy</a></p>
             </div>
         );
     }
