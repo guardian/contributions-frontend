@@ -57,7 +57,7 @@ npm run compile
 npm run watch
 ```
 
-**Client-side Principles**: See [client-side-principles.md](docs/client-side-principles.md) for high-level client-side principles for Membership.
+**Client-side Principles**: See [client-side-principles.md](https://github.com/guardian/membership-frontend/blob/master/docs/client-side-principles.md) for high-level client-side principles for Membership.
 
 ### Setup NGINX
 
@@ -103,27 +103,14 @@ To make the site reachable as `contributions.thegulocal.com` (necessary for regi
 
 
 ```
-cd frontend/
 npm test
 ```
 
+#### Scala tests
 
-#### Scala unit tests
-
-`sbt fast-test`
-
-#### Acceptance tests
-
-1. Run local membership-frontend: `sbt devrun`
-2. Run local [idenity-frontend](https://github.com/guardian/identity-frontend): `sbt devrun`
-3. `sbt acceptance-test`
-
-These are browser driving Selenium tests.
-
-#### All tests
-
-`sbt test`
-
+```
+sbt test
+```
 
 ## Deployment
 
