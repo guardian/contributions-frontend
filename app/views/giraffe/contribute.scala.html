@@ -52,13 +52,19 @@
     <section class="disclaimer">
         <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="feedback">
-                <section>
-                    <p>If you have any questions about contributing to the Guardian, please
-                        <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">
-                            contact us here</a>.
-                    </p>
 
+                <section data-shown="aud">
+                    @fragments.giraffe.legalNotice("https://www.theguardian.com/info/2016/apr/08/australia-contribution-terms-and-conditions")
+                 </section>
+
+                <section data-shown="gbp eur">
+                    @fragments.giraffe.legalNotice("https://www.theguardian.com/info/2016/apr/04/contribution-terms-and-conditions")
                 </section>
+
+                <section data-shown="usd">
+                    @fragments.giraffe.legalNotice("https://www.theguardian.com/info/2016/apr/07/us-contribution-terms-and-conditions")
+                </section>
+
                 <section>
                     <p>
                         The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
