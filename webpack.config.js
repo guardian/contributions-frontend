@@ -3,7 +3,10 @@ var webpack = require('webpack');
 
 module.exports = {
     context: 'assets/javascripts',
-    entry:  'src/main',
+    entry: {
+        contributePage: 'src/contributePage',
+        thankYouPage: 'src/thankYouPage'
+    },
 
     output: {
         path: 'public/',

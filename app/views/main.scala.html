@@ -3,7 +3,8 @@
 @import org.joda.time.DateTime
 @(  pageInfo: PageInfo = views.support.PageInfo(),
     countryGroup: Option[CountryGroup] = None,
-    maxAmount: Option[Int] = None
+    maxAmount: Option[Int] = None,
+    mainScript: Option[String] = None
 )(content: Html)
 @import play.api.libs.json.Json
 @import configuration.{Config, Social}
@@ -172,7 +173,7 @@
                 </div>
             </div>
         </footer>
-        @fragments.javaScriptLaterSteps(pageInfo)
+        @fragments.javaScriptLaterSteps(pageInfo, mainScript)
 
             <!-- build-commit-id: @app.BuildInfo.gitCommitId -->
     </body>

@@ -61,7 +61,8 @@ module.exports = function (grunt) {
                 },
 
                 entry: {
-                    main: "./src/main",
+                    contributePage: 'src/contributePage',
+                    thankYouPage: 'src/thankYouPage',
                     tools: './src/tools'
                 }
             }

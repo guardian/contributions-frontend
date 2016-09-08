@@ -3,7 +3,7 @@
 @import views.support.Social
 @import com.gu.i18n.CountryGroup
 @(pageInfo: PageInfo, social: Set[Social], countryGroup: CountryGroup, charge: Option[String])
-    @main(pageInfo) {
+    @main(pageInfo, mainScript = Some("thankYouPage.js")) {
     <script type="text/javascript">
         @if(charge.isDefined) {
           guardian.productDetails = {

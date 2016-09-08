@@ -2,7 +2,6 @@ import cookie from 'src/utils/cookie';
 import * as ga from 'src/modules/analytics/ga';
 import * as ophan from 'src/modules/analytics/ophan';
 import krux from 'src/modules/analytics/krux';
-import Promise from 'promise-polyfill';
 
 /*
  Re: https://bugzilla.mozilla.org/show_bug.cgi?id=1023920#c2
@@ -20,25 +19,43 @@ var analyticsEnabled = (
     !cookie.getCookie('ANALYTICS_OFF_KEY')
 );
 
-function setupAnalytics() {
-    return ophan.init().then(ga.init,ga.init);
+/**
+ * @param enabled whether ophan is enabled or not
+ * @returns {Promise} resolving when ready
+ */
+function setupOphan(enabled) {
+    if (enabled) {
+        return ophan.init();
+    } else {
+        return Promise.resolve();
+    }
 }
 
-function setupThirdParties() {
-    return krux.init();
+
+/**
+ * @param enabled whether google analytics is enabled or not
+ * @returns {Promise} resolving when ready
+ */
+function setupAnalytics(enabled) {
+    return Promise.resolve(ga.init(enabled));
+}
+
+
+
+/**
+ * @param enabled whether krux is enabled or not
+ * @returns {Promise} resolving when ready
+ */
+function setupKrux(enabled) {
+    if (enabled) {
+        return krux.init();
+    } else {
+        return Promise.resolve();
+    }
 }
 
 export function init() {
-
-    let promises = [];
-
-    if (analyticsEnabled) {
-        promises.push(setupAnalytics());
-    }
-
-    if(analyticsEnabled && !guardian.isDev) {
-        promises.push(setupThirdParties());
-    }
-
-    return Promise.all(promises);
+    return setupOphan(analyticsEnabled)
+        .then(() => setupAnalytics(analyticsEnabled))
+        .then(() => setupKrux(analyticsEnabled && !guardian.isDev));
 }

@@ -1,5 +1,6 @@
 require([
     'src/modules/analytics/setup',
+    'src/modules/analytics/ga',
     'src/modules/contribute',
     'src/modules/stripe',
     'src/modules/dropdown',
@@ -9,6 +10,7 @@ require([
     'src/modules/abTests'
 ], function (
     analytics,
+    ga,
     contribute,
     stripe,
     dropdown,
@@ -19,7 +21,9 @@ require([
 ) {
     'use strict';
 
-    analytics.init();
+    analytics.init().then(function () {
+        ga.pageView();
+    });
     contribute.init();
     stripe.init();
 
