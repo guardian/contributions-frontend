@@ -20,6 +20,7 @@ export const PAYMENT_ERROR = "PAYMENT_ERROR";
 export const PAYPAL_PAY = "PAYPAL_PAY";
 export const CARD_PAY = "CARD_PAY";
 export const JUMP_TO_PAGE = "JUMP_TO_PAGE";
+export const CLEAR_PAYMENT_FLAGS = "CLEAR_PAYMENT_FLAGS";
 
 export function submitPayment(dispatch) {
     const state = store.getState();
@@ -46,7 +47,6 @@ export function submitPayment(dispatch) {
 
 export function paypalRedirect(dispatch) {
     const state = store.getState();
-
     dispatch({ type: SUBMIT_PAYMENT });
 
     const postData = {
