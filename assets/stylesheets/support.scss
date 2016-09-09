@@ -1,29 +1,35 @@
 
 .thanks {
-    padding-left: $gs-gutter * 3;
-    p {
+    &.giraffe__inner {
+        padding-top: $gs-baseline;
+    }
 
-        font-family: $f-serif-headline;
-        font-size: 14px;
-        line-height: 14px;
+    @include mq(desktop) {
 
-        @include mq(tablet) {
-            font-size: 18px;
-            line-height: 18px;
+        section {
+            width: 650px;
         }
-        @include mq(desktop) {
-            font-size: 24px;
-            line-height: 24px;
-        }
+        padding-left: $gs-gutter * 3;
+    }
+    .thanks--description {
+        color: $c-neutral1;
+        font-weight: normal;
+        display:block;
 
     }
     h1 {
+        &:first-of-type {
+            padding-top: 1em;
+        }
+        &:last-of-type {
+            padding-bottom: 1em;
+        }
         padding-bottom: $gs-baseline;
-
 
         color: white;
         font-family: $f-serif-headline;
         font-weight: 900;
+
         font-size: 24px;
         line-height: 24px;
 
@@ -35,6 +41,25 @@
             font-size: 44px;
             line-height: 44px;
         }
+
     }
 
+}
+
+.thanks__list {
+    margin-top: -1em;
+}
+
+.thanks--social {
+    margin-bottom: 50px;
+    h2 {
+        color: #c05303;
+        font-family: $f-sans-serif-headline;
+        @include fs-header(5);
+    }
+    p {
+        color: $c-neutral1;
+        @include f-bodyCopy;
+        @include fs-header(5, true);
+    }
 }

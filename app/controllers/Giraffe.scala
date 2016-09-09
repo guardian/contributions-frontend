@@ -122,13 +122,13 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val charge = request.session.get(chargeId)
-    val title = "Thank You"
+    val title = "Thank you!"
 
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,
       url = request.path,
       image = None,
-      description = Some("You’ve made a vital contribution that will help us maintain our independent, investigative journalism.")
+      description = Some("You’ve made a vital contribution that will help us maintain our independent, investigative journalism")
     ), social, countryGroup, charge))
   }
 

@@ -7,6 +7,7 @@
     color: $black;
     display: table;
     width: 100%;
+    border-bottom: none;
 }
 .control__item {
     display: table-cell;
@@ -31,6 +32,7 @@
 .control:hover,
 .control:active,
 .control.is-active {
+    border-bottom:none;
     .control__icon {
         border-color: color(neutral-1);
     }

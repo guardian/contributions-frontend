@@ -11,22 +11,25 @@
     position: fixed;
     display: flex;
     z-index: 1000;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     align-items: center;
     left: 0px;
     top: 0px;
-    width:100%;
-    height:100%;
-    text-align:left;
-
+    width: 100%;
+    height: 100%;
+    text-align: left;
 
 }
+
 .overlay div {
-    width:300px;
+    width: 300px;
     margin: 0 auto;
-    top: 0; left: 0; bottom: 0; right: 0;
-    border:1px solid #000;
-    padding:20px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border: 1px solid #000;
+    padding: 20px;
     background: #ffbb00;
     color: #333;
 }
@@ -36,6 +39,7 @@
     font-weight: 900;
     line-height: 24px;
 }
+
 .errorMessage {
     margin-top: 10px;
     font-size: 14px;
@@ -56,6 +60,7 @@
         display: block;
     }
 }
+
 .paypal__button {
     margin-top: 10px;
     background-repeat: no-repeat;
@@ -69,12 +74,14 @@
         background-color: darken($palBlue, 5%);
     }
 }
+
 .contribute_card__button {
     @include mq($until: tablet) {
         margin-top: 24px;
     }
     width: 100%;
 }
+
 .giraffe__wrapper {
     background: $dark-yellow;
 }
@@ -106,7 +113,6 @@
     padding: 10px;
     margin-bottom: 2px;
     background: $light-yellow;
-
 
 }
 
@@ -262,12 +268,10 @@
     right: 0;
     top: -32px;
 
-
     text-align: right;
     margin-bottom: $gs-baseline;
     visibility: hidden;
     display: block;
-
 
     &.visible {
         visibility: visible;
@@ -345,8 +349,8 @@ $currencies: gbp usd aud eur nzd cad;
 
     background: white;
 
-    @include fs-textSans(2);
-
+    @include fs-textSans(3);
+    color: $c-neutral1;
     padding: 16px;
 
     @include mq(tablet) {
@@ -366,6 +370,9 @@ $currencies: gbp usd aud eur nzd cad;
             width: 300px;
             height: 400px;
         }
+    }
+    h2 {
+        @include fs-header(2)
     }
 }
 
