@@ -18,10 +18,10 @@
     }
     h1 {
         &:first-of-type {
-            padding-top: 1.5em;
+            padding-top: 1em;
         }
         &:last-of-type {
-            padding-bottom: 1.5em;
+            padding-bottom: 1em;
         }
         padding-bottom: $gs-baseline;
 
@@ -29,8 +29,17 @@
         font-family: $f-serif-headline;
         font-weight: 900;
 
-        font-size: 40px;
-        line-height: 40px;
+        font-size: 24px;
+        line-height: 24px;
+
+        @include mq(tablet) {
+            font-size: 36px;
+            line-height: 36px;
+        }
+        @include mq(desktop) {
+            font-size: 44px;
+            line-height: 44px;
+        }
 
     }
 
