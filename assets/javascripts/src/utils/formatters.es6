@@ -1,4 +1,8 @@
 export function formatCurrency(value) {
-    if (String(value).indexOf('.') === -1) return value;
-    else return parseFloat(value).toFixed(2);
+    if (String(value).indexOf('.') === -1) return Number(value);
+    else return Number(parseFloat(value).toFixed(2));
+}
+
+export function formatCardNumber(number) {
+
 }
