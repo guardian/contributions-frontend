@@ -1,5 +1,7 @@
 import React from 'react';
 
+import {formatCardNumber} from 'src/utils/formatters';
+
 import InputField from '../InputField';
 import CardIcon from '../CardIcon';
 
@@ -43,7 +45,7 @@ export default class Payment extends React.Component {
     render() {
         return <div className='contribute-payment contribute-fields'>
 
-            <InputField label="Card number" type="text" value={this.props.card.number}
+            <InputField label="Card number" type="text" value={formatCardNumber(this.props.card.number)}
                         onChange={event => this.props.updateCard({ number: event.target.value })}
                         onKeyDown={event => this.clearValidation(event.target)}
                         onBlur={this.validateCardNumber.bind(this)}
