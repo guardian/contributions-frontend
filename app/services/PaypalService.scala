@@ -3,6 +3,7 @@ package services
 import java.util.UUID
 
 import com.gu.i18n.CountryGroup
+import com.netaporter.uri.Uri
 import com.paypal.api.payments._
 import com.paypal.base.Constants
 import com.paypal.base.rest.{APIContext, PayPalRESTException}
@@ -89,11 +90,13 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       createdPayment.getLinks.asScala
     } match {
       case Success(links) =>
-        val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url"))
-        approvalLink.map(l => Right(l.getHref)).getOrElse(Left("No approval link returned from paypal"))
+        val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url")).map(l => Right(addUserActionParam(l.getHref)))
+        approvalLink.getOrElse(Left("No approval link returned from paypal"))
       case Failure(exception) => Left(exception.getMessage)
     }
   }
+
+  private def addUserActionParam(url:String) = Uri.parse(url).addParam("useraction", "commit").toString
 
   def executePayment(paymentId: String, payerId: String): Either[String, String] = {
     val payment = new Payment().setId(paymentId)
