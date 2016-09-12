@@ -81,8 +81,7 @@ class PaypalController(
             InternalServerError("Error getting PayPal auth url")
         }
       case JsError(error) =>
-
-        Logger.warn(s"Invalid request=$error")
+        Logger.error(s"Invalid request=$error")
         BadRequest(s"Invalid request=$error")
     }
   }

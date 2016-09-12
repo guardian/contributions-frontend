@@ -15,6 +15,7 @@ import org.joda.time.DateTime
 import play.api.Logger
 import views.support.ChosenVariants
 
+import scala.math.BigDecimal.RoundingMode
 import scala.util.{Failure, Success, Try}
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
@@ -66,8 +67,9 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     }
     val cancelUrl = config.baseReturnUrl
     val currencyCode = countryGroup.currency.toString
-    val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(amount.toString)
-    val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(amount.toString).setQuantity("1")
+    val stringAmount = amount.setScale(2, RoundingMode.HALF_UP).toString
+    val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(stringAmount)
+    val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(stringAmount).setQuantity("1")
     val itemList = new ItemList().setItems(List(item).asJava)
     val transaction = new Transaction
     transaction.setAmount(paypalAmount)
