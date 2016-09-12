@@ -3,6 +3,8 @@
 @import 'mixins';
 @import 'utilities/util-layout';
 
+$control-spacing: 5px;
+
 .legal_notice {
     padding-top: 15px;
 }
@@ -108,7 +110,10 @@
         width: 300px;
     }
 }
-
+.contribute-controls {
+    margin-left: -$control-spacing/2;
+    margin-right: -$control-spacing/2;
+}
 .contribute-section {
     padding: 10px;
     margin-bottom: 2px;
@@ -120,7 +125,7 @@
     margin-bottom: auto;
 
     @include mq(tablet) {
-        height: 305px;
+        height: 350px;
     }
 }
 
@@ -190,6 +195,7 @@
 
 .contribute-controls__input--amount {
     background: white;
+    margin: 0px $control-spacing/2 7px;
 
     input {
         padding: 0 4px;
@@ -213,9 +219,10 @@
 }
 
 .contribute-controls__button {
-    flex: 1;
+    flex-grow: 1;
     margin-bottom: 7px;
     height: 36px;
+    flex-basis: 20%;
 }
 
 .contribute-controls__input {
@@ -239,10 +246,11 @@
 .option-button {
     @include button();
     text-align: center;
-    margin-right: 5px;
+    margin: 0px $control-spacing/2 7px;
+    flex-basis: 20%;
 
-    &:last-of-type {
-        margin-right: 0;
+    .option-button__three & {
+        flex-basis: 30%;
     }
 }
 
@@ -250,6 +258,12 @@
     font-weight: bold;
 }
 
+.option-button__three {
+    flex-basis: 30%;
+}
+.option-button__four {
+    flex-basis: 20%;
+}
 .with-card-icon {
     position: relative;
 }
