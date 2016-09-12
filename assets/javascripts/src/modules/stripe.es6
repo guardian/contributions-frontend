@@ -1,5 +1,3 @@
-import Promise from 'promise-polyfill';
-
 export function init() {
     Stripe.setPublishableKey(guardian.stripePublicKey);
 }

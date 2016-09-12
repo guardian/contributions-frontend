@@ -20,6 +20,7 @@ export const PAYMENT_ERROR = "PAYMENT_ERROR";
 export const PAYPAL_PAY = "PAYPAL_PAY";
 export const CARD_PAY = "CARD_PAY";
 export const JUMP_TO_PAGE = "JUMP_TO_PAGE";
+export const CLEAR_PAYMENT_FLAGS = "CLEAR_PAYMENT_FLAGS";
 
 export function submitPayment(dispatch) {
     const state = store.getState();
@@ -46,12 +47,14 @@ export function submitPayment(dispatch) {
 
 export function paypalRedirect(dispatch) {
     const state = store.getState();
-
     dispatch({ type: SUBMIT_PAYMENT });
 
     const postData = {
             countryGroup: state.data.countryGroup.id ,
-            amount: state.card.amount //TODO should the amount be somewhere else rather than in the card section?
+            amount: state.card.amount, //TODO should the amount be somewhere else rather than in the card section?,
+            cmp: state.data.cmpCode,
+            intCmp: state.data.intCmpCode,
+            ophanId: state.data.ophanId
         };
     fetch('/paypal/auth', {
         credentials: 'same-origin',

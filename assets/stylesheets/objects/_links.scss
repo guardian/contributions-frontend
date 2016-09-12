@@ -1,17 +1,23 @@
 /* ==========================================================================
    Links
    ========================================================================== */
-
-a,
+ a,
 .fake-link {
     overflow: hidden;
+    color: $news-main-1;
     cursor: pointer;
     text-decoration: none;
-
+    border-bottom: 1px solid #dcdcdc;
+     transition: border-color .15s ease-out;
     &:hover,
     &:focus {
-        text-decoration: underline;
+        border-bottom: 1px solid $news-main-1;
     }
+    &:active {
+        color: $news-main-1;
+        text-decoration: none;
+    }
+
 }
 
 // transforms buttons into link-like elements

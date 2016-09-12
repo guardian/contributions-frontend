@@ -12,6 +12,7 @@ GET            /assets/*file                    controllers.Assets.versioned(pat
 
 # Giraffe
 GET            /                                controllers.Giraffe.contributeRedirect
+GET            /home                            controllers.Giraffe.contributeRedirect
 GET            /healthcheck                     controllers.Healthcheck.healthcheck
 POST           /paypal/auth                     controllers.PaypalController.authorize
 

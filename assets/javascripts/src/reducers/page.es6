@@ -1,4 +1,4 @@
-import { GO_BACK, GO_FORWARD, SUBMIT_PAYMENT, PAYMENT_COMPLETE, PAYMENT_ERROR, PAYPAL_PAY, CARD_PAY, JUMP_TO_PAGE, UPDATE_DETAILS } from 'src/actions';
+import { GO_BACK, GO_FORWARD, SUBMIT_PAYMENT, PAYMENT_COMPLETE, PAYMENT_ERROR, PAYPAL_PAY, CARD_PAY, JUMP_TO_PAGE, UPDATE_DETAILS, CLEAR_PAYMENT_FLAGS } from 'src/actions';
 import { PAGES } from 'src/constants';
 
 const initialState = {
@@ -45,6 +45,8 @@ export default function pageReducer(state = initialState, action) {
                 }
             });
 
+        case CLEAR_PAYMENT_FLAGS:
+            return Object.assign({}, state, { paypalPay: false, cardPay:false });
         case PAYPAL_PAY:
             if (state.page != PAGES.CONTRIBUTION) return state;
             else return Object.assign({}, state, { paypalPay: true });

@@ -3,6 +3,9 @@ import React from 'react';
 import Title from '../Title.jsx';
 import ProgressIndicator from '../ProgressIndicator.jsx';
 import Navigation from '../Navigation.jsx';
+import LegalNotice from '../LegalNotice';
+import {PAGES} from 'src/constants';
+
 
 export default class DesktopWrapper extends React.Component {
     render() {
@@ -27,7 +30,9 @@ export default class DesktopWrapper extends React.Component {
                         payWithPaypal={this.props.payWithPaypal}
                         payWithCard={this.props.payWithCard}
                         paymentMethodsTest={this.props.paymentMethodsTest}
-                        mobile = {false}/>
+                        mobile = {false}
+                        clearPaymentFlags={this.props.clearPaymentFlags}/>
+                    {!this.props.processing && this.props.page==PAGES.CONTRIBUTION && <LegalNotice countryGroup={this.props.countryGroup}/>}
                 </form>
             </section>
         </div>;

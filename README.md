@@ -57,7 +57,12 @@ npm run compile
 npm run watch
 ```
 
-**Client-side Principles**: See [client-side-principles.md](docs/client-side-principles.md) for high-level client-side principles for Membership.
+This runs [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html) on port 7777, proxying requests to 9111. In this case, the bundled JS is stored in memory, which allows for much faster recompilation on changes, but the main.js file won't be created. You can also access localhost:7777/webpack-dev-server/\<route\> for a live reload environment. 
+
+If you want to compile main.js as a file, you can use `npm run compile` on its own and access the Play application directly.
+
+
+**Client-side Principles**: See [https://github.com/guardian/membership-frontend/blob/master/docs/client-side-principles.md](https://github.com/guardian/membership-frontend/blob/master/docs/client-side-principles.md) for high-level client-side principles for Membership.
 
 ### Setup NGINX
 
@@ -103,27 +108,14 @@ To make the site reachable as `contributions.thegulocal.com` (necessary for regi
 
 
 ```
-cd frontend/
 npm test
 ```
 
+#### Scala tests
 
-#### Scala unit tests
-
-`sbt fast-test`
-
-#### Acceptance tests
-
-1. Run local membership-frontend: `sbt devrun`
-2. Run local [idenity-frontend](https://github.com/guardian/identity-frontend): `sbt devrun`
-3. `sbt acceptance-test`
-
-These are browser driving Selenium tests.
-
-#### All tests
-
-`sbt test`
-
+```
+sbt test
+```
 
 ## Deployment
 
