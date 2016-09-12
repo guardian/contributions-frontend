@@ -1,5 +1,20 @@
 import {formatCurrency, formatCardNumber} from 'src/utils/formatters';
 
+const stripeMock = {
+    cardType: number => {
+        switch (parseInt(number[0])) {
+            case 3:
+                return 'American Express';
+            case 4:
+                return 'Visa';
+            case 5:
+                return 'Mastercard';
+        }
+    }
+}
+
+window.Stripe = stripeMock;
+
 test('currency formatting', () => {
     expect(formatCurrency(3)).toBe(3);
     expect(formatCurrency(3.12)).toBe(3.12);

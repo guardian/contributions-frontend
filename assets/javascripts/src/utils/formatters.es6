@@ -7,7 +7,7 @@ export function formatCardNumber(number) {
     // the positions of spaces in amex/others
     const amexSpaces = [4, 10];
     const defaultSpaces = [4, 8, 12];
-    const spaces = parseInt(number[0]) === 3 ? amexSpaces : defaultSpaces;
+    const spaces = Stripe.cardType(number) === 'American Express' ? amexSpaces : defaultSpaces;
 
     return String(number)
         .replace(/\s/g, '')
