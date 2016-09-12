@@ -76,7 +76,9 @@ class PaypalController(
         )
         authResponse match {
           case Right(url) => Ok(Json.toJson(AuthResponse(url)))
-          case Left(error) => handleError(authRequest.countryGroup, s"Error getting PayPal auth url: $error")
+          case Left(error) =>
+            Logger.error(s"Error getting PayPal auth url: $error")
+            InternalServerError("Error getting PayPal auth url")
         }
       case JsError(error) =>
 
