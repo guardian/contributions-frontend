@@ -1,7 +1,5 @@
 require([
     'src/modules/analytics/setup',
-    'src/modules/images',
-    'src/modules/metrics',
     'src/modules/contribute',
     'src/modules/stripe',
     'src/modules/dropdown',
@@ -11,8 +9,6 @@ require([
     'src/modules/abTests'
 ], function (
     analytics,
-    images,
-    metrics,
     contribute,
     stripe,
     dropdown,
@@ -24,8 +20,6 @@ require([
     'use strict';
 
     analytics.init();
-    images.init();
-    metrics.init();
     contribute.init();
     stripe.init();
 
