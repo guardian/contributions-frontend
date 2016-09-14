@@ -50,9 +50,14 @@ export default class Contribution extends React.Component {
             return this.setValidationError(`We are presently only able to accept contributions of ${this.props.currency.prefix || ''}${this.props.currency.symbol}${this.props.max} or less.`);
         }
 
-        if (!this.state.inputAmount && (!this.props.currentAmount || this.props.currentAmount === 0)) {
+        if (!this.state.inputAmount && !this.props.currentAmount) {
             return this.setValidationError("Please select or enter a contribution amount.");
         }
+
+        if (this.state.inputAmount <= 1 && this.props.currentAmount <= 1) {
+            return this.setValidationError(`Contribution amount should be at least ${this.props.currency.prefix || ''}${this.props.currency.symbol}1`);
+        }
+
 
         this.clearValidationError();
     }
