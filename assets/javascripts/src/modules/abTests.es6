@@ -6,23 +6,20 @@ import { SET_AMOUNT } from 'src/actions';
 
 export function init() {
     const state = store.getState();
+    const data = {};
 
-    if ("abTests" in window) {
-        var data = {};
-
-        for (var test of abTests) {
-            data[test.testSlug] = {
-                'variantName': test.variantSlug,
-                'complete': 'false'
-            }
+    for (var test of state.data.abTests) {
+        data[test.testSlug] = {
+            'variantName': test.variantSlug,
+            'complete': 'false'
         }
-
-        ophan.loaded.then(function (ophan) {
-            ophan.record({
-                abTestRegister: data
-            })
-        });
     }
+
+    ophan.loaded.then(function (ophan) {
+        ophan.record({
+            abTestRegister: data
+        })
+    });
 
     // only set the amount from the A/B test if it isn't already set
     // this prevents the A/B test overriding the preset amount (query param) functionality)
