@@ -54,8 +54,8 @@ export default class Contribution extends React.Component {
             return this.setValidationError("Please select or enter a contribution amount.");
         }
 
-        if (this.state.inputAmount <= 1 && this.props.currentAmount <= 1) {
-            return this.setValidationError(`Contribution amount should be at least ${this.props.currency.prefix || ''}${this.props.currency.symbol}1`);
+        if (this.state.inputAmount && this.state.inputAmount <= 1) {
+            return this.setValidationError(`Please enter at least ${this.props.currency.prefix || ''}${this.props.currency.symbol}1`);
         }
 
         this.clearValidationError();
