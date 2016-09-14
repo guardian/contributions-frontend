@@ -13,7 +13,7 @@ export function init() {
         for (var test of abTests) {
             data[test.testSlug] = {
                 'variantName': test.variantSlug,
-                'complete': 'true'
+                'complete': 'false'
             }
         }
 
