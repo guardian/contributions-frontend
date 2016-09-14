@@ -58,7 +58,6 @@ export default class Contribution extends React.Component {
             return this.setValidationError(`Contribution amount should be at least ${this.props.currency.prefix || ''}${this.props.currency.symbol}1`);
         }
 
-
         this.clearValidationError();
     }
 
