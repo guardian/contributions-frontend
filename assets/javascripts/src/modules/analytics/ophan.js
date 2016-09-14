@@ -1,7 +1,7 @@
 define(['src/modules/raven'],function(raven) {
     'use strict';
 
-    var ophanUrl = '//j.ophan.co.uk/membership.js';
+    var ophanUrl = '//j.ophan.co.uk/contribution.js';
     var ophan = curl(ophanUrl);
 
     function init() {
