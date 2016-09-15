@@ -2,6 +2,8 @@ import cookie from 'src/utils/cookie';
 import * as ga from 'src/modules/analytics/ga';
 import * as ophan from 'src/modules/analytics/ophan';
 import krux from 'src/modules/analytics/krux';
+import store from 'src/store';
+import { GA_ENABLED } from 'src/actions'
 
 /*
  Re: https://bugzilla.mozilla.org/show_bug.cgi?id=1023920#c2
@@ -37,7 +39,8 @@ function setupOphan(enabled) {
  * @returns {Promise} resolving when ready
  */
 function setupAnalytics(enabled) {
-    return Promise.resolve(ga.init(enabled));
+    store.dispatch({ type: GA_ENABLED, enabled: enabled });
+    return Promise.resolve(ga.init());
 }
 
 

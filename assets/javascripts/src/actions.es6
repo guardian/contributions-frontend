@@ -23,7 +23,8 @@ export const CARD_PAY = "CARD_PAY";
 export const JUMP_TO_PAGE = "JUMP_TO_PAGE";
 export const CLEAR_PAYMENT_FLAGS = "CLEAR_PAYMENT_FLAGS";
 
-export const TRACKING = "TRACKING";
+export const TRACK_STEP = "TRACK_STEP";
+export const GA_ENABLED = "GA_ENABLED";
 
 export function submitPayment(dispatch) {
     const state = store.getState();
@@ -83,9 +84,9 @@ export function trackCheckoutStep(checkoutStep, actionName) {
         const state = store.getState();
 
         // this condition is here to debounce events
-        if (!state.gaTracking[checkoutStep]) {
+        if (!state.gaTracking.steps[checkoutStep]) {
             trackCheckout(checkoutStep, actionName);
-            dispatch({type: TRACKING, step: checkoutStep});
+            dispatch({type: TRACK_STEP, step: checkoutStep});
         }
     }
 }

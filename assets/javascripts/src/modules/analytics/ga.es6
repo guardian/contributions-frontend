@@ -1,5 +1,6 @@
 import * as user  from 'src/utils/user';
 import * as cookie from 'src/utils/cookie';
+import store from 'src/store';
 
 const dimensions = {
     signedIn: 'dimension1',
@@ -17,7 +18,6 @@ const dimensions = {
 };
 
 const defaultTracker = 'membershipPropertyTracker';
-var gaEnabled = true;
 
 function create(){
     /*eslint-disable */
@@ -42,16 +42,17 @@ function create(){
 }
 
 export function gaProxy() {
-    if (gaEnabled) {
+    const state = store.getState();
+    if (state.gaTracking.enabled) {
         const allArgs = Array.from(arguments);
         allArgs[0] = defaultTracker + '.' + allArgs[0];
         window.ga.apply(window.ga, allArgs);
     }
 }
 
-export function init(enabled) {
-    if (!enabled) {
-        gaEnabled = false;
+export function init() {
+    const state = store.getState();
+    if (!state.gaTracking.enabled) {
         return gaProxy;
     }
     let guardian = window.guardian;
