@@ -70,7 +70,7 @@ export default class Contribution extends React.Component {
     }
 
     render() {
-        return <div className='contribute-controls contribute-fields'>
+        return <div className={'contribute-controls contribute-fields ' + (this.props.amounts.length%3?'option-button__fours':'option-button__three')}>
             {this.props.amounts.map(amount =>
                 <button type="button"
                         key={amount}
