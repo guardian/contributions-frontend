@@ -43,7 +43,7 @@ function create(){
 
 export function gaProxy() {
     if (gaEnabled) {
-        let allArgs = Array.from(arguments);
+        const allArgs = Array.from(arguments);
         allArgs[0] = defaultTracker + '.' + allArgs[0];
         window.ga.apply(window.ga, allArgs);
     }
