@@ -7,7 +7,7 @@ import store from 'src/store';
 
 import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT, GO_FORWARD } from 'src/actions';
 import { attachCurrencyListeners, attachErrorDialogListener } from 'src/modules/domListeners';
-import ophan from 'src/modules/analytics/ophan';
+import * as ophan from 'src/modules/analytics/ophan';
 
 export function init() {
     const container = document.getElementById('contribute');

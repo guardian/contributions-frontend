@@ -1,20 +1,18 @@
 @import views.support.Asset
 @import views.support.PageInfo
 
-@(pageInfo: PageInfo = views.support.PageInfo())
+@(pageInfo: PageInfo, mainScript: Option[String])
 
-
-@* TODO: improve this *@
-@if(!pageInfo.url.contains("thank-you")) {
+@if(mainScript.isDefined) {
     <script>
-            (function (isModern) {
-                if (isModern) {
-                    // only load JS if the browser cuts the mustard
-                    var newElm = document.createElement('script');
-                    newElm.src = '@Asset.at("javascripts/main.js")';
-                    document.getElementsByTagName("head")[0].appendChild(newElm);
-                }
-            })(guardian.isModernBrowser);
+        (function (isModern) {
+            if (isModern) {
+                // only load JS if the browser cuts the mustard
+                var newElm = document.createElement('script');
+                newElm.src = '@Asset.at(s"javascripts/${mainScript.get}")';
+                document.getElementsByTagName("head")[0].appendChild(newElm);
+            }
+        })(guardian.isModernBrowser);
     </script>
 }
 

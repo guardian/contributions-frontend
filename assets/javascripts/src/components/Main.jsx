@@ -13,7 +13,8 @@ import {
     CARD_PAY,
     CLEAR_PAYMENT_FLAGS,
     paypalRedirect,
-    submitPayment
+    submitPayment,
+    trackCheckoutStep
 } from 'src/actions';
 
 import { PAGES } from 'src/constants';
@@ -48,12 +49,24 @@ function mapDispatchToProps(dispatch) {
     return {
         goBack: () => dispatch({ type: GO_BACK }),
         goForward: () => dispatch({ type: GO_FORWARD }),
-        setAmount: a => dispatch({ type: SET_AMOUNT, amount: a }),
+        setAmount: a => {
+            dispatch(trackCheckoutStep(1, 'checkout', 'Amount'));
+            dispatch({ type: SET_AMOUNT, amount: a })
+        },
         jumpToFirstPage: () => dispatch({type: JUMP_TO_PAGE, page: 1}),
-        updateDetails: d => dispatch({ type: UPDATE_DETAILS, details: d }),
+        updateDetails: d => {
+            dispatch(trackCheckoutStep(2, 'checkout', 'PersonalDetails'));
+            dispatch({ type: UPDATE_DETAILS, details: d })
+        },
         updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
-        pay: () => dispatch(submitPayment),
-        payWithPaypal: () => dispatch({ type: PAYPAL_PAY }),
+        pay: () => {
+            dispatch(trackCheckoutStep(3, 'checkout', 'Pay with Stripe'));
+            dispatch(submitPayment)
+        },
+        payWithPaypal: () => {
+            dispatch(trackCheckoutStep(3, 'checkout', 'Pay with Paypal'));
+            dispatch({ type: PAYPAL_PAY })
+        },
         payWithCard: () => dispatch({ type: CARD_PAY }),
         paypalRedirect: () => dispatch(paypalRedirect),
         clearPaymentFlags: () => dispatch({ type: CLEAR_PAYMENT_FLAGS }),

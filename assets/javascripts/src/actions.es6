@@ -3,6 +3,7 @@ import 'whatwg-fetch';
 import store from 'src/store';
 import { urls } from 'src/constants';
 import * as stripe from 'src/modules/stripe';
+import { trackCheckout, trackPayment } from 'src/modules/analytics/ga';
 
 export const SET_DATA = "SET_DATA";
 export const SET_COUNTRY_GROUP = "SET_COUNTRY_GROUP";
@@ -22,6 +23,9 @@ export const CARD_PAY = "CARD_PAY";
 export const JUMP_TO_PAGE = "JUMP_TO_PAGE";
 export const CLEAR_PAYMENT_FLAGS = "CLEAR_PAYMENT_FLAGS";
 
+export const TRACK_STEP = "TRACK_STEP";
+export const GA_ENABLED = "GA_ENABLED";
+
 export function submitPayment(dispatch) {
     const state = store.getState();
 
@@ -38,6 +42,12 @@ export function submitPayment(dispatch) {
         .then(response => response.json().then(json => {
             return { response: response, json: json }
         }))
+        .then((response) => {
+            if (response.response.ok)
+                return trackPayment(state.card.amount, state.data.currency.code).then(() => response);
+            else
+                return response;
+        })
         .then(response => {
             if (response.response.ok) dispatch({ type: PAYMENT_COMPLETE, response: response.json })
             else dispatch({ type: PAYMENT_ERROR, kind: 'card', error: response.json })
@@ -65,15 +75,32 @@ export function paypalRedirect(dispatch) {
         },
         body: JSON.stringify(postData)
     })
-     .then( (res) => {
-        if (res.ok) {
-            return res.json();
-                }
-         }
-        )
-        .then((res) =>  window.location = res.approvalUrl)
-        .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }})
+        }
+    })
+    .then(response => {
+        return trackPayment(state.card.amount, state.data.currency.code).then(() => response);
+    })
+    .then((res) =>  window.location = res.approvalUrl)
+    .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
 }
+
+export function trackCheckoutStep(checkoutStep, actionName, label) {
+    return (dispatch) => {
+        const state = store.getState();
+
+        // this condition is here to debounce events
+        if (!state.gaTracking.steps[checkoutStep]) {
+            trackCheckout(checkoutStep, actionName, label);
+            dispatch({type: TRACK_STEP, step: checkoutStep});
+        }
+    }
+}
+
 /**
  * Convert app state to the structure required for payment posts
  *
