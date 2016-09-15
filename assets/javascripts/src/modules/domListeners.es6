@@ -18,7 +18,7 @@ export function attachCurrencyListeners() {
         store.dispatch({
             type: SET_DATA,
             data: {
-                maxAmount: event.target.dataset.maxAmount
+                maxAmount: parseFloat(event.target.dataset.maxAmount)
             }
         });
 
