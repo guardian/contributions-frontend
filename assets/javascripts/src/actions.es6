@@ -3,7 +3,7 @@ import 'whatwg-fetch';
 import store from 'src/store';
 import { urls } from 'src/constants';
 import * as stripe from 'src/modules/stripe';
-import {trackCheckout} from 'src/modules/analytics/ga';
+import { trackCheckout, trackPayment } from 'src/modules/analytics/ga';
 
 export const SET_DATA = "SET_DATA";
 export const SET_COUNTRY_GROUP = "SET_COUNTRY_GROUP";
@@ -46,6 +46,7 @@ export function submitPayment(dispatch) {
             if (response.response.ok) dispatch({ type: PAYMENT_COMPLETE, response: response.json })
             else dispatch({ type: PAYMENT_ERROR, kind: 'card', error: response.json })
         })
+        .then(trackPayment(state.card.amount, state.data.currency.code))
         .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'network', error: error }));
 }
 
@@ -75,6 +76,7 @@ export function paypalRedirect(dispatch) {
                 }
          }
         )
+        .then(trackPayment(state.card.amount, state.data.currency.code))
         .then((res) =>  window.location = res.approvalUrl)
         .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
 }

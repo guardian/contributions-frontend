@@ -19,6 +19,8 @@ const dimensions = {
 
 const defaultTracker = 'membershipPropertyTracker';
 
+const gaTimeout = 1000;
+
 function create(){
     /*eslint-disable */
     (function (i, s, o, g, r, a, m) {
@@ -95,8 +97,42 @@ export function init() {
     return ga;
 }
 
+/**
+ * @returns {Promise} a Promise that will resolved when the call to ga comes back, or after a timeout define by gaTimeout
+ * it will never be rejected
+ */
 export function pageView() {
-    gaProxy('send', 'pageview');
+    return new Promise(resolve => {
+        const timeout = setTimeout(resolve, gaTimeout);
+        gaProxy('send', {
+            hitType: 'pageview',
+            hitCallback: () => {
+                clearTimeout(timeout);
+                resolve();
+            }
+        });
+    });
+}
+
+
+/**
+ * @returns {Promise} a Promise that will resolved when the call to ga comes back, or after a timeout define by gaTimeout
+ * it will never be rejected
+ */
+export function event(category, actionName, label) {
+    return new Promise(resolve => {
+        const timeout = setTimeout(resolve, gaTimeout);
+        gaProxy('send', {
+            hitType: 'event',
+            eventCategory: category,
+            eventAction: actionName,
+            eventLabel: label,
+            hitCallback: () => {
+                clearTimeout(timeout);
+                resolve();
+            }
+        });
+    });
 }
 
 export function setCheckoutStep(checkoutStep) {
@@ -107,5 +143,22 @@ export function setCheckoutStep(checkoutStep) {
 
 export function trackCheckout(checkoutStep, actionName, label) {
     setCheckoutStep(checkoutStep);
-    gaProxy('send', 'event', 'Checkout', actionName, label);
+    return event('Checkout', actionName, label);
+}
+
+export function trackPayment(price, currency) {
+    gaProxy('set', '&cu', currency.toUpperCase());
+
+    gaProxy('ec:addProduct', {
+        'id': '1',
+        'name': 'Contribution',
+        'price': price
+    });
+
+    gaProxy('ec:setAction', 'purchase', {
+        'id': Math.floor(Math.random() * 1000000), // ga wants a transaction ID, but I don't want to send it
+        'revenue': price
+    });
+
+    return event('Payment', 'Contribute', 'purchase');
 }
