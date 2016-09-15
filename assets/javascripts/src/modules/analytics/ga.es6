@@ -105,7 +105,7 @@ export function setCheckoutStep(checkoutStep) {
     });
 }
 
-export function trackCheckout(checkoutStep, actionName) {
+export function trackCheckout(checkoutStep, actionName, label) {
     setCheckoutStep(checkoutStep);
-    gaProxy('send', 'event', 'Checkout', actionName);
+    gaProxy('send', 'event', 'Checkout', actionName, label);
 }

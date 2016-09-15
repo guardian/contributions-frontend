@@ -50,21 +50,21 @@ function mapDispatchToProps(dispatch) {
         goBack: () => dispatch({ type: GO_BACK }),
         goForward: () => dispatch({ type: GO_FORWARD }),
         setAmount: a => {
-            dispatch(trackCheckoutStep(1, 'Amount'));
+            dispatch(trackCheckoutStep(1, 'checkout', 'Amount'));
             dispatch({ type: SET_AMOUNT, amount: a })
         },
         jumpToFirstPage: () => dispatch({type: JUMP_TO_PAGE, page: 1}),
         updateDetails: d => {
-            dispatch(trackCheckoutStep(2, 'PersonalDetails'));
+            dispatch(trackCheckoutStep(2, 'checkout', 'PersonalDetails'));
             dispatch({ type: UPDATE_DETAILS, details: d })
         },
         updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
         pay: () => {
-            dispatch(trackCheckoutStep(3, 'Pay'));
+            dispatch(trackCheckoutStep(3, 'checkout', 'Pay with Stripe'));
             dispatch(submitPayment)
         },
         payWithPaypal: () => {
-            dispatch(trackCheckoutStep(3, 'Pay'));
+            dispatch(trackCheckoutStep(3, 'checkout', 'Pay with Paypal'));
             dispatch({ type: PAYPAL_PAY })
         },
         payWithCard: () => dispatch({ type: CARD_PAY }),

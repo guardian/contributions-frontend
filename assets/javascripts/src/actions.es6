@@ -79,13 +79,13 @@ export function paypalRedirect(dispatch) {
         .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
 }
 
-export function trackCheckoutStep(checkoutStep, actionName) {
+export function trackCheckoutStep(checkoutStep, actionName, label) {
     return (dispatch) => {
         const state = store.getState();
 
         // this condition is here to debounce events
         if (!state.gaTracking.steps[checkoutStep]) {
-            trackCheckout(checkoutStep, actionName);
+            trackCheckout(checkoutStep, actionName, label);
             dispatch({type: TRACK_STEP, step: checkoutStep});
         }
     }
