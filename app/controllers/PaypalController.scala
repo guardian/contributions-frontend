@@ -7,11 +7,13 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
-import play.api.libs.json._
 import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
 import scala.util.Right
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 
 
 class PaypalController(
@@ -46,9 +48,17 @@ class PaypalController(
     intCmp: Option[String],
     ophanId: Option[String]
   )
+
   object AuthRequest {
-    implicit val jf = Json.reads[AuthRequest]
+    implicit val authRequestReads: Reads[AuthRequest] = (
+      (__ \ "countryGroup").read[CountryGroup] and
+        (__ \ "amount").read(min[BigDecimal](1)) and
+        (__ \ "cmp").readNullable[String] and
+        (__ \ "intCmp").readNullable[String] and
+        (__ \ "ophanId").readNullable[String]
+      ) (AuthRequest.apply _)
   }
+
   case class AuthResponse(approvalUrl:String)
 
   implicit val AuthResponseWrites = Json.writes[AuthResponse]
