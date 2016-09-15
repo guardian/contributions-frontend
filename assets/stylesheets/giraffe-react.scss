@@ -11,7 +11,7 @@
     position: fixed;
     display: flex;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
     align-items: center;
     left: 0px;
     top: 0px;
@@ -38,17 +38,17 @@
     font-size: 20px;
     font-weight: 900;
     line-height: 24px;
+    font-family: "Guardian Egyptian Web";
 }
 
 .errorMessage {
     margin-top: 10px;
     font-size: 14px;
     line-height: 18px;
-
+    font-family: "Guardian Text Sans Web";
 }
 
 .overlay button {
-    background-color: #005689;
     height: 36px;
     width: 60px;
     text-align: center;

@@ -3,6 +3,7 @@ package services
 import java.util.UUID
 
 import com.gu.i18n.CountryGroup
+import com.netaporter.uri.Uri
 import com.paypal.api.payments._
 import com.paypal.base.Constants
 import com.paypal.base.rest.{APIContext, PayPalRESTException}
@@ -15,6 +16,7 @@ import org.joda.time.DateTime
 import play.api.Logger
 import views.support.ChosenVariants
 
+import scala.math.BigDecimal.RoundingMode
 import scala.util.{Failure, Success, Try}
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
@@ -66,8 +68,9 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     }
     val cancelUrl = config.baseReturnUrl
     val currencyCode = countryGroup.currency.toString
-    val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(amount.toString)
-    val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(amount.toString).setQuantity("1")
+    val stringAmount = amount.setScale(2, RoundingMode.HALF_UP).toString
+    val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(stringAmount)
+    val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(stringAmount).setQuantity("1")
     val itemList = new ItemList().setItems(List(item).asJava)
     val transaction = new Transaction
     transaction.setAmount(paypalAmount)
@@ -87,11 +90,13 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       createdPayment.getLinks.asScala
     } match {
       case Success(links) =>
-        val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url"))
-        approvalLink.map(l => Right(l.getHref)).getOrElse(Left("No approval link returned from paypal"))
+        val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url")).map(l => Right(addUserActionParam(l.getHref)))
+        approvalLink.getOrElse(Left("No approval link returned from paypal"))
       case Failure(exception) => Left(exception.getMessage)
     }
   }
+
+  private def addUserActionParam(url:String) = Uri.parse(url).addParam("useraction", "commit").toString
 
   def executePayment(paymentId: String, payerId: String): Either[String, String] = {
     val payment = new Payment().setId(paymentId)
