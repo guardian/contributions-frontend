@@ -42,11 +42,16 @@ export function submitPayment(dispatch) {
         .then(response => response.json().then(json => {
             return { response: response, json: json }
         }))
+        .then((response) => {
+            if (response.response.ok)
+                return trackPayment(state.card.amount, state.data.currency.code).then(() => response);
+            else
+                return response;
+        })
         .then(response => {
             if (response.response.ok) dispatch({ type: PAYMENT_COMPLETE, response: response.json })
             else dispatch({ type: PAYMENT_ERROR, kind: 'card', error: response.json })
         })
-        .then(trackPayment(state.card.amount, state.data.currency.code))
         .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'network', error: error }));
 }
 
@@ -70,15 +75,18 @@ export function paypalRedirect(dispatch) {
         },
         body: JSON.stringify(postData)
     })
-     .then( (res) => {
-        if (res.ok) {
-            return res.json();
-                }
-         }
-        )
-        .then(trackPayment(state.card.amount, state.data.currency.code))
-        .then((res) =>  window.location = res.approvalUrl)
-        .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }})
+        }
+    })
+    .then(response => {
+        return trackPayment(state.card.amount, state.data.currency.code).then(() => response);
+    })
+    .then((res) =>  window.location = res.approvalUrl)
+    .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
 }
 
 export function trackCheckoutStep(checkoutStep, actionName, label) {
