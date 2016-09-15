@@ -34,7 +34,7 @@ class PaypalController(
     paypalService.executePayment(paymentId, payerId) match {
       case Right(_) =>
         paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
-        Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
+        Redirect(routes.Giraffe.thanks(countryGroup).url, Map("CMP" -> cmp.toSeq, "INTCMP" -> intCmp.toSeq), SEE_OTHER)
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
     }
   }
