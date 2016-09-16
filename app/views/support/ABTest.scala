@@ -100,7 +100,7 @@ object AmountHighlightTest extends TestTrait {
 
   def variants = NonEmptyList(
     //New variants go here.
-    makeVariant("Amount - 6x 25 highlight", "625", 1, AmountVariantData(List(5,10,25, 50, 100, 250), Some(25)), notAustralia),
+    makeVariant("Amount - 6x 25 highlight", "6amnts", 1, AmountVariantData(List(5,10,25, 50, 100, 250), Some(50)), Set(UK)),
     makeVariant("Amount - 25 highlight", "25", 1, AmountVariantData(List(25, 50, 100, 250), Some(25)), notAustralia),
     makeVariant("Amount - 50 highlight", "50", 0, AmountVariantData(List(25, 50, 100, 250), Some(50)), notAustralia),
     makeVariant("Amount - 100 highlight", "100", 0, AmountVariantData(List(25, 50, 100, 250), Some(100)), notAustralia),
