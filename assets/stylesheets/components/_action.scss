@@ -145,12 +145,18 @@
    background-color: transparent;
    border: 1px solid transparentize(color(news-main-1), 0.3);
 
-   &:focus,
+    &:focus {
+        color: color(news-main-1);
+        border-color: color(comment-main-2);
+        box-shadow: inset 0px 0px 0px 3px color(comment-main-2);
+        background-color: transparent;
+    }
+
    &:active,
    &:hover {
        color: color(news-main-1);
-       background-color: transparent;
        border-color: color(news-main-1);
+       background-color: transparent;
    }
     svg {
         fill: color(news-main-1);
