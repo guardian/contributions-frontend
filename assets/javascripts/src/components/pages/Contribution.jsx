@@ -18,16 +18,6 @@ export default class Contribution extends React.Component {
         this.setState({ inputAmount: event.target.value });
         this.props.setAmount(event.target.value);
     }
-
-    handleFocus() {
-        this.setState({ highlightButton: false });
-    }
-
-    handleBlur() {
-        this.setState({ highlightButton: true });
-        this.props.setAmount(this.state.inputAmount);
-    }
-
     handleClick(amount) {
         this.setState({
             inputAmount: '',
@@ -73,6 +63,7 @@ export default class Contribution extends React.Component {
         return <div className={'contribute-controls contribute-fields ' + (this.props.amounts.length%3?'option-button__fours':'option-button__three')}>
             {this.props.amounts.map(amount =>
                 <button type="button"
+                        tabIndex="0"
                         key={amount}
                         className={'contribute-controls__button option-button ' + (this.state.highlightButton && this.props.currentAmount === amount ? ' active' : '')}
                         onClick={this.handleClick.bind(this, amount)}
@@ -86,8 +77,7 @@ export default class Contribution extends React.Component {
                        placeholder="Other amount" maxLength="10"
                        value={this.state.inputAmount}
                        onChange={this.updateInputAmount.bind(this)}
-                       onFocus={this.handleFocus.bind(this)}
-                       onBlur={this.handleBlur.bind(this)} />
+                />
             </span>
 
             {this.props.error.show && !this.props.paymentMethodsTest.isControl() && <div className="payment-error"> {this.props.error.message}</div>}

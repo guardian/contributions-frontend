@@ -221,7 +221,7 @@ $gs-max-columns: 16;
 
     background-color: #ffffff;
 
-    &:hover {
+    &:hover, &:focus {
         background-color: $comment-support-1;
         color: $white;
     }
