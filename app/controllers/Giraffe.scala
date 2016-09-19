@@ -44,7 +44,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
                           email: String,
                           token: String,
                           marketing: Boolean,
-                          postCode: Option[String],
+                          postcode: Option[String],
                           abTests: Set[JsonAbTest],
                           ophanId: String,
                           cmp: Option[String],
@@ -146,7 +146,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
         "ophanId" -> f.ophanId,
         "cmp" -> f.cmp.mkString,
         "intcmp" -> f.intcmp.mkString
-      ) ++ f.postCode.map("postcode" -> _)
+      ) ++ f.postcode.map("postcode" -> _)
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
       val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(f.currency) * 100
