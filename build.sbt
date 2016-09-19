@@ -61,6 +61,7 @@ dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+resolvers += "old-github-maven-repo" at "http://guardian.github.io/maven/repo-releases/"
 
 addCommandAlias("devrun", "run 9111")
 
