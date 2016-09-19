@@ -1,20 +1,29 @@
 package controllers
 
+import java.util.UUID
+
 import actions.CommonActions._
 import com.gu.i18n.{CountryGroup, Currency}
+import com.paypal.api.payments.Payment
 import models.PaymentHook
+import org.joda.time.DateTime
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
+import play.api.data.Form
 import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
-import scala.util.Right
+
+import scala.util.{Failure, Right, Success, Try}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import play.api.data._
+import play.api.data.Forms._
 
+import scala.concurrent.Future
 
 class PaypalController(
   ws: WSClient,
@@ -32,13 +41,29 @@ class PaypalController(
   ) = NoCacheAction { implicit request =>
     val chosenVariants = Test.getContributePageVariants(countryGroup, request)
     val paypalService = paymentServices.paypalServiceFor(request)
+    val queryParams = Map("CMP" -> cmp.toSeq, "INTCMP" -> intCmp.toSeq)
     val idUser = IdentityUser.fromRequest(request).map(_.id)
-    paypalService.executePayment(paymentId, payerId) match {
-      case Right(_) =>
-        paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
-        Redirect(routes.Giraffe.thanks(countryGroup).url, Map("CMP" -> cmp.toSeq, "INTCMP" -> intCmp.toSeq), SEE_OTHER)
+     paypalService.executePayment(paymentId, payerId) match {
+          case Right(executedPayment) =>
+          paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
+          getEmail(executedPayment) match {
+              //TODO MOVE REDIRECT WITH PARAMS SOMEWHERE AND SHARE IT WITH THE GIRAFFE CONTROLLER
+          case Some(email) => Redirect(routes.Giraffe.postPayment(countryGroup).url, queryParams, SEE_OTHER).withSession(request.session + ("email" -> email))
+          case None => Redirect(routes.Giraffe.thanks(countryGroup).url, queryParams, SEE_OTHER)
+        }
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
     }
+  }
+
+  private def getEmail(payment: Payment): Option[String] = {
+    for {
+      payer <- Option(payment.getPayer)
+      payerInfo <- Option(payer.getPayerInfo)
+      email <- Option(payerInfo.getEmail)
+    }
+      yield {
+        email
+      }
   }
 
   case class AuthRequest(
@@ -121,4 +146,27 @@ class PaypalController(
         Forbidden("Request isn't signed by Paypal")
     }
   }
+  case class MetadataUpdate(marketingOptIn: Boolean)
+
+  val metadataUpdateForm: Form[MetadataUpdate] = Form(
+    mapping(
+      "marketingOptIn"->boolean
+    )(MetadataUpdate.apply)(MetadataUpdate.unapply)
+  )
+
+
+  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async { implicit request =>
+    val paypalService = paymentServices.paypalServiceFor(request)
+    metadataUpdateForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
+      Future.successful(BadRequest(JsArray(withErrors.errors.map(k => JsString(k.key)))))
+    }, { f =>
+      request.session.data.get("email") match {
+        case Some(email) => paypalService.updateMarketingOptIn(email, f.marketingOptIn)
+        case None => Logger.error("email not found in session while trying to update marketing opt in")
+      }
+      Future.successful(Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER))
+    })
+  }
+
+
 }

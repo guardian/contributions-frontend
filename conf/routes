@@ -18,7 +18,7 @@ POST           /paypal/auth                     controllers.PaypalController.aut
 
 GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], ophanId: Option[String])
 POST           /paypal/hook                     controllers.PaypalController.hook
-
+POST           /:countryGroup/update-metadata   controllers.PaypalController.updateMetadata(countryGroup:CountryGroup)
 
 
 GET            /ca                              controllers.Giraffe.redirectToUk
@@ -27,6 +27,7 @@ GET            /int                             controllers.Giraffe.redirectToUk
 GET            /:countryGroup                   controllers.Giraffe.contribute(countryGroup: CountryGroup, error_code: Option[PaymentError]?=None)
 
 GET            /:countryGroup/thank-you         controllers.Giraffe.thanks(countryGroup: CountryGroup)
+GET            /:countryGroup/post-payment      controllers.Giraffe.postPayment(countryGroup: CountryGroup)
 
 POST           /pay                             controllers.Giraffe.pay
 

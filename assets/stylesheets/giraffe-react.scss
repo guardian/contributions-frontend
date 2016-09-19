@@ -8,7 +8,10 @@ $control-spacing: 5px;
 .legal_notice {
     padding-top: 15px;
 }
-
+.postPaymentButton {
+    width: 100%;
+    margin-top: 12px;
+}
 .overlay {
     position: fixed;
     display: flex;
