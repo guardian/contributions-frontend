@@ -64,10 +64,6 @@ If you want to compile main.js as a file, you can use `npm run compile` on its o
 
 **Client-side Principles**: See [https://github.com/guardian/membership-frontend/blob/master/docs/client-side-principles.md](https://github.com/guardian/membership-frontend/blob/master/docs/client-side-principles.md) for high-level client-side principles for Membership.
 
-### Setup NGINX
-
-Follow the instructions in [`/nginx/README.md`](./nginx/README.md) in this project.
-
 ### Setup AWS credentials
 
 Install the awscli:
@@ -77,6 +73,9 @@ brew install awscli
 
 Fetch the developer AWS credentials, discuss how we do this with a team member.
 
+### Setup NGINX
+
+Follow the instructions in [`/nginx/README.md`](./nginx/README.md) in this project.
 
 ### Download private keys
 
