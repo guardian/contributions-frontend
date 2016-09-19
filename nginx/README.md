@@ -18,7 +18,7 @@ Make sure your `nginx.conf` (found in your nginx home) contains the following li
 include sites-enabled/*
 ```
 
-If you want an automated setup run (from the project root):
+If you want an automated setup, make sure you have some aws credentials for the `membership` profile and run (from the project root):
 
 ```
 ./nginx/setup.sh
