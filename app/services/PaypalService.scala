@@ -137,13 +137,21 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         cmp = cmp,
         intCmp = intCmp
       )
+
+      val postCode = {
+        def billingPostCode = Option(payerInfo.getBillingAddress).flatMap(address => Option(address.getPostalCode))
+        def shippingPostcode = Option(payerInfo.getShippingAddress).flatMap(address => Option(address.getPostalCode))
+
+        billingPostCode orElse shippingPostcode
+      }
+
       val contributor = Contributor(
         email = payerInfo.getEmail,
         name = Some(s"${payerInfo.getFirstName} ${payerInfo.getLastName}"),
         firstName = payerInfo.getFirstName,
         lastName = payerInfo.getLastName,
         idUser = idUser,
-        postCode = Option(payerInfo.getBillingAddress).flatMap(address => Option(address.getPostalCode)),
+        postCode = postCode,
         marketingOptIn = None
       )
       contributionData.insertPaymentMetaData(metadata)
