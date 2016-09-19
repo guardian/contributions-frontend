@@ -73,6 +73,7 @@ export default class Contribution extends React.Component {
             <span className="contribute-controls__input contribute-controls__input--amount input-text">
                 <span className={'symbol ' + (!!this.state.inputAmount ? 'active' : '')}>{this.props.currency.symbol}</span>
                 <input type="number"
+                       pattern="[0-9]*"
                        ref={c => this._input = c} // create a reference to this element for validation (see: https://facebook.github.io/react/docs/more-about-refs.html)
                        placeholder="Other amount" maxLength="10"
                        value={this.state.inputAmount}
