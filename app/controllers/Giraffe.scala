@@ -44,7 +44,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
                           email: String,
                           token: String,
                           marketing: Boolean,
-                          postCode: Option[String],
+                          postcode: Option[String],
                           abTests: Set[JsonAbTest],
                           ophanId: String,
                           cmp: Option[String],

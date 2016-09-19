@@ -115,7 +115,7 @@ function paymentFormData(state, token) {
         email: state.details.email,
         token: token,
         marketing: state.details.optIn,
-        postCode: state.details.postCode,
+        postcode: state.details.postcode,
         abTests: state.data.abTests,
         ophanId: state.data.ophanId,
         cmp: state.data.cmpCode,
