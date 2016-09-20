@@ -1,7 +1,7 @@
 import cookie from 'src/utils/cookie';
 import * as ga from 'src/modules/analytics/ga';
 import * as ophan from 'src/modules/analytics/ophan';
-import krux from 'src/modules/analytics/krux';
+import * as krux from 'src/modules/analytics/krux';
 import store from 'src/store';
 import { GA_ENABLED } from 'src/actions'
 
