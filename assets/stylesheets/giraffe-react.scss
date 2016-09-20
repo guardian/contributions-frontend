@@ -14,7 +14,7 @@ $control-spacing: 5px;
     margin-bottom: 12px;
 }
 .postPaymentText{
-    font-size: 14px;
+    @include fs-textSans(2);
 }
 .contactInformationTitle {
     background-image: url('/assets/images/inline-svgs/share-email.svg');
