@@ -51,22 +51,6 @@ For development you'll also need the following commands:
 npm run compile
 ```
 
-**Run the Play app**
-```
-sbt devrun
-```
-
-**Watch files for changes**
-
-```
-npm run watch
-```
-
-This runs [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html) on port 7777, proxying requests to 9111. In this case, the bundled JS is stored in memory, which allows for much faster recompilation on changes, but the main.js file won't be created. You can also access localhost:7777/webpack-dev-server/\<route\> for a live reload environment. 
-
-If you want to compile main.js as a file, you can use `npm run compile` on its own and access the Play application directly.
-
-
 **Client-side Principles**: See [https://github.com/guardian/membership-frontend/blob/master/docs/client-side-principles.md](https://github.com/guardian/membership-frontend/blob/master/docs/client-side-principles.md) for high-level client-side principles for Membership.
 
 ### Setup AWS credentials
@@ -103,6 +87,23 @@ Start the app as follows:
 This will start the Play application, which usually listens on port `9111`. Making a request to `localhost:9111` should give you the homepage.
 
 To make the site reachable as `contributions.thegulocal.com` (necessary for register/sign-in functionality) you then need to make sure NGINX is configured and running as described in [`/nginx/README.md`](./nginx/README.md).
+
+
+### Running the play app manuall
+```
+sbt devrun
+```
+
+### Watch files for changes
+
+```
+npm run watch
+```
+
+This runs [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html) on port 7777, proxying requests to 9111. In this case, the bundled JS is stored in memory, which allows for much faster recompilation on changes, but the main.js file won't be created. You can also access localhost:7777/webpack-dev-server/\<route\> for a live reload environment. 
+
+If you want to compile main.js as a file, you can use `npm run compile` on its own and access the Play application directly.
+
 
 ## Testing
 
