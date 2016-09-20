@@ -151,10 +151,9 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
       val firstName = Option(payerInfo.getFirstName)
       val lastName = Option(payerInfo.getLastName)
-      //TODO maybe do this in a nicer way
-      val fullName = Seq(firstName, lastName).flatten.mkString (" ") match {
-        case "" => None
-        case name => Some(name)
+      val fullName = Seq(firstName, lastName).flatten match {
+        case Nil => None
+        case names => Some(names.mkString(" "))
       }
 
       val contributor = Contributor(
