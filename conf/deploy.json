@@ -4,7 +4,8 @@
         "contributions-frontend":{
             "type":"autoscaling",
             "data":{
-                "bucket": "membership-dist"
+                "bucket": "membership-dist",
+                "publicReadAcl": false
             }
         }
     },
