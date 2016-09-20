@@ -11,6 +11,30 @@ $control-spacing: 5px;
 .postPaymentButton {
     width: 100%;
     margin-top: 12px;
+    margin-bottom: 12px;
+}
+.postPaymentText{
+    font-size: 14px;
+}
+.contactInformationTitle {
+    background-image: url('/assets/images/inline-svgs/share-email.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    padding-left: 25px;
+
+
+}
+.postPaymentTick{
+    width:40px;
+    height:40px;
+    background: white;
+    background-image: url('/assets/images/inline-svgs/tick.svg');
+    border-radius: 1000px;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    background-position: center;
+    margin-bottom: 12px;
+
 }
 .overlay {
     position: fixed;

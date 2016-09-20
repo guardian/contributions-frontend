@@ -1,6 +1,5 @@
 @import com.gu.i18n.CountryGroup
 @import views.support.PageInfo
-@import play.api.libs.json.Json
 @import fragments.giraffe.contributionsMain
 @(pageInfo: PageInfo, countryGroup: CountryGroup)
 
@@ -8,11 +7,14 @@
 
     <div class="contribute-container">
         <div class="contribute-section">
+            <div class ="postPaymentTick"></div>
             <p class ="contribute-form__title">Your payment was processed successfully</p>
-            </div>
-        <div class="contribute-section">
-            <p class ="contribute-form__title">Your contact information</p>
-            <p>Receive on your inbox emails from The Guardian, Including more information about your contribution and our work on this initiative.</p>
+        </div>
+
+
+        <div class="contribute-section class postPaymentText">
+            <p class ="contribute-form__title contactInformationTitle">Your contact information</p>
+            <p>Receive in your inbox emails from The Guardian, Including more information about your contribution and our work on this initiative.</p>
             <form action="update-metadata" method="POST" >
                 <input type="checkbox" name="marketingOptIn" checked="true" value="true">
                 Keep me informed with updates and offers from The Guardian
@@ -25,6 +27,5 @@
 
             </form>
         </div>
-
     </div>
 }
