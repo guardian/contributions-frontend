@@ -51,6 +51,11 @@ For development you'll also need the following commands:
 npm run compile
 ```
 
+**Run the Play app**
+```
+sbt devrun
+```
+
 **Watch files for changes**
 
 ```
@@ -111,7 +116,6 @@ npm test
 ```
 
 #### Scala tests
-
 ```
 sbt test
 ```
