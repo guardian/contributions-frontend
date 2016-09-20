@@ -15,8 +15,10 @@
             <p class ="contribute-form__title contactInformationTitle">Your contact information</p>
             <p>Receive in your inbox emails from The Guardian, Including more information about your contribution and our work on this initiative.</p>
             <form action="update-metadata" method="POST" >
-                <input type="checkbox" name="marketingOptIn" checked="true" value="true">
-                Keep me informed with updates and offers from The Guardian
+                <div class="giraffe-checkbox">
+                    <input type="checkbox" name="marketingOptIn" checked="true" value="true"/>
+                    <label htmlFor="marketingOptIn">Keep me informed with updates and offers from The Guardian</label>
+                </div>
                 <button class="action action--button action--button--forward action action--button contribute-navigation__next action--next postPaymentButton">
                     <span>Next</span>
                     <svg class="action--button__arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="17.89" viewBox="0 0 20 17.89">
