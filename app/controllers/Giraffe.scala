@@ -22,7 +22,7 @@ import utils.RequestCountry._
 import views.support._
 import scala.concurrent.Future
 
-class Giraffe(paymentServices: PaymentServices) extends Controller {
+class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect {
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
     override def bind(key: String, data: Map[String, String]): Result =
@@ -94,13 +94,9 @@ class Giraffe(paymentServices: PaymentServices) extends Controller {
 
   def redirectToUk = NoCacheAction { implicit request => redirectWithQueryParams(routes.Giraffe.contribute(UK).url) }
 
-  private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) = {
-    val QueryParamsToForward = Set("INTCMP", "CMP", "mcopy", "skipAmount", "highlight")
-    Redirect(destinationUrl, request.queryString.filterKeys(QueryParamsToForward), SEE_OTHER)
-  }
+  private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) = redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight"))
 
   def postPayment(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
-    //TODO PAGEINFO DUPLICATION
     val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,

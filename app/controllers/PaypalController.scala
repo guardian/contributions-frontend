@@ -6,7 +6,6 @@ import actions.CommonActions._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.paypal.api.payments.Payment
 import models.PaymentHook
-import org.joda.time.DateTime
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
@@ -16,11 +15,10 @@ import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
 
-import scala.util.{Failure, Right, Success, Try}
+import scala.util.Right
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import play.api.data._
 import play.api.data.Forms._
 
 import scala.concurrent.Future
@@ -28,7 +26,8 @@ import scala.concurrent.Future
 class PaypalController(
   ws: WSClient,
   paymentServices: PaymentServices
-) extends Controller {
+) extends Controller with Redirect {
+
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -39,17 +38,20 @@ class PaypalController(
     intCmp: Option[String],
     ophanId: Option[String]
   ) = NoCacheAction { implicit request =>
+    def thanksUrl = routes.Giraffe.thanks(countryGroup).url
+    def postPayUrl = routes.Giraffe.postPayment(countryGroup).url
     val chosenVariants = Test.getContributePageVariants(countryGroup, request)
     val paypalService = paymentServices.paypalServiceFor(request)
-    val queryParams = Map("CMP" -> cmp.toSeq, "INTCMP" -> intCmp.toSeq)
     val idUser = IdentityUser.fromRequest(request).map(_.id)
-     paypalService.executePayment(paymentId, payerId) match {
-          case Right(executedPayment) =>
-          paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
-          getEmail(executedPayment) match {
-              //TODO MOVE REDIRECT WITH PARAMS SOMEWHERE AND SHARE IT WITH THE GIRAFFE CONTROLLER
-          case Some(email) => Redirect(routes.Giraffe.postPayment(countryGroup).url, queryParams, SEE_OTHER).withSession(request.session + ("email" -> email))
-          case None => Redirect(routes.Giraffe.thanks(countryGroup).url, queryParams, SEE_OTHER)
+
+    paypalService.executePayment(paymentId, payerId) match {
+      case Right(executedPayment) =>
+        paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
+        getEmail(executedPayment) match {
+          case Some(email) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> email))
+          case None =>
+            Logger.error("No email returned from Paypal payment execution, skipping to thank you page")
+            redirectWithCampaignCodes(thanksUrl)
         }
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
     }
@@ -110,6 +112,7 @@ class PaypalController(
           ophanId = authRequest.ophanId
         )
         authResponse match {
+
           case Right(url) => Ok(Json.toJson(AuthResponse(url)))
           case Left(error) =>
             Logger.error(s"Error getting PayPal auth url: $error")
