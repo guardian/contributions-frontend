@@ -11,7 +11,7 @@ import com.paypal.base.rest.{APIContext, PayPalRESTException}
 import scala.collection.JavaConverters._
 import com.typesafe.config.Config
 import data.ContributionData
-import models.{ContributionMetaData, Contributor, PaymentHook}
+import models.{ContributionMetaData, Contributor, PaymentHook, SavedContribution}
 import org.joda.time.DateTime
 import play.api.Logger
 import views.support.ChosenVariants
@@ -114,8 +114,6 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         Left(exception.getMessage)
     }
   }
-
-  case class SavedContribution(contributionMetaData: ContributionMetaData, contributor: Contributor)
 
   def storeMetaData(
     paymentId: String,

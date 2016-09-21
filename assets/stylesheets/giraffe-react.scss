@@ -8,7 +8,8 @@ $control-spacing: 5px;
 .legal_notice {
     padding-top: 15px;
 }
-.postPaymentConfirmation{
+
+.postPaymentConfirmation {
     height: 180px;
 }
 
@@ -18,7 +19,7 @@ $control-spacing: 5px;
     flex-direction: column;
 
     form {
-    height: 140px;
+        height: 140px;
         display: flex;
         flex-direction: column;
     }
@@ -29,13 +30,13 @@ $control-spacing: 5px;
     }
 }
 
-.postPaymentText{
+.postPaymentText {
     @include fs-textSans(2);
 }
 
-.circleBackground{
-    width:40px;
-    height:40px;
+.circleBackground {
+    width: 40px;
+    height: 40px;
     background: white;
     border-radius: 1000px;
     background-repeat: no-repeat;
@@ -44,12 +45,15 @@ $control-spacing: 5px;
     margin-bottom: 12px;
 
 }
-.postPaymentTick{
+
+.postPaymentTick {
     background-image: url('/assets/images/inline-svgs/tick.svg');
 }
+
 .postPaymentEnvelope {
     background-image: url('/assets/images/inline-svgs/share-email.svg');
 }
+
 .overlay {
     position: fixed;
     display: flex;

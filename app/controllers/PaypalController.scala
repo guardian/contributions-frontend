@@ -50,7 +50,7 @@ class PaypalController(
         getEmail(executedPayment) match {
           case Some(email) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> email))
           case None =>
-            Logger.error("No email returned from Paypal payment execution, skipping to thank you page")
+            Logger.error(s"No email returned from Paypal payment execution paymentId=$paymentId")
             redirectWithCampaignCodes(thanksUrl)
         }
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
