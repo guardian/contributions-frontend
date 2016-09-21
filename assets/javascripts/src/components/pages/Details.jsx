@@ -1,6 +1,6 @@
 import React from 'react';
 
-import InputField from '../InputField.jsx';
+import { InputField } from '../InputField.jsx';
 
 export default class Details extends React.Component {
     render() {

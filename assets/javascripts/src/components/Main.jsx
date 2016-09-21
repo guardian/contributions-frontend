@@ -12,9 +12,12 @@ import {
     PAYPAL_PAY,
     CARD_PAY,
     CLEAR_PAYMENT_FLAGS,
+    SET_RECURRING,
     paypalRedirect,
     submitPayment,
-    trackCheckoutStep
+    trackCheckoutStep,
+    setRecurring,
+    showRecurringTestMessage
 } from 'src/actions';
 
 import { PAGES } from 'src/constants';
@@ -41,7 +44,10 @@ function mapStateToProps(state) {
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests),
         countryGroup: state.data.countryGroup,
-        reducedCheckout: abTests.reducedCheckout(state.data.abTests)
+        reducedCheckout: abTests.reducedCheckout(state.data.abTests),
+        showRecurring: abTests.showRecurring(state.data.abTests),
+        recurring: state.details.recurring,
+        recurringNotified: state.data.recurringNotified
     };
 }
 
@@ -70,24 +76,24 @@ function mapDispatchToProps(dispatch) {
         payWithCard: () => dispatch({ type: CARD_PAY }),
         paypalRedirect: () => dispatch(paypalRedirect),
         clearPaymentFlags: () => dispatch({ type: CLEAR_PAYMENT_FLAGS }),
+        setRecurring: enabled => dispatch(setRecurring(enabled)),
+        showRecurringTestMessage: () => dispatch(showRecurringTestMessage)
     };
 }
 
 class Main extends React.Component {
-    componentFor(page) {
-        if(this.props.reducedCheckout && page != PAGES.CONTRIBUTION){
+    componentFor(page, mobile) {
+        if (this.props.reducedCheckout && page != PAGES.CONTRIBUTION) {
             page = PAGES.PAYMENT;
         }
+
         switch (page) {
             case PAGES.CONTRIBUTION:
-                return <Contribution amounts={this.props.amounts}
-                                     max={this.props.maxAmount}
-                                     currency={this.props.currency}
-                                     setAmount={this.props.setAmount}
-                                     currentAmount={this.props.card.amount}
+                return <Contribution max={this.props.maxAmount}
                                      error={this.props.paymentError}
-                                     countryGroup={this.props.countryGroup}
-                />;
+                                     currentAmount={this.props.card.amount}
+                                     mobile={mobile}
+                                     {...this.props} />;
 
             case PAGES.DETAILS:
                 return <Details details={this.props.details}
@@ -110,9 +116,16 @@ class Main extends React.Component {
 
         if (!event.target.checkValidity()) return;
 
-        if(this.props.paypalPay) {
+        if (this.props.showRecurring && this.props.recurring === null) return; // disable form progress if recurring test is on and no recurring method has been selected
+
+        if (this.props.recurring === true) {
+            return this.props.showRecurringTestMessage();
+        }
+
+        if (this.props.paypalPay) {
             this.props.paypalRedirect();
         }
+
         else {
             if (this.props.cardPay) {
                 this.props.pay();
@@ -124,6 +137,7 @@ class Main extends React.Component {
 
     render() {
         const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
+
         return <div>
             <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={showSummary} />
             <MediaQuery query='(max-width: 740px)'>

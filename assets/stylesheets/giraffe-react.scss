@@ -7,6 +7,10 @@ $control-spacing: 5px;
 
 .legal_notice {
     padding-top: 15px;
+
+    p {
+        margin-bottom: 5px;
+    }
 }
 
 .postPaymentConfirmation {
@@ -155,22 +159,34 @@ $control-spacing: 5px;
         width: 300px;
     }
 }
-.contribute-controls {
-    margin-left: -$control-spacing/2;
-    margin-right: -$control-spacing/2;
-}
+
 .contribute-section {
     padding: 10px;
     margin-bottom: 2px;
     background: $light-yellow;
 
+    h2 {
+        @include fs-headline(2);
+
+        margin-left: 2px;
+        margin-bottom: 5px;
+    }
+}
+
+.opacity-wrapper, .option-button__recurring {
+    transition: opacity 200ms linear;
+}
+
+.opaque .opacity-wrapper,
+.option-button__recurring.opaque {
+    opacity: 0.25;
 }
 
 .contribute-form__inner {
     margin-bottom: auto;
 
     @include mq(tablet) {
-        min-height: 350px;
+        min-height: 360px;
     }
 }
 
@@ -231,7 +247,13 @@ $control-spacing: 5px;
 .contribute-controls {
     display: flex;
     flex-wrap: wrap;
+    margin-left: -$control-spacing/2;
+    margin-right: -$control-spacing/2;
     margin-top: auto;
+}
+
+.contribute-controls--recurring {
+    margin-top: 0;
 }
 
 .contribute-controls__input {
@@ -288,27 +310,55 @@ $control-spacing: 5px;
     }
 }
 
+.option-button,
+.option-button-group {
+    margin: 0px $control-spacing/2 7px;
+}
+
+.option-button,
+.action--button {
+    .opaque .opacity-wrapper &:hover,
+    .opaque .opacity-wrapper &:focus {
+        cursor: default;
+    }
+}
+
 .option-button {
     @include button();
     text-align: center;
-    margin: 0px $control-spacing/2 7px;
     flex-basis: 20%;
 
     .option-button__three & {
         flex-basis: 30%;
     }
+
+    .opaque .opacity-wrapper &:hover,
+    .opaque .opacity-wrapper &:focus {
+        background: white;
+        color: $c-neutral1;
+    }
+}
+
+.option-button-group {
+    @include button-group();
 }
 
 .option-button--bold {
     font-weight: bold;
 }
 
+.option-button__recurring {
+    flex: 1;
+}
+
 .option-button__three {
     flex-basis: 30%;
 }
+
 .option-button__four {
     flex-basis: 20%;
 }
+
 .with-card-icon {
     position: relative;
 }
@@ -400,6 +450,16 @@ $currencies: gbp usd aud eur nzd cad;
             flex-direction: row;
         }
     }
+}
+
+.recurring-payment {
+    width: 100%;
+    margin-bottom: $gs-baseline;
+}
+
+.opacity-wrapper--contribute-controls {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .feedback {
