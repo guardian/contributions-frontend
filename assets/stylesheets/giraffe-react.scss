@@ -9,6 +9,51 @@ $control-spacing: 5px;
     padding-top: 15px;
 }
 
+.postPaymentConfirmation {
+    height: 134px;
+}
+
+.postPaymentContact {
+    height: 287px;
+    display: flex;
+    flex-direction: column;
+
+    form {
+        height: 177px;
+        display: flex;
+        flex-direction: column;
+    }
+    button {
+        width: 100%;
+        margin-top: auto;
+        margin-bottom: 12px;
+    }
+}
+
+.postPaymentText {
+    @include fs-textSans(2);
+}
+
+.circleBackground {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 1000px;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    background-position: center;
+    margin-bottom: 12px;
+
+}
+
+.postPaymentTick {
+    background-image: url('/assets/images/inline-svgs/tick.svg');
+}
+
+.postPaymentEnvelope {
+    background-image: url('/assets/images/inline-svgs/share-email.svg');
+}
+
 .overlay {
     position: fixed;
     display: flex;

@@ -1,12 +1,16 @@
 package controllers
 
+import java.util.UUID
+
 import actions.CommonActions._
 import com.gu.i18n.{CountryGroup, Currency}
+import com.paypal.api.payments.Payment
 import models.PaymentHook
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
+import play.api.data.Form
 import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
@@ -14,12 +18,13 @@ import scala.util.Right
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-
+import play.api.data.Forms._
 
 class PaypalController(
   ws: WSClient,
   paymentServices: PaymentServices
-) extends Controller {
+) extends Controller with Redirect {
+
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -30,15 +35,34 @@ class PaypalController(
     intCmp: Option[String],
     ophanId: Option[String]
   ) = NoCacheAction { implicit request =>
+    def thanksUrl = routes.Giraffe.thanks(countryGroup).url
+    def postPayUrl = routes.Giraffe.postPayment(countryGroup).url
     val chosenVariants = Test.getContributePageVariants(countryGroup, request)
     val paypalService = paymentServices.paypalServiceFor(request)
     val idUser = IdentityUser.fromRequest(request).map(_.id)
+
     paypalService.executePayment(paymentId, payerId) match {
-      case Right(_) =>
+      case Right(executedPayment) =>
         paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
-        Redirect(routes.Giraffe.thanks(countryGroup).url, Map("CMP" -> cmp.toSeq, "INTCMP" -> intCmp.toSeq), SEE_OTHER)
+        getEmail(executedPayment) match {
+          case Some(email) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> email))
+          case None =>
+            Logger.error(s"No email returned from Paypal payment execution paymentId=$paymentId")
+            redirectWithCampaignCodes(thanksUrl)
+        }
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
     }
+  }
+
+  private def getEmail(payment: Payment): Option[String] = {
+    for {
+      payer <- Option(payment.getPayer)
+      payerInfo <- Option(payer.getPayerInfo)
+      email <- Option(payerInfo.getEmail)
+    }
+      yield {
+        email
+      }
   }
 
   case class AuthRequest(
@@ -85,6 +109,7 @@ class PaypalController(
           ophanId = authRequest.ophanId
         )
         authResponse match {
+
           case Right(url) => Ok(Json.toJson(AuthResponse(url)))
           case Left(error) =>
             Logger.error(s"Error getting PayPal auth url: $error")
@@ -121,4 +146,22 @@ class PaypalController(
         Forbidden("Request isn't signed by Paypal")
     }
   }
+  case class MetadataUpdate(marketingOptIn: Boolean)
+
+  val metadataUpdateForm: Form[MetadataUpdate] = Form(
+    mapping(
+      "marketingOptIn"->boolean
+    )(MetadataUpdate.apply)(MetadataUpdate.unapply)
+  )
+
+  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction(parse.form(metadataUpdateForm)) {
+    implicit request =>
+      val paypalService = paymentServices.paypalServiceFor(request)
+      request.session.data.get("email") match {
+        case Some(email) => paypalService.updateMarketingOptIn(email, request.body.marketingOptIn)
+        case None => Logger.error("email not found in session while trying to update marketing opt in")
+      }
+      Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
+  }
+
 }

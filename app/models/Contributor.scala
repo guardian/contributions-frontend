@@ -3,8 +3,8 @@ package models
 case class Contributor(
   email: String,
   name: Option[String],
-  firstName: String,
-  lastName: String,
+  firstName: Option[String],
+  lastName: Option[String],
   idUser: Option[String],
   postCode: Option[String],
   marketingOptIn: Option[Boolean]

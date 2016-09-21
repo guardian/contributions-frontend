@@ -1,0 +1,32 @@
+@import com.gu.i18n.CountryGroup
+@import views.support.PageInfo
+@import fragments.giraffe.contributionsMain
+@(pageInfo: PageInfo, countryGroup: CountryGroup)
+
+@contributionsMain(pageInfo, countryGroup, None, None, None) {
+
+    <div class="contribute-container">
+        <div class="contribute-section postPaymentConfirmation">
+            <div class ="circleBackground postPaymentTick"></div>
+            <p class =" contribute-form__title">Your payment was processed successfully</p>
+        </div>
+
+        <div class="contribute-section postPaymentContact">
+            <div class ="circleBackground postPaymentEnvelope"></div>
+            <p class ="contribute-form__title">We would like to stay in touch</p>
+            <form action="update-metadata" method="POST" >
+                <div class="giraffe-checkbox">
+                    <input type="checkbox" name="marketingOptIn" checked="true" value="true"/>
+                    <label htmlFor="marketingOptIn">Keep me informed with updates and offers from the Guardian</label>
+                </div>
+                <button class="action action--button action--button--forward action action--button contribute-navigation__next action--next">
+                    <span>Next</span>
+                    <svg class="action--button__arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="17.89" viewBox="0 0 20 17.89">
+                        <path d="M20 9.35l-9.08 8.54-.86-.81 6.54-7.31H0V8.12h16.6L10.06.81l.86-.81L20 8.51v.84zm20-.81L49.08 0l.86.81-6.54 7.31H60v1.65H43.4l6.54 7.31-.86.81L40 9.39v-.85z"/>
+                    </svg>
+                </button>
+
+            </form>
+        </div>
+    </div>
+}

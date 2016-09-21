@@ -6,7 +6,7 @@ import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
 import com.paypal.api.payments._
 import com.paypal.base.Constants
-import com.paypal.base.rest.{APIContext, PayPalRESTException}
+import com.paypal.base.rest.{APIContext}
 
 import scala.collection.JavaConverters._
 import com.typesafe.config.Config
@@ -98,7 +98,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   private def addUserActionParam(url:String) = Uri.parse(url).addParam("useraction", "commit").toString
 
-  def executePayment(paymentId: String, payerId: String): Either[String, String] = {
+  def executePayment(paymentId: String, payerId: String): Either[String, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
 
@@ -107,9 +107,11 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         if (payment.getState.toUpperCase != "APPROVED") {
           Left(s"payment returned with state: ${payment.getState}")
         } else {
-          Right(payment.getId)
+          Right(payment)
         }
-      case Failure(exception) => Left(exception.getMessage)
+      case Failure(exception) =>
+        Logger.error("Unable to execute payment", exception)
+        Left(exception.getMessage)
     }
   }
 
@@ -120,7 +122,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     intCmp: Option[String],
     ophanId: Option[String],
     idUser: Option[String]
-  ): Right[String, String] = {
+  ): Either[String,String ] = {
     val result = for {
       payment <- Try(Payment.get(apiContext, paymentId))
       transaction <- Try(payment.getTransactions.asScala.head)
@@ -145,22 +147,48 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         billingPostCode orElse shippingPostcode
       }
 
+      val firstName = Option(payerInfo.getFirstName)
+      val lastName = Option(payerInfo.getLastName)
+      val fullName = Seq(firstName, lastName).flatten match {
+        case Nil => None
+        case names => Some(names.mkString(" "))
+      }
+
       val contributor = Contributor(
         email = payerInfo.getEmail,
-        name = Some(s"${payerInfo.getFirstName} ${payerInfo.getLastName}"),
-        firstName = payerInfo.getFirstName,
-        lastName = payerInfo.getLastName,
+        name = fullName,
+        firstName = firstName,
+        lastName = lastName,
         idUser = idUser,
         postCode = postCode,
         marketingOptIn = None
       )
+
       contributionData.insertPaymentMetaData(metadata)
-      contributionData.insertContributor(contributor)
+      contributionData.saveContributor(contributor)
+
     }
-    result recover {
-      case exception: Exception => Logger.error("Unable to store contribution metadata", exception)
+
+    result match {
+      case Success(_) => Right(paymentId)
+      case Failure(exception) =>
+        Logger.error("Unable to store contribution metadata", exception)
+        Left("Unable to store contribution metadata")
     }
-    Right(paymentId)
+
+  }
+
+  def updateMarketingOptIn(email: String, marketingOptInt: Boolean) = {
+    val contributor = Contributor(
+      email = email,
+      marketingOptIn = Some(marketingOptInt),
+      name = None,
+      firstName = None,
+      lastName = None,
+      idUser = None,
+      postCode = None
+    )
+    contributionData.saveContributor(contributor)
   }
 
   def validateEvent(headers: Map[String, String], body: String): Boolean = {
