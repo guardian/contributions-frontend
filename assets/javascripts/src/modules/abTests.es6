@@ -48,6 +48,10 @@ export function paymentMethods(tests) {
     }
 }
 
+export function postcode(tests) {
+    return testDataFor(tests, 'PostcodeTest').displayPostcode;
+}
+
 export function presetAmount(tests) {
     const data = testDataFor(tests, 'AmountHighlightTest');
 

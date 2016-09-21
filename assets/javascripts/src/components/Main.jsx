@@ -41,6 +41,7 @@ function mapStateToProps(state) {
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests),
         paymentMethodsTest: abTests.paymentMethods(state.data.abTests),
+        postcodeTest: abTests.postcode(state.data.abTests),
         countryGroup: state.data.countryGroup
     };
 }
@@ -89,7 +90,9 @@ class Main extends React.Component {
 
             case PAGES.DETAILS:
                 return <Details details={this.props.details}
-                                updateDetails={this.props.updateDetails}/>;
+                                updateDetails={this.props.updateDetails}
+                                showPostcode={this.props.postcodeTest}
+                />;
 
             case PAGES.PAYMENT:
                 return <Payment card={this.props.card}

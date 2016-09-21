@@ -11,12 +11,12 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Cookie, Request}
 
-
 import scala.util.Random
 import scalaz.NonEmptyList
 import views.support.AmountHighlightTest.AmountVariantData
 import views.support.MessageCopyTest.CopyVariantData
 import views.support.PaymentMethodTest.PaymentMethodVariantData
+import views.support.PostcodeTest.PostcodeVariantData
 
 sealed trait VariantData
 
@@ -27,7 +27,7 @@ object VariantData {
         case amount: AmountVariantData => AmountVariantData.format.writes(amount)
         case copy: CopyVariantData => CopyVariantData.format.writes(copy)
         case paymentMethods: PaymentMethodVariantData => PaymentMethodVariantData.format.writes(paymentMethods)
-
+        case postcodeTest: PostcodeVariantData => PostcodeVariantData.format.writes(postcodeTest)
       }
     }
   }
@@ -179,7 +179,7 @@ object Test {
 
   val allTests = List(AmountHighlightTest, MessageCopyTest)
 
-  def pickVariant[A](countryGroup: CountryGroup, request: Request[A], test: TestTrait): Variant = {
+  def pickVariant[A](test: TestTrait)(implicit countryGroup: CountryGroup, request: Request[A]): Variant = {
 
     def pickRandomly: Variant = {
       val n = Random.nextDouble
@@ -199,9 +199,32 @@ object Test {
     Cookie(variant.testSlug+"_GIRAFFE_TEST", variant.variantSlug, maxAge = Some(604800))
   }
 
-  def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
-    ChosenVariants(Seq(pickVariant(countryGroup, request, AmountHighlightTest), pickVariant(countryGroup, request, MessageCopyTest), pickVariant(countryGroup, request, PaymentMethodTest)))
+  def getContributePageVariants[A](implicit countryGroup: CountryGroup, request: Request[A]) = {
+    ChosenVariants(Seq(
+      pickVariant(AmountHighlightTest),
+      pickVariant(MessageCopyTest),
+      pickVariant(PaymentMethodTest),
+      pickVariant(PostcodeTest)
+    ))
   }
+}
+
+object PostcodeTest extends TestTrait {
+
+  case class PostcodeVariantData(displayPostcode: Boolean) extends VariantData
+
+  object PostcodeVariantData {
+    implicit val format: Writes[PostcodeVariantData] = Json.writes[PostcodeVariantData]
+  }
+
+  def name: String = "PostcodeTest"
+
+  def slug: String = "postcode"
+
+  def variants: NonEmptyList[Variant] = NonEmptyList(
+    makeVariant("Postcode not shown", "false", 1, PostcodeVariantData(false)),
+    makeVariant("Postcode shown", "true", 1, PostcodeVariantData(true))
+  )
 }
 
 
