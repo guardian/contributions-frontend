@@ -14,14 +14,11 @@ import play.api.data.Form
 import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
-
 import scala.util.Right
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
-
-import scala.concurrent.Future
 
 class PaypalController(
   ws: WSClient,
@@ -157,19 +154,14 @@ class PaypalController(
     )(MetadataUpdate.apply)(MetadataUpdate.unapply)
   )
 
-
-  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async { implicit request =>
-    val paypalService = paymentServices.paypalServiceFor(request)
-    metadataUpdateForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
-      Future.successful(BadRequest(JsArray(withErrors.errors.map(k => JsString(k.key)))))
-    }, { f =>
+  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction(parse.form(metadataUpdateForm)) {
+    implicit request =>
+      val paypalService = paymentServices.paypalServiceFor(request)
       request.session.data.get("email") match {
-        case Some(email) => paypalService.updateMarketingOptIn(email, f.marketingOptIn)
+        case Some(email) => paypalService.updateMarketingOptIn(email, request.body.marketingOptIn)
         case None => Logger.error("email not found in session while trying to update marketing opt in")
       }
-      Future.successful(Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER))
-    })
+      Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
   }
-
 
 }
