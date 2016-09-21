@@ -25,7 +25,7 @@ export default class MobileWrapper extends React.Component {
                         <ProgressIndicator page={this.props.page}/>
                     </div>
 
-                    {this.props.componentFor(p)}
+                    {this.props.componentFor(p, true)}
 
                     <Navigation
                         page={p}

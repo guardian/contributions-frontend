@@ -2,7 +2,7 @@ import React from 'react';
 
 import {formatCardNumber} from 'src/utils/formatters';
 
-import InputField from '../InputField';
+import { InputField } from '../InputField';
 import CardIcon from '../CardIcon';
 
 export default class Payment extends React.Component {

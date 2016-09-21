@@ -231,3 +231,41 @@ $gs-max-columns: 16;
         color: $white;
     }
 }
+
+@mixin button-group {
+    @include button();
+
+    display: flex;
+    padding: 0;
+
+    &:hover, &:focus, &.active {
+        background-color: #ffffff;
+    }
+
+    & .option-button {
+        flex: 1;
+        margin: 0;
+        border-radius: 0;
+        border-right: 1px solid $c-neutral4;
+        color: $c-neutral1;
+
+        &.active {
+            color: white;
+        }
+
+        &:first-of-type {
+            border-top-left-radius: $input-border-radius;
+            border-bottom-left-radius: $input-border-radius;
+        }
+
+        &:last-of-type {
+            border-top-right-radius: $input-border-radius;
+            border-bottom-right-radius: $input-border-radius;
+        }
+    }
+
+    & a:hover {
+        border-bottom: 0;
+        color: white;
+    }
+}

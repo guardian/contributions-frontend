@@ -28,14 +28,18 @@ export function init() {
     }
 }
 
+function testFor(tests, testName) {
+    return tests.find(t => t.testName == testName);
+}
+
 function testDataFor(tests, testName) {
-    const test = tests.find(t => t.testName == testName);
+    const test = testFor(tests, testName);
     return test && test.data;
 }
 
-export function amounts(tests) {
-    const data = testDataFor(tests, 'AmountHighlightTest');
-    const defaultAmounts = [25, 50, 100, 250];
+export function amounts(state) {
+    const data = testDataFor(state.data.abTests, 'AmountHighlightTest');
+    const defaultAmounts = state.details.recurring === true ? [2, 5, 10, 20] : [25, 50, 100, 250];
 
     return (data && data.values) || defaultAmounts;
 }
@@ -44,4 +48,9 @@ export function presetAmount(tests) {
     const data = testDataFor(tests, 'AmountHighlightTest');
 
     return data && data.preselect;
+}
+
+export function showRecurring(tests) {
+    const test = testFor(tests, 'RecurringPaymentTest');
+    return test && test.variantSlug === 'recurring';
 }
