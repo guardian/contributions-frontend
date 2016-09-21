@@ -1,7 +1,5 @@
 package views.support
 
-
-
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -25,13 +23,12 @@ object VariantData {
       o match {
         case amount: AmountVariantData => AmountVariantData.format.writes(amount)
         case paymentMethods: PaymentMethodVariantData => PaymentMethodVariantData.format.writes(paymentMethods)
-
       }
     }
   }
 }
 
-case class Variant(testName: String, testSlug: String, variantName: String, variantSlug: String, weight: Double, data: VariantData, countryGroupFilter: Set[CountryGroup] = Set.empty) {
+case class Variant(testName: String, testSlug: String, variantName: String, variantSlug: String, weight: Double, data: Option[VariantData], countryGroupFilter: Set[CountryGroup] = Set.empty) {
   def matches(countryGroup: CountryGroup): Boolean = countryGroupFilter.isEmpty || countryGroupFilter.contains(countryGroup)
 }
 
@@ -42,7 +39,7 @@ object Variant {
       (__ \ "variantName").write[String] and
       (__ \ "variantSlug").write[String] and
       (__ \ "weight").write[Double] and
-      (__ \ "data").write[VariantData]
+      (__ \ "data").writeNullable[VariantData]
     )(v => (v.testName, v.testSlug, v.variantName, v.variantSlug, v.weight, v.data))
 }
 
@@ -51,7 +48,7 @@ trait TestTrait {
   def slug: String
   def variants: NonEmptyList[Variant]
 
-  def makeVariant(variantName: String, variantSlug: String, weight: Double, data: VariantData, countryGroupFilter: Set[CountryGroup] = Set.empty): Variant = {
+  def makeVariant(variantName: String, variantSlug: String, weight: Double, data: Option[VariantData] = None, countryGroupFilter: Set[CountryGroup] = Set.empty): Variant = {
     Variant(name, slug, variantName, variantSlug, weight, data, countryGroupFilter)
   }
 
@@ -98,12 +95,12 @@ object AmountHighlightTest extends TestTrait {
 
   def variants = NonEmptyList(
     //New variants go here.
-    makeVariant("Amount - 6x 25 highlight", "6amnts", 1, AmountVariantData(List(5,10,25, 50, 100, 250), Some(50)), Set(UK)),
-    makeVariant("Amount - 25 highlight", "25", 1, AmountVariantData(List(25, 50, 100, 250), Some(25)), notAustralia),
-    makeVariant("Amount - 50 highlight", "50", 0, AmountVariantData(List(25, 50, 100, 250), Some(50)), notAustralia),
-    makeVariant("Amount - 100 highlight", "100", 0, AmountVariantData(List(25, 50, 100, 250), Some(100)), notAustralia),
-    makeVariant("Amount - 250 highlight", "250", 0, AmountVariantData(List(25, 50, 100, 250), Some(250)), notAustralia),
-    makeVariant("Amount - 100 highlight Australia", "100-Australia", 1, AmountVariantData(List(50, 100, 250, 500), Some(100)), Set(Australia))
+    makeVariant("Amount - 6x 25 highlight", "6amnts", 1, Some(AmountVariantData(List(5,10,25, 50, 100, 250), Some(50))), Set(UK)),
+    makeVariant("Amount - 25 highlight", "25", 1, Some(AmountVariantData(List(25, 50, 100, 250), Some(25))), notAustralia),
+    makeVariant("Amount - 50 highlight", "50", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(50))), notAustralia),
+    makeVariant("Amount - 100 highlight", "100", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(100))), notAustralia),
+    makeVariant("Amount - 250 highlight", "250", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(250))), notAustralia),
+    makeVariant("Amount - 100 highlight Australia", "100-Australia", 1, Some(AmountVariantData(List(50, 100, 250, 500), Some(100))), Set(Australia))
   )
 }
 
@@ -130,11 +127,21 @@ object PaymentMethodTest extends TestTrait {
   }
 
   def variants = NonEmptyList(
-    makeVariant("Control", "control", 0.5, PaymentMethodVariantData(Set(CARD))),
-    makeVariant("Paypal", "paypal", 0.5, PaymentMethodVariantData(Set(CARD, PAYPAL)))
+    makeVariant("Control", "control", 0.5, Some(PaymentMethodVariantData(Set(CARD)))),
+    makeVariant("Paypal", "paypal", 0.5, Some(PaymentMethodVariantData(Set(CARD, PAYPAL))))
   )
-
 }
+
+object RecurringPaymentTest extends TestTrait {
+  def name = "RecurringPaymentTest"
+  def slug = "recurringPayment"
+
+  def variants = NonEmptyList(
+    makeVariant("control", "control", 0.5),
+    makeVariant("recurring", "recurring", 0.5)
+  )
+}
+
 case class ChosenVariants(variants: Seq[Variant]) {
   def asJson = Json.toJson(variants)
   def encodeURL = URLEncoder.encode(asJson.toString, StandardCharsets.UTF_8.name())
@@ -167,8 +174,9 @@ object Test {
   def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
     ChosenVariants(Seq(
       pickVariant(countryGroup, request, AmountHighlightTest),
-      pickVariant(countryGroup, request, PaymentMethodTest))
-    )
+      pickVariant(countryGroup, request, PaymentMethodTest),
+      pickVariant(countryGroup, request, RecurringPaymentTest)
+    ))
   }
 }
 
