@@ -105,7 +105,7 @@ class Main extends React.Component {
         }
     }
 
-    submit(mobile, event) {
+    submit(event) {
         event.preventDefault(); // we never want the standard submit behaviour, which triggers a reload
 
         if (!event.target.checkValidity()) return;
@@ -131,7 +131,7 @@ class Main extends React.Component {
             </MediaQuery>
 
             <MediaQuery query='(min-width: 741px)'>
-                <DesktopWrapper submit={this.submit.bind(this, false)} componentFor={this.componentFor.bind(this)} {...this.props} />
+                <DesktopWrapper submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
         </div>
     }
