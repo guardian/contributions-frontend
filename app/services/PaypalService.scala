@@ -6,12 +6,12 @@ import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
 import com.paypal.api.payments._
 import com.paypal.base.Constants
-import com.paypal.base.rest.{APIContext, PayPalRESTException}
+import com.paypal.base.rest.{APIContext}
 
 import scala.collection.JavaConverters._
 import com.typesafe.config.Config
 import data.ContributionData
-import models.{ContributionMetaData, Contributor, PaymentHook, SavedContribution}
+import models.{ContributionMetaData, Contributor, PaymentHook}
 import org.joda.time.DateTime
 import play.api.Logger
 import views.support.ChosenVariants
@@ -122,7 +122,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     intCmp: Option[String],
     ophanId: Option[String],
     idUser: Option[String]
-  ): Either[String,SavedContribution ] = {
+  ): Either[String,String ] = {
     val result = for {
       payment <- Try(Payment.get(apiContext, paymentId))
       transaction <- Try(payment.getTransactions.asScala.head)
@@ -166,11 +166,11 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
       contributionData.insertPaymentMetaData(metadata)
       contributionData.saveContributor(contributor)
-      SavedContribution(metadata,contributor)
+
     }
 
     result match {
-      case Success(data) => Right(data)
+      case Success(_) => Right(paymentId)
       case Failure(exception) =>
         Logger.error("Unable to store contribution metadata", exception)
         Left("Unable to store contribution metadata")
