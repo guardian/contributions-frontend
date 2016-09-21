@@ -15,7 +15,6 @@ import play.api.mvc.{Cookie, Request}
 import scala.util.Random
 import scalaz.NonEmptyList
 import views.support.AmountHighlightTest.AmountVariantData
-import views.support.MessageCopyTest.CopyVariantData
 import views.support.PaymentMethodTest.PaymentMethodVariantData
 
 sealed trait VariantData
@@ -25,7 +24,6 @@ object VariantData {
     def writes(o: VariantData): JsValue = {
       o match {
         case amount: AmountVariantData => AmountVariantData.format.writes(amount)
-        case copy: CopyVariantData => CopyVariantData.format.writes(copy)
         case paymentMethods: PaymentMethodVariantData => PaymentMethodVariantData.format.writes(paymentMethods)
 
       }
@@ -109,39 +107,6 @@ object AmountHighlightTest extends TestTrait {
   )
 }
 
-object MessageCopyTest extends TestTrait {
-  def name = "MessageCopyTest"
-  def slug = "mcopy"
-
-  case class CopyVariantData(message: String) extends VariantData
-
-  object CopyVariantData {
-    implicit val format: Format[CopyVariantData] = Json.format[CopyVariantData]
-  }
-
-  def variants = NonEmptyList(
-    makeVariant("Copy - control", "control", 1, CopyVariantData("Support the Guardian")),
-    makeVariant("Copy - support", "support", 0, CopyVariantData("Support the Guardian")),
-    makeVariant("Copy - power", "power", 0, CopyVariantData("The powerful won't investigate themselves. That's why we need you.")),
-    makeVariant("Copy - mutual", "mutual", 0, CopyVariantData("Can't live without us? The feeling's mutual.")),
-    makeVariant("Copy - everyone", "everyone", 0, CopyVariantData("If everyone who sees this chipped in the Guardian's future would be more secure.")),
-    makeVariant("Copy - everyone", "everyoneinline", 0, CopyVariantData("If everyone who sees this chipped in the Guardian's future would be more secure.")),
-    makeVariant("Copy - everyone editorial", "everyone-editorial", 0, CopyVariantData("If everyone who sees this chipped in the Guardian's future would be more secure.")),
-    makeVariant("Copy - expensive", "expensive", 0, CopyVariantData("Producing the Guardian is expensive. Supporting it isn't.")),
-    makeVariant("Copy - expensive inline", "expensiveinline", 0, CopyVariantData("Producing the Guardian is expensive. Supporting it isn't.")),
-    makeVariant("Copy - british", "british", 0, CopyVariantData("It's not very British to talk about money. So we'll just ask for it instead.")),
-    makeVariant("Copy - british inline", "britishinline", 0, CopyVariantData("It's not very British to talk about money. So we'll just ask for it instead.")),
-    makeVariant("Copy - powerless", "powerless", 0, CopyVariantData("Don't let the powerless pay the price. Make your contribution")),
-    makeVariant("Copy - powerless inline", "powerlessinline", 0, CopyVariantData("Don't let the powerless pay the price. Make your contribution")),
-    makeVariant("Copy - coffee inline", "costofnewswithyourcoffeeinline", 0, CopyVariantData("Do you want the news with your coffee or do you just want coffee? Quality journalism costs. Please contribute.")),
-    makeVariant("Copy - coffee", "costofnewswithyourcoffee", 0, CopyVariantData("Do you want the news with your coffee or do you just want coffee? Quality journalism costs. Please contribute.")),
-    makeVariant("Copy - heritage inline", "heritageinline", 0, CopyVariantData("From the Peterloo massacre to phone hacking and the Panama Papers, we've been there - on your side for almost 200 years. Contribute to the Guardian today")),
-    makeVariant("Copy - heritage", "heritage", 0, CopyVariantData("From the Peterloo massacre to phone hacking and the Panama Papers, we've been there - on your side for almost 200 years. Contribute to the Guardian today")),
-    makeVariant("Copy - global beijing inline", "global-beijing-inline", 0, CopyVariantData("By the time you've had your morning tea, reporters in Rio, Beijing, Moscow, Berlin, Paris, Johannesburg have already filed their stories. Covering the world's news isn't cheap. Please chip in a few pounds.")),
-    makeVariant("Copy - global beijing", "global-beijing", 0, CopyVariantData("By the time you've had your morning tea, reporters in Rio, Beijing, Moscow, Berlin, Paris, Johannesburg have already filed their stories. Covering the world's news isn't cheap. Please chip in a few pounds."))
-  )
-}
-
 object PaymentMethodTest extends TestTrait {
 
   def name = "PaymentMethodTest"
@@ -177,7 +142,7 @@ case class ChosenVariants(variants: Seq[Variant]) {
 
 object Test {
 
-  val allTests = List(AmountHighlightTest, MessageCopyTest)
+  val allTests = List(AmountHighlightTest) // only used in unit tests
 
   def pickVariant[A](countryGroup: CountryGroup, request: Request[A], test: TestTrait): Variant = {
 
@@ -200,7 +165,10 @@ object Test {
   }
 
   def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
-    ChosenVariants(Seq(pickVariant(countryGroup, request, AmountHighlightTest), pickVariant(countryGroup, request, MessageCopyTest), pickVariant(countryGroup, request, PaymentMethodTest)))
+    ChosenVariants(Seq(
+      pickVariant(countryGroup, request, AmountHighlightTest),
+      pickVariant(countryGroup, request, PaymentMethodTest))
+    )
   }
 }
 

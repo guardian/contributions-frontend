@@ -4,7 +4,6 @@ import com.gu.i18n.CountryGroup
 import org.scalatest.{MustMatchers, WordSpec}
 import CountryGroup._
 import org.scalatest.matchers.{MatchResult, Matcher}
-import views.support.MessageCopyTest.CopyVariantData
 
 import scalaz.NonEmptyList
 
