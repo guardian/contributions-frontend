@@ -27,7 +27,7 @@ trait AppComponents extends PlayComponents {
 
 
   lazy val config = ConfigFactory.load()
-
+  lazy val stripeConfig = config.getConfig("stripe")
   private val idConfig = config.getConfig("identity")
 
   lazy val identityKeys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
@@ -52,7 +52,7 @@ trait AppComponents extends PlayComponents {
   lazy val paymentServices = PaymentServices(
     identityAuthProvider,
     testUsernames,
-    PaymentServices.stripeServicesFor(config.getConfig("stripe")),
+    PaymentServices.stripeServicesFor(config.getConfig("stripe"), contributionDataPerMode),
     PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionDataPerMode)(paypalExecutionContext)
 
   )
@@ -60,6 +60,7 @@ trait AppComponents extends PlayComponents {
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
   lazy val paypalController = wire[PaypalController]
+  lazy val stripeController = new StripeController(paymentServices, stripeConfig)
 
   override lazy val httpErrorHandler =
     new monitoring.ErrorHandler(identityAuthProvider, environment, configuration, sourceMapper, Some(router))

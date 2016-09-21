@@ -129,8 +129,6 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   }
 
-  case class SavedContributionData(contributor: Contributor, contributionMetaData: ContributionMetaData)
-
   def storeMetaData(
     paymentId: String,
     variants: Seq[Variant],
@@ -219,8 +217,8 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paymentHook: PaymentHook): XorT[Future, String, PaymentHook] = {
-    contributionData.insertPaymentHook(paymentHook)
+  def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] = {
+    contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 
 }
