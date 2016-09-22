@@ -124,7 +124,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     intCmp: Option[String],
     ophanId: Option[String],
     idUser: Option[String]
-  ): Either[String,SavedContributionData ] = {
+  ): Either[String, SavedContributionData] = {
     val result = for {
       payment <- Try(Payment.get(apiContext, paymentId))
       transaction <- Try(payment.getTransactions.asScala.head)
