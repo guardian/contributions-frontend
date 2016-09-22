@@ -76,6 +76,12 @@ class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contribu
       )
     }
 
+    println(stripeHook.amount)
+    println(stripeHook.created)
+    println(stripeHook.cardCountry)
+    println(stripeHook.email)
+    println(stripeHook.currency)
+
     for {
       eventFromStripe <- findCharge(stripeHook)
       balanceTransaction <- findBalanceTransaction(eventFromStripe)

@@ -125,7 +125,8 @@ object PaypalHook {
 }
 
 case class StripeHook(
-  contributionId: ContributionId,
+                       name: String,
+                       contributionId: ContributionId,
   eventId: String,
   paymentId: String,
   balanceTransactionId: String,
@@ -153,10 +154,12 @@ object StripeHook {
         amount <- (payload \ "amount").validate[Long]
         cardCountry <- (payload \ "source" \ "country").validate[String]
         status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
+        name <- (metadata \ "name").validate[String]
         email <- (metadata \ "email").validate[String]
         balanceTransactionId <- (payload \ "balance_transaction").validate[String]
       } yield {
         StripeHook(
+          name = name,
           contributionId = contributionId,
           eventId = eventId,
           paymentId = paymentId,

@@ -3,11 +3,12 @@ package controllers
 import actions.CommonActions._
 import cats.data.Xor
 import com.typesafe.config.Config
+import model.exactTarget.ContributorRow
 import models.StripeHook
 import play.api.Logger
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{BodyParsers, Controller, Result}
-import services.PaymentServices
+import services.{EmailService, PaymentServices}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,6 +18,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
 
   def hook = SharedSecretAction(webhookKey) {
     NoCacheAction.async(BodyParsers.parse.json) { request =>
+
+
 
       def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result]): Future[Result] = {
         stripeHookJson.validate[StripeHook] match {
@@ -30,6 +33,10 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       }
 
       withParsedStripeHook(request.body) { stripeHook =>
+
+        val row = ContributorRow.fromStripe(stripeHook)
+        EmailService.thank(row)
+
         val stripeService = paymentServices.stripeServices(stripeHook.mode)
         stripeService.processPaymentHook(stripeHook)
           .value.map {

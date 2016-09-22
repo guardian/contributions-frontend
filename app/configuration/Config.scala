@@ -13,6 +13,7 @@ object Config {
   val contributeUrl = config.getString("contribute.url")
   val facebookAppId = config.getString("facebook.app.id")
   val idWebAppUrl = config.getString("identity.webapp.url")
+  val emailSQSQueue = config.getString("emailSQSQueue")
 
   val stage = config.getString("stage")
   val stageProd: Boolean = stage == "PROD"
