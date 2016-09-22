@@ -5,14 +5,30 @@ const initialState = {
     steps: [false, false, false, false]
 };
 
+// return a copy of `array` with element `i` having its value replaced with `value`
+const replace = (array, i, value) => {
+    let newArray = array.slice();
+
+    if (i >= 0 && i < array.length) {
+        newArray[i] = value
+    }
+
+    return newArray;
+};
+
 export default function trackingReducer(state = initialState, action) {
-    if (action.type === TRACK_STEP && action.step > 0 && action.step < state.steps.length) {
-        state.steps[action.step] = true;
-        return state;
-    } else if (action.type == GA_ENABLED) {
-        state.enabled = action.enabled;
-        return state;
-    } else {
-        return state;
+    switch (action.type) {
+        case TRACK_STEP:
+            return Object.assign({}, state, {
+                steps: replace(state.steps, action.step, true)
+            });
+
+        case GA_ENABLED:
+            return Object.assign({}, state, {
+                enabled: action.enabled
+            });
+
+        default:
+            return state;
     }
 }
