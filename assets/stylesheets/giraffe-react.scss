@@ -170,7 +170,7 @@ $control-spacing: 5px;
     margin-bottom: auto;
 
     @include mq(tablet) {
-        height: 350px;
+        min-height: 350px;
     }
 }
 
