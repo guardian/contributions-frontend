@@ -115,6 +115,8 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     }
   }
 
+  case class SavedContributionData(contributor: Contributor, contributionMetaData: ContributionMetaData)
+
   def storeMetaData(
     paymentId: String,
     chosenVariants: ChosenVariants,
@@ -122,7 +124,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     intCmp: Option[String],
     ophanId: Option[String],
     idUser: Option[String]
-  ): Either[String,String ] = {
+  ): Either[String, SavedContributionData] = {
     val result = for {
       payment <- Try(Payment.get(apiContext, paymentId))
       transaction <- Try(payment.getTransactions.asScala.head)
@@ -166,11 +168,12 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
       contributionData.insertPaymentMetaData(metadata)
       contributionData.saveContributor(contributor)
+      SavedContributionData(contributor, metadata)
 
     }
 
     result match {
-      case Success(_) => Right(paymentId)
+      case Success(savedData) => Right(savedData)
       case Failure(exception) =>
         Logger.error("Unable to store contribution metadata", exception)
         Left("Unable to store contribution metadata")

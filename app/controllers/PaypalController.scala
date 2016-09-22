@@ -42,27 +42,13 @@ class PaypalController(
     val idUser = IdentityUser.fromRequest(request).map(_.id)
 
     paypalService.executePayment(paymentId, payerId) match {
-      case Right(executedPayment) =>
-        paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser)
-        getEmail(executedPayment) match {
-          case Some(email) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> email))
-          case None =>
-            Logger.error(s"No email returned from Paypal payment execution paymentId=$paymentId")
-            redirectWithCampaignCodes(thanksUrl)
+      case Right(_) =>
+        paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser) match {
+          case Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
+          case Left(_) => redirectWithCampaignCodes(thanksUrl)
         }
       case Left(error) => handleError(countryGroup, s"Error executing PayPal payment: $error")
     }
-  }
-
-  private def getEmail(payment: Payment): Option[String] = {
-    for {
-      payer <- Option(payment.getPayer)
-      payerInfo <- Option(payer.getPayerInfo)
-      email <- Option(payerInfo.getEmail)
-    }
-      yield {
-        email
-      }
   }
 
   case class AuthRequest(
