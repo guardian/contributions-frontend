@@ -9,9 +9,6 @@ import {ALL_PAGES, PAGES} from 'src/constants';
 export default class MobileWrapper extends React.Component {
 
     render() {
-        if (this.props.paymentMethodsTest.isControl())
-            return this.renderInForm(ALL_PAGES);
-        else
         if (this.props.page == PAGES.CONTRIBUTION)
             return this.renderInForm([PAGES.CONTRIBUTION]);
         else
@@ -40,11 +37,10 @@ export default class MobileWrapper extends React.Component {
                         payWithPaypal={this.props.payWithPaypal}
                         payWithCard={this.props.payWithCard}
                         jumpToFirstPage={this.props.jumpToFirstPage}
-                        paymentMethodsTest={this.props.paymentMethodsTest}
                         mobile={true}
                         clearPaymentFlags={this.props.clearPaymentFlags}/>
 
-                    {(!this.props.processing || this.props.paymentMethodsTest.isControl()) && p== PAGES.CONTRIBUTION && <LegalNotice countryGroup={this.props.countryGroup}/>}
+                    {!this.props.processing  && p== PAGES.CONTRIBUTION && <LegalNotice countryGroup={this.props.countryGroup}/>}
                 </section>
             )}
         </form>;
