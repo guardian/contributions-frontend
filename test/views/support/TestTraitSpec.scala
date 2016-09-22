@@ -49,7 +49,7 @@ class TestTraitSpec extends WordSpec with MustMatchers {
       override def name: String = "something"
       override def slug: String = "somethingElse"
 
-      override def variants: NonEmptyList[Variant] = weights.map { case (name, weight, countries) => makeVariant(name, "slug", weight, PaymentMethodVariantData(Set(PAYPAL)), countries.toSet) }
+      override def variants: NonEmptyList[Variant] = weights.map { case (name, weight, countries) => makeVariant(name, "slug", weight, Some(PaymentMethodVariantData(Set(PAYPAL))), countries.toSet) }
     }
     TestImp
   }
