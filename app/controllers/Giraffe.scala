@@ -130,10 +130,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
 
     val responseWithTests = (for {
       testId <- request.cookies.get(Test.TestIdCookieName)
-      variantSlug <- request.cookies.get(Test.variantCookieName(variant))
+      variantSlug <- request.cookies.get(Test.cookieName(variant))
     } yield response) getOrElse response.withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
 
-    responseWithTests.discardingCookies(Test.allTests.filterNot(t => t.slug == variant.testSlug) map(t => DiscardingCookie(Test.testCookieName(t))): _*)
+    responseWithTests.discardingCookies(Test.allTests.filterNot(t => t.slug == variant.testSlug) map(t => DiscardingCookie(Test.cookieName(t))): _*)
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>

@@ -147,11 +147,12 @@ object Test {
 
   val allTests = List(AmountHighlightTest, PaymentMethodTest, RecurringPaymentTest)
 
+  def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
+  def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"
+
   def testIdFor[A](request: Request[A]): Int = request.cookies.get(TestIdCookieName) map(_.value.toInt) getOrElse Random.nextInt(MaxTestId)
   def testIdCookie(id: Int) = Cookie(TestIdCookieName, id.toString, maxAge = Some(604800))
-  def variantCookie(v: Variant) = Cookie(variantCookieName(v), v.variantSlug, maxAge = Some(604800))
-  def variantCookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
-  def testCookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"
+  def variantCookie(v: Variant) = Cookie(cookieName(v), v.variantSlug, maxAge = Some(604800))
 
   def pickVariant[A](countryGroup: CountryGroup, request: Request[A], test: TestTrait): Variant = {
     def pickRandomly: Variant = {
