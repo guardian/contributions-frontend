@@ -181,15 +181,15 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
     for {
       data <- XorT.fromXor[Future](contributionDataToSave)
-      contributionMetaData <- XorT.right(contributionData.insertPaymentMetaData(data.contributionMetaData))
-      contributor <- XorT.right(contributionData.saveContributor(data.contributor))
+      contributionMetaData <- contributionData.insertPaymentMetaData(data.contributionMetaData)
+      contributor <- contributionData.saveContributor(data.contributor)
     } yield SavedContributionData(
       contributor = contributor,
       contributionMetaData = contributionMetaData
     )
   }
 
-  def updateMarketingOptIn(email: String, marketingOptInt: Boolean): Future[Contributor] = {
+  def updateMarketingOptIn(email: String, marketingOptInt: Boolean): XorT[Future, String, Contributor] = {
     val contributor = Contributor(
       email = email,
       marketingOptIn = Some(marketingOptInt),
@@ -207,7 +207,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paymentHook: PaymentHook): Future[PaymentHook] = {
+  def processPaymentHook(paymentHook: PaymentHook): XorT[Future, String, PaymentHook] = {
     contributionData.insertPaymentHook(paymentHook)
   }
 

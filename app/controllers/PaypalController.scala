@@ -5,7 +5,7 @@ import cats.data.Xor
 import com.gu.i18n.{CountryGroup, Currency}
 import models.PaymentHook
 import play.api.libs.ws.WSClient
-import play.api.mvc.{BodyParsers, Controller}
+import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
 import play.api.data.Form
@@ -122,18 +122,25 @@ class PaypalController(
     val paypalService = paymentServices.paypalServiceFor(request)
     val validHook = paypalService.validateEvent(request.headers.toSimpleMap, bodyText)
 
-    bodyJson.validate[PaymentHook] match {
-      case JsSuccess(paymentHook, _) if validHook =>
-        paypalService.processPaymentHook(paymentHook).map { _ =>
+    def withParsedPaymentHook(paymentHookJson: JsValue)(block: PaymentHook => Future[Result]): Future[Result] = {
+      bodyJson.validate[PaymentHook] match {
+        case JsSuccess(paymentHook, _) if validHook =>
           Logger.info(s"Received paymentHook: ${paymentHook.paymentId}")
-          Ok
-        }
-      case JsError(errors) =>
-        Logger.error(s"Unable to parse Json, parsing errors: $errors")
-        Future.successful(InternalServerError("Unable to parse json payload"))
-      case _ =>
-        Logger.error(s"A webhook request wasn't valid: $request, headers: ${request.headers.toSimpleMap},body: $bodyText")
-        Future.successful(Forbidden("Request isn't signed by Paypal"))
+          block(paymentHook)
+        case JsError(errors) =>
+          Logger.error(s"Unable to parse Json, parsing errors: $errors")
+          Future.successful(InternalServerError("Unable to parse json payload"))
+        case _ =>
+          Logger.error(s"A webhook request wasn't valid: $request, headers: ${request.headers.toSimpleMap},body: $bodyText")
+          Future.successful(Forbidden("Request isn't signed by Paypal"))
+      }
+    }
+
+    withParsedPaymentHook(bodyJson) { paymentHook =>
+      paypalService.processPaymentHook(paymentHook).value.map {
+        case Xor.Right(_) => Ok
+        case Xor.Left(_) => InternalServerError
+      }
     }
   }
   case class MetadataUpdate(marketingOptIn: Boolean)
@@ -148,7 +155,7 @@ class PaypalController(
     implicit request =>
       val paypalService = paymentServices.paypalServiceFor(request)
       val contributor = request.session.data.get("email") match {
-        case Some(email) => paypalService.updateMarketingOptIn(email, request.body.marketingOptIn)
+        case Some(email) => paypalService.updateMarketingOptIn(email, request.body.marketingOptIn).value
         case None => Future.successful(Logger.error("email not found in session while trying to update marketing opt in"))
       }
       contributor.map { _ =>
