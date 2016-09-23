@@ -45,7 +45,7 @@ class PaypalController(
 
     paypalService.executePayment(paymentId, payerId) match {
       case Right(_) =>
-        paypalService.storeMetaData(paymentId, variant, cmp, intCmp, ophanId, idUser) match {
+        paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser) match {
           case Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
           case Left(_) => redirectWithCampaignCodes(thanksUrl)
         }

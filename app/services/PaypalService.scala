@@ -120,7 +120,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   def storeMetaData(
     paymentId: String,
-    variant: Variant,
+    variants: Seq[Variant],
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String],
@@ -138,7 +138,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         created = created,
         email = payerInfo.getEmail,
         ophanId = ophanId,
-        abTests = Json.toJson(variant),
+        abTests = Json.toJson(variants),
         cmp = cmp,
         intCmp = intCmp
       )
