@@ -43,7 +43,7 @@ trait AppComponents extends PlayComponents {
     val dbConfig = config.getConfig("dbConf")
     def contributionDataFor(mode: Mode) = {
       val modeKey = dbConfig.getString(mode.name)
-      new ContributionData(dbApi.database(modeKey))
+      new ContributionData(dbApi.database(modeKey))(jdbcExecutionContext) // explicit execution context to avoid blocking the app
     }
     Mode.all.map(mode => mode -> contributionDataFor(mode)).toMap
   }

@@ -1,13 +1,22 @@
 package data
 
+import java.sql.Connection
+
 import anorm._
 import data.AnormMappings._
 import models.{ContributionMetaData, Contributor, PaymentHook}
 import play.api.db.Database
 
-class ContributionData(db: Database) {
-  def insertPaymentHook(paymentHook: PaymentHook): Unit = {
-    db.withConnection(autocommit = true) { implicit conn =>
+import scala.concurrent.{ExecutionContext, Future}
+
+class ContributionData(db: Database)(implicit ec: ExecutionContext) {
+
+  def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A): Future[A] = Future {
+    db.withConnection(autocommit)(block)
+  }
+
+  def insertPaymentHook(paymentHook: PaymentHook): Future[PaymentHook] = {
+    withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO payment_hooks(
           contributionid,
@@ -44,11 +53,12 @@ class ContributionData(db: Database) {
           status = excluded.status,
           email = excluded.email"""
       request.execute()
+      paymentHook
     }
   }
 
-  def insertPaymentMetaData(pmd: ContributionMetaData): Unit = {
-    db.withConnection(autocommit = true) { implicit conn =>
+  def insertPaymentMetaData(pmd: ContributionMetaData): Future[ContributionMetaData] = {
+    withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO contribution_metadata(
           contributionid,
@@ -76,11 +86,12 @@ class ContributionData(db: Database) {
           cmp = excluded.cmp,
           intcmp = excluded.intcmp"""
       request.execute()
+      pmd
     }
   }
 
-  def saveContributor(contributor: Contributor): Unit = {
-    db.withConnection(autocommit = true) { implicit conn =>
+  def saveContributor(contributor: Contributor): Future[Contributor] = {
+    withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO live_contributors(
           receipt_email,
@@ -109,6 +120,7 @@ class ContributionData(db: Database) {
           marketingoptin = COALESCE(excluded.marketingoptin, live_contributors.marketingoptin
         )"""
       request.execute()
+      contributor
     }
   }
 }
