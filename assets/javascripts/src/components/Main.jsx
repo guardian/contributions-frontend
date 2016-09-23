@@ -40,7 +40,8 @@ function mapStateToProps(state) {
         cardPay: state.page.cardPay,
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests),
-        countryGroup: state.data.countryGroup
+        countryGroup: state.data.countryGroup,
+        reducedCheckout: abTests.reducedCheckout(state.data.abTests)
     };
 }
 
@@ -74,6 +75,9 @@ function mapDispatchToProps(dispatch) {
 
 class Main extends React.Component {
     componentFor(page) {
+        if(this.props.reducedCheckout && page != PAGES.CONTRIBUTION){
+            page = PAGES.PAYMENT;
+        }
         switch (page) {
             case PAGES.CONTRIBUTION:
                 return <Contribution amounts={this.props.amounts}
@@ -94,6 +98,9 @@ class Main extends React.Component {
                                 updateCard={this.props.updateCard}
                                 error={this.props.paymentError}
                                 countryGroup={this.props.countryGroup}
+                                reducedCheckout={this.props.reducedCheckout}
+                                details={this.props.details}
+                                updateDetails={this.props.updateDetails}
                 />;
         }
     }

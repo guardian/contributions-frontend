@@ -38,7 +38,7 @@ object Variant {
       (__ \ "variantSlug").write[String] and
       (__ \ "weight").write[Double] and
       (__ \ "data").writeNullable[VariantData]
-    )(v => (v.testName, v.testSlug, v.variantName, v.variantSlug, v.weight, v.data))
+    ) (v => (v.testName, v.testSlug, v.variantName, v.variantSlug, v.weight, v.data))
 }
 
 trait TestTrait {
@@ -54,7 +54,7 @@ trait TestTrait {
     def filterVariants(countryGroup: CountryGroup) = variants.list.filter(_.matches(countryGroup)).toSet
 
     CountryGroup.allGroups.map(country => country -> filterVariants(country)).toMap
-  }
+    }
 
   val variantRangesByCountry: Map[CountryGroup, Seq[(Double, Variant)]] = {
    def addRanges(filteredVariants: Set[Variant]): Seq[(Double, Variant)] = {
@@ -66,12 +66,26 @@ trait TestTrait {
      cdf.zip(filteredVariantList)
    }
 
-    variantsByCountry.map { case (country, variants) => country -> addRanges(variants)}
+    variantsByCountry.map { case (country, variants) => country -> addRanges(variants) }
   }
+}
+
+object ReducedCheckoutTest extends TestTrait {
+  def name = "ReducedCheckoutTest"
+
+  def slug = "2sc"
+
+  def variants = NonEmptyList(
+    makeVariant("control", "c", 1, None),
+    makeVariant("test", "t", 1, None)
+  )
+
+
 }
 
 object AmountHighlightTest extends TestTrait {
   def name = "AmountHighlightTest"
+
   def slug = "highlight"
 
   case class AmountVariantData(values: List[Int], preselect: Option[Int]) extends VariantData
@@ -114,7 +128,7 @@ object Test {
   val CookiePrefix     = "gu.contributions.test"
   val TestIdCookieName = s"$CookiePrefix.id"
 
-  val allTests = List(AmountHighlightTest, RecurringPaymentTest)
+  val allTests = List(AmountHighlightTest, RecurringPaymentTest, ReducedCheckoutTest)
 
   def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
   def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"
@@ -128,6 +142,7 @@ object Test {
   def variantCookie(v: Variant) = Cookie(cookieName(v), v.variantSlug, maxAge = Some(604800))
 
   def pickVariant[A](countryGroup: CountryGroup, request: Request[A], test: TestTrait): Variant = {
+
     def pickRandomly: Variant = {
       val n = Random.nextDouble
       test.variantRangesByCountry(countryGroup).dropWhile(_._1 < n).head._2

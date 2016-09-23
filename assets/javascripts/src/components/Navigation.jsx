@@ -6,6 +6,9 @@ import { PAGES } from 'src/constants';
 
 export default class Navigation extends React.Component {
     classNameFor(page) {
+        if(this.props.reducedCheckout && page === PAGES.DETAILS){
+            return 'payment';
+        }
         switch(page) {
             case PAGES.CONTRIBUTION:
                 return 'contribution';
@@ -17,11 +20,12 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-        const showForward = !this.props.processing && this.props.page == PAGES.DETAILS;
-        const showBack = !this.props.processing && this.props.page !== PAGES.CONTRIBUTION;
-        const showPay = !this.props.processing && !!this.props.amount && this.props.page === PAGES.PAYMENT;
-        const isFirstPage = !this.props.processing && this.props.page === PAGES.CONTRIBUTION;
-        const showMobileBack = !this.props.processing && this.props.page == PAGES.PAYMENT;
+        const processing = this.props.processing;
+        const isFirstPage = !processing && this.props.page === PAGES.CONTRIBUTION;
+        const showMobileBack = !processing && this.props.page == PAGES.PAYMENT;
+        const showBack = !processing && this.props.page !== PAGES.CONTRIBUTION;
+        const showPay = !processing && ((!!this.props.amount && this.props.page === PAGES.PAYMENT)||(this.props.reducedCheckout&&!isFirstPage));
+        const showForward = !(isFirstPage || showPay || processing);
 
         return <div className={'contribute-navigation ' + this.classNameFor(this.props.page)}>
         {showBack && <Back type="button" className="action--secondary contribute-navigation__back hidden-mobile" onClick={this.props.goBack}>Back</Back>}
@@ -30,7 +34,7 @@ export default class Navigation extends React.Component {
         {showMobileBack && <Back className="action--secondary contribute-navigation__back show-mobile" onClick={this.props.jumpToFirstPage}>Back</Back>}
         {isFirstPage &&  <Forward className="contribute-navigation__button action action--button contribute-navigation__next action--next contribute_card__button" onClick={this.props.clearPaymentFlags}>{"Contribute with debit/credit card"}</Forward>}
         {isFirstPage && <Forward className="contribute-navigation__button action action--button  paypal__button" onClick={this.props.payWithPaypal}>Contribute with</Forward>}
-        {this.props.processing && <Spinner text="Processing" />}
+        {processing && <Spinner text="Processing" />}
         </div>;
     }
 }
