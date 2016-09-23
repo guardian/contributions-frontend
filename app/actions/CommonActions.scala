@@ -15,4 +15,7 @@ object CommonActions {
   private def resultModifier(f: Result => Result) = new ActionBuilder[Request] {
     def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request).map(f)
   }
+
+  def BasicAuthAction[A](user: String, password: String)(action: Action[A]) = BasicAuth.apply(user, password)(action)
+
 }
