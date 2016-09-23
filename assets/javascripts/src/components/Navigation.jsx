@@ -17,18 +17,18 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-        const paymentMethods = this.props.paymentMethodsTest.paymentMethods;
-        const isPaymentMethodsControl = this.props.paymentMethodsTest.isControl();
-        const showForward = !this.props.processing && this.props.page == PAGES.DETAILS;
+        const paymentMethods = this.props.paymentMethodsTest && this.props.paymentMethodsTest.paymentMethods;
+        const isPaymentMethodsControl = this.props.paymentMethodsTest && this.props.paymentMethodsTest.isControl();
+
+        const showForward = !this.props.processing && this.props.page === PAGES.DETAILS;
         const showBack = !this.props.processing && this.props.page !== PAGES.CONTRIBUTION;
         const showPay = !this.props.processing && !!this.props.amount && this.props.page === PAGES.PAYMENT;
         const isFirstPage = !this.props.processing && this.props.page === PAGES.CONTRIBUTION;
-        const showMobileBack = !this.props.processing && this.props.page == PAGES.PAYMENT && !(isPaymentMethodsControl && this.props.mobile);
+        const showMobileBack = !this.props.processing && this.props.page === PAGES.PAYMENT && !(isPaymentMethodsControl && this.props.mobile);
 
-
-        const showPaypal = isFirstPage && paymentMethods.indexOf("PAYPAL") >= 0;
-        const showCard = isFirstPage && paymentMethods.indexOf("CARD") >= 0 && !(isPaymentMethodsControl && this.props.mobile);
-        const cardButtonLabel = isPaymentMethodsControl ? "Next" : "Contribute with debit/credit card";
+        const showPaypal = isFirstPage && paymentMethods && paymentMethods.indexOf("PAYPAL") >= 0;
+        const showCard = isFirstPage && (!paymentMethods || (paymentMethods && paymentMethods.indexOf("CARD") >= 0 && !(isPaymentMethodsControl && this.props.mobile)));
+        const cardButtonLabel = !paymentMethods || isPaymentMethodsControl ? "Next" : "Contribute with debit/credit card";
         const showProcessing = this.props.processing && !(this.props.page == PAGES.CONTRIBUTION && isPaymentMethodsControl);
 
         return <div className={'contribute-navigation ' + this.classNameFor(this.props.page)}>

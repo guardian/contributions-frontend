@@ -15,7 +15,8 @@ export default function cardReducer(state = initialState, action) {
             return Object.assign({}, state, action.card);
 
         case SET_AMOUNT:
-            return Object.assign({}, state, { amount: formatCurrency(action.amount) });
+            const formatted = formatCurrency(action.amount);
+            return Object.assign({}, state, { amount: isNaN(formatted) ? 0 : formatted });
 
         default:
             return state;

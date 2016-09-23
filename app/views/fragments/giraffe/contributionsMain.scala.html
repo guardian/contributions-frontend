@@ -1,15 +1,13 @@
 @import com.gu.i18n.CountryGroup
-@import views.support.ChosenVariants
 @import views.support.PageInfo
-@import views.support.Asset
 @import views.support.CountryGroupImplicits._
 
-@import play.api.libs.json.Json
 @(pageInfo: PageInfo = views.support.PageInfo(),
-countryGroup: CountryGroup,
-maxAmount: Option[Int] = None,
-mainScript: Option[String] = None,
-errorMessage:Option[String])(content: Html)
+    countryGroup: CountryGroup,
+    maxAmount: Option[Int] = None,
+    mainScript: Option[String] = None,
+    errorMessage:Option[String])(content: Html)
+
 @main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
     <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
 

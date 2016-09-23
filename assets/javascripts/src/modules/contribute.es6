@@ -39,7 +39,7 @@ export function init() {
  * @returns {{abTests, maxAmount: number, countryGroup, currency}}
  */
 function appDataFrom(container) {
-    const { currency, ...countryGroup } = JSON.parse(container.getAttribute('data-country-group'))
+    const { currency, ...countryGroup } = JSON.parse(container.getAttribute('data-country-group'));
 
     return {
         abTests: JSON.parse(container.getAttribute('data-ab-tests')),

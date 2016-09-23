@@ -107,12 +107,14 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
     )
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
+
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
+    val mvtId = Test.testIdFor(request)
     val errorMessage = error.map(_.message)
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
-    val chosenVariants: ChosenVariants = Test.getContributePageVariants(countryGroup, request)
+    val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
     val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,
@@ -124,8 +126,14 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
     val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears, errorMessage))
-      .withCookies(chosenVariants.variants.map(Test.createCookie):_*)
+    val response = Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp, creditCardExpiryYears, errorMessage))
+
+    val responseWithTests = (for {
+      testId <- request.cookies.get(Test.TestIdCookieName)
+      variantSlug <- request.cookies.get(Test.variantCookieName(variant))
+    } yield response) getOrElse response.withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
+
+    responseWithTests.discardingCookies(Test.allTests.filterNot(t => t.slug == variant.testSlug) map(t => DiscardingCookie(Test.testCookieName(t))): _*)
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>

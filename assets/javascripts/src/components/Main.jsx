@@ -118,11 +118,10 @@ class Main extends React.Component {
     }
 
     render() {
-
         const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
         return <div>
             <MediaQuery query='(max-width: 740px)'>
-                {this.renderSummary(showSummary && !this.props.paymentMethodsTest.isControl())}
+                {this.renderSummary(showSummary && !(this.props.paymentMethodsTest && this.props.paymentMethodsTest.isControl()))}
                 <MobileWrapper submit={this.submit.bind(this, true)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
 
@@ -132,8 +131,8 @@ class Main extends React.Component {
             </MediaQuery>
         </div>
     }
+
     renderSummary(visible) {
-        const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
         return <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={visible} />
     }
 }

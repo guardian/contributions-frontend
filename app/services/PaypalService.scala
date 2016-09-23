@@ -6,7 +6,7 @@ import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
 import com.paypal.api.payments._
 import com.paypal.base.Constants
-import com.paypal.base.rest.{APIContext}
+import com.paypal.base.rest.APIContext
 
 import scala.collection.JavaConverters._
 import com.typesafe.config.Config
@@ -14,7 +14,8 @@ import data.ContributionData
 import models.{ContributionMetaData, Contributor, PaymentHook}
 import org.joda.time.DateTime
 import play.api.Logger
-import views.support.ChosenVariants
+import play.api.libs.json.Json
+import views.support.Variant
 
 import scala.math.BigDecimal.RoundingMode
 import scala.util.{Failure, Success, Try}
@@ -119,7 +120,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   def storeMetaData(
     paymentId: String,
-    chosenVariants: ChosenVariants,
+    variant: Variant,
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String],
@@ -137,7 +138,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         created = created,
         email = payerInfo.getEmail,
         ophanId = ophanId,
-        abTests = chosenVariants.asJson,
+        abTests = Json.toJson(variant),
         cmp = cmp,
         intCmp = intCmp
       )
