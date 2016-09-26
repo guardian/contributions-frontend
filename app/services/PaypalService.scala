@@ -21,7 +21,7 @@ import views.support.Variant
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
 
@@ -49,13 +49,13 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  private def asyncExecute[A](block: => A): Future[Xor[String, A]] = Future {
+  private def asyncExecute[A](block: => A): XorT[Future, String, A] = XorT(Future {
     val result = Try(block)
     Xor.fromTry(result).leftMap { exception =>
       Logger.error("Error while calling PayPal API", exception)
       "Error while calling PayPal API"
     }
-  }
+  })
 
   def getAuthUrl(
     amount: BigDecimal,
@@ -100,7 +100,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     val res = asyncExecute {
       val links = payment.create(apiContext).getLinks.asScala
       links.find(_.getRel.equalsIgnoreCase("approval_url")).map(l => addUserActionParam(l.getHref))
-    } map {
+    }.value map {
       case Xor.Right(None) => Xor.left("No approval link returned from PayPal")
       case Xor.Right(Some(link)) => Xor.right(link)
       case Xor.Left(error) => Xor.left(error)
@@ -113,7 +113,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
   def executePayment(paymentId: String, payerId: String): XorT[Future, String, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
-    val paymentResponse = asyncExecute(payment.execute(apiContext, paymentExecution)) map {
+    val paymentResponse = asyncExecute(payment.execute(apiContext, paymentExecution)).value map {
       case Xor.Right(payment) if (payment.getState.toUpperCase != "APPROVED") => Xor.left(s"payment returned with state: ${payment.getState}")
       case Xor.Right(payment) => Xor.right(payment)
       case Xor.Left(error) => Xor.left(error)
