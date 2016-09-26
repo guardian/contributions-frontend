@@ -13,7 +13,6 @@ import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
 
-import scala.util.Right
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -89,8 +88,11 @@ class PaypalController(
 
   def authorize = NoCacheAction.async(parse.json) { request =>
     request.body.validate[AuthRequest] match {
+
       case JsSuccess(authRequest, _) =>
+
         val paypalService = paymentServices.paypalServiceFor(request)
+
         val authResponse = paypalService.getAuthUrl(
           amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
           countryGroup = authRequest.countryGroup,
@@ -99,6 +101,7 @@ class PaypalController(
           intCmp = authRequest.intCmp,
           ophanId = authRequest.ophanId
         )
+
         authResponse.value map {
           case Xor.Right(url) => Ok(Json.toJson(AuthResponse(url)))
           case Xor.Left(error) =>
