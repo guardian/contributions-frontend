@@ -13,7 +13,6 @@ import play.api.mvc.{Cookie, Request}
 import scala.util.Random
 import scalaz.NonEmptyList
 import views.support.AmountHighlightTest.AmountVariantData
-import views.support.PaymentMethodTest.PaymentMethodVariantData
 
 sealed trait VariantData
 
@@ -22,7 +21,6 @@ object VariantData {
     def writes(o: VariantData): JsValue = {
       o match {
         case amount: AmountVariantData => AmountVariantData.format.writes(amount)
-        case paymentMethods: PaymentMethodVariantData => PaymentMethodVariantData.format.writes(paymentMethods)
       }
     }
   }
@@ -103,34 +101,6 @@ object AmountHighlightTest extends TestTrait {
   )
 }
 
-object PaymentMethodTest extends TestTrait {
-
-  def name = "PaymentMethodTest"
-
-  def slug = "paymentMethods"
-
-  case class PaymentMethodVariantData(paymentMethods: Set[PaymentMethod]) extends VariantData
-
-  object PaymentMethodVariantData {
-    implicit val format: Writes[PaymentMethodVariantData] = Json.writes[PaymentMethodVariantData]
-  }
-
-  sealed trait PaymentMethod
-
-  case object CARD extends PaymentMethod
-
-  case object PAYPAL extends PaymentMethod
-
-  implicit val paymentMethodFormatter: Writes[PaymentMethod] = new Writes[PaymentMethod] {
-    def writes(method: PaymentMethod): JsValue = JsString(method.toString)
-  }
-
-  def variants = NonEmptyList(
-    makeVariant("Control", "control", 0.5, Some(PaymentMethodVariantData(Set(CARD)))),
-    makeVariant("Paypal", "paypal", 0.5, Some(PaymentMethodVariantData(Set(CARD, PAYPAL))))
-  )
-}
-
 object RecurringPaymentTest extends TestTrait {
   def name = "RecurringPaymentTest"
   def slug = "recurringPayment"
@@ -173,7 +143,6 @@ object Test {
   def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
     ChosenVariants(Seq(
       pickVariant(countryGroup, request, AmountHighlightTest),
-      pickVariant(countryGroup, request, PaymentMethodTest),
       pickVariant(countryGroup, request, RecurringPaymentTest)
     ))
   }

@@ -40,7 +40,6 @@ function mapStateToProps(state) {
         cardPay: state.page.cardPay,
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests),
-        paymentMethodsTest: abTests.paymentMethods(state.data.abTests),
         countryGroup: state.data.countryGroup
     };
 }
@@ -83,7 +82,6 @@ class Main extends React.Component {
                                      setAmount={this.props.setAmount}
                                      currentAmount={this.props.card.amount}
                                      error={this.props.paymentError}
-                                     paymentMethodsTest={this.props.paymentMethodsTest}
                                      countryGroup={this.props.countryGroup}
                 />;
 
@@ -122,7 +120,7 @@ class Main extends React.Component {
         const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
         return <div>
             <MediaQuery query='(max-width: 740px)'>
-                {this.renderSummary(showSummary && !this.props.paymentMethodsTest.isControl())}
+                {this.renderSummary(showSummary)}
                 <MobileWrapper submit={this.submit.bind(this, true)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
 
