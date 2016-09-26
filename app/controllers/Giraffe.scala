@@ -128,10 +128,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
 
     val response = Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp, creditCardExpiryYears, errorMessage))
 
-    val responseWithTests = (for {
-      testId <- request.cookies.get(Test.TestIdCookieName)
-      variantSlug <- request.cookies.get(Test.cookieName(variant))
-    } yield response) getOrElse response.withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
+    val responseWithTests = {
+      if (request.cookies.get(Test.TestIdCookieName).isDefined && request.cookies.get(Test.cookieName(variant)).isDefined) response
+      else response.withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
+    }
 
     responseWithTests.discardingCookies(Test.allTests.filterNot(t => t.slug == variant.testSlug) map(t => DiscardingCookie(Test.cookieName(t))): _*)
   }
