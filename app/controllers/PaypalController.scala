@@ -88,7 +88,6 @@ class PaypalController(
 
   def authorize = NoCacheAction.async(parse.json) { request =>
     request.body.validate[AuthRequest] match {
-
       case JsSuccess(authRequest, _) =>
         val paypalService = paymentServices.paypalServiceFor(request)
         val authResponse = paypalService.getAuthUrl(
@@ -105,7 +104,6 @@ class PaypalController(
             Logger.error(s"Error getting PayPal auth url: $error")
             InternalServerError("Error getting PayPal auth url")
         }
-
       case JsError(error) =>
         Logger.error(s"Invalid request=$error")
         Future.successful(BadRequest(s"Invalid request=$error"))
