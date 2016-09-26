@@ -53,7 +53,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     val result = Try(block)
     Xor.fromTry(result).leftMap { exception =>
       Logger.error("Error while calling PayPal API", exception)
-      "Error while calling PayPal API"
+      exception.getMessage
     }
   })
 
