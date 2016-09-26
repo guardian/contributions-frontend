@@ -110,11 +110,13 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
 
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
     val mvtId = Test.testIdFor(request)
+    val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
+
     val errorMessage = error.map(_.message)
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
-    val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
+
     val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,
@@ -123,17 +125,17 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
+
     val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    val response = Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp, creditCardExpiryYears, errorMessage))
+    val inactiveTestsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix))
+      .filterNot(c => c.value == variant.testSlug)
+      .flatMap(c => Test.allTests.find(_.slug.equalsIgnoreCase(c.name)))
 
-    val responseWithTests = {
-      if (request.cookies.get(Test.TestIdCookieName).isDefined && request.cookies.get(Test.cookieName(variant)).isDefined) response
-      else response.withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
-    }
-
-    responseWithTests.discardingCookies(Test.allTests.filterNot(t => t.slug == variant.testSlug) map(t => DiscardingCookie(Test.cookieName(t))): _*)
+    Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp, creditCardExpiryYears, errorMessage))
+      .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
+      .discardingCookies(inactiveTestsInCookies.toSeq map (t => DiscardingCookie(Test.cookieName(t))): _*)
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
