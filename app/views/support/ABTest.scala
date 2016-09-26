@@ -160,7 +160,7 @@ object Test {
       test.variantRangesByCountry(countryGroup).dropWhile(_._1 < n).head._2
     }
 
-    def pickByQueryStringOrCookie[A]: Option[Variant] = {
+    def pickByQueryStringOrCookie: Option[Variant] = {
       val search: Option[String] = request.getQueryString(test.slug)
         .orElse(request.cookies.get(s"$CookiePrefix.${test.slug}").map(_.value))
       test.variantsByCountry(countryGroup).find(_.variantSlug == search.getOrElse(""))
