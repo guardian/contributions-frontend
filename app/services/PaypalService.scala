@@ -105,7 +105,6 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       case Xor.Right(createdPayment) => Xor.fromOption(getAuthLink(createdPayment), "No approval link returned from PayPal")
       case Xor.Left(error) => Xor.left(error)
     }
-
   }
 
   private def getAuthLink(payment: Payment) = {
