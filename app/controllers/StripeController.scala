@@ -1,10 +1,10 @@
 package controllers
 
 import actions.CommonActions._
-import cats.data.{Xor, XorT}
+import cats.data.Xor
 import cats.implicits._
 import com.typesafe.config.Config
-import models.{PaymentHook, SavedContributionData, StripeHook}
+import models.StripeHook
 import play.api.Logger
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{BodyParsers, Controller, Result}
@@ -18,13 +18,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
 
   def hook = SharedSecretAction(webhookKey) {
     NoCacheAction.async(BodyParsers.parse.json) { request =>
-      val stripeService = paymentServices.stripeServiceFor(request)
-      val idUser = IdentityUser.fromRequest(request).map(_.id)
-
-      def savePaymentHook(stripeHook: StripeHook)(savedContributionData: SavedContributionData): XorT[Future, String, PaymentHook] = {
-        val contributionId = savedContributionData.contributionMetaData.contributionId
-        stripeService.processPaymentHook(stripeHook, contributionId)
-      }
 
       def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result]): Future[Result] = {
         stripeHookJson.validate[StripeHook] match {
@@ -38,8 +31,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       }
 
       withParsedStripeHook(request.body) { stripeHook =>
-        stripeService.storeMetaData(stripeHook, idUser)
-          .flatMap(savePaymentHook(stripeHook))
+        val stripeService = paymentServices.stripeServices(stripeHook.mode)
+        stripeService.processPaymentHook(stripeHook)
+          .flatMap(_ => stripeService.storeMetaData(stripeHook))
           .value.map {
           case Xor.Right(_) => Ok
           case Xor.Left(_) => InternalServerError

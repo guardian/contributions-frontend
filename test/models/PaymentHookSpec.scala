@@ -6,7 +6,8 @@ import models.PaymentProvider.{Paypal, Stripe}
 import models.PaymentStatus.Paid
 import org.joda.time.DateTime
 import org.scalatest.{MustMatchers, WordSpec}
-import play.api.libs.json.{JsArray, JsObject, JsSuccess, Json}
+import play.api.libs.json.{JsArray, JsSuccess, Json}
+import services.PaymentServices.Testing
 
 class PaymentHookSpec extends WordSpec with MustMatchers {
 
@@ -56,7 +57,8 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         eventId = "evt_18u3jGCbpG0cQtlb9k9WRx6f",
         paymentId = "ch_18u3jGCbpG0cQtlbhYCnPcuz",
         balanceTransactionId = "txn_18u3jGCbpG0cQtlbFz3nsClh",
-        created = new DateTime(1473960774L),
+        mode = Testing,
+        created = new DateTime("2016-09-15T17:32:54Z"),
         currency = "GBP",
         amount = BigDecimal("25.00"),
         cardCountry = "US",
@@ -64,6 +66,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         name = "a",
         email = "a@a.a",
         postCode = None,
+        idUser = Some("123"),
         ophanId = "it4m6aomfvm3rlv0o1ov",
         abTests = JsArray(Seq(
           Json.obj(
@@ -99,17 +102,16 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
       val jsResult = stripeHook.map { stripeHook =>
         PaymentHook.fromStripe(
           stripeHook = stripeHook,
-          contributionId = UUID.fromString("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf"),
           convertedAmount = BigDecimal("20.00")
         )
       }
 
       jsResult mustBe a [JsSuccess[_]]
       jsResult.get mustEqual PaymentHook(
-        contributionId = UUID.fromString("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf"),
+        contributionId = UUID.fromString("0b28dd01-c07b-3c7d-87ab-7a3ae04ac261"),
         paymentId = "ch_18u3jGCbpG0cQtlbhYCnPcuz",
         provider = Stripe,
-        created = new DateTime(1473960774L),
+        created = new DateTime("2016-09-15T17:32:54Z"),
         currency = "GBP",
         cardCountry = Some("US"),
         amount = BigDecimal("25.00"),
@@ -202,7 +204,8 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
                           |        "ophanId": "it4m6aomfvm3rlv0o1ov",
                           |        "abTests": "[{\"testName\":\"AmountHighlightTest\",\"testSlug\":\"highlight\",\"variantName\":\"Amount - 50 highlight\",\"variantSlug\":\"50\"},{\"testName\":\"MessageCopyTest\",\"testSlug\":\"mcopy\",\"variantName\":\"Copy - control\",\"variantSlug\":\"control\"},{\"testName\":\"PaymentMethodTest\",\"testSlug\":\"paymentMethods\",\"variantName\":\"Paypal\",\"variantSlug\":\"paypal\"}]",
                           |        "email": "a@a.a",
-                          |        "name": "a"
+                          |        "name": "a",
+                          |        "idUser": "123"
                           |      },
                           |      "order": null,
                           |      "paid": true,

@@ -5,6 +5,7 @@ import java.util.UUID
 import models.PaymentProvider.{Paypal, Stripe}
 import org.joda.time.DateTime
 import play.api.libs.json._
+import services.PaymentServices.{Default, Mode, Testing}
 
 sealed trait PaymentProvider
 
@@ -79,8 +80,8 @@ object PaymentHook {
     email = None
   )
 
-  def fromStripe(stripeHook: StripeHook, contributionId: UUID, convertedAmount: BigDecimal): PaymentHook = PaymentHook(
-    contributionId = contributionId,
+  def fromStripe(stripeHook: StripeHook, convertedAmount: BigDecimal): PaymentHook = PaymentHook(
+    contributionId = UUID.nameUUIDFromBytes(stripeHook.paymentId.getBytes),
     paymentId = stripeHook.paymentId,
     provider = Stripe,
     created = stripeHook.created,
@@ -129,6 +130,7 @@ case class StripeHook(
   eventId: String,
   paymentId: String,
   balanceTransactionId: String,
+  mode: Mode,
   created: DateTime,
   currency: String,
   amount: BigDecimal,
@@ -137,6 +139,7 @@ case class StripeHook(
   name: String,
   email: String,
   postCode: Option[String],
+  idUser: Option[String],
   ophanId: String,
   abTests: JsValue,
   cmp: Option[String],
@@ -152,6 +155,7 @@ object StripeHook {
         payload <- (json \ "data" \ "object").validate[JsObject]
         metadata <- (payload \ "metadata").validate[JsObject]
         paymentId <- (payload \ "id").validate[String]
+        liveMode <- (payload \ "livemode").validate[Boolean]
         created <- (payload \ "created").validate[Long]
         currency <- (payload \ "currency").validate[String]
         amount <- (payload \ "amount").validate[Long]
@@ -160,6 +164,7 @@ object StripeHook {
         name <- (metadata \ "name").validate[String]
         email <- (metadata \ "email").validate[String]
         postCode <- (metadata \ "postcode").validateOpt[String]
+        idUser <- (metadata \ "idUser").validateOpt[String]
         ophanId <- (metadata \ "ophanId").validate[String]
         abTests <- (metadata \ "abTests").validate[String].map(Json.parse)
         cmp <- (metadata \ "cmp").validateOpt[String]
@@ -171,7 +176,8 @@ object StripeHook {
           eventId = eventId,
           paymentId = paymentId,
           balanceTransactionId = balanceTransactionId,
-          created = new DateTime(created),
+          mode = if (liveMode) Default else Testing,
+          created = new DateTime(created * 1000),
           currency = currency.toUpperCase,
           amount = BigDecimal(amount, 2),
           cardCountry = cardCountry,
@@ -179,6 +185,7 @@ object StripeHook {
           name = name,
           email = email,
           postCode = postCode,
+          idUser = idUser,
           ophanId = ophanId,
           abTests = abTests,
           cmp = cmp,

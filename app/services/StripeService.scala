@@ -15,9 +15,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contributionData: ContributionData)(implicit ec: ExecutionContext)
   extends MembershipStripeService(apiConfig = apiConfig, metrics = metrics) {
 
-  def storeMetaData(stripeHook: StripeHook, idUser: Option[String]): XorT[Future, String, SavedContributionData] = {
+  def storeMetaData(stripeHook: StripeHook): XorT[Future, String, SavedContributionData] = {
     val metadata = ContributionMetaData(
-      contributionId = UUID.randomUUID(),
+      contributionId = UUID.nameUUIDFromBytes(stripeHook.paymentId.getBytes),
       created = stripeHook.created,
       email = stripeHook.email,
       ophanId = Some(stripeHook.ophanId),
@@ -30,9 +30,9 @@ class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contribu
       name = Some(stripeHook.name),
       firstName = None,
       lastName = None,
-      idUser = idUser,
+      idUser = stripeHook.idUser,
       postCode = stripeHook.postCode,
-      marketingOptIn = None
+      marketingOptIn = stripeHook.marketingOptIn
     )
 
     for {
@@ -44,7 +44,7 @@ class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contribu
     )
   }
 
-  def processPaymentHook(stripeHook: StripeHook, contributionId: UUID): XorT[Future, String, PaymentHook] = {
+  def processPaymentHook(stripeHook: StripeHook): XorT[Future, String, PaymentHook] = {
 
     def findCharge(stripeHook: StripeHook): XorT[Future, String, Event[Charge]] = {
       OptionT(this.Event.findCharge(stripeHook.eventId))
@@ -59,7 +59,6 @@ class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contribu
     def toPaymentHook(balanceTransaction: BalanceTransaction): PaymentHook = {
       PaymentHook.fromStripe(
         stripeHook = stripeHook,
-        contributionId = contributionId,
         convertedAmount = BigDecimal(balanceTransaction.amount, 2)
       )
     }

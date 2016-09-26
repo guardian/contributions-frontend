@@ -150,6 +150,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
 
   def pay = NoCacheAction.async { implicit request =>
     val stripe = paymentServices.stripeServiceFor(request)
+    val idUser = IdentityUser.fromRequest(request).map(_.id)
 
     supportForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
       Future.successful(BadRequest(JsArray(withErrors.errors.map(k => JsString(k.key)))))
@@ -162,7 +163,10 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
         "ophanId" -> f.ophanId,
         "cmp" -> f.cmp.mkString,
         "intcmp" -> f.intcmp.mkString
-      ) ++ f.postcode.map("postcode" -> _)
+      ) ++ List(
+        f.postcode.map("postcode" -> _),
+        idUser.map("idUser" -> _)
+      ).flatten.toMap
       // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
       val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
       val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(f.currency) * 100
