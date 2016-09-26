@@ -90,9 +90,7 @@ class PaypalController(
     request.body.validate[AuthRequest] match {
 
       case JsSuccess(authRequest, _) =>
-
         val paypalService = paymentServices.paypalServiceFor(request)
-
         val authResponse = paypalService.getAuthUrl(
           amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
           countryGroup = authRequest.countryGroup,
@@ -101,7 +99,6 @@ class PaypalController(
           intCmp = authRequest.intCmp,
           ophanId = authRequest.ophanId
         )
-
         authResponse.value map {
           case Xor.Right(url) => Ok(Json.toJson(AuthResponse(url)))
           case Xor.Left(error) =>
