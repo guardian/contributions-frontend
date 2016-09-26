@@ -107,12 +107,16 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
     )
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
+
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
+    val mvtId = Test.testIdFor(request)
+    val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
+
     val errorMessage = error.map(_.message)
     val stripe = paymentServices.stripeServiceFor(request)
     val cmp = request.getQueryString("CMP")
     val intCmp = request.getQueryString("INTCMP")
-    val chosenVariants: ChosenVariants = Test.getContributePageVariants(countryGroup, request)
+
     val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,
@@ -121,11 +125,15 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
       description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
+
     val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, chosenVariants, cmp, intCmp, creditCardExpiryYears, errorMessage))
-      .withCookies(chosenVariants.variants.map(Test.createCookie):_*)
+    val testsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix)) map(_.name)
+
+    Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp, creditCardExpiryYears, errorMessage))
+      .discardingCookies(testsInCookies.toSeq map(DiscardingCookie(_)): _*)
+      .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>

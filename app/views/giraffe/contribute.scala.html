@@ -1,17 +1,17 @@
 @import com.gu.i18n.CountryGroup
-@import views.support.ChosenVariants
 @import views.support.PageInfo
 @import fragments.giraffe.contributionsMain
 @import views.support.CountryGroupImplicits._
-
 @import play.api.libs.json.Json
-@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, chosenVariants: ChosenVariants, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int], errorMessage: Option[String])
+@import views.support.Variant
+
+@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, variant: Variant, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int], errorMessage: Option[String])
 
 @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage) {
 
     <!-- react injects its components here -->
     <section id="contribute" class="contribute-container"
-    data-ab-tests="@Json.stringify(chosenVariants.asJson)"
+    data-ab-tests="@Json.stringify(Json.toJson(Seq(variant)))"
     data-country-group="@Json.stringify(Json.toJson(countryGroup))"
     data-max-amount="@maxAmount"
         @cmpCode.map(code => Html(s"""data-cmp-code="${code}""""))

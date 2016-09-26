@@ -17,13 +17,11 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-
         const showForward = !this.props.processing && this.props.page == PAGES.DETAILS;
         const showBack = !this.props.processing && this.props.page !== PAGES.CONTRIBUTION;
         const showPay = !this.props.processing && !!this.props.amount && this.props.page === PAGES.PAYMENT;
         const isFirstPage = !this.props.processing && this.props.page === PAGES.CONTRIBUTION;
         const showMobileBack = !this.props.processing && this.props.page == PAGES.PAYMENT;
-
 
         return <div className={'contribute-navigation ' + this.classNameFor(this.props.page)}>
         {showBack && <Back type="button" className="action--secondary contribute-navigation__back hidden-mobile" onClick={this.props.goBack}>Back</Back>}

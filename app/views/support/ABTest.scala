@@ -50,15 +50,13 @@ trait TestTrait {
     Variant(name, slug, variantName, variantSlug, weight, data, countryGroupFilter)
   }
 
- val variantsByCountry: Map[CountryGroup, Set[Variant]] = {
-
+  val variantsByCountry: Map[CountryGroup, Set[Variant]] = {
     def filterVariants(countryGroup: CountryGroup) = variants.list.filter(_.matches(countryGroup)).toSet
 
     CountryGroup.allGroups.map(country => country -> filterVariants(country)).toMap
-    }
+  }
 
   val variantRangesByCountry: Map[CountryGroup, Seq[(Double, Variant)]] = {
-
    def addRanges(filteredVariants: Set[Variant]): Seq[(Double, Variant)] = {
      val filteredVariantList = filteredVariants.toList
      val variantWeights = filteredVariantList.map(_.weight)
@@ -111,40 +109,49 @@ object RecurringPaymentTest extends TestTrait {
   )
 }
 
-case class ChosenVariants(variants: Seq[Variant]) {
-  def asJson = Json.toJson(variants)
-  def encodeURL = URLEncoder.encode(asJson.toString, StandardCharsets.UTF_8.name())
-}
-
 object Test {
+  private val MaxTestId = 100
+  val CookiePrefix     = "gu.contributions.test"
+  val TestIdCookieName = s"$CookiePrefix.id"
 
-  val allTests = List(AmountHighlightTest) // only used in unit tests
+  val allTests = List(AmountHighlightTest, RecurringPaymentTest)
+
+  def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
+  def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"
+
+  def testIdFor[A](request: Request[A]): Int = {
+    val id = request.cookies.get(TestIdCookieName) map(_.value.toInt) getOrElse Random.nextInt(MaxTestId)
+    if (id == 0) MaxTestId else id
+  }
+
+  def testIdCookie(id: Int) = Cookie(TestIdCookieName, id.toString, maxAge = Some(604800))
+  def variantCookie(v: Variant) = Cookie(cookieName(v), v.variantSlug, maxAge = Some(604800))
 
   def pickVariant[A](countryGroup: CountryGroup, request: Request[A], test: TestTrait): Variant = {
-
     def pickRandomly: Variant = {
       val n = Random.nextDouble
       test.variantRangesByCountry(countryGroup).dropWhile(_._1 < n).head._2
     }
 
-    def pickByQueryStringOrCookie[A]: Option[Variant] = {
+    def pickByQueryStringOrCookie: Option[Variant] = {
       val search: Option[String] = request.getQueryString(test.slug)
-        .orElse(request.cookies.get(test.slug + "_GIRAFFE_TEST").map(_.value))
-      test.variantsByCountry(countryGroup).find(_.variantSlug == search.getOrElse(None))
+        .orElse(request.cookies.get(s"$CookiePrefix.${test.slug}").map(_.value))
+      test.variantsByCountry(countryGroup).find(v => search.contains(v.variantSlug))
     }
 
     pickByQueryStringOrCookie getOrElse pickRandomly
   }
 
-  def createCookie(variant: Variant): Cookie = {
-    Cookie(variant.testSlug+"_GIRAFFE_TEST", variant.variantSlug, maxAge = Some(604800))
+  def pickTest[A](request: Request[A], userId: Int): TestTrait = {
+    def pickByQueryString = allTests.find(t => request.getQueryString(t.slug).nonEmpty)
+    def pickByCookie = allTests.find(t => request.cookies.get(s"$CookiePrefix.${t.slug}").nonEmpty)
+    def pickRandomly = allTests(userId % allTests.length)
+
+    pickByQueryString orElse pickByCookie getOrElse pickRandomly
   }
 
-  def getContributePageVariants[A](countryGroup: CountryGroup,request: Request[A]) = {
-    ChosenVariants(Seq(
-      pickVariant(countryGroup, request, AmountHighlightTest),
-      pickVariant(countryGroup, request, RecurringPaymentTest)
-    ))
+  def getContributePageVariant[A](countryGroup: CountryGroup, userId: Int, request: Request[A]): Variant = {
+    pickVariant(countryGroup, request, pickTest(request, userId))
   }
 }
 

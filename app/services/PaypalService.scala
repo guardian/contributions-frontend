@@ -16,7 +16,8 @@ import data.ContributionData
 import models._
 import org.joda.time.DateTime
 import play.api.Logger
-import views.support.ChosenVariants
+import play.api.libs.json.Json
+import views.support.Variant
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
@@ -121,7 +122,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   def storeMetaData(
     paymentId: String,
-    chosenVariants: ChosenVariants,
+    variants: Seq[Variant],
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String],
@@ -139,7 +140,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         created = created,
         email = payerInfo.getEmail,
         ophanId = ophanId,
-        abTests = chosenVariants.asJson,
+        abTests = Json.toJson(variants),
         cmp = cmp,
         intCmp = intCmp
       )

@@ -36,6 +36,7 @@ function testDataFor(tests, testName) {
 export function amounts(tests) {
     const data = testDataFor(tests, 'AmountHighlightTest');
     const defaultAmounts = [25, 50, 100, 250];
+
     return (data && data.values) || defaultAmounts;
 }
 

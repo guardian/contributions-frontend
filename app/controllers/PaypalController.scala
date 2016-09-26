@@ -38,15 +38,17 @@ class PaypalController(
     intCmp: Option[String],
     ophanId: Option[String]
   ) = NoCacheAction.async { implicit request =>
+    val mvtId = Test.testIdFor(request)
+
     def thanksUrl = routes.Giraffe.thanks(countryGroup).url
     def postPayUrl = routes.Giraffe.postPayment(countryGroup).url
-    val chosenVariants = Test.getContributePageVariants(countryGroup, request)
+    val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
     val paypalService = paymentServices.paypalServiceFor(request)
     val idUser = IdentityUser.fromRequest(request).map(_.id)
 
     paypalService.executePayment(paymentId, payerId) match {
       case Right(_) =>
-        paypalService.storeMetaData(paymentId, chosenVariants, cmp, intCmp, ophanId, idUser).value.map {
+        paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser).value.map {
           case Xor.Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
           case Xor.Left(_) => redirectWithCampaignCodes(thanksUrl)
         }

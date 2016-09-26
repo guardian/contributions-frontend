@@ -116,7 +116,6 @@ class Main extends React.Component {
     }
 
     render() {
-
         const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
         return <div>
             <MediaQuery query='(max-width: 740px)'>
@@ -130,8 +129,8 @@ class Main extends React.Component {
             </MediaQuery>
         </div>
     }
+
     renderSummary(visible) {
-        const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
         return <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={visible} />
     }
 }
