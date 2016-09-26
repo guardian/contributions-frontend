@@ -1,14 +1,11 @@
 @import views.support.PageInfo
 @(pageInfo: PageInfo)
 
-     @import configuration.Config
+ @import configuration.Config
     @import views.support.Asset
+@* Critical scripts that should execute as soon as possible, preventing layout thrashing *@
 
-
-    @* Critical scripts that should execute as soon as possible, preventing layout thrashing *@
-<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
-
-        <!--[if IE 9]>
+<!--[if IE 9]>
     <script src="@Asset.at("javascripts/lib/polyfills.min.js")"></script>
 <![endif]-->
 
@@ -143,29 +140,8 @@
 
     // find polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
     if (!Array.prototype.find) {
-      Array.prototype.find = function(predicate) {
-        'use strict';
-        if (this == null) {
-          throw new TypeError('Array.prototype.find called on null or undefined');
-        }
-        if (typeof predicate !== 'function') {
-          throw new TypeError('predicate must be a function');
-        }
-        var list = Object(this);
-        var length = list.length >>> 0;
-        var thisArg = arguments[1];
-        var value;
-
-        for (var i = 0; i < length; i++) {
-          value = list[i];
-          if (predicate.call(thisArg, value, i, list)) {
-            return value;
-          }
-        }
-        return undefined;
-      };
+      Array.prototype.find=function(r){"use strict";if(null==this)throw new TypeError("Array.prototype.find called on null or undefined");if("function"!=typeof r)throw new TypeError("predicate must be a function");for(var t,e=Object(this),n=e.length>>>0,o=arguments[1],i=0;n>i;i++)if(t=e[i],r.call(o,t,i,e))return t;return void 0};
     }
-
 
     // promise polyfill
     if (!window.Promise) {
@@ -174,80 +150,7 @@
 
     // Array.from polyfill, from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from#Polyfill
     if (!Array.from) {
-        Array.from = (function () {
-            var toStr = Object.prototype.toString;
-            var isCallable = function (fn) {
-                return typeof fn === 'function' || toStr.call(fn) === '[object Function]';
-            };
-            var toInteger = function (value) {
-                var number = Number(value);
-                if (isNaN(number)) { return 0; }
-                if (number === 0 || !isFinite(number)) { return number; }
-                return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
-            };
-            var maxSafeInteger = Math.pow(2, 53) - 1;
-            var toLength = function (value) {
-                var len = toInteger(value);
-                return Math.min(Math.max(len, 0), maxSafeInteger);
-            };
-
-            // The length property of the from method is 1.
-            return function from(arrayLike/*, mapFn, thisArg */) {
-                // 1. Let C be the this value.
-                var C = this;
-
-                // 2. Let items be ToObject(arrayLike).
-                var items = Object(arrayLike);
-
-                // 3. ReturnIfAbrupt(items).
-                if (arrayLike == null) {
-                    throw new TypeError("Array.from requires an array-like object - not null or undefined");
-                }
-
-                // 4. If mapfn is undefined, then let mapping be false.
-                var mapFn = arguments.length > 1 ? arguments[1] : void undefined;
-                var T;
-                if (typeof mapFn !== 'undefined') {
-                    // 5. else
-                    // 5. a If IsCallable(mapfn) is false, throw a TypeError exception.
-                    if (!isCallable(mapFn)) {
-                        throw new TypeError('Array.from: when provided, the second argument must be a function');
-                    }
-
-                    // 5. b. If thisArg was supplied, let T be thisArg; else let T be undefined.
-                    if (arguments.length > 2) {
-                        T = arguments[2];
-                    }
-                }
-
-                // 10. Let lenValue be Get(items, "length").
-                // 11. Let len be ToLength(lenValue).
-                var len = toLength(items.length);
-
-                // 13. If IsConstructor(C) is true, then
-                // 13. a. Let A be the result of calling the [[Construct]] internal method of C with an argument list containing the single item len.
-                // 14. a. Else, Let A be ArrayCreate(len).
-                var A = isCallable(C) ? Object(new C(len)) : new Array(len);
-
-                // 16. Let k be 0.
-                var k = 0;
-                // 17. Repeat, while k < len… (also steps a - h)
-                var kValue;
-                while (k < len) {
-                    kValue = items[k];
-                    if (mapFn) {
-                        A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
-                    } else {
-                        A[k] = kValue;
-                    }
-                    k += 1;
-                }
-                // 18. Let putStatus be Put(A, "length", len, true).
-                A.length = len;
-                // 20. Return A.
-                return A;
-            };
-        }());
+        Array.from=function(){var r=Object.prototype.toString,n=function(n){return"function"==typeof n||"[object Function]"===r.call(n)},t=function(r){var n=+r;return isNaN(n)?0:0!==n&&isFinite(n)?(n>0?1:-1)*Math.floor(Math.abs(n)):n},e=Math.pow(2,53)-1,o=function(r){var n=t(r);return Math.min(Math.max(n,0),e)};return function(r){var t=this,e=Object(r);if(null==r)throw new TypeError("Array.from requires an array-like object - not null or undefined");var a,i=arguments.length>1?arguments[1]:void 0;if(void 0!==i){if(!n(i))throw new TypeError("Array.from: when provided, the second argument must be a function");arguments.length>2&&(a=arguments[2])}for(var u,f=o(e.length),c=n(t)?Object(new t(f)):Array(f),h=0;f>h;)u=e[h],c[h]=i?void 0===a?i(u,h):i.call(a,u,h):u,h+=1;return c.length=f,c}}();
     }
 </script>
 
