@@ -17,7 +17,6 @@ export function init() {
 
     if (presetAmount) {
         store.dispatch({ type: SET_AMOUNT, amount: parseInt(presetAmount) });
-        store.dispatch({ type: GO_FORWARD });
     }
 
     ReactDOM.render(
