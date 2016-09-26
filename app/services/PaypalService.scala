@@ -110,21 +110,15 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   private def addUserActionParam(url:String) = Uri.parse(url).addParam("useraction", "commit").toString
 
-  def executePayment(paymentId: String, payerId: String): Either[String, Payment] = {
+  def executePayment(paymentId: String, payerId: String): XorT[Future, String, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
-
-    Try(payment.execute(apiContext, paymentExecution)) match {
-      case Success(payment) =>
-        if (payment.getState.toUpperCase != "APPROVED") {
-          Left(s"payment returned with state: ${payment.getState}")
-        } else {
-          Right(payment)
-        }
-      case Failure(exception) =>
-        Logger.error("Unable to execute payment", exception)
-        Left(exception.getMessage)
+    val paymentResponse = asyncExecute(payment.execute(apiContext, paymentExecution)) map {
+      case Xor.Right(payment) if (payment.getState.toUpperCase != "APPROVED") => Xor.left(s"payment returned with state: ${payment.getState}")
+      case Xor.Right(payment) => Xor.right(payment)
+      case Xor.Left(error) => Xor.left(error)
     }
+    XorT(paymentResponse)
   }
 
   case class SavedContributionData(contributor: Contributor, contributionMetaData: ContributionMetaData)
