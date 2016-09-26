@@ -13,7 +13,6 @@ import play.api.mvc.{Cookie, Request}
 import scala.util.Random
 import scalaz.NonEmptyList
 import views.support.AmountHighlightTest.AmountVariantData
-import views.support.PaymentMethodTest.PaymentMethodVariantData
 
 sealed trait VariantData
 
@@ -22,7 +21,6 @@ object VariantData {
     def writes(o: VariantData): JsValue = {
       o match {
         case amount: AmountVariantData => AmountVariantData.format.writes(amount)
-        case paymentMethods: PaymentMethodVariantData => PaymentMethodVariantData.format.writes(paymentMethods)
       }
     }
   }
@@ -93,40 +91,11 @@ object AmountHighlightTest extends TestTrait {
 
   def variants = NonEmptyList(
     //New variants go here.
-    makeVariant("Amount - 6x 25 highlight", "6amnts", 1, Some(AmountVariantData(List(5,10,25, 50, 100, 250), Some(50))), Set(UK)),
     makeVariant("Amount - 25 highlight", "25", 1, Some(AmountVariantData(List(25, 50, 100, 250), Some(25))), notAustralia),
     makeVariant("Amount - 50 highlight", "50", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(50))), notAustralia),
     makeVariant("Amount - 100 highlight", "100", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(100))), notAustralia),
     makeVariant("Amount - 250 highlight", "250", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(250))), notAustralia),
     makeVariant("Amount - 100 highlight Australia", "100-Australia", 1, Some(AmountVariantData(List(50, 100, 250, 500), Some(100))), Set(Australia))
-  )
-}
-
-object PaymentMethodTest extends TestTrait {
-
-  def name = "PaymentMethodTest"
-
-  def slug = "paymentMethods"
-
-  case class PaymentMethodVariantData(paymentMethods: Set[PaymentMethod]) extends VariantData
-
-  object PaymentMethodVariantData {
-    implicit val format: Writes[PaymentMethodVariantData] = Json.writes[PaymentMethodVariantData]
-  }
-
-  sealed trait PaymentMethod
-
-  case object CARD extends PaymentMethod
-
-  case object PAYPAL extends PaymentMethod
-
-  implicit val paymentMethodFormatter: Writes[PaymentMethod] = new Writes[PaymentMethod] {
-    def writes(method: PaymentMethod): JsValue = JsString(method.toString)
-  }
-
-  def variants = NonEmptyList(
-    makeVariant("Control", "control", 0.5, Some(PaymentMethodVariantData(Set(CARD)))),
-    makeVariant("Paypal", "paypal", 0.5, Some(PaymentMethodVariantData(Set(CARD, PAYPAL))))
   )
 }
 
@@ -145,7 +114,7 @@ object Test {
   val CookiePrefix     = "gu.contributions.test"
   val TestIdCookieName = s"$CookiePrefix.id"
 
-  val allTests = List(AmountHighlightTest, PaymentMethodTest, RecurringPaymentTest)
+  val allTests = List(AmountHighlightTest, RecurringPaymentTest)
 
   def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
   def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"

@@ -80,7 +80,7 @@ export default class Contribution extends React.Component {
                 />
             </span>
 
-            {this.props.error.show && !this.props.paymentMethodsTest.isControl() && <div className="payment-error"> {this.props.error.message}</div>}
+            {this.props.error.show && <div className="payment-error"> {this.props.error.message}</div>}
         </div>;
     }
 }

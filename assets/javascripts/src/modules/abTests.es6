@@ -40,17 +40,6 @@ export function amounts(tests) {
     return (data && data.values) || defaultAmounts;
 }
 
-export function paymentMethods(tests) {
-    const data = testDataFor(tests, 'PaymentMethodTest');
-
-    if (data) return {
-        paymentMethods: data.paymentMethods,
-        isControl: function () {
-            return (this.paymentMethods.indexOf("CARD") >= 0 && this.paymentMethods.length == 1);
-        }
-    }
-}
-
 export function presetAmount(tests) {
     const data = testDataFor(tests, 'AmountHighlightTest');
 

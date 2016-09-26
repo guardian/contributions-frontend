@@ -4,7 +4,6 @@ import com.gu.i18n.CountryGroup
 import org.scalatest.{MustMatchers, WordSpec}
 import CountryGroup._
 import org.scalatest.matchers.{MatchResult, Matcher}
-import views.support.PaymentMethodTest.{PAYPAL, PaymentMethodVariantData}
 
 import scalaz.NonEmptyList
 
@@ -45,11 +44,12 @@ class TestTraitSpec extends WordSpec with MustMatchers {
   def extractWeights(test: TestTrait, c: CountryGroup) = test.variantRangesByCountry(c).map { case (weight, variant) => ((variant.variantName, weight)) }
 
   def getTestTrait(weights: NonEmptyList[(String, Double, List[CountryGroup])]): TestTrait = {
+
     object TestImp extends TestTrait {
       override def name: String = "something"
       override def slug: String = "somethingElse"
 
-      override def variants: NonEmptyList[Variant] = weights.map { case (name, weight, countries) => makeVariant(name, "slug", weight, Some(PaymentMethodVariantData(Set(PAYPAL))), countries.toSet) }
+      override def variants: NonEmptyList[Variant] = weights.map { case (name, weight, countries) => makeVariant(name, "slug", weight, None, countries.toSet) }
     }
     TestImp
   }

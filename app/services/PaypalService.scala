@@ -2,6 +2,8 @@ package services
 
 import java.util.UUID
 
+import cats.data.{Xor, XorT}
+import cats.implicits._
 import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
 import com.paypal.api.payments._
@@ -11,12 +13,13 @@ import com.paypal.base.rest.APIContext
 import scala.collection.JavaConverters._
 import com.typesafe.config.Config
 import data.ContributionData
-import models.{ContributionMetaData, Contributor, PaymentHook}
+import models._
 import org.joda.time.DateTime
 import play.api.Logger
 import play.api.libs.json.Json
 import views.support.Variant
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 import scala.util.{Failure, Success, Try}
 
@@ -40,10 +43,9 @@ object PaypalApiConfig {
   )
 }
 
-class PaypalService(config: PaypalApiConfig, contributionData: ContributionData) {
+class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)(implicit ec: ExecutionContext) {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
-
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
@@ -125,8 +127,8 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     intCmp: Option[String],
     ophanId: Option[String],
     idUser: Option[String]
-  ): Either[String, SavedContributionData] = {
-    val result = for {
+  ): XorT[Future, String, SavedContributionData] = {
+    val triedSavedContributionData = for {
       payment <- Try(Payment.get(apiContext, paymentId))
       transaction <- Try(payment.getTransactions.asScala.head)
       contributionId <- Try(UUID.fromString(transaction.getCustom))
@@ -167,22 +169,28 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
         marketingOptIn = None
       )
 
-      contributionData.insertPaymentMetaData(metadata)
-      contributionData.saveContributor(contributor)
-      SavedContributionData(contributor, metadata)
-
+      SavedContributionData(
+        contributor = contributor,
+        contributionMetaData = metadata
+      )
     }
 
-    result match {
-      case Success(savedData) => Right(savedData)
-      case Failure(exception) =>
-        Logger.error("Unable to store contribution metadata", exception)
-        Left("Unable to store contribution metadata")
+    val contributionDataToSave = Xor.fromTry(triedSavedContributionData).leftMap { exception =>
+      Logger.error("Unable to store contribution metadata", exception)
+      "Unable to store contribution metadata"
     }
 
+    for {
+      data <- XorT.fromXor[Future](contributionDataToSave)
+      contributionMetaData <- contributionData.insertPaymentMetaData(data.contributionMetaData)
+      contributor <- contributionData.saveContributor(data.contributor)
+    } yield SavedContributionData(
+      contributor = contributor,
+      contributionMetaData = contributionMetaData
+    )
   }
 
-  def updateMarketingOptIn(email: String, marketingOptInt: Boolean) = {
+  def updateMarketingOptIn(email: String, marketingOptInt: Boolean): XorT[Future, String, Contributor] = {
     val contributor = Contributor(
       email = email,
       marketingOptIn = Some(marketingOptInt),
@@ -200,6 +208,8 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paymentHook: PaymentHook) = contributionData.insertPaymentHook(paymentHook)
+  def processPaymentHook(paymentHook: PaymentHook): XorT[Future, String, PaymentHook] = {
+    contributionData.insertPaymentHook(paymentHook)
+  }
 
 }
