@@ -119,7 +119,11 @@ object Test {
   def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
   def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"
 
-  def testIdFor[A](request: Request[A]): Int = request.cookies.get(TestIdCookieName) map(_.value.toInt) getOrElse Random.nextInt(MaxTestId)
+  def testIdFor[A](request: Request[A]): Int = {
+    val id = request.cookies.get(TestIdCookieName) map(_.value.toInt) getOrElse Random.nextInt(MaxTestId)
+    if (id == 0) MaxTestId else id
+  }
+
   def testIdCookie(id: Int) = Cookie(TestIdCookieName, id.toString, maxAge = Some(604800))
   def variantCookie(v: Variant) = Cookie(cookieName(v), v.variantSlug, maxAge = Some(604800))
 
