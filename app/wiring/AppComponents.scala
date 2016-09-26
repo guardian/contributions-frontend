@@ -53,7 +53,7 @@ trait AppComponents extends PlayComponents {
     identityAuthProvider,
     testUsernames,
     PaymentServices.stripeServicesFor(config.getConfig("stripe")),
-    PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionDataPerMode)
+    PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionDataPerMode)(paypalExecutionContext)
 
   )
   lazy val giraffeController = wire[Giraffe]
