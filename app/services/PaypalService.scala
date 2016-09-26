@@ -49,6 +49,14 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
+  private def asyncExecute[A](block: => A): Future[Xor[String, A]] = Future {
+    val result = Try(block)
+    Xor.fromTry(result).leftMap { exception =>
+      Logger.error("Error while calling PayPal API", exception)
+      "Error while calling PayPal API"
+    }
+  }
+
   def getAuthUrl(
     amount: BigDecimal,
     countryGroup: CountryGroup,
@@ -56,9 +64,9 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String]
-  ): Either[String, String] = {
+  ): XorT[Future, String, String] = {
 
-    def returnUrl: String = {
+    val returnUrl: String = {
       val extraParams = List(
         cmp.map(value => s"CMP=$value"),
         intCmp.map(value => s"INTCMP=$value"),
@@ -69,6 +77,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       }
       s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
     }
+
     val cancelUrl = config.baseReturnUrl
     val currencyCode = countryGroup.currency.toString
     val stringAmount = amount.setScale(2, RoundingMode.HALF_UP).toString
@@ -88,15 +97,15 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
     val payment = new Payment().setIntent("sale").setPayer(payer).setTransactions(transactions).setRedirectUrls(redirectUrls)
 
-    Try {
-      val createdPayment = payment.create(apiContext)
-      createdPayment.getLinks.asScala
-    } match {
-      case Success(links) =>
-        val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url")).map(l => Right(addUserActionParam(l.getHref)))
-        approvalLink.getOrElse(Left("No approval link returned from paypal"))
-      case Failure(exception) => Left(exception.getMessage)
+    val res = asyncExecute {
+      val links = payment.create(apiContext).getLinks.asScala
+      links.find(_.getRel.equalsIgnoreCase("approval_url")).map(l => addUserActionParam(l.getHref))
+    } map {
+      case Xor.Right(None) => Xor.left("No approval link returned from PayPal")
+      case Xor.Right(Some(link)) => Xor.right(link)
+      case Xor.Left(error) => Xor.left(error)
     }
+    XorT(res)
   }
 
   private def addUserActionParam(url:String) = Uri.parse(url).addParam("useraction", "commit").toString

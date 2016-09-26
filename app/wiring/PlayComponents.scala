@@ -12,5 +12,6 @@ trait PlayComponents extends BuiltInComponents with AhcWSComponents with DBCompo
   implicit val as: ActorSystem = actorSystem
 
   val jdbcExecutionContext: ExecutionContext = actorSystem.dispatchers.lookup("contexts.jdbc-context")
+  val paypalExecutionContext: ExecutionContext = actorSystem.dispatchers.lookup("contexts.paypal-context")
 }
 
