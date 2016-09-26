@@ -66,59 +66,68 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     ophanId: Option[String]
   ): XorT[Future, String, String] = {
 
-    val returnUrl: String = {
-      val extraParams = List(
-        cmp.map(value => s"CMP=$value"),
-        intCmp.map(value => s"INTCMP=$value"),
-        ophanId.map(value => s"ophanId=$value")
-      ).flatten match {
-        case Nil => ""
-        case params => params.mkString("?", "&", "")
+    val paymentToCreate = {
+
+      val returnUrl: String = {
+        val extraParams = List(
+          cmp.map(value => s"CMP=$value"),
+          intCmp.map(value => s"INTCMP=$value"),
+          ophanId.map(value => s"ophanId=$value")
+        ).flatten match {
+          case Nil => ""
+          case params => params.mkString("?", "&", "")
+        }
+        s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
       }
-      s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
+
+      val cancelUrl = config.baseReturnUrl
+      val currencyCode = countryGroup.currency.toString
+      val stringAmount = amount.setScale(2, RoundingMode.HALF_UP).toString
+      val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(stringAmount)
+      val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(stringAmount).setQuantity("1")
+      val itemList = new ItemList().setItems(List(item).asJava)
+      val transaction = new Transaction
+      transaction.setAmount(paypalAmount)
+      transaction.setDescription(description)
+      transaction.setCustom(contributionId)
+      transaction.setItemList(itemList)
+
+      val transactions = List(transaction).asJava
+
+      val payer = new Payer().setPaymentMethod("paypal")
+      val redirectUrls = new RedirectUrls().setCancelUrl(cancelUrl).setReturnUrl(returnUrl)
+      new Payment().setIntent("sale").setPayer(payer).setTransactions(transactions).setRedirectUrls(redirectUrls)
     }
 
-    val cancelUrl = config.baseReturnUrl
-    val currencyCode = countryGroup.currency.toString
-    val stringAmount = amount.setScale(2, RoundingMode.HALF_UP).toString
-    val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(stringAmount)
-    val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(stringAmount).setQuantity("1")
-    val itemList = new ItemList().setItems(List(item).asJava)
-    val transaction = new Transaction
-    transaction.setAmount(paypalAmount)
-    transaction.setDescription(description)
-    transaction.setCustom(contributionId)
-    transaction.setItemList(itemList)
-
-    val transactions = List(transaction).asJava
-
-    val payer = new Payer().setPaymentMethod("paypal")
-    val redirectUrls = new RedirectUrls().setCancelUrl(cancelUrl).setReturnUrl(returnUrl)
-
-    val payment = new Payment().setIntent("sale").setPayer(payer).setTransactions(transactions).setRedirectUrls(redirectUrls)
-
-    val res = asyncExecute {
-      val links = payment.create(apiContext).getLinks.asScala
-      links.find(_.getRel.equalsIgnoreCase("approval_url")).map(l => addUserActionParam(l.getHref))
-    }.value map {
-      case Xor.Right(None) => Xor.left("No approval link returned from PayPal")
-      case Xor.Right(Some(link)) => Xor.right(link)
+    asyncExecute{
+      paymentToCreate.create(apiContext)
+    } transform {
+      case Xor.Right(createdPayment) => Xor.fromOption(getAuthLink(createdPayment), "No approval link returned from PayPal")
       case Xor.Left(error) => Xor.left(error)
     }
-    XorT(res)
+
   }
 
-  private def addUserActionParam(url:String) = Uri.parse(url).addParam("useraction", "commit").toString
+  private def getAuthLink(payment: Payment) = {
+    for {
+      links <- Option(payment.getLinks)
+      approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
+      authUrl <- Option(approvalLinks.getHref)
+    }
+      yield {
+        Uri.parse(authUrl).addParam("useraction", "commit").toString
+      }
+  }
 
   def executePayment(paymentId: String, payerId: String): XorT[Future, String, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
-    val paymentResponse = asyncExecute(payment.execute(apiContext, paymentExecution)).value map {
+    asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
       case Xor.Right(payment) if (payment.getState.toUpperCase != "APPROVED") => Xor.left(s"payment returned with state: ${payment.getState}")
       case Xor.Right(payment) => Xor.right(payment)
       case Xor.Left(error) => Xor.left(error)
     }
-    XorT(paymentResponse)
+
   }
 
   case class SavedContributionData(contributor: Contributor, contributionMetaData: ContributionMetaData)
