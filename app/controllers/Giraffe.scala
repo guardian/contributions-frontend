@@ -129,13 +129,11 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
     val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
     val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    val inactiveTestsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix))
-      .filterNot(c => c.value == variant.testSlug)
-      .flatMap(c => Test.allTests.find(_.slug.equalsIgnoreCase(c.name)))
+    val testsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix)) map(_.name)
 
     Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp, creditCardExpiryYears, errorMessage))
+      .discardingCookies(testsInCookies.toSeq map(DiscardingCookie(_)): _*)
       .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
-      .discardingCookies(inactiveTestsInCookies.toSeq map (t => DiscardingCookie(Test.cookieName(t))): _*)
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
