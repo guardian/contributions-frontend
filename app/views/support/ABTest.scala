@@ -163,7 +163,7 @@ object Test {
     def pickByQueryStringOrCookie: Option[Variant] = {
       val search: Option[String] = request.getQueryString(test.slug)
         .orElse(request.cookies.get(s"$CookiePrefix.${test.slug}").map(_.value))
-      test.variantsByCountry(countryGroup).find(_.variantSlug == search.getOrElse(""))
+      test.variantsByCountry(countryGroup).find(v => search.contains(v.variantSlug))
     }
 
     pickByQueryStringOrCookie getOrElse pickRandomly
