@@ -3,6 +3,7 @@ package controllers
 import actions.CommonActions._
 import cats.data.Xor
 import com.gu.i18n.{CountryGroup, Currency}
+import com.netaporter.uri.Uri
 import models.PaymentHook
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
@@ -12,8 +13,6 @@ import play.api.data.Form
 import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
-
-import scala.util.Right
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -46,14 +45,16 @@ class PaypalController(
     val paypalService = paymentServices.paypalServiceFor(request)
     val idUser = IdentityUser.fromRequest(request).map(_.id)
 
-    paypalService.executePayment(paymentId, payerId) match {
-      case Right(_) =>
-        paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser).value.map {
-          case Xor.Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
-          case Xor.Left(_) => redirectWithCampaignCodes(thanksUrl)
-        }
-      case Left(error) => Future.successful(handleError(countryGroup, s"Error executing PayPal payment: $error"))
+    def saveMetadata = paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser).value.map {
+      case Xor.Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
+      case Xor.Left(_) => redirectWithCampaignCodes(thanksUrl)
     }
+
+    paypalService.executePayment(paymentId, payerId).value flatMap {
+      case Xor.Right(_) => saveMetadata
+      case Xor.Left(error) => Future.successful(handleError(countryGroup, s"Error executing PayPal payment: $error"))
+    }
+
   }
 
   case class AuthRequest(
@@ -74,8 +75,12 @@ class PaypalController(
       ) (AuthRequest.apply _)
   }
 
-  case class AuthResponse(approvalUrl:String)
+  case class AuthResponse(approvalUrl:Uri)
 
+  implicit val UriWrites = new Writes[Uri] {
+    override def writes(uri: Uri): JsValue = JsString(uri.toString)
+  }
+  
   implicit val AuthResponseWrites = Json.writes[AuthResponse]
 
   implicit val CountryGroupReads = new Reads[CountryGroup] {
@@ -87,7 +92,7 @@ class PaypalController(
 
   private def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = amount min MaxAmount.forCurrency(currency)
 
-  def authorize = NoCacheAction(parse.json) { request =>
+  def authorize = NoCacheAction.async(parse.json) { request =>
     request.body.validate[AuthRequest] match {
       case JsSuccess(authRequest, _) =>
         val paypalService = paymentServices.paypalServiceFor(request)
@@ -99,16 +104,15 @@ class PaypalController(
           intCmp = authRequest.intCmp,
           ophanId = authRequest.ophanId
         )
-        authResponse match {
-
-          case Right(url) => Ok(Json.toJson(AuthResponse(url)))
-          case Left(error) =>
+        authResponse.value map {
+          case Xor.Right(url) => Ok(Json.toJson(AuthResponse(url)))
+          case Xor.Left(error) =>
             Logger.error(s"Error getting PayPal auth url: $error")
             InternalServerError("Error getting PayPal auth url")
         }
       case JsError(error) =>
         Logger.error(s"Invalid request=$error")
-        BadRequest(s"Invalid request=$error")
+        Future.successful(BadRequest(s"Invalid request=$error"))
     }
   }
 

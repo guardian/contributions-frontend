@@ -8,6 +8,8 @@ import com.typesafe.config.Config
 import data.ContributionData
 import play.api.mvc.RequestHeader
 import services.PaymentServices.{Default, Mode, Testing}
+
+import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -46,16 +48,18 @@ object PaymentServices {
 
   def stripeServicesFor(stripeConfig: Config):Map[Mode, StripeService]  = Mode.all.map(mode => mode -> stripeServiceFor(stripeConfig, mode)).toMap
 
-  def paypalServiceFor(paypalConfig: Config, universe: Mode, contributionData: ContributionData): PaypalService = {
-    val paypalMode = paypalConfig.getString(universe.name)
-    val keys = paypalConfig.getConfig(paypalMode)
-    val apiConfig = PaypalApiConfig.from(keys, paypalMode)
-    new PaypalService(apiConfig, contributionData)
+  def paypalServicesFor(paypalConfig: Config, contributionDataPerMode: Map[Mode, ContributionData])(ec: ExecutionContext): Map[Mode, PaypalService] = {
+
+    def paypalServiceFor(universe: Mode): PaypalService = {
+      val contributionData = contributionDataPerMode(universe)
+      val paypalMode = paypalConfig.getString(universe.name)
+      val keys = paypalConfig.getConfig(paypalMode)
+      val apiConfig = PaypalApiConfig.from(keys, paypalMode)
+      new PaypalService(apiConfig, contributionData)(ec)
+    }
+
+    Mode.all.map(mode => mode -> paypalServiceFor(mode)).toMap
   }
-
-
-  def paypalServicesFor(paypalConfig: Config, contributionDataPerMode: Map[Mode, ContributionData]): Map[Mode, PaypalService] =
-    Mode.all.map(mode => mode -> paypalServiceFor(paypalConfig, mode, contributionDataPerMode(mode))).toMap
 }
 
 case class PaymentServices(

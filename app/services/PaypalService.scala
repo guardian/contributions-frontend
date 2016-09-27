@@ -21,7 +21,7 @@ import views.support.Variant
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
 
@@ -49,6 +49,14 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
+  private def asyncExecute[A](block: => A): XorT[Future, String, A] = XorT(Future {
+    val result = Try(block)
+    Xor.fromTry(result).leftMap { exception =>
+      Logger.error("Error while calling PayPal API", exception)
+      exception.getMessage
+    }
+  })
+
   def getAuthUrl(
     amount: BigDecimal,
     countryGroup: CountryGroup,
@@ -56,66 +64,69 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String]
-  ): Either[String, String] = {
+  ): XorT[Future, String, Uri] = {
 
-    def returnUrl: String = {
-      val extraParams = List(
-        cmp.map(value => s"CMP=$value"),
-        intCmp.map(value => s"INTCMP=$value"),
-        ophanId.map(value => s"ophanId=$value")
-      ).flatten match {
-        case Nil => ""
-        case params => params.mkString("?", "&", "")
+    val paymentToCreate = {
+
+      val returnUrl: String = {
+        val extraParams = List(
+          cmp.map(value => s"CMP=$value"),
+          intCmp.map(value => s"INTCMP=$value"),
+          ophanId.map(value => s"ophanId=$value")
+        ).flatten match {
+          case Nil => ""
+          case params => params.mkString("?", "&", "")
+        }
+        s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
       }
-      s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
+
+      val cancelUrl = config.baseReturnUrl
+      val currencyCode = countryGroup.currency.toString
+      val stringAmount = amount.setScale(2, RoundingMode.HALF_UP).toString
+      val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(stringAmount)
+      val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(stringAmount).setQuantity("1")
+      val itemList = new ItemList().setItems(List(item).asJava)
+      val transaction = new Transaction
+      transaction.setAmount(paypalAmount)
+      transaction.setDescription(description)
+      transaction.setCustom(contributionId)
+      transaction.setItemList(itemList)
+
+      val transactions = List(transaction).asJava
+
+      val payer = new Payer().setPaymentMethod("paypal")
+      val redirectUrls = new RedirectUrls().setCancelUrl(cancelUrl).setReturnUrl(returnUrl)
+      new Payment().setIntent("sale").setPayer(payer).setTransactions(transactions).setRedirectUrls(redirectUrls)
     }
-    val cancelUrl = config.baseReturnUrl
-    val currencyCode = countryGroup.currency.toString
-    val stringAmount = amount.setScale(2, RoundingMode.HALF_UP).toString
-    val paypalAmount = new Amount().setCurrency(currencyCode).setTotal(stringAmount)
-    val item = new Item().setDescription(description).setCurrency(currencyCode).setPrice(stringAmount).setQuantity("1")
-    val itemList = new ItemList().setItems(List(item).asJava)
-    val transaction = new Transaction
-    transaction.setAmount(paypalAmount)
-    transaction.setDescription(description)
-    transaction.setCustom(contributionId)
-    transaction.setItemList(itemList)
 
-    val transactions = List(transaction).asJava
-
-    val payer = new Payer().setPaymentMethod("paypal")
-    val redirectUrls = new RedirectUrls().setCancelUrl(cancelUrl).setReturnUrl(returnUrl)
-
-    val payment = new Payment().setIntent("sale").setPayer(payer).setTransactions(transactions).setRedirectUrls(redirectUrls)
-
-    Try {
-      val createdPayment = payment.create(apiContext)
-      createdPayment.getLinks.asScala
-    } match {
-      case Success(links) =>
-        val approvalLink = links.find(_.getRel.equalsIgnoreCase("approval_url")).map(l => Right(addUserActionParam(l.getHref)))
-        approvalLink.getOrElse(Left("No approval link returned from paypal"))
-      case Failure(exception) => Left(exception.getMessage)
+    asyncExecute{
+      paymentToCreate.create(apiContext)
+    } transform {
+      case Xor.Right(createdPayment) => Xor.fromOption(getAuthLink(createdPayment), "No approval link returned from PayPal")
+      case Xor.Left(error) => Xor.left(error)
     }
   }
 
-  private def addUserActionParam(url:String) = Uri.parse(url).addParam("useraction", "commit").toString
+  private def getAuthLink(payment: Payment) = {
+    for {
+      links <- Option(payment.getLinks)
+      approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
+      authUrl <- Option(approvalLinks.getHref)
+    }
+      yield {
+        Uri.parse(authUrl).addParam("useraction", "commit")
+      }
+  }
 
-  def executePayment(paymentId: String, payerId: String): Either[String, Payment] = {
+  def executePayment(paymentId: String, payerId: String): XorT[Future, String, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
-
-    Try(payment.execute(apiContext, paymentExecution)) match {
-      case Success(payment) =>
-        if (payment.getState.toUpperCase != "APPROVED") {
-          Left(s"payment returned with state: ${payment.getState}")
-        } else {
-          Right(payment)
-        }
-      case Failure(exception) =>
-        Logger.error("Unable to execute payment", exception)
-        Left(exception.getMessage)
+    asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
+      case Xor.Right(payment) if (payment.getState.toUpperCase != "APPROVED") => Xor.left(s"payment returned with state: ${payment.getState}")
+      case Xor.Right(payment) => Xor.right(payment)
+      case Xor.Left(error) => Xor.left(error)
     }
+
   }
 
   case class SavedContributionData(contributor: Contributor, contributionMetaData: ContributionMetaData)
