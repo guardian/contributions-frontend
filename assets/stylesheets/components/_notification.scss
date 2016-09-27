@@ -1,0 +1,24 @@
+.notification-outer {
+    position: absolute;
+    background: #ffd359;
+    width: 100%;
+    top: 135px; // sits above all of the form components
+    left: 0;
+    padding: 10px;
+    z-index: 5;
+}
+
+.notification {
+    background: #ffeebf;
+    padding: 20px;
+
+    .contribute-form__title {
+        margin-bottom: 15px;
+    }
+
+    p {
+        @include f-textSans();
+        font-size: 14px;
+        line-height: 18px;
+    }
+}

@@ -13,6 +13,7 @@ import {
     CARD_PAY,
     CLEAR_PAYMENT_FLAGS,
     SET_RECURRING,
+    DISMISS_RECURRING_NOTIFICATION,
     paypalRedirect,
     submitPayment,
     trackCheckoutStep,
@@ -77,7 +78,8 @@ function mapDispatchToProps(dispatch) {
         paypalRedirect: () => dispatch(paypalRedirect),
         clearPaymentFlags: () => dispatch({ type: CLEAR_PAYMENT_FLAGS }),
         setRecurring: enabled => dispatch(setRecurring(enabled)),
-        showRecurringTestMessage: () => dispatch(showRecurringTestMessage)
+        showRecurringTestMessage: () => dispatch(showRecurringTestMessage),
+        dismissRecurringNotification: () => dispatch({ type: DISMISS_RECURRING_NOTIFICATION })
     };
 }
 
