@@ -64,7 +64,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String]
-  ): XorT[Future, String, String] = {
+  ): XorT[Future, String, Uri] = {
 
     val paymentToCreate = {
 
@@ -114,7 +114,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       authUrl <- Option(approvalLinks.getHref)
     }
       yield {
-        Uri.parse(authUrl).addParam("useraction", "commit").toString
+        Uri.parse(authUrl).addParam("useraction", "commit")
       }
   }
 

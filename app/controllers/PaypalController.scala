@@ -3,6 +3,7 @@ package controllers
 import actions.CommonActions._
 import cats.data.Xor
 import com.gu.i18n.{CountryGroup, Currency}
+import com.netaporter.uri.Uri
 import models.PaymentHook
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
@@ -12,7 +13,6 @@ import play.api.data.Form
 import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
-
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -75,8 +75,12 @@ class PaypalController(
       ) (AuthRequest.apply _)
   }
 
-  case class AuthResponse(approvalUrl:String)
+  case class AuthResponse(approvalUrl:Uri)
 
+  implicit val UriWrites = new Writes[Uri] {
+    override def writes(uri: Uri): JsValue = JsString(uri.toString)
+  }
+  
   implicit val AuthResponseWrites = Json.writes[AuthResponse]
 
   implicit val CountryGroupReads = new Reads[CountryGroup] {
