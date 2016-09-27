@@ -61,6 +61,7 @@ function countryId() {
     }
 }
 
+
 export function amounts(tests) {
     const amounts = {
         'au': {

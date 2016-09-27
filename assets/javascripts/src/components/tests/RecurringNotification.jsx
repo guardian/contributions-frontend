@@ -6,6 +6,7 @@ export default class RecurringNotification extends React.Component {
     render() {
         return <div className="notification-outer">
             <div className="notification">
+                <div className="arrow-up"></div>
                 <h2 className="contribute-form__title">Thank you for your interest in monthly contributions</h2>
 
                 <p>At the moment we can only accept one-off contributions but we’ll be exploring new options in the future.</p>

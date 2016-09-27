@@ -1,11 +1,11 @@
 .notification-outer {
     position: absolute;
-    background: #ffd359;
     width: 100%;
     top: 135px; // sits above all of the form components
     left: 0;
     padding: 10px;
     z-index: 5;
+    background: #ffd359;
 }
 
 .notification {
@@ -21,4 +21,15 @@
         font-size: 14px;
         line-height: 18px;
     }
+}
+
+.arrow-up {
+    position: absolute;
+    top: 0;
+    right: 65px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid #ffeebf;
 }
