@@ -119,7 +119,7 @@ export function pageView() {
  * @returns {Promise} a Promise that will resolved when the call to ga comes back, or after a timeout define by gaTimeout
  * it will never be rejected
  */
-export function event(category, actionName, label) {
+export function event(category, actionName, label, value) {
     return new Promise(resolve => {
         const timeout = setTimeout(resolve, gaTimeout);
         gaProxy('send', {
@@ -127,6 +127,7 @@ export function event(category, actionName, label) {
             eventCategory: category,
             eventAction: actionName,
             eventLabel: label,
+            eventValue: value,
             hitCallback: () => {
                 clearTimeout(timeout);
                 resolve();
