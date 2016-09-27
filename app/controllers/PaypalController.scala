@@ -45,14 +45,16 @@ class PaypalController(
     val paypalService = paymentServices.paypalServiceFor(request)
     val idUser = IdentityUser.fromRequest(request).map(_.id)
 
+    def saveMetadata = paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser).value.map {
+      case Xor.Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
+      case Xor.Left(_) => redirectWithCampaignCodes(thanksUrl)
+    }
+
     paypalService.executePayment(paymentId, payerId).value flatMap {
-      case Xor.Right(_) =>
-        paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser).value.map {
-          case Xor.Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
-          case Xor.Left(_) => redirectWithCampaignCodes(thanksUrl)
-        }
+      case Xor.Right(_) => saveMetadata
       case Xor.Left(error) => Future.successful(handleError(countryGroup, s"Error executing PayPal payment: $error"))
     }
+
   }
 
   case class AuthRequest(
