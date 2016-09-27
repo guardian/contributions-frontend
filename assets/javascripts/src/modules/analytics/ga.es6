@@ -45,7 +45,7 @@ function create(){
 
 export function gaProxy() {
     const state = store.getState();
-    if (state.gaTracking.enabled) {
+    if (state.gaTracking.enabled && window.ga) {
         const allArgs = Array.from(arguments);
         allArgs[0] = defaultTracker + '.' + allArgs[0];
         window.ga.apply(window.ga, allArgs);
