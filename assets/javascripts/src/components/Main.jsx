@@ -118,20 +118,15 @@ class Main extends React.Component {
     render() {
         const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
         return <div>
+            <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={showSummary} />
             <MediaQuery query='(max-width: 740px)'>
-                {this.renderSummary(showSummary)}
                 <MobileWrapper submit={this.submit.bind(this, true)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
 
             <MediaQuery query='(min-width: 741px)'>
-                {this.renderSummary(showSummary)}
                 <DesktopWrapper submit={this.submit.bind(this, false)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
         </div>
-    }
-
-    renderSummary(visible) {
-        return <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={visible} />
     }
 }
 
