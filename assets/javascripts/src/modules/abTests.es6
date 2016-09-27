@@ -53,17 +53,19 @@ function testDataFor(tests, testName) {
     return test && test.data;
 }
 
+
 export function amounts(state) {
     const data = testDataFor(state.data.abTests, 'AmountHighlightTest');
     const defaultAmounts = state.details.recurring === true ? [2, 5, 10, 20] : [25, 50, 100, 250];
 
-    return (data && data.values) || defaultAmounts;
+    return (data && data.values) || defaults;
 }
 
 export function presetAmount(tests) {
     const data = testDataFor(tests, 'AmountHighlightTest');
+    const defaultAmount = countryId() === 'au' ? 100 : 25;
 
-    return data && data.preselect;
+    return (data && data.preselect) || defaultAmount;
 }
 
 export function showRecurring(tests) {
