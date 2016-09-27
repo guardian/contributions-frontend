@@ -121,6 +121,7 @@ class Main extends React.Component {
         if (this.props.showRecurring && this.props.recurring === null) return; // disable form progress if recurring test is on and no recurring method has been selected
 
         if (this.props.recurring === true) {
+            abTests.trackRecurring(this.props.card.amount);
             return this.props.showRecurringTestMessage();
         }
 
