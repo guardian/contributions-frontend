@@ -1,4 +1,5 @@
 import * as ophan from 'src/modules/analytics/ophan';
+import * as GA from 'src/modules/analytics/ga';
 
 import store from 'src/store';
 
@@ -71,5 +72,6 @@ export function showRecurring(tests) {
 }
 
 export function trackRecurring(amount) {
+    GA.event('recurring', 'Pay monthly', '', amount);
     trackComplete();
 }
