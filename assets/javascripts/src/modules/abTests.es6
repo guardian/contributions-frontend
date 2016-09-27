@@ -6,18 +6,10 @@ import { SET_AMOUNT } from 'src/actions';
 
 export function init() {
     const state = store.getState();
-    const data = {};
-
-    for (var test of state.data.abTests) {
-        data[test.testSlug] = {
-            'variantName': test.variantSlug,
-            'complete': 'false'
-        }
-    }
 
     ophan.loaded.then(function (ophan) {
         ophan.record({
-            abTestRegister: data
+            abTestRegister: abTestData(state.data.abTests, false)
         })
     });
 
@@ -26,6 +18,29 @@ export function init() {
     if (isNaN(parseInt(state.card.amount))) {
         store.dispatch({ type: SET_AMOUNT, amount: presetAmount(state.data.abTests) });
     }
+}
+
+function abTestData(tests, complete) {
+    const data = {};
+
+    for (var test of tests) {
+        data[test.testSlug] = {
+            'variantName': test.variantSlug,
+            'complete': complete
+        }
+    }
+
+    return data;
+}
+
+function trackComplete() {
+    const state = store.getState();
+
+    return ophan.loaded.then(function (ophan) {
+        ophan.record({
+            abTestRegister: abTestData(state.data.abTests, true)
+        });
+    });
 }
 
 function testFor(tests, testName) {
@@ -53,4 +68,8 @@ export function presetAmount(tests) {
 export function showRecurring(tests) {
     const test = testFor(tests, 'RecurringPaymentTest');
     return test && test.variantSlug === 'recurring';
+}
+
+export function trackRecurring(amount) {
+    trackComplete();
 }
