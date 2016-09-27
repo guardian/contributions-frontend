@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {RecurringSelection} from '../tests/RecurringPayments';
+import RecurringNotification from '../tests/RecurringNotification';
 import {AmountButton} from '../Buttons';
 import {AmountInput} from '../InputField';
 
@@ -92,7 +93,9 @@ class FormWithRecurring extends React.Component {
         return <div className={'contribute-controls contribute-fields contribute-controls--recurring ' + (this.props.amounts.length % 3 ? 'option-button__fours ' : 'option-button__three ')}>
             <RecurringSelection setRecurring={this.props.setRecurring} recurring={this.props.recurring} recurringNotified={this.props.recurringNotified} />
 
-            <h2 className="full-row">{inputHeading}</h2>
+            {this.props.recurringNotified === 1 && <RecurringNotification dismiss={this.props.dismissRecurringNotification}/>}
+
+            <h2 className="contribution-heading full-row">{inputHeading}</h2>
 
             <div className={'opacity-wrapper opacity-wrapper--contribute-controls'}>
                 {this.props.amounts.map(amount =>

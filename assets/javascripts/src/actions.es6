@@ -28,6 +28,7 @@ export const GA_ENABLED = "GA_ENABLED";
 
 export const SET_RECURRING = "SET_RECURRING";
 export const SET_RECURRING_NOTIFIED = "SET_RECURRING_NOTIFIED";
+export const DISMISS_RECURRING_NOTIFICATION = "DISMISS_RECURRING_NOTIFICATION";
 
 export function submitPayment(dispatch) {
     const state = store.getState();

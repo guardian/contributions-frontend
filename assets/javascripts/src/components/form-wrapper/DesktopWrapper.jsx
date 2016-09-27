@@ -9,7 +9,7 @@ import {PAGES} from 'src/constants';
 
 export default class DesktopWrapper extends React.Component {
     render() {
-        const makeThingsOpaque = this.props.showRecurring && this.props.recurring === null;
+        const makeThingsOpaque = this.props.showRecurring && this.props.recurring === null && this.props.recurringNotified === 0;
 
         return <div>
            <section className={'contribute-section ' + (makeThingsOpaque ? 'opaque' : '')} key={this.props.page}>
