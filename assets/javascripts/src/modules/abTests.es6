@@ -100,6 +100,9 @@ export function showRecurring(tests) {
 }
 
 export function trackRecurring(amount) {
-    GA.event('recurring', 'Pay monthly', '', amount);
+    const state = store.getState();
+    const currency = state.data.currency.code || '';
+
+    GA.event('recurring', 'Pay monthly', currency , amount);
     trackComplete();
 }
