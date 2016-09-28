@@ -54,7 +54,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
 
   val supportForm: Form[SupportForm] = Form(
     mapping(
-      "name" -> nonEmptyText,
+      "name" -> text,
       "currency" -> of[Currency],
       "amount" -> bigDecimal(10, 2),
       "email" -> email,

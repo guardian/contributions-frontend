@@ -24,7 +24,7 @@ export function init() {
     // only set the amount from the A/B test if it isn't already set
     // this prevents the A/B test overriding the preset amount (query param) functionality)
     if (isNaN(parseInt(state.card.amount))) {
-        store.dispatch({ type: SET_AMOUNT, amount: presetAmount(state.data.abTests) });
+        store.dispatch({type: SET_AMOUNT, amount: presetAmount(state.data.abTests)});
     }
 }
 
@@ -46,6 +46,9 @@ export function amounts(tests) {
     const defaults = countryId() === 'au' ? [50, 100, 250, 500] : [25, 50, 100, 250];
 
     return (data && data.values) || defaults;
+}
+export function reducedCheckout(tests) {
+    return (tests[0].testName == 'ReducedCheckoutTest') && (tests[0].variantName = 'test')
 }
 
 export function presetAmount(tests) {
