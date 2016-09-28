@@ -54,6 +54,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
 
       stripeHook mustBe a [JsSuccess[_]]
       stripeHook.get mustEqual StripeHook(
+        contributionId = UUID.fromString("7f5256d2-8e63-4b29-8f1e-f5c4e670db22"),
         eventId = "evt_18u3jGCbpG0cQtlb9k9WRx6f",
         paymentId = "ch_18u3jGCbpG0cQtlbhYCnPcuz",
         balanceTransactionId = "txn_18u3jGCbpG0cQtlbFz3nsClh",
@@ -63,34 +64,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         amount = BigDecimal("25.00"),
         cardCountry = "US",
         status = Paid,
-        name = "a",
-        email = "a@a.a",
-        postCode = None,
-        idUser = Some("123"),
-        ophanId = "it4m6aomfvm3rlv0o1ov",
-        abTests = JsArray(Seq(
-          Json.obj(
-            "testName" -> "AmountHighlightTest",
-            "testSlug" -> "highlight",
-            "variantName" -> "Amount - 50 highlight",
-            "variantSlug" -> "50"
-          ),
-          Json.obj(
-            "testName" -> "MessageCopyTest",
-            "testSlug" -> "mcopy",
-            "variantName" -> "Copy - control",
-            "variantSlug" -> "control"
-          ),
-          Json.obj(
-            "testName" -> "PaymentMethodTest",
-            "testSlug" -> "paymentMethods",
-            "variantName" -> "Paypal",
-            "variantSlug" -> "paypal"
-          )
-        )),
-        cmp = None,
-        intCmp = None,
-        marketingOptIn = Some(true)
+        email = "a@a.a"
       )
     }
 
@@ -108,7 +82,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
 
       jsResult mustBe a [JsSuccess[_]]
       jsResult.get mustEqual PaymentHook(
-        contributionId = UUID.fromString("0b28dd01-c07b-3c7d-87ab-7a3ae04ac261"),
+        contributionId = UUID.fromString("7f5256d2-8e63-4b29-8f1e-f5c4e670db22"),
         paymentId = "ch_18u3jGCbpG0cQtlbhYCnPcuz",
         provider = Stripe,
         created = new DateTime("2016-09-15T17:32:54Z"),
@@ -205,7 +179,8 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
                           |        "abTests": "[{\"testName\":\"AmountHighlightTest\",\"testSlug\":\"highlight\",\"variantName\":\"Amount - 50 highlight\",\"variantSlug\":\"50\"},{\"testName\":\"MessageCopyTest\",\"testSlug\":\"mcopy\",\"variantName\":\"Copy - control\",\"variantSlug\":\"control\"},{\"testName\":\"PaymentMethodTest\",\"testSlug\":\"paymentMethods\",\"variantName\":\"Paypal\",\"variantSlug\":\"paypal\"}]",
                           |        "email": "a@a.a",
                           |        "name": "a",
-                          |        "idUser": "123"
+                          |        "idUser": "123",
+                          |        "contributionId": "7f5256d2-8e63-4b29-8f1e-f5c4e670db22"
                           |      },
                           |      "order": null,
                           |      "paid": true,

@@ -9,30 +9,45 @@ import data.ContributionData
 import models._
 import cats.implicits._
 import com.gu.stripe.Stripe.{BalanceTransaction, Charge, Event}
+import org.joda.time.DateTime
+import play.api.libs.json.Json
+import views.support.Variant
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contributionData: ContributionData)(implicit ec: ExecutionContext)
   extends MembershipStripeService(apiConfig = apiConfig, metrics = metrics) {
 
-  def storeMetaData(stripeHook: StripeHook): XorT[Future, String, SavedContributionData] = {
+  def storeMetaData(
+    contributionId: UUID,
+    created: DateTime,
+    email: String,
+    name: String,
+    postCode: Option[String],
+    marketing: Boolean,
+    variants: Seq[Variant],
+    cmp: Option[String],
+    intCmp: Option[String],
+    ophanId: String,
+    idUser: Option[String]
+  ): XorT[Future, String, SavedContributionData] = {
     val metadata = ContributionMetaData(
-      contributionId = UUID.nameUUIDFromBytes(stripeHook.paymentId.getBytes),
-      created = stripeHook.created,
-      email = stripeHook.email,
-      ophanId = Some(stripeHook.ophanId),
-      abTests = stripeHook.abTests,
-      cmp = stripeHook.cmp,
-      intCmp = stripeHook.intCmp
+      contributionId = contributionId,
+      created = created,
+      email = email,
+      ophanId = Some(ophanId),
+      abTests = Json.toJson(variants),
+      cmp = cmp,
+      intCmp = intCmp
     )
     val contributor = Contributor(
-      email = stripeHook.email,
-      name = Some(stripeHook.name),
+      email = email,
+      name = Some(name),
       firstName = None,
       lastName = None,
-      idUser = stripeHook.idUser,
-      postCode = stripeHook.postCode,
-      marketingOptIn = stripeHook.marketingOptIn
+      idUser = idUser,
+      postCode = postCode,
+      marketingOptIn = Some(marketing)
     )
 
     for {

@@ -2,24 +2,30 @@ package controllers
 
 import java.lang.Math.min
 import java.time.LocalDate
+import java.util.UUID
 
 import actions.CommonActions.NoCacheAction
+import cats.data.XorT
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
 import com.gu.stripe.Stripe
+import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.netaporter.uri.dsl._
 import configuration.Config
+import models.SavedContributionData
+import org.joda.time.DateTime
 import play.api.data.Forms._
 import play.api.data.format.Formatter
-import play.api.data.{FieldMapping, Form, FormError}
+import play.api.data.{Form, FormError}
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.json.{JsArray, JsString, Json}
+import play.api.libs.json.Json
 import play.api.mvc._
 import services.PaymentServices
 import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
+
 import scala.concurrent.Future
 
 class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect {
@@ -148,44 +154,71 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
     ), social, countryGroup, charge))
   }
 
-  def pay = NoCacheAction.async { implicit request =>
+  def pay = NoCacheAction.async(parse.form(supportForm)) { implicit request =>
+
+    val form = request.body
+
     val stripe = paymentServices.stripeServiceFor(request)
     val idUser = IdentityUser.fromRequest(request).map(_.id)
 
-    supportForm.bindFromRequest().fold[Future[Result]]({ withErrors =>
-      Future.successful(BadRequest(JsArray(withErrors.errors.map(k => JsString(k.key)))))
-    }, { f =>
-      val metadata = Map(
-        "marketing-opt-in" -> f.marketing.toString,
-        "email" -> f.email,
-        "name" -> f.name,
-        "abTests" -> Json.toJson(f.abTests).toString,
-        "ophanId" -> f.ophanId,
-        "cmp" -> f.cmp.mkString,
-        "intcmp" -> f.intcmp.mkString
-      ) ++ List(
-        f.postcode.map("postcode" -> _),
-        idUser.map("idUser" -> _)
-      ).flatten.toMap
-      // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
-      val amountInSmallestCurrencyUnit = (f.amount * 100).toInt
-      val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(f.currency) * 100
-      val res = stripe.Charge.create(min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit), f.currency, f.email, "Your contribution", f.token, metadata)
+    val countryGroup = form.currency match {
+      case USD => US
+      case AUD => Australia
+      case EUR => Europe
+      case _ => UK
+    }
 
-      val redirect = f.currency match {
-        case USD => routes.Giraffe.thanks(US).url
-        case AUD => routes.Giraffe.thanks(Australia).url
-        case EUR => routes.Giraffe.thanks(Europe).url
-        case _ => routes.Giraffe.thanks(UK).url
-      }
+    val variant = Test.getContributePageVariant(countryGroup, Test.testIdFor(request), request)
 
-      res.map { charge =>
-        Ok(Json.obj("redirect" -> redirect))
-          .withSession(chargeId -> charge.id)
-      }.recover {
-        case e: Stripe.Error => BadRequest(Json.toJson(e))
-      }
-    })
+    val contributionId = UUID.randomUUID()
+
+    val metadata = Map(
+      "marketing-opt-in" -> form.marketing.toString,
+      "email" -> form.email,
+      "name" -> form.name,
+      "abTests" -> Json.toJson(Seq(variant)).toString,
+      "ophanId" -> form.ophanId,
+      "cmp" -> form.cmp.mkString,
+      "intcmp" -> form.intcmp.mkString,
+      "contributionId" -> contributionId.toString
+    ) ++ List(
+      form.postcode.map("postcode" -> _),
+      idUser.map("idUser" -> _)
+    ).flatten.toMap
+    // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
+    val amountInSmallestCurrencyUnit = (form.amount * 100).toInt
+    val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(form.currency) * 100
+    val amount = min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit)
+
+    val redirect = routes.Giraffe.thanks(countryGroup).url
+
+    def createCharge: Future[Stripe.Charge] = {
+      stripe.Charge.create(amount, form.currency, form.email, "Your contribution", form.token, metadata)
+    }
+
+    def storeMetaData(charge: Charge): XorT[Future, String, SavedContributionData] = {
+      stripe.storeMetaData(
+        contributionId = contributionId,
+        created = new DateTime(charge.created * 1000L),
+        email = charge.receipt_email,
+        name = form.name,
+        postCode = form.postcode,
+        marketing = form.marketing,
+        variants = Seq(variant),
+        cmp = form.cmp,
+        intCmp = form.intcmp,
+        ophanId = form.ophanId,
+        idUser = idUser
+      )
+    }
+
+    createCharge.map { charge =>
+      storeMetaData(charge) // fire and forget. If it fails we don't want to stop the user
+      Ok(Json.obj("redirect" -> redirect))
+        .withSession(chargeId -> charge.id)
+    }.recover {
+      case e: Stripe.Error => BadRequest(Json.toJson(e))
+    }
   }
 }
 

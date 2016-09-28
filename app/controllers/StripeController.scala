@@ -2,7 +2,6 @@ package controllers
 
 import actions.CommonActions._
 import cats.data.Xor
-import cats.implicits._
 import com.typesafe.config.Config
 import models.StripeHook
 import play.api.Logger
@@ -33,7 +32,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       withParsedStripeHook(request.body) { stripeHook =>
         val stripeService = paymentServices.stripeServices(stripeHook.mode)
         stripeService.processPaymentHook(stripeHook)
-          .flatMap(_ => stripeService.storeMetaData(stripeHook))
           .value.map {
           case Xor.Right(_) => Ok
           case Xor.Left(_) => InternalServerError

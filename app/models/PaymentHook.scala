@@ -81,7 +81,7 @@ object PaymentHook {
   )
 
   def fromStripe(stripeHook: StripeHook, convertedAmount: BigDecimal): PaymentHook = PaymentHook(
-    contributionId = UUID.nameUUIDFromBytes(stripeHook.paymentId.getBytes),
+    contributionId = stripeHook.contributionId,
     paymentId = stripeHook.paymentId,
     provider = Stripe,
     created = stripeHook.created,
@@ -127,6 +127,7 @@ object PaypalHook {
 }
 
 case class StripeHook(
+  contributionId: UUID,
   eventId: String,
   paymentId: String,
   balanceTransactionId: String,
@@ -136,15 +137,7 @@ case class StripeHook(
   amount: BigDecimal,
   cardCountry: String,
   status: PaymentStatus,
-  name: String,
-  email: String,
-  postCode: Option[String],
-  idUser: Option[String],
-  ophanId: String,
-  abTests: JsValue,
-  cmp: Option[String],
-  intCmp: Option[String],
-  marketingOptIn: Option[Boolean]
+  email: String
 )
 
 object StripeHook {
@@ -154,6 +147,7 @@ object StripeHook {
         eventId <- (json \ "id").validate[String]
         payload <- (json \ "data" \ "object").validate[JsObject]
         metadata <- (payload \ "metadata").validate[JsObject]
+        contributionId <- (metadata \ "contributionId").validate[UUID]
         paymentId <- (payload \ "id").validate[String]
         liveMode <- (payload \ "livemode").validate[Boolean]
         created <- (payload \ "created").validate[Long]
@@ -161,18 +155,11 @@ object StripeHook {
         amount <- (payload \ "amount").validate[Long]
         cardCountry <- (payload \ "source" \ "country").validate[String]
         status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
-        name <- (metadata \ "name").validate[String]
         email <- (metadata \ "email").validate[String]
-        postCode <- (metadata \ "postcode").validateOpt[String]
-        idUser <- (metadata \ "idUser").validateOpt[String]
-        ophanId <- (metadata \ "ophanId").validate[String]
-        abTests <- (metadata \ "abTests").validate[String].map(Json.parse)
-        cmp <- (metadata \ "cmp").validateOpt[String]
-        intCmp <- (metadata \ "intcmp").validateOpt[String]
-        marketingOptIn <- (metadata \ "marketing-opt-in").validateOpt[String]
         balanceTransactionId <- (payload \ "balance_transaction").validate[String]
       } yield {
         StripeHook(
+          contributionId = contributionId,
           eventId = eventId,
           paymentId = paymentId,
           balanceTransactionId = balanceTransactionId,
@@ -182,15 +169,7 @@ object StripeHook {
           amount = BigDecimal(amount, 2),
           cardCountry = cardCountry,
           status = status,
-          name = name,
-          email = email,
-          postCode = postCode,
-          idUser = idUser,
-          ophanId = ophanId,
-          abTests = abTests,
-          cmp = cmp,
-          intCmp = intCmp,
-          marketingOptIn = marketingOptIn.map(_.toBoolean)
+          email = email
         )
       }
     }
