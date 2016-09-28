@@ -9,11 +9,10 @@ import com.typesafe.config.ConfigFactory
 import controllers._
 import data.ContributionData
 import filters.CheckCacheHeadersFilter
-import models.ContributionMetaData
-import play.api.db.Database
 import services.PaymentServices.Mode
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
+import play.filters.gzip.{GzipFilter, GzipFilterComponents}
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services.PaymentServices
 import router.Routes
@@ -23,8 +22,7 @@ import router.Routes
 /* https://www.playframework.com/documentation/2.5.x/ScalaCompileTimeDependencyInjection
  * https://github.com/adamw/macwire/blob/master/README.md#play24x
  */
-trait AppComponents extends PlayComponents {
-
+trait AppComponents extends PlayComponents with GzipFilterComponents {
 
   lazy val config = ConfigFactory.load()
 
@@ -48,7 +46,6 @@ trait AppComponents extends PlayComponents {
     Mode.all.map(mode => mode -> contributionDataFor(mode)).toMap
   }
 
-
   lazy val paymentServices = PaymentServices(
     identityAuthProvider,
     testUsernames,
@@ -65,6 +62,7 @@ trait AppComponents extends PlayComponents {
     new monitoring.ErrorHandler(identityAuthProvider, environment, configuration, sourceMapper, Some(router))
 
   override lazy val httpFilters: Seq[EssentialFilter] = Seq(
+    gzipFilter,
     wire[CheckCacheHeadersFilter],
     SecurityHeadersFilter(SecurityHeadersConfig(
       contentSecurityPolicy = None,
