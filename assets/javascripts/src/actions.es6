@@ -107,7 +107,7 @@ export function trackCheckoutStep(checkoutStep, actionName, label) {
 
 export function setRecurring(enabled) {
     return dispatch => {
-        dispatch({ type: SET_AMOUNT, amount: enabled ? 5 : 50 });
+        dispatch({ type: SET_AMOUNT, amount: enabled ? 5 : 25 });
         dispatch({ type: SET_RECURRING, enabled: enabled });
     }
 }
