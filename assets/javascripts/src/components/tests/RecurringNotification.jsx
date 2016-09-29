@@ -13,7 +13,8 @@ export default class RecurringNotification extends React.Component {
                 <p>Email <a href="mailto:contributions.help@theguardian.com">contributions.help@theguardian.com</a> if you’d like to know more.</p>
 
                 <Button className="action action--button contribute-navigation__next"
-                        onClick={this.props.dismiss}>
+                        onClick={this.props.dismiss}
+                        autoFocus="true">
                     OK
                 </Button>
             </div>
