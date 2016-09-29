@@ -314,12 +314,9 @@ $control-spacing: 5px;
     margin: 0px $control-spacing/2 7px;
 }
 
-.option-button,
-.action--button {
-    .opaque .opacity-wrapper &:hover,
-    .opaque .opacity-wrapper &:focus {
-        cursor: default;
-    }
+.opaque .opacity-wrapper *:hover,
+.opaque .opacity-wrapper *:focus {
+    cursor: default;
 }
 
 .option-button {
@@ -331,8 +328,8 @@ $control-spacing: 5px;
         flex-basis: 30%;
     }
 
-    .opaque .opacity-wrapper &:hover,
-    .opaque .opacity-wrapper &:focus {
+    .opaque .opacity-wrapper &:hover:not(.active),
+    .opaque .opacity-wrapper &:focus:not(.active) {
         background: white;
         color: $c-neutral1;
     }
