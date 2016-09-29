@@ -28,7 +28,7 @@ export default class MobileWrapper extends React.Component {
                         />
                     </div>
 
-                    {this.props.componentFor(p)}
+                    {this.props.componentFor(p, true)}
 
                     <Navigation
                         page={p}

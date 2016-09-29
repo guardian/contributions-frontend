@@ -1,4 +1,4 @@
-import { SET_DATA, SET_COUNTRY_GROUP } from 'src/actions';
+import { SET_DATA, SET_COUNTRY_GROUP, SET_RECURRING_NOTIFIED, DISMISS_RECURRING_NOTIFICATION } from 'src/actions';
 
 const initialState = {
     abTests: [],
@@ -12,7 +12,16 @@ const initialState = {
     },
     cmpCode: '',
     intCmpCode: '',
-    ophanId: null
+    ophanId: null,
+
+    /**
+     * the state of the recurring test notification:
+     *
+     *  0: we haven't shown the notification yet
+     *  1: show the notification
+     *  2: the notification has been dismissed
+     */
+    recurringNotified: 0
 };
 
 /**
@@ -28,6 +37,12 @@ export default function dataReducer(state = initialState, action) {
             const { currency, ...countryGroup } = action.countryGroup;
 
             return Object.assign({}, state, { currency: currency, countryGroup: countryGroup });
+
+        case SET_RECURRING_NOTIFIED:
+            return Object.assign({}, state, { recurringNotified: 1 });
+
+        case DISMISS_RECURRING_NOTIFICATION:
+            return Object.assign({}, state, { recurringNotified: 2 });
 
         default:
             return state;
