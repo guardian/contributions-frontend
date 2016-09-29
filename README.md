@@ -1,4 +1,4 @@
-# ~~Membership~~ Contributions Frontend
+# Contributions Frontend
 
 
 ## Table of Contents
@@ -6,11 +6,9 @@
 1. [Getting Started](#getting-started)
 1. [Setup](#setup)
 1. [Run](#run)
-1. [Tests](#tests)
+1. [Testing](#testing)
 1. [Deployment](#deployment)
-1. [Test Users](#test-users)
 1. [Security](#security)
-1. [Additional Documentation](#additional)
 
 ## Getting Started
 
@@ -120,7 +118,7 @@ sbt test
 
 **TODO: Make this autodeployable**
 
-We use continuous deployment of the `master` branch to Production (https://membership.theguardian.com/).
+We use continuous deployment of the `master` branch to Production (https://contribute.theguardian.com/).
 See [fix-a-failed-deploy.md](https://github.com/guardian/deploy/blob/master/magenta-lib/docs/magenta-lib/howto/fix-a-failed-deploy.md)
 for what to do if a deploy goes bad.
 
@@ -133,8 +131,10 @@ S3 bucket, and if private credentials need adding or updating, they need to be u
 
 You can download and update credentials like this
 
-    aws s3 cp s3://contributions-private/DEV/contributions.private.conf /etc/gu
-    aws s3 cp /etc/gu/contributions.private.conf s3://contributions-private/DEV/
+```
+sudo aws s3 cp s3://contributions-private/DEV/contributions.private.conf /etc/gu/ --profile membership
+sudo aws s3 cp /etc/gu/contributions.private.conf s3://contributions-private/DEV/ --profile membership
+```
 
 For a reminder on why we do this, here's @tackley on the subject:
 
@@ -145,13 +145,3 @@ For a reminder on why we do this, here's @tackley on the subject:
 >For AWS access keys, always prefer to use instance profiles instead.
 
 >For other credentials, put them in a configuration store such as DynamoDB or a private S3 bucket.
-
-<a name="additional"></a>
-
-
-## Additional Documentation
-
-Further documentation notes and useful items can be found in [docs](/docs).
-
-- [Troubleshooting](docs/Troubleshooting.md) for information on common problems and how to fix them.
-- [Building AMIs](docs/building-amis.md) for how to update our AMIs
