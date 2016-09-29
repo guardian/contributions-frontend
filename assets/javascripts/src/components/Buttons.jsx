@@ -3,7 +3,6 @@ import React from 'react';
 export class AmountButton extends React.Component {
     render() {
         return <button type="button"
-                       tabIndex="0"
                        key={this.props.amount}
                        className={'contribute-controls__button option-button ' + (this.props.highlight && this.props.currentAmount === this.props.amount ? ' active' : '')}
                        onClick={this.props.onClick}
