@@ -4,13 +4,12 @@ import actions.CommonActions._
 import cats.data.Xor
 import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
-import models.PaypalHook
+import models.{ContributionId, PaypalHook}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
 import play.api.data.Form
-import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
 import play.api.libs.json._
@@ -99,7 +98,7 @@ class PaypalController(
         val authResponse = paypalService.getAuthUrl(
           amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
           countryGroup = authRequest.countryGroup,
-          contributionId = ContributionIdGenerator.getNewId,
+          contributionId = ContributionId.random,
           cmp = authRequest.cmp,
           intCmp = authRequest.intCmp,
           ophanId = authRequest.ophanId

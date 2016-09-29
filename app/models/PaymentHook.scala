@@ -1,7 +1,5 @@
 package models
 
-import java.util.UUID
-
 import models.PaymentProvider.{Paypal, Stripe}
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -54,7 +52,7 @@ object PaymentStatus extends EnumMapping[PaymentStatus] {
 }
 
 case class PaymentHook(
-  contributionId: UUID,
+  contributionId: ContributionId,
   paymentId: String,
   provider: PaymentProvider,
   created: DateTime,
@@ -95,7 +93,7 @@ object PaymentHook {
 }
 
 case class PaypalHook(
-  contributionId: UUID,
+  contributionId: ContributionId,
   paymentId: String,
   created: DateTime,
   currency: String,
@@ -108,7 +106,7 @@ object PaypalHook {
     override def reads(json: JsValue): JsResult[PaypalHook] = {
       for {
         resource <- (json \ "resource").validate[JsObject]
-        contributionId <- (resource \ "custom").validate[UUID]
+        contributionId <- (resource \ "custom").validate[ContributionId]
         paymentId <- (resource \ "parent_payment").validate[String]
         created <- (resource \ "create_time").validate[String]
         currency <- (resource \ "amount" \ "currency").validate[String]
@@ -127,7 +125,7 @@ object PaypalHook {
 }
 
 case class StripeHook(
-  contributionId: UUID,
+  contributionId: ContributionId,
   eventId: String,
   paymentId: String,
   balanceTransactionId: String,
@@ -147,7 +145,7 @@ object StripeHook {
         eventId <- (json \ "id").validate[String]
         payload <- (json \ "data" \ "object").validate[JsObject]
         metadata <- (payload \ "metadata").validate[JsObject]
-        contributionId <- (metadata \ "contributionId").validate[UUID]
+        contributionId <- (metadata \ "contributionId").validate[ContributionId]
         paymentId <- (payload \ "id").validate[String]
         liveMode <- (payload \ "livemode").validate[Boolean]
         created <- (payload \ "created").validate[Long]

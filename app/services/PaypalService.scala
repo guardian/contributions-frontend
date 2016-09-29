@@ -60,7 +60,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
   def getAuthUrl(
     amount: BigDecimal,
     countryGroup: CountryGroup,
-    contributionId: String,
+    contributionId: ContributionId,
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String]
@@ -89,7 +89,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       val transaction = new Transaction
       transaction.setAmount(paypalAmount)
       transaction.setDescription(description)
-      transaction.setCustom(contributionId)
+      transaction.setCustom(contributionId.id.toString)
       transaction.setItemList(itemList)
 
       val transactions = List(transaction).asJava
@@ -145,7 +145,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       payerInfo <- Try(payment.getPayer.getPayerInfo)
     } yield {
       val metadata = ContributionMetaData(
-        contributionId = contributionId,
+        contributionId = ContributionId(contributionId),
         created = created,
         email = payerInfo.getEmail,
         ophanId = ophanId,

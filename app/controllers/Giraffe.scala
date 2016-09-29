@@ -2,7 +2,6 @@ package controllers
 
 import java.lang.Math.min
 import java.time.LocalDate
-import java.util.UUID
 
 import actions.CommonActions.NoCacheAction
 import cats.data.XorT
@@ -13,7 +12,7 @@ import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.netaporter.uri.dsl._
 import configuration.Config
-import models.SavedContributionData
+import models.{ContributionId, SavedContributionData}
 import org.joda.time.DateTime
 import play.api.data.Forms._
 import play.api.data.format.Formatter
@@ -170,7 +169,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
 
     val variant = Test.getContributePageVariant(countryGroup, Test.testIdFor(request), request)
 
-    val contributionId = UUID.randomUUID()
+    val contributionId = ContributionId.random
 
     val metadata = Map(
       "marketing-opt-in" -> form.marketing.toString,

@@ -1,12 +1,10 @@
 package models
 
-import java.util.UUID
-
 import models.PaymentProvider.{Paypal, Stripe}
 import models.PaymentStatus.Paid
 import org.joda.time.DateTime
 import org.scalatest.{MustMatchers, WordSpec}
-import play.api.libs.json.{JsArray, JsSuccess, Json}
+import play.api.libs.json.{JsSuccess, Json}
 import services.PaymentServices.Testing
 
 class PaymentHookSpec extends WordSpec with MustMatchers {
@@ -19,7 +17,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
 
       jsResult mustBe a [JsSuccess[_]]
       jsResult.get mustEqual PaypalHook(
-        contributionId = UUID.fromString("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf"),
+        contributionId = ContributionId("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf"),
         paymentId = "PAY-9D679537LH910742AK6VPPZI",
         created = new DateTime("2016-08-10T09:49:14Z"),
         currency = "GBP",
@@ -34,7 +32,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
 
       jsResult mustBe a [JsSuccess[_]]
       jsResult.get mustEqual PaymentHook(
-        contributionId = UUID.fromString("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf"),
+        contributionId = ContributionId("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf"),
         paymentId = "PAY-9D679537LH910742AK6VPPZI",
         provider = Paypal,
         created = new DateTime("2016-08-10T09:49:14Z"),
@@ -54,7 +52,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
 
       stripeHook mustBe a [JsSuccess[_]]
       stripeHook.get mustEqual StripeHook(
-        contributionId = UUID.fromString("7f5256d2-8e63-4b29-8f1e-f5c4e670db22"),
+        contributionId = ContributionId("7f5256d2-8e63-4b29-8f1e-f5c4e670db22"),
         eventId = "evt_18u3jGCbpG0cQtlb9k9WRx6f",
         paymentId = "ch_18u3jGCbpG0cQtlbhYCnPcuz",
         balanceTransactionId = "txn_18u3jGCbpG0cQtlbFz3nsClh",
@@ -82,7 +80,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
 
       jsResult mustBe a [JsSuccess[_]]
       jsResult.get mustEqual PaymentHook(
-        contributionId = UUID.fromString("7f5256d2-8e63-4b29-8f1e-f5c4e670db22"),
+        contributionId = ContributionId("7f5256d2-8e63-4b29-8f1e-f5c4e670db22"),
         paymentId = "ch_18u3jGCbpG0cQtlbhYCnPcuz",
         provider = Stripe,
         created = new DateTime("2016-09-15T17:32:54Z"),

@@ -37,7 +37,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           status,
           email
         ) VALUES (
-          ${paymentHook.contributionId}::uuid,
+          ${paymentHook.contributionId.id}::uuid,
           ${paymentHook.paymentId},
           ${paymentHook.provider}::paymentProvider,
           ${paymentHook.created},
@@ -76,7 +76,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           cmp,
           intcmp
         ) VALUES (
-          ${pmd.contributionId}::uuid,
+          ${pmd.contributionId.id}::uuid,
           ${pmd.created},
           ${pmd.email},
           ${pmd.ophanId},

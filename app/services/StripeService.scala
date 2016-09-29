@@ -1,7 +1,5 @@
 package services
 
-import java.util.UUID
-
 import cats.data.{OptionT, XorT}
 import com.gu.monitoring.StatusMetrics
 import com.gu.stripe.{StripeApiConfig, StripeService => MembershipStripeService}
@@ -19,7 +17,7 @@ class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contribu
   extends MembershipStripeService(apiConfig = apiConfig, metrics = metrics) {
 
   def storeMetaData(
-    contributionId: UUID,
+    contributionId: ContributionId,
     created: DateTime,
     email: String,
     name: String,
