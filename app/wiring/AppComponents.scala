@@ -12,9 +12,10 @@ import filters.CheckCacheHeadersFilter
 import services.PaymentServices.Mode
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
-import play.filters.gzip.{GzipFilter, GzipFilterComponents}
+import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
-import services.PaymentServices
+import services.{IdentityService, PaymentServices}
+
 import router.Routes
 
 //Sometimes intellij deletes this -> (import router.Routes)
@@ -53,6 +54,9 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionDataPerMode)(paypalExecutionContext)
 
   )
+
+  lazy val identityService = new IdentityService(wsClient, idConfig)
+
   lazy val giraffeController = wire[Giraffe]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
