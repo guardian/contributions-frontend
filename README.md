@@ -151,7 +151,7 @@ For a reminder on why we do this, here's @tackley on the subject:
 
 ## Additional Documentation
 
-Further documentation notes and useful items can be found in [docs](/docs).
+Further documentation notes and useful items can be found in docs.
 
-- [Troubleshooting](docs/Troubleshooting.md) for information on common problems and how to fix them.
-- [Building AMIs](docs/building-amis.md) for how to update our AMIs
+- Troubleshooting for information on common problems and how to fix them.
+- Building AMIs for how to update our AMIs
