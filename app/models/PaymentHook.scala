@@ -1,10 +1,9 @@
 package models
 
-import java.util.UUID
-
-import models.PaymentProvider.Paypal
+import models.PaymentProvider.{Paypal, Stripe}
 import org.joda.time.DateTime
 import play.api.libs.json._
+import services.PaymentServices.{Default, Mode, Testing}
 
 sealed trait PaymentProvider
 
@@ -40,10 +39,20 @@ object PaymentStatus extends EnumMapping[PaymentStatus] {
       case _ => JsError("Unknown paypal status type, a JsString was expected")
     }
   }
+
+  val stripeReads = new Reads[PaymentStatus] {
+    override def reads(json: JsValue): JsResult[PaymentStatus] = json match {
+      case JsString("succeeded") => JsSuccess(Paid)
+      case JsString("failed") => JsSuccess(Failed)
+      case JsString("refunded") => JsSuccess(Refunded)
+      case JsString(wrongStatus) => JsError(s"Unexpected stripe status: $wrongStatus")
+      case _ => JsError("Unknown stripe status type, a JsString was expected")
+    }
+  }
 }
 
 case class PaymentHook(
-  contributionId: UUID,
+  contributionId: ContributionId,
   paymentId: String,
   provider: PaymentProvider,
   created: DateTime,
@@ -56,30 +65,111 @@ case class PaymentHook(
 )
 
 object PaymentHook {
+  def fromPaypal(paypalHook: PaypalHook): PaymentHook = PaymentHook(
+    contributionId = paypalHook.contributionId,
+    paymentId = paypalHook.paymentId,
+    provider = Paypal,
+    created = paypalHook.created,
+    currency = paypalHook.currency,
+    cardCountry = None,
+    amount = paypalHook.amount,
+    convertedAmount = None,
+    status = paypalHook.status,
+    email = None
+  )
 
-  implicit val paypalReader = new Reads[PaymentHook] {
+  def fromStripe(stripeHook: StripeHook, convertedAmount: BigDecimal): PaymentHook = PaymentHook(
+    contributionId = stripeHook.contributionId,
+    paymentId = stripeHook.paymentId,
+    provider = Stripe,
+    created = stripeHook.created,
+    currency = stripeHook.currency,
+    cardCountry = Some(stripeHook.cardCountry),
+    amount = stripeHook.amount,
+    convertedAmount = Some(convertedAmount),
+    status = stripeHook.status,
+    email = Some(stripeHook.email)
+  )
+}
 
-    override def reads(json: JsValue): JsResult[PaymentHook] = {
+case class PaypalHook(
+  contributionId: ContributionId,
+  paymentId: String,
+  created: DateTime,
+  currency: String,
+  amount: BigDecimal,
+  status: PaymentStatus
+)
+
+object PaypalHook {
+  implicit val reader = new Reads[PaypalHook] {
+    override def reads(json: JsValue): JsResult[PaypalHook] = {
       for {
         resource <- (json \ "resource").validate[JsObject]
-        contributionId <- (resource \ "custom").validate[UUID]
+        contributionId <- (resource \ "custom").validate[ContributionId]
         paymentId <- (resource \ "parent_payment").validate[String]
         created <- (resource \ "create_time").validate[String]
         currency <- (resource \ "amount" \ "currency").validate[String]
         amount <- (resource \ "amount" \ "total").validate[BigDecimal]
         status <- (json \ "event_type").validate[PaymentStatus](PaymentStatus.paypalReads)
-      } yield PaymentHook(
+      } yield PaypalHook(
         contributionId = contributionId,
         paymentId = paymentId,
-        provider = Paypal,
         created = new DateTime(created),
         currency = currency,
-        cardCountry = None,
         amount = amount,
-        convertedAmount = None,
-        status = status,
-        email = None
+        status = status
       )
+    }
+  }
+}
+
+case class StripeHook(
+  contributionId: ContributionId,
+  eventId: String,
+  paymentId: String,
+  balanceTransactionId: String,
+  mode: Mode,
+  created: DateTime,
+  currency: String,
+  amount: BigDecimal,
+  cardCountry: String,
+  status: PaymentStatus,
+  email: String
+)
+
+object StripeHook {
+  implicit val reader = new Reads[StripeHook] {
+    override def reads(json: JsValue): JsResult[StripeHook] = {
+      for {
+        eventId <- (json \ "id").validate[String]
+        payload <- (json \ "data" \ "object").validate[JsObject]
+        metadata <- (payload \ "metadata").validate[JsObject]
+        contributionId <- (metadata \ "contributionId").validate[ContributionId]
+        paymentId <- (payload \ "id").validate[String]
+        liveMode <- (payload \ "livemode").validate[Boolean]
+        created <- (payload \ "created").validate[Long]
+        currency <- (payload \ "currency").validate[String]
+        amount <- (payload \ "amount").validate[Long]
+        cardCountry <- (payload \ "source" \ "country").validate[String]
+        status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
+        email <- (metadata \ "email").validate[String]
+        balanceTransactionId <- (payload \ "balance_transaction").validate[String]
+      } yield {
+        StripeHook(
+          contributionId = contributionId,
+          eventId = eventId,
+          paymentId = paymentId,
+          balanceTransactionId = balanceTransactionId,
+          mode = if (liveMode) Default else Testing,
+          created = new DateTime(created * 1000),
+          currency = currency.toUpperCase,
+          amount = BigDecimal(amount, 2),
+          cardCountry = cardCountry,
+          status = status,
+          email = email
+        )
+      }
     }
   }
 }

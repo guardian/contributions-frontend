@@ -18,8 +18,8 @@ POST           /paypal/auth                     controllers.PaypalController.aut
 
 GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], ophanId: Option[String])
 POST           /paypal/hook                     controllers.PaypalController.hook
+POST           /stripe/hook                     controllers.StripeController.hook
 POST           /:countryGroup/update-metadata   controllers.PaypalController.updateMetadata(countryGroup:CountryGroup)
-
 
 GET            /ca                              controllers.Giraffe.redirectToUk
 GET            /nz                              controllers.Giraffe.redirectToUk

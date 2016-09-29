@@ -60,7 +60,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
   def getAuthUrl(
     amount: BigDecimal,
     countryGroup: CountryGroup,
-    contributionId: String,
+    contributionId: ContributionId,
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String]
@@ -89,7 +89,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       val transaction = new Transaction
       transaction.setAmount(paypalAmount)
       transaction.setDescription(description)
-      transaction.setCustom(contributionId)
+      transaction.setCustom(contributionId.id.toString)
       transaction.setItemList(itemList)
 
       val transactions = List(transaction).asJava
@@ -129,8 +129,6 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
 
   }
 
-  case class SavedContributionData(contributor: Contributor, contributionMetaData: ContributionMetaData)
-
   def storeMetaData(
     paymentId: String,
     variants: Seq[Variant],
@@ -147,7 +145,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       payerInfo <- Try(payment.getPayer.getPayerInfo)
     } yield {
       val metadata = ContributionMetaData(
-        contributionId = contributionId,
+        contributionId = ContributionId(contributionId),
         created = created,
         email = payerInfo.getEmail,
         ophanId = ophanId,
@@ -219,8 +217,8 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paymentHook: PaymentHook): XorT[Future, String, PaymentHook] = {
-    contributionData.insertPaymentHook(paymentHook)
+  def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] = {
+    contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 
 }

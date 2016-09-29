@@ -4,13 +4,12 @@ import actions.CommonActions._
 import cats.data.Xor
 import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
-import models.PaymentHook
+import models.{ContributionId, PaypalHook}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
 import play.api.data.Form
-import utils.ContributionIdGenerator
 import views.support.Test
 import utils.MaxAmount
 import play.api.libs.json._
@@ -80,7 +79,7 @@ class PaypalController(
   implicit val UriWrites = new Writes[Uri] {
     override def writes(uri: Uri): JsValue = JsString(uri.toString)
   }
-  
+
   implicit val AuthResponseWrites = Json.writes[AuthResponse]
 
   implicit val CountryGroupReads = new Reads[CountryGroup] {
@@ -99,7 +98,7 @@ class PaypalController(
         val authResponse = paypalService.getAuthUrl(
           amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
           countryGroup = authRequest.countryGroup,
-          contributionId = ContributionIdGenerator.getNewId,
+          contributionId = ContributionId.random,
           cmp = authRequest.cmp,
           intCmp = authRequest.intCmp,
           ophanId = authRequest.ophanId
@@ -128,11 +127,11 @@ class PaypalController(
     val paypalService = paymentServices.paypalServiceFor(request)
     val validHook = paypalService.validateEvent(request.headers.toSimpleMap, bodyText)
 
-    def withParsedPaymentHook(paymentHookJson: JsValue)(block: PaymentHook => Future[Result]): Future[Result] = {
-      bodyJson.validate[PaymentHook] match {
-        case JsSuccess(paymentHook, _) if validHook =>
-          Logger.info(s"Received paymentHook: ${paymentHook.paymentId}")
-          block(paymentHook)
+    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result]): Future[Result] = {
+      bodyJson.validate[PaypalHook] match {
+        case JsSuccess(paypalHook, _) if validHook =>
+          Logger.info(s"Received paymentHook: ${paypalHook.paymentId}")
+          block(paypalHook)
         case JsError(errors) =>
           Logger.error(s"Unable to parse Json, parsing errors: $errors")
           Future.successful(InternalServerError("Unable to parse json payload"))
@@ -142,8 +141,8 @@ class PaypalController(
       }
     }
 
-    withParsedPaymentHook(bodyJson) { paymentHook =>
-      paypalService.processPaymentHook(paymentHook).value.map {
+    withParsedPaypalHook(bodyJson) { paypalHook =>
+      paypalService.processPaymentHook(paypalHook).value.map {
         case Xor.Right(_) => Ok
         case Xor.Left(_) => InternalServerError
       }
