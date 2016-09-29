@@ -226,7 +226,7 @@ $gs-max-columns: 16;
         color: $white;
     }
 
-    &.active {
+    &.active, &.active:hover, &.active:focus {
         background-color: $c-neutral1;
         color: $white;
     }
