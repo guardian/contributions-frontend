@@ -53,10 +53,32 @@ function testDataFor(tests, testName) {
     return test && test.data;
 }
 
+function countryId() {
+    try {
+        return store.getState().data.countryGroup.id;
+    } catch (e) {
+        return '';
+    }
+}
 
-export function amounts(state) {
+
+export function amounts(tests) {
+    const amounts = {
+        'au': {
+            'one-off': [50, 100, 250, 500],
+            'monthly': [5, 10, 25, 50]
+        },
+
+        'default': {
+            'one-off': [25, 50, 100, 250],
+            'monthly': [2, 5, 10, 20]
+        }
+    }
+
+    const state = store.getState();
     const data = testDataFor(state.data.abTests, 'AmountHighlightTest');
-    const defaultAmounts = state.details.recurring === true ? [2, 5, 10, 20] : [25, 50, 100, 250];
+    const defaultAmounts = amounts[countryId()] || amounts['default'];
+    const defaults = state.details.recurring === true ? defaultAmounts['monthly'] : defaultAmounts['one-off'];
 
     return (data && data.values) || defaults;
 }
