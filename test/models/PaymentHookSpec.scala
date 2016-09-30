@@ -73,7 +73,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
       val jsResult = stripeHook.map { stripeHook =>
         PaymentHook.fromStripe(
           stripeHook = stripeHook,
-          convertedAmount = BigDecimal("20.00")
+          convertedAmount = Some(BigDecimal("20.00"))
         )
       }
 
