@@ -282,7 +282,11 @@ $control-spacing: 5px;
 
     .symbol {
         color: color(neutral-3);
-        vertical-align: -1px;
+
+        &.small {
+            color: color(neutral-1);
+            font-weight: bold;
+        }
 
         &.active {
             color: color(neutral-1);
