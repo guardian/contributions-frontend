@@ -55,7 +55,6 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         contributionId = ContributionId("7f5256d2-8e63-4b29-8f1e-f5c4e670db22"),
         eventId = "evt_18u3jGCbpG0cQtlb9k9WRx6f",
         paymentId = "ch_18u3jGCbpG0cQtlbhYCnPcuz",
-        balanceTransactionId = "txn_18u3jGCbpG0cQtlbFz3nsClh",
         mode = Testing,
         created = new DateTime("2016-09-15T17:32:54Z"),
         currency = "GBP",
