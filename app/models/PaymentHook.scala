@@ -78,7 +78,7 @@ object PaymentHook {
     email = None
   )
 
-  def fromStripe(stripeHook: StripeHook, convertedAmount: BigDecimal): PaymentHook = PaymentHook(
+  def fromStripe(stripeHook: StripeHook, convertedAmount: Option[BigDecimal]): PaymentHook = PaymentHook(
     contributionId = stripeHook.contributionId,
     paymentId = stripeHook.paymentId,
     provider = Stripe,
@@ -86,7 +86,7 @@ object PaymentHook {
     currency = stripeHook.currency,
     cardCountry = Some(stripeHook.cardCountry),
     amount = stripeHook.amount,
-    convertedAmount = Some(convertedAmount),
+    convertedAmount = convertedAmount,
     status = stripeHook.status,
     email = Some(stripeHook.email)
   )

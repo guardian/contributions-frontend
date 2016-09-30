@@ -1,20 +1,21 @@
 package services
 
 import cats.data.{OptionT, XorT}
-import com.gu.monitoring.StatusMetrics
+import com.gu.monitoring.ServiceMetrics
 import com.gu.stripe.{StripeApiConfig, StripeService => MembershipStripeService}
 import data.ContributionData
 import models._
 import cats.implicits._
-import com.gu.stripe.Stripe.{BalanceTransaction, Charge, Event}
+import com.gu.okhttp.RequestRunners
+import com.gu.stripe.Stripe.{Charge, Event}
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import views.support.Variant
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contributionData: ContributionData)(implicit ec: ExecutionContext)
-  extends MembershipStripeService(apiConfig = apiConfig, metrics = metrics) {
+class StripeService(apiConfig: StripeApiConfig, metrics: ServiceMetrics, contributionData: ContributionData)(implicit ec: ExecutionContext)
+  extends MembershipStripeService(apiConfig = apiConfig, RequestRunners.loggingRunner(metrics)) {
 
   def storeMetaData(
     contributionId: ContributionId,
@@ -59,28 +60,27 @@ class StripeService(apiConfig: StripeApiConfig, metrics: StatusMetrics, contribu
 
   def processPaymentHook(stripeHook: StripeHook): XorT[Future, String, PaymentHook] = {
 
-    def findCharge(stripeHook: StripeHook): XorT[Future, String, Event[Charge]] = {
-      OptionT(this.Event.findCharge(stripeHook.eventId))
-        .toRight(s"Impossible to find charge with eventId: ${stripeHook.eventId}")
+    def convertedAmount(event: Event[Charge]): OptionT[Future, BigDecimal] = {
+      for {
+        balanceTransactionId <- OptionT.fromOption[Future](event.`object`.balance_transaction)
+        balanceTransaction <- OptionT(this.BalanceTransaction.read(balanceTransactionId))
+      } yield BigDecimal(balanceTransaction.amount, 2)
     }
 
-    def findBalanceTransaction(event: Event[Charge]): XorT[Future, String, BalanceTransaction] = {
-      OptionT(this.BalanceTransaction.read(event.`object`.balance_transaction))
-        .toRight(s"Impossible to find balance transaction with Id: ${event.`object`.balance_transaction}")
+    def toPaymentHook(event: Event[Charge]): OptionT[Future, PaymentHook] = OptionT.liftF {
+      convertedAmount(event).value.map { amount =>
+        PaymentHook.fromStripe(stripeHook = stripeHook, convertedAmount = amount)
+      }
     }
 
-    def toPaymentHook(balanceTransaction: BalanceTransaction): PaymentHook = {
-      PaymentHook.fromStripe(
-        stripeHook = stripeHook,
-        convertedAmount = BigDecimal(balanceTransaction.amount, 2)
-      )
-    }
+    val paymentHook = for {
+      event <- OptionT(this.Event.findCharge(stripeHook.eventId))
+      paymentHook <- toPaymentHook(event)
+    } yield paymentHook
 
     for {
-      eventFromStripe <- findCharge(stripeHook)
-      balanceTransaction <- findBalanceTransaction(eventFromStripe)
-      paymentHook = toPaymentHook(balanceTransaction)
-      insertedPaymentHook <- contributionData.insertPaymentHook(paymentHook)
-    } yield insertedPaymentHook
+      hook <- paymentHook.toRight(s"Unable to find the stripe event identified by ${stripeHook.eventId}")
+      insertResult <- contributionData.insertPaymentHook(hook)
+    } yield insertResult
   }
 }
