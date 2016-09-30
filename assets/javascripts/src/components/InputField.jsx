@@ -4,13 +4,14 @@ export class AmountInput extends React.Component {
     render() {
         const { inputAmount, symbol, refFn, ...props } = this.props;
 
-        return <span className="contribute-controls__input contribute-controls__input--amount input-text">
+        return <span className={(this.props.small ? 'contribute-controls__input-small':'contribute-controls__input') + ' contribute-controls__input--amount input-text'}>
             <span className={'symbol ' + (!!inputAmount ? 'active' : '')}>{symbol}</span>
             <input type="number"
                    ref={refFn.bind(this)} // create a reference to this element for validation (see: https://facebook.github.io/react/docs/more-about-refs.html)
                    placeholder="Other amount" maxLength="10"
                    value={inputAmount}
                    onChange={this.props.onChange.bind(this)}
+                   className={this.props.small ? 'contribute-controls__small-input': ''}
                    {...props} />
         </span>
     }

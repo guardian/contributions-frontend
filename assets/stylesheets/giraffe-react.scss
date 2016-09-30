@@ -275,8 +275,14 @@ $control-spacing: 5px;
         }
     }
 
+    input.contribute-controls__small-input {
+        width: 90%;
+        text-align: left;
+    }
+
     .symbol {
         color: color(neutral-3);
+        vertical-align: -1px;
 
         &.active {
             color: color(neutral-1);
@@ -295,6 +301,12 @@ $control-spacing: 5px;
     width: 100%;
     display: block;
 }
+
+.contribute-controls__input-small {
+    flex-basis: 48%;
+    display: block;
+}
+
 
 .contribute-navigation__button {
     float: right;
