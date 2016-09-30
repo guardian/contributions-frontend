@@ -90,7 +90,7 @@ class FormWithRecurring extends React.Component {
                 : 'One-off amount';
 
 
-        return <div className={'contribute-controls contribute-fields contribute-controls--recurring ' + (this.props.amounts.length % 3 ? 'option-button__fours ' : 'option-button__three ')}>
+        return <div className="contribute-controls contribute-fields contribute-controls--recurring">
             <RecurringSelection setRecurring={this.props.setRecurring} recurring={this.props.recurring} recurringNotified={this.props.recurringNotified} />
 
             {this.props.recurringNotified === 1 && <RecurringNotification dismiss={this.props.dismissRecurringNotification}/>}
@@ -113,7 +113,9 @@ class FormWithRecurring extends React.Component {
                              refFn={this.props.refFn}
                              value={this.props.inputAmount}
                              disabled={disabled}
-                             onChange={this.props.updateInputAmount}/>
+                             onChange={this.props.updateInputAmount}
+                             small={this.props.amounts.length == 6}
+                />
             </div>
 
             {this.props.error.show && <div className="payment-error"> {this.props.error.message}</div>}
@@ -123,7 +125,7 @@ class FormWithRecurring extends React.Component {
 
 class FormWithoutRecurring extends React.Component {
     render() {
-        return <div className={'contribute-controls contribute-fields ' + (this.props.amounts.length % 3 ? 'option-button__fours' : 'option-button__three')}>
+        return <div className="contribute-controls contribute-fields">
             {this.props.amounts.map(amount =>
                 <AmountButton amount={amount}
                               key={amount}
@@ -138,7 +140,9 @@ class FormWithoutRecurring extends React.Component {
                          symbol={this.props.currency.symbol}
                          refFn={this.props.refFn}
                          value={this.props.inputAmount}
-                         onChange={this.props.updateInputAmount}/>
+                         onChange={this.props.updateInputAmount}
+                         small={this.props.amounts.length == 6}
+            />
 
             {this.props.error.show && <div className="payment-error"> {this.props.error.message}</div>}
         </div>;
