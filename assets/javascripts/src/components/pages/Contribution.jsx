@@ -90,7 +90,7 @@ class FormWithRecurring extends React.Component {
                 : 'One-off amount';
 
 
-        return <div className="contribute-controls contribute-fields contribute-controls--recurring option-button__fours">
+        return <div className="contribute-controls contribute-fields contribute-controls--recurring">
             <RecurringSelection setRecurring={this.props.setRecurring} recurring={this.props.recurring} recurringNotified={this.props.recurringNotified} />
 
             {this.props.recurringNotified === 1 && <RecurringNotification dismiss={this.props.dismissRecurringNotification}/>}
@@ -125,7 +125,7 @@ class FormWithRecurring extends React.Component {
 
 class FormWithoutRecurring extends React.Component {
     render() {
-        return <div className="contribute-controls contribute-fields option-button__fours">
+        return <div className="contribute-controls contribute-fields">
             {this.props.amounts.map(amount =>
                 <AmountButton amount={amount}
                               key={amount}
