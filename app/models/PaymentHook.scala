@@ -128,7 +128,6 @@ case class StripeHook(
   contributionId: ContributionId,
   eventId: String,
   paymentId: String,
-  balanceTransactionId: String,
   mode: Mode,
   created: DateTime,
   currency: String,
@@ -154,13 +153,11 @@ object StripeHook {
         cardCountry <- (payload \ "source" \ "country").validate[String]
         status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
         email <- (metadata \ "email").validate[String]
-        balanceTransactionId <- (payload \ "balance_transaction").validate[String]
       } yield {
         StripeHook(
           contributionId = contributionId,
           eventId = eventId,
           paymentId = paymentId,
-          balanceTransactionId = balanceTransactionId,
           mode = if (liveMode) Default else Testing,
           created = new DateTime(created * 1000),
           currency = currency.toUpperCase,
