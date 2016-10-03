@@ -5,7 +5,7 @@ case class Contributor(
   name: Option[String],
   firstName: Option[String],
   lastName: Option[String],
-  idUser: Option[String],
+  idUser: Option[IdentityId],
   postCode: Option[String],
   marketingOptIn: Option[Boolean]
 )

@@ -135,7 +135,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String],
-    idUser: Option[String]
+    idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
     val triedSavedContributionData = for {
       payment <- Try(Payment.get(apiContext, paymentId))

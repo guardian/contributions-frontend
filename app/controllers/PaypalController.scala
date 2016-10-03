@@ -4,7 +4,7 @@ import actions.CommonActions._
 import cats.data.Xor
 import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
-import models.{ContributionId, PaypalHook}
+import models.{ContributionId, IdentityId, PaypalHook}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
@@ -42,7 +42,7 @@ class PaypalController(
     def postPayUrl = routes.Giraffe.postPayment(countryGroup).url
     val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
     val paypalService = paymentServices.paypalServiceFor(request)
-    val idUser = IdentityUser.fromRequest(request).map(_.id)
+    val idUser = IdentityId.fromRequest(request)
 
     def saveMetadata = paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser).value.map {
       case Xor.Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))

@@ -28,7 +28,7 @@ class StripeService(apiConfig: StripeApiConfig, metrics: ServiceMetrics, contrib
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: String,
-    idUser: Option[String]
+    idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
     val metadata = ContributionMetaData(
       contributionId = contributionId,

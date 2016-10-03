@@ -113,7 +113,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           ${contributor.name},
           ${contributor.firstName},
           ${contributor.lastName},
-          ${contributor.idUser},
+          ${contributor.idUser.map(_.id)},
           ${contributor.postCode},
           ${contributor.marketingOptIn}
         ) ON CONFLICT(receipt_email) DO
