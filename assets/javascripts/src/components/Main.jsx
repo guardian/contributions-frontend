@@ -144,7 +144,7 @@ class Main extends React.Component {
         return <div>
             <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={showSummary} />
             <MediaQuery query='(max-width: 740px)'>
-                <MobileWrapper submit={this.submit.bind(this, true)} componentFor={this.componentFor.bind(this)} {...this.props} />
+                <MobileWrapper submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
 
             <MediaQuery query='(min-width: 741px)'>
