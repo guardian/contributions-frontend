@@ -27,7 +27,7 @@ function abTestData(tests, complete) {
     for (var test of tests) {
         data[test.testSlug] = {
             'variantName': test.variantSlug,
-            'complete': complete
+            'complete': String(complete)
         }
     }
 
