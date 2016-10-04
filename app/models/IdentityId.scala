@@ -5,7 +5,7 @@ import play.api.libs.json.{Format, JsResult, JsValue, Json}
 import play.api.mvc.Request
 
 case class IdentityId(id: String) extends AnyVal {
-  override def toString: String = id.toString
+  override def toString: String = id
 }
 
 object IdentityId {

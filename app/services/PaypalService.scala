@@ -214,7 +214,7 @@ class PaypalService(
       postCode = None
     )
 
-    // Fire and forget
+    // Fire and forget: we don't want to stop the user flow
     idUser.map { id =>
       identityService.updateMarketingPreferences(id, marketingOptInt)
     }
