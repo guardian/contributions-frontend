@@ -9,7 +9,7 @@ import com.typesafe.config.ConfigFactory
 import controllers._
 import data.ContributionData
 import filters.CheckCacheHeadersFilter
-import services.PaymentServices.Mode
+import models.PaymentMode
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
@@ -38,13 +38,13 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val identityAuthProvider =
     Cookies.authProvider(identityKeys).withDisplayNameProvider(Token.authProvider(identityKeys, "membership"))
 
-  val contributionDataPerMode: Map[Mode, ContributionData] = {
+  val contributionDataPerMode: Map[PaymentMode, ContributionData] = {
     val dbConfig = config.getConfig("dbConf")
-    def contributionDataFor(mode: Mode) = {
+    def contributionDataFor(mode: PaymentMode) = {
       val modeKey = dbConfig.getString(mode.name)
       new ContributionData(dbApi.database(modeKey))(jdbcExecutionContext) // explicit execution context to avoid blocking the app
     }
-    Mode.all.map(mode => mode -> contributionDataFor(mode)).toMap
+    PaymentMode.all.map(mode => mode -> contributionDataFor(mode)).toMap
   }
 
   lazy val paymentServices = PaymentServices(

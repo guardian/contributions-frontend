@@ -6,8 +6,9 @@ import com.gu.monitoring.ServiceMetrics
 import com.gu.stripe.{StripeApiConfig, StripeCredentials}
 import com.typesafe.config.Config
 import data.ContributionData
+import models.PaymentMode
+import models.PaymentMode.{Default, Testing}
 import play.api.mvc.RequestHeader
-import services.PaymentServices.{Default, Mode, Testing}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,25 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object PaymentServices {
 
-  /* https://stripe.com/docs/dashboard#livemode-and-testing
-   */
-  sealed trait Mode {
-    val name: String
-  }
-
-  case object Default extends Mode {
-    val name = "default"
-  }
-
-  case object Testing extends Mode {
-    val name = "testing"
-  }
-
-  object Mode {
-    val all: Set[Mode] = Set(Default, Testing)
-  }
-
-  def stripeServiceFor(stripeConfig: Config, universe: Mode, contributionData: ContributionData): StripeService = {
+  def stripeServiceFor(stripeConfig: Config, universe: PaymentMode, contributionData: ContributionData): StripeService = {
     val stripeMode = stripeConfig.getString(universe.name)
     val keys = stripeConfig.getConfig(s"keys.$stripeMode")
     val credentials = StripeCredentials(
@@ -45,13 +28,13 @@ object PaymentServices {
     new StripeService(StripeApiConfig(stripeMode, credentials), metrics, contributionData)
   }
 
-  def stripeServicesFor(stripeConfig: Config, contributionDataPerMode: Map[Mode, ContributionData]):Map[Mode, StripeService] = {
-    Mode.all.map(mode => mode -> stripeServiceFor(stripeConfig, mode, contributionDataPerMode(mode))).toMap
+  def stripeServicesFor(stripeConfig: Config, contributionDataPerMode: Map[PaymentMode, ContributionData]):Map[PaymentMode, StripeService] = {
+    PaymentMode.all.map(mode => mode -> stripeServiceFor(stripeConfig, mode, contributionDataPerMode(mode))).toMap
   }
 
-  def paypalServicesFor(paypalConfig: Config, contributionDataPerMode: Map[Mode, ContributionData])(ec: ExecutionContext): Map[Mode, PaypalService] = {
+  def paypalServicesFor(paypalConfig: Config, contributionDataPerMode: Map[PaymentMode, ContributionData])(ec: ExecutionContext): Map[PaymentMode, PaypalService] = {
 
-    def paypalServiceFor(universe: Mode): PaypalService = {
+    def paypalServiceFor(universe: PaymentMode): PaypalService = {
       val contributionData = contributionDataPerMode(universe)
       val paypalMode = paypalConfig.getString(universe.name)
       val keys = paypalConfig.getConfig(paypalMode)
@@ -59,20 +42,20 @@ object PaymentServices {
       new PaypalService(apiConfig, contributionData)(ec)
     }
 
-    Mode.all.map(mode => mode -> paypalServiceFor(mode)).toMap
+    PaymentMode.all.map(mode => mode -> paypalServiceFor(mode)).toMap
   }
 }
 
 case class PaymentServices(
   authProvider: AuthenticatedIdUser.Provider,
   testUsernames: TestUsernames,
-  stripeServices: Map[Mode, StripeService],
-  paypalServices: Map[Mode, PaypalService]
+  stripeServices: Map[PaymentMode, StripeService],
+  paypalServices: Map[PaymentMode, PaypalService]
 ) {
 
   private def isTestUser(request: RequestHeader): Boolean = authProvider(request).flatMap(_.displayName).exists(testUsernames.isValid)
 
-  private def modeFor(request: RequestHeader): Mode = if (isTestUser(request)) Testing else Default
+  private def modeFor(request: RequestHeader): PaymentMode = if (isTestUser(request)) Testing else Default
 
   def stripeServiceFor(request: RequestHeader): StripeService = stripeServices(modeFor(request))
 
