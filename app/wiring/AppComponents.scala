@@ -47,14 +47,13 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     PaymentMode.all.map(mode => mode -> contributionDataFor(mode)).toMap
   }
 
-  lazy val paymentServices = PaymentServices(
-    identityAuthProvider,
-    testUsernames,
-    PaymentServices.stripeServicesFor(config.getConfig("stripe"), contributionDataPerMode),
-    PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionDataPerMode)(paypalExecutionContext)
-
+  lazy val paymentServices = new PaymentServices(
+    config = config,
+    authProvider = identityAuthProvider,
+    testUsernames = testUsernames,
+    contributionDataPerMode = contributionDataPerMode,
+    actorSystem = actorSystem
   )
-
   lazy val identityService = new IdentityService(wsClient, idConfig)
 
   lazy val giraffeController = wire[Giraffe]

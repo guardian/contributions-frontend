@@ -1,5 +1,6 @@
 package services
 
+import akka.actor.ActorSystem
 import com.gu.identity.play.AuthenticatedIdUser
 import com.gu.identity.testing.usernames.TestUsernames
 import com.gu.monitoring.ServiceMetrics
@@ -11,47 +12,46 @@ import models.PaymentMode.{Default, Testing}
 import play.api.mvc.RequestHeader
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
 
+class PaymentServices(
+  config: Config,
+  authProvider: AuthenticatedIdUser.Provider,
+  testUsernames: TestUsernames,
+  contributionDataPerMode: Map[PaymentMode, ContributionData],
+  actorSystem: ActorSystem
+)(implicit ec: ExecutionContext) {
 
-object PaymentServices {
+  val stripeServices: Map[PaymentMode, StripeService] = {
+    val stripeConfig = config.getConfig("stripe")
 
-  def stripeServiceFor(stripeConfig: Config, universe: PaymentMode, contributionData: ContributionData): StripeService = {
-    val stripeMode = stripeConfig.getString(universe.name)
-    val keys = stripeConfig.getConfig(s"keys.$stripeMode")
-    val credentials = StripeCredentials(
-      secretKey = keys.getString("secret"),
-      publicKey = keys.getString("public")
-    )
-
-    val metrics = new ServiceMetrics(stripeMode, "giraffe","stripe")
-    new StripeService(StripeApiConfig(stripeMode, credentials), metrics, contributionData)
+    def stripeServiceFor(mode: PaymentMode): StripeService = {
+      val contributionData = contributionDataPerMode(mode)
+      val stripeMode = stripeConfig.getString(mode.name)
+      val keys = stripeConfig.getConfig(s"keys.$stripeMode")
+      val credentials = StripeCredentials(
+        secretKey = keys.getString("secret"),
+        publicKey = keys.getString("public")
+      )
+      val metrics = new ServiceMetrics(stripeMode, "giraffe", "stripe")
+      new StripeService(StripeApiConfig(stripeMode, credentials), metrics, contributionData)
+    }
+    PaymentMode.all.map(mode => mode -> stripeServiceFor(mode)).toMap
   }
 
-  def stripeServicesFor(stripeConfig: Config, contributionDataPerMode: Map[PaymentMode, ContributionData]):Map[PaymentMode, StripeService] = {
-    PaymentMode.all.map(mode => mode -> stripeServiceFor(stripeConfig, mode, contributionDataPerMode(mode))).toMap
-  }
+  val paypalServices: Map[PaymentMode, PaypalService] = {
+    val paypalExecutionContext = actorSystem.dispatchers.lookup("contexts.paypal-context")
+    val paypalConfig = config.getConfig("paypal")
 
-  def paypalServicesFor(paypalConfig: Config, contributionDataPerMode: Map[PaymentMode, ContributionData])(ec: ExecutionContext): Map[PaymentMode, PaypalService] = {
-
-    def paypalServiceFor(universe: PaymentMode): PaypalService = {
-      val contributionData = contributionDataPerMode(universe)
-      val paypalMode = paypalConfig.getString(universe.name)
+    def paypalServiceFor(mode: PaymentMode): PaypalService = {
+      val contributionData = contributionDataPerMode(mode)
+      val paypalMode = paypalConfig.getString(mode.name)
       val keys = paypalConfig.getConfig(paypalMode)
       val apiConfig = PaypalApiConfig.from(keys, paypalMode)
-      new PaypalService(apiConfig, contributionData)(ec)
+      new PaypalService(apiConfig, contributionData)(paypalExecutionContext)
     }
 
     PaymentMode.all.map(mode => mode -> paypalServiceFor(mode)).toMap
   }
-}
-
-case class PaymentServices(
-  authProvider: AuthenticatedIdUser.Provider,
-  testUsernames: TestUsernames,
-  stripeServices: Map[PaymentMode, StripeService],
-  paypalServices: Map[PaymentMode, PaypalService]
-) {
 
   private def isTestUser(request: RequestHeader): Boolean = authProvider(request).flatMap(_.displayName).exists(testUsernames.isValid)
 
