@@ -51,6 +51,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     config = config,
     authProvider = identityAuthProvider,
     testUsernames = testUsernames,
+    identityService = identityService,
     contributionDataPerMode = contributionDataPerMode,
     actorSystem = actorSystem
   )

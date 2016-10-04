@@ -14,7 +14,12 @@ import views.support.Variant
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StripeService(apiConfig: StripeApiConfig, metrics: ServiceMetrics, contributionData: ContributionData)(implicit ec: ExecutionContext)
+class StripeService(
+  apiConfig: StripeApiConfig,
+  metrics: ServiceMetrics,
+  contributionData: ContributionData,
+  identityService: IdentityService
+)(implicit ec: ExecutionContext)
   extends MembershipStripeService(apiConfig = apiConfig, RequestRunners.loggingRunner(metrics)) {
 
   def storeMetaData(
@@ -30,6 +35,12 @@ class StripeService(apiConfig: StripeApiConfig, metrics: ServiceMetrics, contrib
     ophanId: String,
     idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
+
+    // Fire and forget
+    idUser.map { id =>
+      identityService.updateMarketingPreferences(id, marketing)
+    }
+
     val metadata = ContributionMetaData(
       contributionId = contributionId,
       created = created,

@@ -159,8 +159,10 @@ class PaypalController(
   def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async(parse.form(metadataUpdateForm)) {
     implicit request =>
       val paypalService = paymentServices.paypalServiceFor(request)
+      val marketingOptIn = request.body.marketingOptIn
+      val idUser = IdentityId.fromRequest(request)
       val contributor = request.session.data.get("email") match {
-        case Some(email) => paypalService.updateMarketingOptIn(email, request.body.marketingOptIn).value
+        case Some(email) => paypalService.updateMarketingOptIn(email, marketingOptIn, idUser).value
         case None => Future.successful(Logger.error("email not found in session while trying to update marketing opt in"))
       }
       contributor.map { _ =>
