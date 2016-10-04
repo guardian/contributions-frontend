@@ -4,10 +4,11 @@ import actions.CommonActions._
 import cats.data.Xor
 import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
+import model.exactTarget.ContributorRow
 import models.{ContributionId, PaypalHook}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
-import services.PaymentServices
+import services.{EmailService, PaymentServices}
 import play.api.Logger
 import play.api.data.Form
 import views.support.Test
@@ -142,6 +143,12 @@ class PaypalController(
     }
 
     withParsedPaypalHook(bodyJson) { paypalHook =>
+
+      for {
+        row <- ContributorRow.fromPaypal(paypalHook) //TODO: move the paypal logic into here and pass email and name as strings
+        send <- EmailService.thank(row)
+      }
+
       paypalService.processPaymentHook(paypalHook).value.map {
         case Xor.Right(_) => Ok
         case Xor.Left(_) => InternalServerError

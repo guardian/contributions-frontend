@@ -78,6 +78,12 @@ class StripeService(apiConfig: StripeApiConfig, metrics: ServiceMetrics, contrib
       paymentHook <- toPaymentHook(event)
     } yield paymentHook
 
+    println(stripeHook.amount)
+    println(stripeHook.created)
+    println(stripeHook.cardCountry)
+    println(stripeHook.email)
+    println(stripeHook.currency)
+
     for {
       hook <- paymentHook.toRight(s"Unable to find the stripe event identified by ${stripeHook.eventId}")
       insertResult <- contributionData.insertPaymentHook(hook)
