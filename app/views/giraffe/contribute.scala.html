@@ -24,7 +24,7 @@
     data-ab-tests="@Json.stringify(Json.toJson(Seq(variant)))"
     data-country-group="@Json.stringify(Json.toJson(countryGroup))"
     data-max-amount="@maxAmount"
-    csrf-token="@csrfToken.getOrElse("")"
+    data-csrf-token="@csrfToken.getOrElse("")"
         @cmpCode.map(code => Html(s"""data-cmp-code="${code}""""))
         @intCmpCode.map(code => Html(s"""data-int-cmp-code="${code}""""))>
     </section>
