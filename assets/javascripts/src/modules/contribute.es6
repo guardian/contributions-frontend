@@ -46,7 +46,8 @@ function appDataFrom(container) {
         countryGroup: countryGroup,
         currency: currency,
         cmpCode: container.getAttribute('data-cmp-code'),
-        intCmpCode: container.getAttribute('data-int-cmp-code')
+        intCmpCode: container.getAttribute('data-int-cmp-code'),
+        csrfToken: container.getAttribute('csrf-token')
     };
 }
 
