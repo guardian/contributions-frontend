@@ -9,12 +9,13 @@ import com.typesafe.config.ConfigFactory
 import controllers._
 import data.ContributionData
 import filters.CheckCacheHeadersFilter
-import services.PaymentServices.Mode
+import models.PaymentMode
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
-import play.filters.gzip.{GzipFilter, GzipFilterComponents}
+import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
-import services.PaymentServices
+import services.{IdentityService, PaymentServices}
+
 import router.Routes
 
 //Sometimes intellij deletes this -> (import router.Routes)
@@ -37,22 +38,25 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val identityAuthProvider =
     Cookies.authProvider(identityKeys).withDisplayNameProvider(Token.authProvider(identityKeys, "membership"))
 
-  val contributionDataPerMode: Map[Mode, ContributionData] = {
+  val contributionDataPerMode: Map[PaymentMode, ContributionData] = {
     val dbConfig = config.getConfig("dbConf")
-    def contributionDataFor(mode: Mode) = {
+    def contributionDataFor(mode: PaymentMode) = {
       val modeKey = dbConfig.getString(mode.name)
       new ContributionData(dbApi.database(modeKey))(jdbcExecutionContext) // explicit execution context to avoid blocking the app
     }
-    Mode.all.map(mode => mode -> contributionDataFor(mode)).toMap
+    PaymentMode.all.map(mode => mode -> contributionDataFor(mode)).toMap
   }
 
-  lazy val paymentServices = PaymentServices(
-    identityAuthProvider,
-    testUsernames,
-    PaymentServices.stripeServicesFor(config.getConfig("stripe"), contributionDataPerMode),
-    PaymentServices.paypalServicesFor(config.getConfig("paypal"), contributionDataPerMode)(paypalExecutionContext)
-
+  lazy val paymentServices = new PaymentServices(
+    config = config,
+    authProvider = identityAuthProvider,
+    testUsernames = testUsernames,
+    identityService = identityService,
+    contributionDataPerMode = contributionDataPerMode,
+    actorSystem = actorSystem
   )
+  lazy val identityService = new IdentityService(wsClient, idConfig)
+
   lazy val giraffeController = wire[Giraffe]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]

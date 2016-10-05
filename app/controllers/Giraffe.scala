@@ -12,7 +12,7 @@ import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.netaporter.uri.dsl._
 import configuration.Config
-import models.{ContributionId, SavedContributionData}
+import models.{ContributionId, IdentityId, SavedContributionData}
 import org.joda.time.DateTime
 import play.api.data.Forms._
 import play.api.data.format.Formatter
@@ -158,7 +158,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
     val form = request.body
 
     val stripe = paymentServices.stripeServiceFor(request)
-    val idUser = IdentityUser.fromRequest(request).map(_.id)
+    val idUser = IdentityId.fromRequest(request)
 
     val countryGroup = form.currency match {
       case USD => US
@@ -182,7 +182,7 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
       "contributionId" -> contributionId.toString
     ) ++ List(
       form.postcode.map("postcode" -> _),
-      idUser.map("idUser" -> _)
+      idUser.map("idUser" -> _.id)
     ).flatten.toMap
     // Note that '.. * 100' will not work for Yen and other currencies! https://stripe.com/docs/api#charge_object-amount
     val amountInSmallestCurrencyUnit = (form.amount * 100).toInt

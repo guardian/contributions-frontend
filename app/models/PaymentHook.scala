@@ -3,7 +3,7 @@ package models
 import models.PaymentProvider.{Paypal, Stripe}
 import org.joda.time.DateTime
 import play.api.libs.json._
-import services.PaymentServices.{Default, Mode, Testing}
+import models.PaymentMode.{Default, Testing}
 
 sealed trait PaymentProvider
 
@@ -128,7 +128,7 @@ case class StripeHook(
   contributionId: ContributionId,
   eventId: String,
   paymentId: String,
-  mode: Mode,
+  mode: PaymentMode,
   created: DateTime,
   currency: String,
   amount: BigDecimal,

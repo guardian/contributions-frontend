@@ -5,7 +5,7 @@ import models.PaymentStatus.Paid
 import org.joda.time.DateTime
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.libs.json.{JsSuccess, Json}
-import services.PaymentServices.Testing
+import models.PaymentMode.Testing
 
 class PaymentHookSpec extends WordSpec with MustMatchers {
 

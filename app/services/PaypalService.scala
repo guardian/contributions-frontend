@@ -34,7 +34,7 @@ case class PaypalApiConfig(
 )
 
 object PaypalApiConfig {
-  def from(config: Config, environmentName: String, variant: String = "api") = PaypalApiConfig(
+  def from(config: Config, environmentName: String) = PaypalApiConfig(
     envName = environmentName,
     credentials = PaypalCredentials(config.getString("clientId"), config.getString("clientSecret")),
     paypalMode = config.getString("paypalMode"),
@@ -43,7 +43,11 @@ object PaypalApiConfig {
   )
 }
 
-class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)(implicit ec: ExecutionContext) {
+class PaypalService(
+  config: PaypalApiConfig,
+  contributionData: ContributionData,
+  identityService: IdentityService
+)(implicit ec: ExecutionContext) {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
 
@@ -122,8 +126,8 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
-      case Xor.Right(payment) if (payment.getState.toUpperCase != "APPROVED") => Xor.left(s"payment returned with state: ${payment.getState}")
-      case Xor.Right(payment) => Xor.right(payment)
+      case Xor.Right(p) if p.getState.toUpperCase != "APPROVED" => Xor.left(s"payment returned with state: ${payment.getState}")
+      case Xor.Right(p) => Xor.right(p)
       case Xor.Left(error) => Xor.left(error)
     }
 
@@ -135,7 +139,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     cmp: Option[String],
     intCmp: Option[String],
     ophanId: Option[String],
-    idUser: Option[String]
+    idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
     val triedSavedContributionData = for {
       payment <- Try(Payment.get(apiContext, paymentId))
@@ -199,7 +203,7 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
     )
   }
 
-  def updateMarketingOptIn(email: String, marketingOptInt: Boolean): XorT[Future, String, Contributor] = {
+  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId]): XorT[Future, String, Contributor] = {
     val contributor = Contributor(
       email = email,
       marketingOptIn = Some(marketingOptInt),
@@ -209,6 +213,12 @@ class PaypalService(config: PaypalApiConfig, contributionData: ContributionData)
       idUser = None,
       postCode = None
     )
+
+    // Fire and forget: we don't want to stop the user flow
+    idUser.map { id =>
+      identityService.updateMarketingPreferences(id, marketingOptInt)
+    }
+
     contributionData.saveContributor(contributor)
   }
 
