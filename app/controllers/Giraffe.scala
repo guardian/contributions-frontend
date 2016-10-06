@@ -116,37 +116,35 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
 
-  def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = {
-    addToken {
-      NoCacheAction { implicit request =>
+  def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
+    NoCacheAction { implicit request =>
 
-        val mvtId = Test.testIdFor(request)
-        val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
+      val mvtId = Test.testIdFor(request)
+      val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
 
-        val errorMessage = error.map(_.message)
-        val stripe = paymentServices.stripeServiceFor(request)
-        val cmp = request.getQueryString("CMP")
-        val intCmp = request.getQueryString("INTCMP")
+      val errorMessage = error.map(_.message)
+      val stripe = paymentServices.stripeServiceFor(request)
+      val cmp = request.getQueryString("CMP")
+      val intCmp = request.getQueryString("INTCMP")
 
-        val pageInfo = PageInfo(
-          title = "Support the Guardian | Contribute today",
-          url = request.path,
-          image = Some("https://media.guim.co.uk/5719a2b724efd8944e0222d57c839a7d2b6e39b3/0_0_1440_864/1000.jpg"),
-          stripePublicKey = Some(stripe.publicKey),
-          description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
-          customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
-        )
+      val pageInfo = PageInfo(
+        title = "Support the Guardian | Contribute today",
+        url = request.path,
+        image = Some("https://media.guim.co.uk/5719a2b724efd8944e0222d57c839a7d2b6e39b3/0_0_1440_864/1000.jpg"),
+        stripePublicKey = Some(stripe.publicKey),
+        description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
+        customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
+      )
 
-        val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
-        val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
+      val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
+      val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-        val testsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix)) map(_.name)
+      val testsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix)) map(_.name)
 
-        Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp,
-          creditCardExpiryYears, errorMessage, CSRF.getToken.map(_.value)))
-          .discardingCookies(testsInCookies.toSeq map(DiscardingCookie(_)): _*)
-          .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
-      }
+      Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp,
+        creditCardExpiryYears, errorMessage, CSRF.getToken.map(_.value)))
+        .discardingCookies(testsInCookies.toSeq map(DiscardingCookie(_)): _*)
+        .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
     }
   }
 
