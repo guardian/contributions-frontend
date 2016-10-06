@@ -141,12 +141,20 @@ class PaypalService(
     ophanId: Option[String],
     idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
-    val triedSavedContributionData = for {
-      payment <- Try(Payment.get(apiContext, paymentId))
-      transaction <- Try(payment.getTransactions.asScala.head)
-      contributionId <- Try(UUID.fromString(transaction.getCustom))
-      created <- Try(new DateTime(payment.getCreateTime))
-      payerInfo <- Try(payment.getPayer.getPayerInfo)
+
+    def tryToXorT[A](block: => A): XorT[Future, String, A] = {
+      XorT.fromXor[Future](Xor.catchNonFatal(block).leftMap {t: Throwable =>
+        Logger.error("Unable to store contribution metadata", t)
+        "Unable to store contribution metadata"
+      })
+    }
+
+    val contributionDataToSave = for {
+      payment <- asyncExecute(Payment.get(apiContext, paymentId))
+      transaction <- tryToXorT(payment.getTransactions.asScala.head)
+      contributionId <- tryToXorT(UUID.fromString(transaction.getCustom))
+      created <- tryToXorT(new DateTime(payment.getCreateTime))
+      payerInfo <- tryToXorT(payment.getPayer.getPayerInfo)
     } yield {
       val metadata = ContributionMetaData(
         contributionId = ContributionId(contributionId),
@@ -188,13 +196,8 @@ class PaypalService(
       )
     }
 
-    val contributionDataToSave = Xor.fromTry(triedSavedContributionData).leftMap { exception =>
-      Logger.error("Unable to store contribution metadata", exception)
-      "Unable to store contribution metadata"
-    }
-
     for {
-      data <- XorT.fromXor[Future](contributionDataToSave)
+      data <- contributionDataToSave
       contributionMetaData <- contributionData.insertPaymentMetaData(data.contributionMetaData)
       contributor <- contributionData.saveContributor(data.contributor)
     } yield SavedContributionData(
