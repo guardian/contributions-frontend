@@ -168,5 +168,4 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
       }
   }
-
 }

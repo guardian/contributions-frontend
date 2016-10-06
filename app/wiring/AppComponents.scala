@@ -9,13 +9,10 @@ import com.typesafe.config.ConfigFactory
 import controllers._
 import data.ContributionData
 import filters.CheckCacheHeadersFilter
-import play.api.libs.crypto.CSRFTokenSigner
 import models.PaymentMode
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
-import play.filters.csrf.CSRFAddToken
-import play.filters.csrf.CSRFCheck
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services.{IdentityService, PaymentServices}
 
@@ -65,15 +62,6 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val assetController = wire[Assets]
   lazy val paypalController = wire[PaypalController]
   lazy val stripeController = new StripeController(paymentServices, stripeConfig)
-
-  // The in-scope variables crypto and csrfTokenSigner are both CSRFTokenSigner's,
-  // therefore, create a method which can be used to specify which one wire should use.
-  // Note: this will be unnecessary when crypto is removed in a future version of Play.
-  def getCSRFAddToken(crypto: CSRFTokenSigner): CSRFAddToken = wire[CSRFAddToken]
-  def getCSRFCheck(crypto: CSRFTokenSigner): CSRFCheck = wire[CSRFCheck]
-
-  lazy val addToken = getCSRFAddToken(csrfTokenSigner)
-  lazy val check = getCSRFCheck(crypto)
 
   override lazy val httpErrorHandler =
     new monitoring.ErrorHandler(identityAuthProvider, environment, configuration, sourceMapper, Some(router))
