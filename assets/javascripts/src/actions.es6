@@ -26,10 +26,6 @@ export const CLEAR_PAYMENT_FLAGS = "CLEAR_PAYMENT_FLAGS";
 export const TRACK_STEP = "TRACK_STEP";
 export const GA_ENABLED = "GA_ENABLED";
 
-export const SET_RECURRING = "SET_RECURRING";
-export const SET_RECURRING_NOTIFIED = "SET_RECURRING_NOTIFIED";
-export const DISMISS_RECURRING_NOTIFICATION = "DISMISS_RECURRING_NOTIFICATION";
-
 export function submitPayment(dispatch) {
     const state = store.getState();
 
@@ -106,18 +102,6 @@ export function trackCheckoutStep(checkoutStep, actionName, label) {
             dispatch({type: TRACK_STEP, step: checkoutStep});
         }
     }
-}
-
-export function setRecurring(enabled) {
-    return dispatch => {
-        dispatch({ type: SET_AMOUNT, amount: enabled ? 5 : 25 });
-        dispatch({ type: SET_RECURRING, enabled: enabled });
-    }
-}
-
-export function showRecurringTestMessage(dispatch) {
-    setRecurring(false)(dispatch);
-    dispatch({ type: SET_RECURRING_NOTIFIED });
 }
 
 /**

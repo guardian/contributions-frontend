@@ -115,22 +115,12 @@ object AmountHighlightTest extends TestTrait {
   )
 }
 
-object RecurringPaymentTest extends TestTrait {
-  def name = "RecurringPaymentTest"
-  def slug = "recurringPayment"
-
-  def variants = NonEmptyList(
-    makeVariant("control", "control", 0.5),
-    makeVariant("recurring", "recurring", 0.5)
-  )
-}
-
 object Test {
   private val MaxTestId = 100
   val CookiePrefix     = "gu.contributions.test"
   val TestIdCookieName = s"$CookiePrefix.id"
 
-  val allTests = List(AmountHighlightTest, RecurringPaymentTest, ReducedCheckoutTest)
+  val allTests = List(AmountHighlightTest, ReducedCheckoutTest)
 
   def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
   def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"
