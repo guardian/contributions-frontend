@@ -64,13 +64,16 @@ export function paypalRedirect(dispatch) {
     dispatch({ type: SUBMIT_PAYMENT });
 
     const postData = {
-            countryGroup: state.data.countryGroup.id ,
-            amount: state.card.amount, //TODO should the amount be somewhere else rather than in the card section?,
-            cmp: state.data.cmpCode,
-            intCmp: state.data.intCmpCode,
-            ophanId: state.data.ophanId
-        };
-    fetch('/paypal/auth', {
+        countryGroup: state.data.countryGroup.id ,
+        amount: state.card.amount, //TODO should the amount be somewhere else rather than in the card section?,
+        cmp: state.data.cmpCode,
+        intCmp: state.data.intCmpCode,
+        ophanId: state.data.ophanId
+    };
+
+    const url = '/paypal/auth?csrfToken=' + state.data.csrfToken;
+
+    fetch(url, {
         credentials: 'same-origin',
         method: 'POST',
         headers: {

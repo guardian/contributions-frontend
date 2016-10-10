@@ -16,16 +16,12 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
+import play.filters.csrf.CSRFCheck
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaypalController(
-  ws: WSClient,
-  paymentServices: PaymentServices
-)(
-  implicit ec: ExecutionContext
-) extends Controller with Redirect {
-
+class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)
+                      (implicit ec: ExecutionContext) extends Controller with Redirect {
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -91,27 +87,30 @@ class PaypalController(
 
   private def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = amount min MaxAmount.forCurrency(currency)
 
-  def authorize = NoCacheAction.async(parse.json) { request =>
-    request.body.validate[AuthRequest] match {
-      case JsSuccess(authRequest, _) =>
-        val paypalService = paymentServices.paypalServiceFor(request)
-        val authResponse = paypalService.getAuthUrl(
-          amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
-          countryGroup = authRequest.countryGroup,
-          contributionId = ContributionId.random,
-          cmp = authRequest.cmp,
-          intCmp = authRequest.intCmp,
-          ophanId = authRequest.ophanId
-        )
-        authResponse.value map {
-          case Xor.Right(url) => Ok(Json.toJson(AuthResponse(url)))
-          case Xor.Left(error) =>
-            Logger.error(s"Error getting PayPal auth url: $error")
-            InternalServerError("Error getting PayPal auth url")
-        }
-      case JsError(error) =>
-        Logger.error(s"Invalid request=$error")
-        Future.successful(BadRequest(s"Invalid request=$error"))
+  def authorize = checkToken {
+    NoCacheAction.async(parse.json) { request =>
+
+      request.body.validate[AuthRequest] match {
+        case JsSuccess(authRequest, _) =>
+          val paypalService = paymentServices.paypalServiceFor(request)
+          val authResponse = paypalService.getAuthUrl(
+            amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
+            countryGroup = authRequest.countryGroup,
+            contributionId = ContributionId.random,
+            cmp = authRequest.cmp,
+            intCmp = authRequest.intCmp,
+            ophanId = authRequest.ophanId
+          )
+          authResponse.value map {
+            case Xor.Right(url) => Ok(Json.toJson(AuthResponse(url)))
+            case Xor.Left(error) =>
+              Logger.error(s"Error getting PayPal auth url: $error")
+              InternalServerError("Error getting PayPal auth url")
+          }
+        case JsError(error) =>
+          Logger.error(s"Invalid request=$error")
+          Future.successful(BadRequest(s"Invalid request=$error"))
+      }
     }
   }
 
@@ -169,5 +168,4 @@ class PaypalController(
         Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
       }
   }
-
 }

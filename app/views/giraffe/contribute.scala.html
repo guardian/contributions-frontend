@@ -5,7 +5,17 @@
 @import play.api.libs.json.Json
 @import views.support.Variant
 
-@(pageInfo: PageInfo, maxAmount: Int, countryGroup: CountryGroup, variant: Variant, cmpCode: Option[String], intCmpCode: Option[String], creditCardExpiryYears: List[Int], errorMessage: Option[String])
+@(
+    pageInfo: PageInfo,
+    maxAmount: Int,
+    countryGroup: CountryGroup,
+    variant: Variant,
+    cmpCode: Option[String],
+    intCmpCode: Option[String],
+    creditCardExpiryYears: List[Int],
+    errorMessage: Option[String],
+    csrfToken: Option[String]
+)
 
 @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage) {
 
@@ -14,6 +24,7 @@
     data-ab-tests="@Json.stringify(Json.toJson(Seq(variant)))"
     data-country-group="@Json.stringify(Json.toJson(countryGroup))"
     data-max-amount="@maxAmount"
+    data-csrf-token="@csrfToken.getOrElse("")"
         @cmpCode.map(code => Html(s"""data-cmp-code="${code}""""))
         @intCmpCode.map(code => Html(s"""data-int-cmp-code="${code}""""))>
     </section>

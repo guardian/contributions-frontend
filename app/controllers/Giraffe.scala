@@ -20,6 +20,8 @@ import play.api.data.{Form, FormError}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Json
 import play.api.mvc._
+import play.filters.csrf.CSRF
+import play.filters.csrf.CSRFAddToken
 import services.PaymentServices
 import utils.MaxAmount
 import utils.RequestCountry._
@@ -27,7 +29,8 @@ import views.support._
 
 import scala.concurrent.Future
 
-class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect {
+class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
+
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
     override def bind(key: String, data: Map[String, String]): Result =
@@ -113,32 +116,36 @@ class Giraffe(paymentServices: PaymentServices) extends Controller with Redirect
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
 
-  def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = NoCacheAction { implicit request =>
-    val mvtId = Test.testIdFor(request)
-    val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
+  def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
+    NoCacheAction { implicit request =>
 
-    val errorMessage = error.map(_.message)
-    val stripe = paymentServices.stripeServiceFor(request)
-    val cmp = request.getQueryString("CMP")
-    val intCmp = request.getQueryString("INTCMP")
+      val mvtId = Test.testIdFor(request)
+      val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
 
-    val pageInfo = PageInfo(
-      title = "Support the Guardian | Contribute today",
-      url = request.path,
-      image = Some("https://media.guim.co.uk/5719a2b724efd8944e0222d57c839a7d2b6e39b3/0_0_1440_864/1000.jpg"),
-      stripePublicKey = Some(stripe.publicKey),
-      description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
-      customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
-    )
+      val errorMessage = error.map(_.message)
+      val stripe = paymentServices.stripeServiceFor(request)
+      val cmp = request.getQueryString("CMP")
+      val intCmp = request.getQueryString("INTCMP")
 
-    val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
-    val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
+      val pageInfo = PageInfo(
+        title = "Support the Guardian | Contribute today",
+        url = request.path,
+        image = Some("https://media.guim.co.uk/5719a2b724efd8944e0222d57c839a7d2b6e39b3/0_0_1440_864/1000.jpg"),
+        stripePublicKey = Some(stripe.publicKey),
+        description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
+        customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
+      )
 
-    val testsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix)) map(_.name)
+      val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
+      val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-    Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp, creditCardExpiryYears, errorMessage))
-      .discardingCookies(testsInCookies.toSeq map(DiscardingCookie(_)): _*)
-      .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
+      val testsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix)) map(_.name)
+
+      Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp,
+        creditCardExpiryYears, errorMessage, CSRF.getToken.map(_.value)))
+        .discardingCookies(testsInCookies.toSeq map(DiscardingCookie(_)): _*)
+        .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
+    }
   }
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>

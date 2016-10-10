@@ -46,13 +46,14 @@ function appDataFrom(container) {
         countryGroup: countryGroup,
         currency: currency,
         cmpCode: container.getAttribute('data-cmp-code'),
-        intCmpCode: container.getAttribute('data-int-cmp-code')
+        intCmpCode: container.getAttribute('data-int-cmp-code'),
+        csrfToken: container.getAttribute('data-csrf-token')
     };
 }
 
 function getUrlParameter(rawName, url) {
     const name = rawName.replace(/[\[\]]/g, "\\$&");
-    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)")
+    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
     const results = regex.exec(url || window.location.href);
 
     if (!results) return null;
