@@ -12,13 +12,9 @@ import {
     PAYPAL_PAY,
     CARD_PAY,
     CLEAR_PAYMENT_FLAGS,
-    SET_RECURRING,
-    DISMISS_RECURRING_NOTIFICATION,
     paypalRedirect,
     submitPayment,
-    trackCheckoutStep,
-    setRecurring,
-    showRecurringTestMessage
+    trackCheckoutStep
 } from 'src/actions';
 
 import { PAGES } from 'src/constants';
@@ -45,10 +41,7 @@ function mapStateToProps(state) {
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests),
         countryGroup: state.data.countryGroup,
-        reducedCheckout: abTests.reducedCheckout(state.data.abTests),
-        showRecurring: abTests.showRecurring(state.data.abTests),
-        recurring: state.details.recurring,
-        recurringNotified: state.data.recurringNotified
+        reducedCheckout: abTests.reducedCheckout(state.data.abTests)
     };
 }
 
@@ -76,15 +69,12 @@ function mapDispatchToProps(dispatch) {
         },
         payWithCard: () => dispatch({ type: CARD_PAY }),
         paypalRedirect: () => dispatch(paypalRedirect),
-        clearPaymentFlags: () => dispatch({ type: CLEAR_PAYMENT_FLAGS }),
-        setRecurring: enabled => dispatch(setRecurring(enabled)),
-        showRecurringTestMessage: () => dispatch(showRecurringTestMessage),
-        dismissRecurringNotification: () => dispatch({ type: DISMISS_RECURRING_NOTIFICATION })
+        clearPaymentFlags: () => dispatch({ type: CLEAR_PAYMENT_FLAGS })
     };
 }
 
 class Main extends React.Component {
-    componentFor(page, mobile) {
+    componentFor(page) {
         if (this.props.reducedCheckout && page != PAGES.CONTRIBUTION) {
             page = PAGES.PAYMENT;
         }
@@ -94,7 +84,6 @@ class Main extends React.Component {
                 return <Contribution max={this.props.maxAmount}
                                      error={this.props.paymentError}
                                      currentAmount={this.props.card.amount}
-                                     mobile={mobile}
                                      {...this.props} />;
 
             case PAGES.DETAILS:
@@ -117,13 +106,6 @@ class Main extends React.Component {
         event.preventDefault(); // we never want the standard submit behaviour, which triggers a reload
 
         if (!event.target.checkValidity()) return;
-
-        if (this.props.showRecurring && this.props.recurring === null) return; // disable form progress if recurring test is on and no recurring method has been selected
-
-        if (this.props.recurring === true) {
-            abTests.trackRecurring(this.props.card.amount);
-            return this.props.showRecurringTestMessage();
-        }
 
         if (this.props.paypalPay) {
             this.props.paypalRedirect();

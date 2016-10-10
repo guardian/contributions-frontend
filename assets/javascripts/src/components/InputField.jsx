@@ -2,10 +2,10 @@ import React from 'react';
 
 export class AmountInput extends React.Component {
     render() {
-        const { inputAmount, symbol, refFn, ...props } = this.props;
+        const { inputAmount, symbol, refFn, small, ...props } = this.props;
 
-        return <span className={'contribute-controls__input contribute-controls__input--amount input-text ' + (this.props.small ? 'contribute-controls__input-small':'')}>
-            <span className={'symbol ' + (!!inputAmount ? 'active' : '') + (this.props.small ? ' small' : '')}>{symbol}</span>
+        return <span className={'contribute-controls__input contribute-controls__input--amount input-text ' + (small ? 'contribute-controls__input-small':'')}>
+            <span className={'symbol ' + (!!inputAmount ? 'active' : '') + (small ? ' small' : '')}>{symbol}</span>
             <input type="number"
                    ref={refFn.bind(this)} // create a reference to this element for validation (see: https://facebook.github.io/react/docs/more-about-refs.html)
                    placeholder="Other amount" maxLength="10"

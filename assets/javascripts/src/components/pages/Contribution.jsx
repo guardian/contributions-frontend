@@ -1,7 +1,5 @@
 import React from 'react';
 
-import {RecurringSelection} from '../tests/RecurringPayments';
-import RecurringNotification from '../tests/RecurringNotification';
 import {AmountButton} from '../Buttons';
 import {AmountInput} from '../InputField';
 
@@ -66,81 +64,22 @@ export default class Contribution extends React.Component {
     }
 
     render() {
-        const props = Object.assign({}, this.props, {
-            inputAmount: this.state.inputAmount,
-            updateInputAmount: this.updateInputAmount.bind(this),
-            handleClick: this.handleClick.bind(this),
-            highlightButton: this.state.highlightButton,
-            refFn: component => this._input = component // create a reference to this element for validation (see: https://facebook.github.io/react/docs/more-about-refs.html)
-        });
-
-        return (this.props.showRecurring && !this.props.mobile)
-            ? <FormWithRecurring {...props} />
-            : <FormWithoutRecurring {...props} />;
-    }
-}
-
-class FormWithRecurring extends React.Component {
-    render() {
-        const disabled = this.props.recurring === null;
-        const inputHeading = disabled
-            ? 'Amount'
-            : this.props.recurring === true
-                ? 'Monthly amount'
-                : 'One-off amount';
-
-
-        return <div className="contribute-controls contribute-fields contribute-controls--recurring">
-            <RecurringSelection setRecurring={this.props.setRecurring} recurring={this.props.recurring} recurringNotified={this.props.recurringNotified} />
-
-            {this.props.recurringNotified === 1 && <RecurringNotification dismiss={this.props.dismissRecurringNotification}/>}
-
-            <h2 className="contribution-heading full-row">{inputHeading}</h2>
-
-            <div className={'opacity-wrapper opacity-wrapper--contribute-controls'}>
-                {this.props.amounts.map(amount =>
-                    <AmountButton amount={amount}
-                                  key={amount}
-                                  highlight={this.props.highlightButton}
-                                  currentAmount={this.props.currentAmount}
-                                  onClick={() => !disabled && this.props.handleClick(amount)}>
-                        {this.props.currency.symbol + amount}
-                    </AmountButton>
-                )}
-
-                <AmountInput inputAmount={this.props.inputAmount}
-                             symbol={this.props.currency.symbol}
-                             refFn={this.props.refFn}
-                             value={this.props.inputAmount}
-                             disabled={disabled}
-                             onChange={this.props.updateInputAmount}
-                             small={this.props.amounts.length == 6}
-                />
-            </div>
-
-            {this.props.error.show && <div className="payment-error"> {this.props.error.message}</div>}
-        </div>;
-    }
-}
-
-class FormWithoutRecurring extends React.Component {
-    render() {
         return <div className="contribute-controls contribute-fields">
             {this.props.amounts.map(amount =>
                 <AmountButton amount={amount}
                               key={amount}
-                              highlight={this.props.highlightButton}
+                              highlight={this.state.highlightButton}
                               currentAmount={this.props.currentAmount}
-                              onClick={() => this.props.handleClick(amount)}>
+                              onClick={this.handleClick.bind(this, amount)}>
                     {this.props.currency.symbol + amount}
                 </AmountButton>
             )}
 
-            <AmountInput inputAmount={this.props.inputAmount}
+            <AmountInput inputAmount={this.state.inputAmount}
                          symbol={this.props.currency.symbol}
-                         refFn={this.props.refFn}
-                         value={this.props.inputAmount}
-                         onChange={this.props.updateInputAmount}
+                         refFn={component => this._input = component}
+                         value={this.state.inputAmount}
+                         onChange={this.updateInputAmount.bind(this)}
                          small={this.props.amounts.length == 6}
             />
 
@@ -148,4 +87,3 @@ class FormWithoutRecurring extends React.Component {
         </div>;
     }
 }
-

@@ -93,16 +93,3 @@ export function presetAmount(tests) {
 
     return (data && data.preselect) || defaultAmount;
 }
-
-export function showRecurring(tests) {
-    const test = testFor(tests, 'RecurringPaymentTest');
-    return test && test.variantSlug === 'recurring';
-}
-
-export function trackRecurring(amount) {
-    const state = store.getState();
-    const currency = state.data.currency.code || '';
-
-    GA.event('recurring', 'Pay monthly', currency , amount);
-    trackComplete();
-}
