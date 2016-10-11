@@ -46,7 +46,8 @@ object PaypalApiConfig {
 class PaypalService(
   config: PaypalApiConfig,
   contributionData: ContributionData,
-  identityService: IdentityService
+  identityService: IdentityService,
+  emailService: EmailService
 )(implicit ec: ExecutionContext) {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
@@ -60,6 +61,15 @@ class PaypalService(
       exception.getMessage
     }
   })
+
+  private def fullName(payerInfo: PayerInfo): Option[String] = {
+    val firstName = Option(payerInfo.getFirstName)
+    val lastName = Option(payerInfo.getLastName)
+    Seq(firstName, lastName).flatten match {
+      case Nil => None
+      case names => Some(names.mkString(" "))
+    }
+  }
 
   def getAuthUrl(
     amount: BigDecimal,
@@ -143,7 +153,7 @@ class PaypalService(
   ): XorT[Future, String, SavedContributionData] = {
 
     def tryToXorT[A](block: => A): XorT[Future, String, A] = {
-      XorT.fromXor[Future](Xor.catchNonFatal(block).leftMap {t: Throwable =>
+      XorT.fromXor[Future](Xor.catchNonFatal(block).leftMap { t: Throwable =>
         Logger.error("Unable to store contribution metadata", t)
         "Unable to store contribution metadata"
       })
@@ -175,14 +185,10 @@ class PaypalService(
 
       val firstName = Option(payerInfo.getFirstName)
       val lastName = Option(payerInfo.getLastName)
-      val fullName = Seq(firstName, lastName).flatten match {
-        case Nil => None
-        case names => Some(names.mkString(" "))
-      }
 
       val contributor = Contributor(
         email = payerInfo.getEmail,
-        name = fullName,
+        name = fullName(payerInfo),
         firstName = firstName,
         lastName = lastName,
         idUser = idUser,
@@ -231,6 +237,24 @@ class PaypalService(
   }
 
   def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] = {
+
+    def tryToXorT[A](block: => A): XorT[Future, String, A] = {
+      XorT.fromXor[Future](Xor.catchNonFatal(block).leftMap { t: Throwable =>
+        Logger.error("Unable to retrieve payment meta data", t)
+        "Unable to retrieve payment meta data"
+      })
+    }
+
+    for {
+      payment <- asyncExecute(Payment.get(apiContext, paypalHook.paymentId))
+      payerInfo <- tryToXorT(payment.getPayer.getPayerInfo)
+    } yield {
+      val name = fullName(payerInfo).getOrElse("")
+      val email = payerInfo.getEmail
+      val contributorRow = ContributorRow.fromPaypal(paypalHook, name, email)
+      emailService.thank(contributorRow)
+    }
+
     contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 

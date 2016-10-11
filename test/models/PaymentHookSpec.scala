@@ -61,6 +61,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         amount = BigDecimal("25.00"),
         cardCountry = "US",
         status = Paid,
+        name = "a",
         email = "a@a.a"
       )
     }
