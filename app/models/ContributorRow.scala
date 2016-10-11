@@ -9,25 +9,27 @@ case class ContributorRow(
   email: String,
   created: DateTime,
   amount: BigDecimal,
-  country: String,
+  currency: String,
+  edition: String,
   name: String,
   cardCountry: Option[String] = None
 )
 
 object ContributorRow {
 
-  def currencyToCountry(currency: String): String = currency match {
-    case "GBP" => "UK"
-    case "USD" => "US"
-    case "AUD" => "AUS"
-    case _ => "ROW"
+  def currencyToEdition(currency: String): String = currency match {
+    case "GBP" => "uk"
+    case "USD" => "us"
+    case "AUD" => "au"
+    case _ => "international"
   }
 
   def fromStripe(stripeHook: StripeHook): ContributorRow = ContributorRow(
     email = stripeHook.email,
     created = stripeHook.created,
     amount = stripeHook.amount,
-    country = currencyToCountry(stripeHook.currency),
+    currency = stripeHook.currency,
+    edition = currencyToEdition(stripeHook.currency),
     name = stripeHook.name,
     cardCountry = Some(stripeHook.cardCountry)
   )
@@ -36,7 +38,8 @@ object ContributorRow {
     email = email,
     created = paypalHook.created,
     amount = paypalHook.amount,
-    country = currencyToCountry(paypalHook.currency),
+    currency = paypalHook.currency,
+    edition = currencyToEdition(paypalHook.currency),
     name = name
   )
 
@@ -50,7 +53,8 @@ object ContributorRow {
             "EmailAddress" -> c.email,
             "created" -> c.created.toString(),
             "amount" -> c.amount,
-            "country" -> c.country,
+            "currency" -> c.currency,
+            "edition" -> c.edition,
             "name" -> c.name
           )
         )
