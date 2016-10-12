@@ -23,6 +23,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin, 
     buildInfoOptions += BuildInfoOption.ToMap
 )
 
+PlayKeys.playRunHooks += AssetsWatch(baseDirectory.value)
+
 sources in (Compile,doc) := Seq.empty
 
 publishArtifact in (Compile, packageDoc) := false
@@ -63,7 +65,7 @@ dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 resolvers += "old-github-maven-repo" at "http://guardian.github.io/maven/repo-releases/"
 
-addCommandAlias("devrun", "run 9111")
+addCommandAlias("devrun", "run 9112")
 
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 serverLoading in Debian := Systemd

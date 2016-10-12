@@ -9,7 +9,9 @@
     "compile": "echo 'compiling assets' && grunt compile",
     "compileCss": "grunt compile:css --dev",
     "compileJs": "grunt compile:js --dev",
-    "watch": "concurrently --kill-others 'grunt runWatch --dev' 'webpack-dev-server --port 7777'",
+    "watch": "concurrently --kill-others 'grunt runWatch --dev' 'webpack-dev-server --port 9111'",
+    "watchGrunt": "grunt runWatch --dev",
+    "watchWebpack": "webpack-dev-server --port 9111",
     "test": "jest",
     "postinstall": "npm run bowerSetup"
   },
