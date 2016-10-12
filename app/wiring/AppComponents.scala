@@ -41,10 +41,10 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   val contributionDataPerMode: Map[PaymentMode, ContributionData] = {
     val dbConfig = config.getConfig("dbConf")
     def contributionDataFor(mode: PaymentMode) = {
-      val modeKey = dbConfig.getString(mode.name)
+      val modeKey = dbConfig.getString(mode.entryName.toLowerCase)
       new ContributionData(dbApi.database(modeKey))(jdbcExecutionContext) // explicit execution context to avoid blocking the app
     }
-    PaymentMode.all.map(mode => mode -> contributionDataFor(mode)).toMap
+    PaymentMode.values.map(mode => mode -> contributionDataFor(mode)).toMap
   }
 
   lazy val paymentServices = new PaymentServices(
