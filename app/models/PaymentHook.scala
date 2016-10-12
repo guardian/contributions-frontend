@@ -1,34 +1,28 @@
 package models
 
+import enumeratum._
 import models.PaymentProvider.{Paypal, Stripe}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import models.PaymentMode.{Default, Testing}
 
-sealed trait PaymentProvider
+sealed trait PaymentProvider extends EnumEntry
 
-object PaymentProvider extends EnumMapping[PaymentProvider] {
+object PaymentProvider extends Enum[PaymentProvider] {
+  val values = findValues
+
   case object Paypal extends PaymentProvider
   case object Stripe extends PaymentProvider
-
-  val mapping: Map[PaymentProvider, String] = Map(
-    Paypal -> "Paypal",
-    Stripe -> "Stripe"
-  )
 }
 
-sealed trait PaymentStatus
+sealed trait PaymentStatus extends EnumEntry
 
-object PaymentStatus extends EnumMapping[PaymentStatus] {
+object PaymentStatus extends Enum[PaymentStatus] {
+  val values = findValues
+
   case object Failed extends PaymentStatus
   case object Paid extends PaymentStatus
   case object Refunded extends PaymentStatus
-
-  val mapping: Map[PaymentStatus, String] = Map(
-    Failed -> "Failed",
-    Paid -> "Paid",
-    Refunded -> "Refunded"
-  )
 
   val paypalReads = new Reads[PaymentStatus] {
     override def reads(json: JsValue): JsResult[PaymentStatus] = json match {

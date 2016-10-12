@@ -42,6 +42,8 @@ val anormLib = "com.typesafe.play" %% "anorm" % "2.5.2"
 val postgresql = "org.postgresql" % "postgresql" % "9.4.1209"
 val identityCookie =  "com.gu.identity" %% "identity-cookie" % "3.51"
 val scalaTest = "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
+val enumeratum = "com.beachape" %% "enumeratum" % "1.4.15"
+
 libraryDependencies ++= Seq(
     cache,
     ws,
@@ -57,7 +59,8 @@ libraryDependencies ++= Seq(
     macwire,
     anormLib,
     postgresql,
-    identityCookie
+    identityCookie,
+    enumeratum
 )
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 

@@ -27,7 +27,7 @@ class PaymentServices(
 
     def stripeServiceFor(mode: PaymentMode): StripeService = {
       val contributionData = contributionDataPerMode(mode)
-      val stripeMode = stripeConfig.getString(mode.name)
+      val stripeMode = stripeConfig.getString(mode.entryName.toLowerCase)
       val keys = stripeConfig.getConfig(s"keys.$stripeMode")
       val credentials = StripeCredentials(
         secretKey = keys.getString("secret"),
@@ -41,7 +41,7 @@ class PaymentServices(
         identityService = identityService
       )
     }
-    PaymentMode.all.map(mode => mode -> stripeServiceFor(mode)).toMap
+    PaymentMode.values.map(mode => mode -> stripeServiceFor(mode)).toMap
   }
 
   val paypalServices: Map[PaymentMode, PaypalService] = {
@@ -50,13 +50,13 @@ class PaymentServices(
 
     def paypalServiceFor(mode: PaymentMode): PaypalService = {
       val contributionData = contributionDataPerMode(mode)
-      val paypalMode = paypalConfig.getString(mode.name)
+      val paypalMode = paypalConfig.getString(mode.entryName.toLowerCase)
       val keys = paypalConfig.getConfig(paypalMode)
       val apiConfig = PaypalApiConfig.from(keys, paypalMode)
       new PaypalService(apiConfig, contributionData, identityService)(paypalExecutionContext)
     }
 
-    PaymentMode.all.map(mode => mode -> paypalServiceFor(mode)).toMap
+    PaymentMode.values.map(mode => mode -> paypalServiceFor(mode)).toMap
   }
 
   private def isTestUser(request: RequestHeader): Boolean = authProvider(request).flatMap(_.displayName).exists(testUsernames.isValid)

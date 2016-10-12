@@ -1,18 +1,12 @@
 package models
 
-sealed trait PaymentMode {
-  val name: String
-}
+import enumeratum._
 
-object PaymentMode {
+sealed trait PaymentMode extends EnumEntry
 
-  case object Default extends PaymentMode {
-    val name = "default"
-  }
+object PaymentMode extends Enum[PaymentMode] {
+  val values = findValues
 
-  case object Testing extends PaymentMode {
-    val name = "testing"
-  }
-
-  val all: Set[PaymentMode] = Set(Default, Testing)
+  case object Default extends PaymentMode
+  case object Testing extends PaymentMode
 }
