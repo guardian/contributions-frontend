@@ -27,7 +27,7 @@ class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
   private val sqsClient = new AmazonSQSAsyncClient(credentialsProviderChain)
   sqsClient.setRegion(Region.getRegion(Regions.EU_WEST_1))
 
-  val thankYouQueueUrl = sqsClient.createQueue(Config.thankYouEmailQueue).getQueueUrl
+  val thankYouQueueUrl = sqsClient.getQueueUrl(Config.thankYouEmailQueue).getQueueUrl
 
   def thank(row: ContributorRow): XorT[Future, Throwable, SendMessageResult] = {
     sendEmailToQueue(thankYouQueueUrl, row)
