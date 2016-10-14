@@ -148,7 +148,8 @@ class PaypalService(
     variants: Seq[Variant],
     cmp: Option[String],
     intCmp: Option[String],
-    ophanId: Option[String],
+    ophanPageviewId: Option[String],
+    ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
 
@@ -170,7 +171,8 @@ class PaypalService(
         contributionId = ContributionId(contributionId),
         created = created,
         email = payerInfo.getEmail,
-        ophanId = ophanId,
+        ophanPageviewId = ophanPageviewId,
+        ophanBrowserId = ophanBrowserId,
         abTests = Json.toJson(variants),
         cmp = cmp,
         intCmp = intCmp

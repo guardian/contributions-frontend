@@ -120,7 +120,8 @@ function paymentFormData(state, token) {
         marketing: state.details.optIn,
         postcode: state.details.postcode,
         abTests: state.data.abTests,
-        ophanId: state.data.ophanId,
+        ophanPageviewId: state.data.ophan.pageviewId,
+        ophanBrowserId: state.data.ophan.browserId,
         cmp: state.data.cmpCode,
         intcmp: state.data.intCmpCode
     };

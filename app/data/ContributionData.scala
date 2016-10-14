@@ -71,7 +71,8 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           contributionid,
           created,
           email,
-          ophanid,
+          ophan_pageview_id,
+          ophan_browser_id,
           abtests,
           cmp,
           intcmp
@@ -79,7 +80,8 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           ${pmd.contributionId.id}::uuid,
           ${pmd.created},
           ${pmd.email},
-          ${pmd.ophanId},
+          ${pmd.ophanPageviewId},
+          ${pmd.ophanBrowserId},
           ${pmd.abTests},
           ${pmd.cmp},
           ${pmd.intCmp}
@@ -88,7 +90,8 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           contributionid = excluded.contributionid,
           created = excluded.created,
           email = excluded.email,
-          ophanid = excluded.ophanid,
+          ophan_pageview_id = excluded.ophan_pageview_id,
+          ophan_browser_id = excluded.ophan_browser_id,
           abtests = excluded.abtests,
           cmp = excluded.cmp,
           intcmp = excluded.intcmp"""

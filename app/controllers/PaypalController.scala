@@ -30,7 +30,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     payerId: String,
     cmp: Option[String],
     intCmp: Option[String],
-    ophanId: Option[String]
+    ophanPageviewId: Option[String],
+    ophanBrowserId: Option[String]
   ) = NoCacheAction.async { implicit request =>
     val mvtId = Test.testIdFor(request)
 
@@ -40,7 +41,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     val paypalService = paymentServices.paypalServiceFor(request)
     val idUser = IdentityId.fromRequest(request)
 
-    def saveMetadata = paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser).value.map {
+    def saveMetadata = paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanPageviewId, ophanBrowserId, idUser).value.map {
       case Xor.Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
       case Xor.Left(_) => redirectWithCampaignCodes(thanksUrl)
     }
