@@ -46,7 +46,8 @@ object PaypalApiConfig {
 class PaypalService(
   config: PaypalApiConfig,
   contributionData: ContributionData,
-  identityService: IdentityService
+  identityService: IdentityService,
+  emailService: EmailService
 )(implicit ec: ExecutionContext) {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
@@ -60,6 +61,15 @@ class PaypalService(
       exception.getMessage
     }
   })
+
+  private def fullName(payerInfo: PayerInfo): Option[String] = {
+    val firstName = Option(payerInfo.getFirstName)
+    val lastName = Option(payerInfo.getLastName)
+    Seq(firstName, lastName).flatten match {
+      case Nil => None
+      case names => Some(names.mkString(" "))
+    }
+  }
 
   def getAuthUrl(
     amount: BigDecimal,
@@ -141,12 +151,20 @@ class PaypalService(
     ophanId: Option[String],
     idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
-    val triedSavedContributionData = for {
-      payment <- Try(Payment.get(apiContext, paymentId))
-      transaction <- Try(payment.getTransactions.asScala.head)
-      contributionId <- Try(UUID.fromString(transaction.getCustom))
-      created <- Try(new DateTime(payment.getCreateTime))
-      payerInfo <- Try(payment.getPayer.getPayerInfo)
+
+    def tryToXorT[A](block: => A): XorT[Future, String, A] = {
+      XorT.fromXor[Future](Xor.catchNonFatal(block).leftMap { t: Throwable =>
+        Logger.error("Unable to store contribution metadata", t)
+        "Unable to store contribution metadata"
+      })
+    }
+
+    val contributionDataToSave = for {
+      payment <- asyncExecute(Payment.get(apiContext, paymentId))
+      transaction <- tryToXorT(payment.getTransactions.asScala.head)
+      contributionId <- tryToXorT(UUID.fromString(transaction.getCustom))
+      created <- tryToXorT(new DateTime(payment.getCreateTime))
+      payerInfo <- tryToXorT(payment.getPayer.getPayerInfo)
     } yield {
       val metadata = ContributionMetaData(
         contributionId = ContributionId(contributionId),
@@ -167,14 +185,10 @@ class PaypalService(
 
       val firstName = Option(payerInfo.getFirstName)
       val lastName = Option(payerInfo.getLastName)
-      val fullName = Seq(firstName, lastName).flatten match {
-        case Nil => None
-        case names => Some(names.mkString(" "))
-      }
 
       val contributor = Contributor(
         email = payerInfo.getEmail,
-        name = fullName,
+        name = fullName(payerInfo),
         firstName = firstName,
         lastName = lastName,
         idUser = idUser,
@@ -188,13 +202,8 @@ class PaypalService(
       )
     }
 
-    val contributionDataToSave = Xor.fromTry(triedSavedContributionData).leftMap { exception =>
-      Logger.error("Unable to store contribution metadata", exception)
-      "Unable to store contribution metadata"
-    }
-
     for {
-      data <- XorT.fromXor[Future](contributionDataToSave)
+      data <- contributionDataToSave
       contributionMetaData <- contributionData.insertPaymentMetaData(data.contributionMetaData)
       contributor <- contributionData.saveContributor(data.contributor)
     } yield SavedContributionData(
@@ -228,6 +237,24 @@ class PaypalService(
   }
 
   def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] = {
+
+    def tryToXorT[A](block: => A): XorT[Future, String, A] = {
+      XorT.fromXor[Future](Xor.catchNonFatal(block).leftMap { t: Throwable =>
+        Logger.error("Unable to retrieve payment meta data", t)
+        "Unable to retrieve payment meta data"
+      })
+    }
+
+    for {
+      payment <- asyncExecute(Payment.get(apiContext, paypalHook.paymentId))
+      payerInfo <- tryToXorT(payment.getPayer.getPayerInfo)
+    } yield {
+      val name = fullName(payerInfo).getOrElse("")
+      val email = payerInfo.getEmail
+      val contributorRow = ContributorRow.fromPaypal(paypalHook, name, email)
+      emailService.thank(contributorRow)
+    }
+
     contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 

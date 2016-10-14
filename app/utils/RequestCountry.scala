@@ -1,9 +1,7 @@
 package utils
 
 import com.gu.i18n.CountryGroup
-import controllers.IdentityRequest
 import play.api.mvc.Request
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 object RequestCountry {
   implicit class RequestWithFastlyCountry(r: Request[_]) {

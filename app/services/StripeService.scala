@@ -18,7 +18,8 @@ class StripeService(
   apiConfig: StripeApiConfig,
   metrics: ServiceMetrics,
   contributionData: ContributionData,
-  identityService: IdentityService
+  identityService: IdentityService,
+  emailService: EmailService
 )(implicit ec: ExecutionContext)
   extends MembershipStripeService(apiConfig = apiConfig, RequestRunners.loggingRunner(metrics)) {
 
@@ -92,6 +93,7 @@ class StripeService(
     for {
       hook <- paymentHook.toRight(s"Unable to find the stripe event identified by ${stripeHook.eventId}")
       insertResult <- contributionData.insertPaymentHook(hook)
+      _ <- emailService.thank(ContributorRow.fromStripe(stripeHook)).leftMap(e => e.getMessage)
     } yield insertResult
   }
 }

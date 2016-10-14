@@ -42,6 +42,17 @@
     ELBSSLCertificate:
       Description: "ELB SSL Certificate ARN"
       Type: "String"
+    EmailSqsQueueArn:
+      Description: "The ARN of the email SQS queue"
+      Type: "String"
+  Mappings:
+    StageVariables:
+      CODE:
+        MaxInstances: 2
+        MinInstances: 1
+      PROD:
+        MaxInstances: 6
+        MinInstances: 3
   Resources:
     FrontendAutoScalingGroup:
       Type: "AWS::AutoScaling::AutoScalingGroup"
@@ -52,9 +63,10 @@
           Ref: "Subnets"
         LaunchConfigurationName:
           Ref: "FrontendLaunchConfig"
-        MinSize: "3"
-        MaxSize: "6"
-        DesiredCapacity: "3"
+        MinSize:
+          Fn::FindInMap: [ StageVariables, { Ref: Stage }, MinInstances ]
+        MaxSize:
+          Fn::FindInMap: [ StageVariables, { Ref: Stage }, MaxInstances ]
         LoadBalancerNames:
           -
             Ref: "ContributionsFrontendElasticLoadBalancer"
@@ -202,6 +214,19 @@
                     - "logs:*"
                   Resource:
                     - "arn:aws:logs:*:*:*"
+          -
+            PolicyName: "SqsMessages"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                -
+                  Effect: "Allow"
+                  Action:
+                    - "sqs:GetQueueUrl"
+                    - "sqs:SendMessage"
+                  Resource:
+                    -
+                      Ref: "EmailSqsQueueArn"
     ContributionsAppInstanceProfile:
       Type: "AWS::IAM::InstanceProfile"
       Properties:

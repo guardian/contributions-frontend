@@ -14,7 +14,7 @@ import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
-import services.{IdentityService, PaymentServices}
+import services.{EmailService, IdentityService, PaymentServices}
 
 import router.Routes
 
@@ -52,10 +52,12 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     authProvider = identityAuthProvider,
     testUsernames = testUsernames,
     identityService = identityService,
+    emailService = emailService,
     contributionDataPerMode = contributionDataPerMode,
     actorSystem = actorSystem
   )
   lazy val identityService = new IdentityService(wsClient, idConfig)
+  lazy val emailService = wire[EmailService]
 
   lazy val giraffeController = wire[Giraffe]
   lazy val healthcheckController = wire[Healthcheck]

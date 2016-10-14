@@ -18,6 +18,7 @@ class PaymentServices(
   authProvider: AuthenticatedIdUser.Provider,
   testUsernames: TestUsernames,
   identityService: IdentityService,
+  emailService: EmailService,
   contributionDataPerMode: Map[PaymentMode, ContributionData],
   actorSystem: ActorSystem
 )(implicit ec: ExecutionContext) {
@@ -38,7 +39,8 @@ class PaymentServices(
         apiConfig = StripeApiConfig(stripeMode, credentials),
         metrics = metrics,
         contributionData = contributionData,
-        identityService = identityService
+        identityService = identityService,
+        emailService = emailService
       )
     }
     PaymentMode.values.map(mode => mode -> stripeServiceFor(mode)).toMap
@@ -53,7 +55,12 @@ class PaymentServices(
       val paypalMode = paypalConfig.getString(mode.entryName.toLowerCase)
       val keys = paypalConfig.getConfig(paypalMode)
       val apiConfig = PaypalApiConfig.from(keys, paypalMode)
-      new PaypalService(apiConfig, contributionData, identityService)(paypalExecutionContext)
+      new PaypalService(
+        config = apiConfig,
+        contributionData = contributionData,
+        identityService = identityService,
+        emailService = emailService
+      )(paypalExecutionContext)
     }
 
     PaymentMode.values.map(mode => mode -> paypalServiceFor(mode)).toMap

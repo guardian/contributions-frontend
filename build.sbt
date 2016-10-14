@@ -33,7 +33,7 @@ play.sbt.routes.RoutesKeys.routesImport ++= Seq("controllers.Binders._", "com.gu
 scalaVersion := "2.11.7"
 val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
 val cats = "org.typelevel" %% "cats" % "0.7.0"
-val membershipCommon = "com.gu" %% "membership-common" % "0.277"
+val membershipCommon = "com.gu" %% "membership-common" % "0.284"
 val sentryRavenLogback = "com.getsentry.raven" % "raven-logback" % "7.6.0"
 val memsubCommonPlayAuth = "com.gu" %% "memsub-common-play-auth" % "1.0"
 val paypalSdk = "com.paypal.sdk" % "rest-api-sdk" % "1.9.2" exclude("org.apache.logging.log4j", "log4j-slf4j-impl")
@@ -43,6 +43,7 @@ val postgresql = "org.postgresql" % "postgresql" % "9.4.1209"
 val identityCookie =  "com.gu.identity" %% "identity-cookie" % "3.51"
 val scalaTest = "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
 val enumeratum = "com.beachape" %% "enumeratum" % "1.4.15"
+val sqs = "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.36"
 
 libraryDependencies ++= Seq(
     cache,
@@ -60,7 +61,8 @@ libraryDependencies ++= Seq(
     anormLib,
     postgresql,
     identityCookie,
-    enumeratum
+    enumeratum,
+    sqs
 )
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
