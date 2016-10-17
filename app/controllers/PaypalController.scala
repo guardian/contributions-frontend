@@ -58,7 +58,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     amount: BigDecimal,
     cmp: Option[String],
     intCmp: Option[String],
-    ophanId: Option[String]
+    ophanPageviewId: Option[String],
+    ophanBrowserId: Option[String]
   )
 
   object AuthRequest {
@@ -67,7 +68,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         (__ \ "amount").read(min[BigDecimal](1)) and
         (__ \ "cmp").readNullable[String] and
         (__ \ "intCmp").readNullable[String] and
-        (__ \ "ophanId").readNullable[String]
+        (__ \ "ophanPageviewId").readNullable[String] and
+        (__ \ "ophanBrowserId").readNullable[String]
       ) (AuthRequest.apply _)
   }
 
@@ -100,7 +102,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
             contributionId = ContributionId.random,
             cmp = authRequest.cmp,
             intCmp = authRequest.intCmp,
-            ophanId = authRequest.ophanId
+            ophanPageviewId = authRequest.ophanPageviewId,
+            ophanBrowserId = authRequest.ophanBrowserId
           )
           authResponse.value map {
             case Xor.Right(url) => Ok(Json.toJson(AuthResponse(url)))

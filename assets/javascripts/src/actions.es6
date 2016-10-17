@@ -64,7 +64,8 @@ export function paypalRedirect(dispatch) {
         amount: state.card.amount, //TODO should the amount be somewhere else rather than in the card section?,
         cmp: state.data.cmpCode,
         intCmp: state.data.intCmpCode,
-        ophanId: state.data.ophanId
+        ophanPageviewId: state.data.ophan.pageviewId,
+        ophanBrowserId: state.data.ophan.browserId
     };
 
     const url = '/paypal/auth?csrfToken=' + state.data.csrfToken;
