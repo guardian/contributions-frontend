@@ -18,8 +18,12 @@ POST           /paypal/auth                     controllers.PaypalController.aut
 
 GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], pvid: Option[String], bid: Option[String])
 POST           /paypal/hook                     controllers.PaypalController.hook
-POST           /stripe/hook                     controllers.StripeController.hook
 POST           /:countryGroup/update-metadata   controllers.PaypalController.updateMetadata(countryGroup:CountryGroup)
+
+POST           /stripe/pay                      controllers.StripeController.pay
+#delete /pay this is just to be safe when deploying the new route
+POST           /pay                             controllers.StripeController.pay
+POST           /stripe/hook                     controllers.StripeController.hook
 
 GET            /ca                              controllers.Giraffe.redirectToUk
 GET            /nz                              controllers.Giraffe.redirectToUk
@@ -29,5 +33,5 @@ GET            /:countryGroup                   controllers.Giraffe.contribute(c
 GET            /:countryGroup/thank-you         controllers.Giraffe.thanks(countryGroup: CountryGroup)
 GET            /:countryGroup/post-payment      controllers.Giraffe.postPayment(countryGroup: CountryGroup)
 
-POST           /pay                             controllers.Giraffe.pay
+
 

@@ -7,5 +7,5 @@ export const PAGES = {
 export const ALL_PAGES = [PAGES.CONTRIBUTION, PAGES.DETAILS, PAGES.PAYMENT];
 
 export const urls = {
-    pay: '/pay'
+    pay: '/stripe/pay'
 };
