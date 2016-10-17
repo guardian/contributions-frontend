@@ -8,10 +8,12 @@ packageSummary := "Contributions Play APP"
 
 packageDescription := """lorem ipsum donor sit amet"""
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala,BuildInfoPlugin, RiffRaffArtifact, JDebPackaging).settings(
+def env(key: String, default: String): String = Option(System.getenv(key)).getOrElse(default)
+
+lazy val root = (project in file(".")).enablePlugins(PlayScala, BuildInfoPlugin, RiffRaffArtifact, JDebPackaging).settings(
     buildInfoKeys := Seq[BuildInfoKey](
         name,
-        BuildInfoKey.constant("buildNumber", Option(System.getenv("BUILD_NUMBER")) getOrElse "DEV"),
+        BuildInfoKey.constant("buildNumber", env("BUILD_NUMBER", "DEV")),
         BuildInfoKey.constant("buildTime", System.currentTimeMillis),
         BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse(try {
             "git rev-parse HEAD".!!.trim
@@ -30,7 +32,7 @@ sources in (Compile,doc) := Seq.empty
 publishArtifact in (Compile, packageDoc) := false
 
 play.sbt.routes.RoutesKeys.routesImport ++= Seq("controllers.Binders._", "com.gu.i18n.CountryGroup", "controllers.PaymentError")
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
 val cats = "org.typelevel" %% "cats" % "0.7.0"
 val membershipCommon = "com.gu" %% "membership-common" % "0.284"
@@ -81,12 +83,12 @@ packageSummary := "contributions frontend"
 packageDescription := """take financial contributions"""
 
 riffRaffPackageType := (packageBin in Debian).value
-def env(key: String): Option[String] = Option(System.getenv(key))
-riffRaffBuildIdentifier := env("BUILD_NUMBER").getOrElse("DEV")
-riffRaffManifestBranch := env("BRANCH_NAME").getOrElse("unknown_branch")
+riffRaffBuildIdentifier := env("BUILD_NUMBER", "DEV")
+riffRaffManifestBranch := env("BRANCH_NAME", "unknown_branch")
 riffRaffManifestVcsUrl  := "git@github.com:guardian/contributions-frontend.git"
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
+riffRaffArtifactResources += (file("cloud-formation/cfn.yml"), "packages/cfn/cloud-formation/cfn.yml")
 
 javaOptions in Universal ++= Seq(
     "-Dpidfile.path=/dev/null",

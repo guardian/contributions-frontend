@@ -108,9 +108,6 @@
               - "\n"
               -
                 - "#!/bin/bash -ev"
-                - "apt-get -y update"
-                - "apt-get -y upgrade"
-                - "/opt/features/ssh-keys/initialise-keys-and-cron-job.sh -l -b github-team-keys -t Membership-and-Subscriptions || true \n"
                 -
                   Fn::Join:
                     - ""
@@ -227,6 +224,14 @@
                   Resource:
                     -
                       Ref: "EmailSqsQueueArn"
+          -
+            PolicyName: "UpdateSSHKeys"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action: s3:GetObject
+                  Resource: arn:aws:s3:::github-public-keys/Membership-and-Subscriptions/*
     ContributionsAppInstanceProfile:
       Type: "AWS::IAM::InstanceProfile"
       Properties:
