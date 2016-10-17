@@ -2,8 +2,12 @@ package controllers
 
 import actions.CommonActions._
 import cats.data.Xor
+import cats.data.XorT
+import cats.instances.future._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
+import com.paypal.api.payments.Payment
+import models.SavedContributionData
 import models.{ContributionId, IdentityId, PaypalHook}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{BodyParsers, Controller, Result}
@@ -16,7 +20,12 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
+import play.api.mvc.Cookie
 import play.filters.csrf.CSRFCheck
+import utils.AppError
+import utils.ContribTimestamp
+import utils.PaypalPaymentError
+import utils.StoreMetaDataError
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,24 +42,39 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
   ) = NoCacheAction.async { implicit request =>
-    val mvtId = Test.testIdFor(request)
 
-    def thanksUrl = routes.Giraffe.thanks(countryGroup).url
-    def postPayUrl = routes.Giraffe.postPayment(countryGroup).url
-    val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
     val paypalService = paymentServices.paypalServiceFor(request)
-    val idUser = IdentityId.fromRequest(request)
 
-    def saveMetadata = paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanPageviewId, ophanBrowserId, idUser).value.map {
-      case Xor.Right(savedData) => redirectWithCampaignCodes(postPayUrl).withSession(request.session + ("email" -> savedData.contributor.email))
-      case Xor.Left(_) => redirectWithCampaignCodes(thanksUrl)
+    def storeMetaData(payment: Payment): XorT[Future, AppError, (Payment, SavedContributionData)] = {
+      val mvtId = Test.testIdFor(request)
+      val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
+      val idUser = IdentityId.fromRequest(request)
+
+      paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser)
+        .leftMap[AppError](StoreMetaDataError) // not necessary if storeMetaData() returns a custom error type
+        .map(data => (payment, data))
     }
 
-    paypalService.executePayment(paymentId, payerId).value flatMap {
-      case Xor.Right(_) => saveMetadata
-      case Xor.Left(error) => Future.successful(handleError(countryGroup, s"Error executing PayPal payment: $error"))
+    def notOkResult(error: AppError): Result = error match {
+      case PaypalPaymentError(message) =>
+        handleError(countryGroup, s"Error executing PayPal payment: $message")
+      case _ =>
+        val thanksUrl = routes.Giraffe.thanks(countryGroup).url
+        redirectWithCampaignCodes(thanksUrl)
     }
 
+    def okResult(data: (Payment, SavedContributionData)): Result = data match {
+      case (payment, savedData) =>
+        val postPayUrl = routes.Giraffe.postPayment(countryGroup).url
+        val result = redirectWithCampaignCodes(postPayUrl)
+          .withSession(request.session + ("email" -> savedData.contributor.email))
+        ContribTimestamp.setContribTimestampCookie(result, payment.getCreateTime)
+    }
+
+    paypalService.executePayment(paymentId, payerId)
+      .leftMap(PaypalPaymentError) // not necessary if executePayment() returns a custom error type
+      .flatMap(payment => storeMetaData(payment))
+      .fold(notOkResult, okResult)
   }
 
   case class AuthRequest(
