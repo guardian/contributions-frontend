@@ -30,7 +30,7 @@ import utils.StoreMetaDataError
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)
-                      (implicit ec: ExecutionContext) extends Controller with Redirect {
+                      (implicit ec: ExecutionContext) extends Controller with Redirect with ContribTimestamp.Implicits {
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -65,10 +65,9 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
     def okResult(data: (Payment, SavedContributionData)): Result = data match {
       case (payment, savedData) =>
-        val postPayUrl = routes.Giraffe.postPayment(countryGroup).url
-        val result = redirectWithCampaignCodes(postPayUrl)
+        redirectWithCampaignCodes(routes.Giraffe.postPayment(countryGroup).url)
           .withSession(request.session + ("email" -> savedData.contributor.email))
-        ContribTimestamp.setContribTimestampCookie(result, payment.getCreateTime)
+          .setContribTimestampCookie(payment)
     }
 
     paypalService.executePayment(paymentId, payerId)
