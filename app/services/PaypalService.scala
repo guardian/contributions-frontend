@@ -77,7 +77,8 @@ class PaypalService(
     contributionId: ContributionId,
     cmp: Option[String],
     intCmp: Option[String],
-    ophanId: Option[String]
+    ophanPageviewId: Option[String],
+    ophanBrowserId: Option[String]
   ): XorT[Future, String, Uri] = {
 
     val paymentToCreate = {
@@ -86,7 +87,8 @@ class PaypalService(
         val extraParams = List(
           cmp.map(value => s"CMP=$value"),
           intCmp.map(value => s"INTCMP=$value"),
-          ophanId.map(value => s"ophanId=$value")
+          ophanPageviewId.map(value => s"pvid=$value"),
+          ophanBrowserId.map(value => s"bid=$value")
         ).flatten match {
           case Nil => ""
           case params => params.mkString("?", "&", "")
@@ -148,7 +150,8 @@ class PaypalService(
     variants: Seq[Variant],
     cmp: Option[String],
     intCmp: Option[String],
-    ophanId: Option[String],
+    ophanPageviewId: Option[String],
+    ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
 
@@ -170,7 +173,8 @@ class PaypalService(
         contributionId = ContributionId(contributionId),
         created = created,
         email = payerInfo.getEmail,
-        ophanId = ophanId,
+        ophanPageviewId = ophanPageviewId,
+        ophanBrowserId = ophanBrowserId,
         abTests = Json.toJson(variants),
         cmp = cmp,
         intCmp = intCmp

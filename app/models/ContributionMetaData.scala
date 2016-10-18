@@ -7,7 +7,8 @@ case class ContributionMetaData(
   contributionId: ContributionId,
   created: DateTime,
   email: String,
-  ophanId: Option[String],
+  ophanPageviewId: Option[String],
+  ophanBrowserId: Option[String],
   abTests: JsValue,
   cmp: Option[String],
   intCmp: Option[String]

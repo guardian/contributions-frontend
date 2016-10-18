@@ -12,7 +12,10 @@ const initialState = {
     },
     cmpCode: '',
     intCmpCode: '',
-    ophanId: null
+    ophan: {
+        pageviewId: null,
+        browserId: null
+    }
 };
 
 /**

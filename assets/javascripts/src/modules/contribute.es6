@@ -9,6 +9,7 @@ import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT, GO_FORWARD } from 'src/actions
 import { attachCurrencyListeners, attachErrorDialogListener } from 'src/modules/domListeners';
 import * as ophan from 'src/modules/analytics/ophan';
 
+
 export function init() {
     const container = document.getElementById('contribute');
     const presetAmount = getUrlParameter('amount');
@@ -28,7 +29,7 @@ export function init() {
 
     attachCurrencyListeners();
     attachErrorDialogListener();
-    setOphanId();
+    setOphanIds();
 }
 
 /**
@@ -62,9 +63,12 @@ function getUrlParameter(rawName, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-function setOphanId() {
+function setOphanIds() {
     ophan.loaded.then(o => store.dispatch({
         type: SET_DATA,
-        data: { ophanId: o.viewId }
+        data: { ophan: {
+            pageviewId: o.viewId,
+            browserId: ophan.browserId()
+        }}
     }));
 }

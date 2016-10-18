@@ -16,7 +16,7 @@ GET            /home                            controllers.Giraffe.contributeRe
 GET            /healthcheck                     controllers.Healthcheck.healthcheck
 POST           /paypal/auth                     controllers.PaypalController.authorize
 
-GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], ophanId: Option[String])
+GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], ophanPageviewId: Option[String], ophanBrowserId: Option[String])
 POST           /paypal/hook                     controllers.PaypalController.hook
 POST           /stripe/hook                     controllers.StripeController.hook
 POST           /:countryGroup/update-metadata   controllers.PaypalController.updateMetadata(countryGroup:CountryGroup)
