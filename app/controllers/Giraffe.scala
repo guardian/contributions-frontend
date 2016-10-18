@@ -55,7 +55,7 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
                           postcode: Option[String],
                           abTests: Set[JsonAbTest],
                           ophanPageviewId: String,
-                          ophanBrowserId: String,
+                          ophanBrowserId: Option[String],
                           cmp: Option[String],
                           intcmp: Option[String]
 
@@ -77,7 +77,7 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
         "variantSlug" -> text
       )(JsonAbTest.apply)(JsonAbTest.unapply)),
       "ophanPageviewId" -> text,
-      "ophanBrowserId" -> text,
+      "ophanBrowserId" -> optional(text),
       "cmp" -> optional(text),
       "intcmp" -> optional(text)
     )(SupportForm.apply)(SupportForm.unapply)
@@ -186,7 +186,7 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
       "name" -> form.name,
       "abTests" -> Json.toJson(Seq(variant)).toString,
       "ophanPageviewId" -> form.ophanPageviewId,
-      "ophanBrowserId" -> form.ophanBrowserId,
+      "ophanBrowserId" -> form.ophanBrowserId.getOrElse(""),
       "cmp" -> form.cmp.mkString,
       "intcmp" -> form.intcmp.mkString,
       "contributionId" -> contributionId.toString
