@@ -50,7 +50,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
       val idUser = IdentityId.fromRequest(request)
 
-      paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanId, idUser)
+      paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanPageviewId, ophanBrowserId, idUser)
         .leftMap[AppError](StoreMetaDataError) // not necessary if storeMetaData() returns a custom error type
         .map(data => (payment, data))
     }
