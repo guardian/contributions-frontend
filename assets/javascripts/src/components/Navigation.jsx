@@ -30,7 +30,7 @@ export default class Navigation extends React.Component {
         return <div className={'contribute-navigation ' + this.classNameFor(this.props.page)}>
         {showBack && <Back type="button" className="action--secondary contribute-navigation__back hidden-mobile" onClick={this.props.goBack}>Back</Back>}
         {showForward && <Forward className="contribute-navigation__button contribute-navigation__next hidden-mobile">Next</Forward>}
-        {showPay && <Forward className='contribute-navigation__button action--pay' onClick={this.props.payWithCard}>Contribute {this.props.currency.prefix}{this.props.currency.symbol}{this.props.amount}</Forward>}
+        {showPay && <Forward className='contribute-navigation__button action--pay' onClick={this.props.payWithCard}>Pay {this.props.currency.prefix}{this.props.currency.symbol}{this.props.amount}</Forward>}
         {showMobileBack && <Back className="action--secondary contribute-navigation__back show-mobile" onClick={this.props.jumpToFirstPage}>Back</Back>}
         {isFirstPage &&  <Forward className="contribute-navigation__button action action--button contribute-navigation__next action--next contribute_card__button" onClick={this.props.clearPaymentFlags}>{"Contribute with debit/credit card"}</Forward>}
         {isFirstPage && <Forward className="contribute-navigation__button action action--button  paypal__button" onClick={this.props.payWithPaypal}>Contribute with</Forward>}
