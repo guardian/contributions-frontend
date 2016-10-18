@@ -98,7 +98,7 @@ module.exports = function (grunt) {
 
         postcss: {
             options: {
-                map: isDev ? true : false,
+                map: !!isDev,
                 processors: [
                     require('autoprefixer')({browsers: ['last 2 versions', 'IE 9', 'Safari 7']}),
                     require('postcss-pxtorem')()
@@ -380,7 +380,7 @@ module.exports = function (grunt) {
         grunt.task.run(['test:unit']);
     });
     grunt.registerTask('test:unit', function() {
-        grunt.config.set('karma.options.singleRun', (singleRun === false) ? false : true);
+        grunt.config.set('karma.options.singleRun', (singleRun !== false));
         grunt.task.run(['karma:unit']);
     });
 
