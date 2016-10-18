@@ -34,7 +34,7 @@ class StripeService(
     cmp: Option[String],
     intCmp: Option[String],
     ophanPageviewId: String,
-    ophanBrowserId: String,
+    ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
 
@@ -48,7 +48,7 @@ class StripeService(
       created = created,
       email = email,
       ophanPageviewId = Some(ophanPageviewId),
-      ophanBrowserId = Some(ophanBrowserId),
+      ophanBrowserId = ophanBrowserId,
       abTests = Json.toJson(variants),
       cmp = cmp,
       intCmp = intCmp
