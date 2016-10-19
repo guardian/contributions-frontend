@@ -4,6 +4,8 @@ import actions.CommonActions._
 import cats.data.Xor
 import cats.data.XorT
 import cats.instances.future._
+import cookies.ContribTimestampCookie
+import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
@@ -20,19 +22,16 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
-import play.api.mvc.Cookie
 import play.filters.csrf.CSRFCheck
 import utils.AppError
-import utils.ContribTimestamp
 import utils.PaypalPaymentError
 import utils.StoreMetaDataError
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)
-                      (implicit ec: ExecutionContext) extends Controller with Redirect {
-
-  import ContribTimestamp.Implicits._
+class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)(implicit ec: ExecutionContext)
+  extends Controller with Redirect {
+  import ContribTimestampCookie._
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -69,7 +68,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       case (payment, savedData) =>
         redirectWithCampaignCodes(routes.Giraffe.postPayment(countryGroup).url)
           .withSession(request.session + ("email" -> savedData.contributor.email))
-          .setContribTimestampCookie(payment)
+          .setCookie[ContribTimestampCookie].using(payment)
     }
 
     paypalService.executePayment(paymentId, payerId)
