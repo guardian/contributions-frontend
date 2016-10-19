@@ -19,12 +19,14 @@ import play.api.data.format.Formatter
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
+import utils.ContribTimestamp
 import utils.MaxAmount
 import views.support.Test
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext) extends Controller {
+class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
+  extends Controller with ContribTimestamp.Implicits {
 
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
@@ -144,6 +146,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       storeMetaData(charge) // fire and forget. If it fails we don't want to stop the user
       Ok(Json.obj("redirect" -> redirect))
         .withSession("charge_id" -> charge.id)
+        .setContribTimestampCookie(charge)
     }.recover {
       case e: Stripe.Error => BadRequest(Json.toJson(e))
     }
