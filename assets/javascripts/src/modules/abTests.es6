@@ -10,6 +10,8 @@ export function init() {
 
     registerTestsWithOphan(state.data.abTests, initTestFlags);
 
+    registerAARecurringTestWithGA(state.data.abTests);
+
     // only set the amount from the A/B test if it isn't already set
     // this prevents the A/B test overriding the preset amount (query param) functionality)
     if (isNaN(parseInt(state.card.amount))) {
@@ -64,7 +66,7 @@ function isAARecurringTest(test) {
 /**
  * To be used with registerTestsWithOphan().
  * Sets a test's completed flag to false, unless it is the AA recurring test,
- * in which its complete flag is set to true.
+ * in which case its complete flag is set to true.
  */
 function initTestFlags(test) {
    return isAARecurringTest(test);
@@ -72,14 +74,33 @@ function initTestFlags(test) {
 
 /**
  * To be used with registerTestsWithOphan().
- * Set a test's complete flag to true, apart from the AA recurring test
- * (whose complete flag was set to true on initialisation).
+ * Set a test's complete flag to true, apart from the AA recurring test which is ignored.
  */
 function completeTestFlags(test) {
     if (isAARecurringTest(test)) {
         return null;
     } else {
         return true;
+    }
+}
+
+/**
+ * Send an AA recurring test event to GA.
+ * @see https://developers.google.com/analytics/devguides/collection/analyticsjs/events
+ */
+function sendAARecurringTestEvent() {
+    GA.event('no-object', 'pageview', 'aa-recurring-test')
+}
+
+/**
+ * Sends one recurring test to GA iff the tests include at least one AA recurring test.
+ */
+function registerAARecurringTestWithGA(tests) {
+    for (var test of tests) {
+        if (isAARecurringTest(test)) {
+            sendAARecurringTestEvent();
+            break;
+        }
     }
 }
 
