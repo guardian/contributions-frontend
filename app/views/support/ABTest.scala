@@ -1,15 +1,10 @@
 package views.support
 
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-
 import com.gu.i18n.CountryGroup
 import com.gu.i18n.CountryGroup._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Cookie, Request}
-
-
 import scala.util.Random
 import scalaz.NonEmptyList
 import views.support.AmountHighlightTest.AmountVariantData
@@ -120,7 +115,7 @@ object Test {
   val CookiePrefix     = "gu.contributions.test"
   val TestIdCookieName = s"$CookiePrefix.id"
 
-  val allTests = List(AmountHighlightTest, ReducedCheckoutTest)
+  val allTests = List(AmountHighlightTest, ReducedCheckoutTest, AARecurringTest)
 
   def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
   def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"
@@ -162,6 +157,18 @@ object Test {
   }
 }
 
+/**
+ * The first time the recurring test was run, there was a big discrepancy between the data in Ophan and GA.
+ * This test fires an event to Ophan on page load; (independently) an event will also be fired to GA on page load.
+ * By comparing the event counts, we hope to debug the discrepancy.
+ */
+object AARecurringTest extends TestTrait {
 
+  override def name: String = "AARecurringTest"
 
+  override def slug: String = "aa-recurring-test"
 
+  override def variants: NonEmptyList[Variant] = NonEmptyList(
+    makeVariant("default", "default", weight = 1, data = None)
+  )
+}
