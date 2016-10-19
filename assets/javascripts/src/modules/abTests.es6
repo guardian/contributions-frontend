@@ -8,7 +8,7 @@ import { SET_AMOUNT } from 'src/actions';
 export function init() {
     const state = store.getState();
 
-    registerTestsWithOphan(state.data.abTests, initTestFlags);
+    registerTestsWithOphan(state.data.abTests);
 
     registerAARecurringTestWithGA(state.data.abTests);
 
@@ -19,69 +19,29 @@ export function init() {
     }
 }
 
-/**
- * Check if an object is empty.
- * @see http://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object
- */
-function isEmpty(obj) {
-    return Object.keys(obj).length === 0 && obj.constructor === Object;
-}
-
-/**
- * The function f should take a test and return the complete flag (true/false) for the test.
- * If the function returns null, the complete flag for the test will not be set.
- * Any tests which have their complete flag set are registered with Ophan.
- */
-function registerTestsWithOphan(tests, f) {
+function registerTestsWithOphan(tests) {
     const data = {};
 
     for (var test of tests) {
-        const completeFlag = f(test);
-
-        if (completeFlag !== null) {
-            data[test.testSlug] = {
-                'variantName': test.variantSlug,
-                'complete': String(completeFlag)
-            }
+        data[test.testSlug] = {
+            'variantName': test.variantSlug,
+            'complete': String(false)
         }
     }
 
-    if (!isEmpty(data)) {
-        ophan.loaded.then(function (ophan) {
-            ophan.record({
-                abTestRegister: data
-            })
+    ophan.loaded.then(function (ophan) {
+        ophan.record({
+            abTestRegister: data
         })
-    }
+    })
 }
 
 /**
  * @see AARecurringTest for the corresponding Scala class.
  */
 function isAARecurringTest(test) {
-    // Only one variant name to check.
+   // Only one variant name to check.
     return (test.testName == 'AARecurringTest') && (test.variantName == 'default');
-}
-
-/**
- * To be used with registerTestsWithOphan().
- * Sets a test's completed flag to false, unless it is the AA recurring test,
- * in which case its complete flag is set to true.
- */
-function initTestFlags(test) {
-   return isAARecurringTest(test);
-}
-
-/**
- * To be used with registerTestsWithOphan().
- * Set a test's complete flag to true, apart from the AA recurring test which is ignored.
- */
-function completeTestFlags(test) {
-    if (isAARecurringTest(test)) {
-        return null;
-    } else {
-        return true;
-    }
 }
 
 /**
@@ -104,11 +64,6 @@ function registerAARecurringTestWithGA(tests) {
     }
 }
 
-function trackComplete() {
-    const state = store.getState();
-    registerTestsWithOphan(state.data.abTests, completeTestFlags);
-}
-
 function testFor(tests, testName) {
     return tests.find(t => t.testName == testName);
 }
@@ -125,7 +80,6 @@ function countryId() {
         return '';
     }
 }
-
 
 export function amounts(tests) {
     const amounts = {
