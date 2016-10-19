@@ -21,8 +21,6 @@ POST           /paypal/hook                     controllers.PaypalController.hoo
 POST           /:countryGroup/update-metadata   controllers.PaypalController.updateMetadata(countryGroup:CountryGroup)
 
 POST           /stripe/pay                      controllers.StripeController.pay
-#delete /pay this is just to be safe when deploying the new route
-POST           /pay                             controllers.StripeController.pay
 POST           /stripe/hook                     controllers.StripeController.hook
 
 GET            /ca                              controllers.Giraffe.redirectToUk
