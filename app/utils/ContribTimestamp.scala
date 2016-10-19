@@ -71,4 +71,6 @@ object ContribTimestamp {
       override def contribTimestamp(data: Charge): Instant = Instant.ofEpochSecond(data.created)
     }
   }
+
+  object Implicits extends Implicits
 }

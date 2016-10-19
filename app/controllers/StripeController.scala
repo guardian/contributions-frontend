@@ -26,7 +26,8 @@ import views.support.Test
 import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
-  extends Controller with ContribTimestamp.Implicits {
+  extends Controller {
+  import ContribTimestamp.Implicits._
 
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]

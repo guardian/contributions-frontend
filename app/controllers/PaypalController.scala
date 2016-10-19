@@ -30,7 +30,9 @@ import utils.StoreMetaDataError
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)
-                      (implicit ec: ExecutionContext) extends Controller with Redirect with ContribTimestamp.Implicits {
+                      (implicit ec: ExecutionContext) extends Controller with Redirect {
+
+  import ContribTimestamp.Implicits._
 
   def executePayment(
     countryGroup: CountryGroup,
