@@ -55,6 +55,7 @@ class StripeService(
     )
     val contributor = Contributor(
       email = email,
+      contributorId = Some(ContributorId.random),
       name = Some(name),
       firstName = None,
       lastName = None,

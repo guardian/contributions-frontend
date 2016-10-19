@@ -102,6 +102,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
 
   def saveContributor(contributor: Contributor): XorT[Future, String, Contributor] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
+      // Note that the contributor ID will only set on insert. it's not touched on update.
       val request = SQL"""
         INSERT INTO live_contributors(
           receipt_email,
@@ -110,7 +111,9 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           lastname,
           iduser,
           postcode,
-          marketingoptin
+          marketingoptin,
+          contributor_id,
+          updated
         ) VALUES (
           ${contributor.email},
           ${contributor.name},
@@ -118,7 +121,9 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           ${contributor.lastName},
           ${contributor.idUser.map(_.id)},
           ${contributor.postCode},
-          ${contributor.marketingOptIn}
+          ${contributor.marketingOptIn},
+          ${contributor.contributorId.map(_.id)}::uuid,
+          now()
         ) ON CONFLICT(receipt_email) DO
         UPDATE SET
           receipt_email = excluded.receipt_email,
@@ -127,8 +132,8 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           lastname = COALESCE(excluded.lastname, live_contributors.lastname),
           iduser = COALESCE(excluded.iduser, live_contributors.iduser),
           postcode = COALESCE(excluded.postcode, live_contributors.postcode),
-          marketingoptin = COALESCE(excluded.marketingoptin, live_contributors.marketingoptin
-        )"""
+          marketingoptin = COALESCE(excluded.marketingoptin, live_contributors.marketingoptin),
+          updated = now()"""
       request.execute()
       contributor
     }

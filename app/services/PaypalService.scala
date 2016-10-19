@@ -192,6 +192,7 @@ class PaypalService(
 
       val contributor = Contributor(
         email = payerInfo.getEmail,
+        contributorId = Some(ContributorId.random),
         name = fullName(payerInfo),
         firstName = firstName,
         lastName = lastName,
@@ -219,6 +220,7 @@ class PaypalService(
   def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId]): XorT[Future, String, Contributor] = {
     val contributor = Contributor(
       email = email,
+      contributorId = None,
       marketingOptIn = Some(marketingOptInt),
       name = None,
       firstName = None,
