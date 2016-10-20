@@ -8,9 +8,8 @@ import { SET_AMOUNT } from 'src/actions';
 export function init() {
     const state = store.getState();
 
-    registerTestsWithOphan(state.data.abTests);
-
-    registerAARecurringTestWithGA(state.data.abTests);
+    registerTestsWithOphan(state.data.abTests, false);
+    completeAARecurringTestIfApplicable(state.data.abTests);
 
     // only set the amount from the A/B test if it isn't already set
     // this prevents the A/B test overriding the preset amount (query param) functionality)
@@ -19,13 +18,13 @@ export function init() {
     }
 }
 
-function registerTestsWithOphan(tests) {
+function registerTestsWithOphan(tests, complete) {
     const data = {};
 
     for (var test of tests) {
         data[test.testSlug] = {
             'variantName': test.variantSlug,
-            'complete': String(false)
+            'complete': String(complete)
         }
     }
 
@@ -36,31 +35,25 @@ function registerTestsWithOphan(tests) {
     })
 }
 
-/**
- * @see AARecurringTest for the corresponding Scala class.
- */
-function isAARecurringTest(test) {
-   // Only one variant name to check.
-    return (test.testName == 'AARecurringTest') && (test.variantName == 'default');
+function registerTestWithOphan(test, complete) {
+    registerTestsWithOphan([test], complete)
 }
 
 /**
- * Send an AA recurring test event to GA.
- * @see https://developers.google.com/analytics/devguides/collection/analyticsjs/events
+ * If the tests contains the AA recurring test, its complete flag is set to true in Ophan, and an event is sent to GA.
+ * The aim of this is to check that the two methods of tracking the test reconcile.
+ *
+ * @param tests an array of tests
  */
-function sendAARecurringTestEvent() {
-    GA.event('no-object', 'pageview', 'aa-recurring-test')
-}
+function completeAARecurringTestIfApplicable(tests) {
+    // only one variant name to check
+    const targetTest = tests.find(test =>
+        (test.testName == 'AARecurringTest') && (test.variantName == 'default')
+    );
 
-/**
- * Sends one recurring test to GA iff the tests include at least one AA recurring test.
- */
-function registerAARecurringTestWithGA(tests) {
-    for (var test of tests) {
-        if (isAARecurringTest(test)) {
-            sendAARecurringTestEvent();
-            break;
-        }
+    if (targetTest !== undefined) {
+        registerTestWithOphan(targetTest, true);
+        GA.event('no-object', 'pageview', 'aa-recurring-test');
     }
 }
 
