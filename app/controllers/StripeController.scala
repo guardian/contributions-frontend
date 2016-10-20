@@ -1,15 +1,19 @@
 package controllers
 
 import java.lang.Math._
+import java.time.Instant
 
 import actions.CommonActions._
 import cats.data.{Xor, XorT}
+import cookies.ContribTimestampCookieAttributes
+import cookies.syntax._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n.{AUD, Currency, EUR, USD}
 import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.typesafe.config.Config
+import cookies.ContribTimestampCookieAttributes
 import models.{ContributionId, IdentityId, SavedContributionData, StripeHook}
 import org.joda.time.DateTime
 import play.api.Logger
@@ -19,14 +23,14 @@ import play.api.data.format.Formatter
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
-import utils.ContribTimestamp
 import utils.MaxAmount
 import views.support.Test
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
-  extends Controller with ContribTimestamp.Implicits {
+  extends Controller {
+  import ContribTimestampCookieAttributes._
 
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
@@ -146,7 +150,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       storeMetaData(charge) // fire and forget. If it fails we don't want to stop the user
       Ok(Json.obj("redirect" -> redirect))
         .withSession("charge_id" -> charge.id)
-        .setContribTimestampCookie(charge)
+        .setCookie[ContribTimestampCookieAttributes](Instant.ofEpochSecond(charge.created).toString)
     }.recover {
       case e: Stripe.Error => BadRequest(Json.toJson(e))
     }

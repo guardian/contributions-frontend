@@ -11,15 +11,11 @@ import play.api.mvc._
 import play.filters.csrf.CSRF
 import play.filters.csrf.CSRFAddToken
 import services.PaymentServices
-import utils.ContribTimestamp
 import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
 
-import scala.concurrent.Future
-
-class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken)
-  extends Controller with Redirect with ContribTimestamp.Implicits {
+class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),
