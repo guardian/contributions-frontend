@@ -4,7 +4,7 @@ import actions.CommonActions._
 import cats.data.Xor
 import cats.data.XorT
 import cats.instances.future._
-import cookies.ContribTimestampCookie
+import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)(implicit ec: ExecutionContext)
   extends Controller with Redirect {
-  import ContribTimestampCookie._
+  import ContribTimestampCookieAttributes._
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -68,7 +68,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       case (payment, savedData) =>
         redirectWithCampaignCodes(routes.Giraffe.postPayment(countryGroup).url)
           .withSession(request.session + ("email" -> savedData.contributor.email))
-          .setCookie[ContribTimestampCookie].using(payment)
+          .setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
     paypalService.executePayment(paymentId, payerId)

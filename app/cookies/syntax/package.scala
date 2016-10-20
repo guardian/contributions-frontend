@@ -5,17 +5,11 @@ import play.api.mvc.Result
 package object syntax {
 
   /**
-   * Allows for the following syntax: `result.setCookie[C].using(data)`
+   * Allows for the following syntax: `result.setCookie[C](data)`
    */
-  implicit class CookieRequest(result: Result) {
-    def setCookie[C <: CookieType] = new CookieRequest.CookieFactory[C](result)
-  }
-
-  object CookieRequest {
-    class CookieFactory[C <: CookieType](result: Result) {
-      def using[A](data: A)(implicit c: C, cv: CookieValue[A, C]): Result = {
-        result.withCookies(CookieType.createCookie[C, A](data))
-      }
+  implicit class CookieRequest(val result: Result) extends AnyVal {
+    def setCookie[C <: CookieAttributes](data: String)(implicit c: C): Result = {
+      result.withCookies(Cookies.createCookie[C](data))
     }
   }
 }

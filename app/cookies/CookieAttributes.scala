@@ -2,7 +2,7 @@ package cookies
 
 import play.api.mvc.Cookie
 
-abstract class CookieType {
+abstract class CookieAttributes {
   val name: String
   val maxAge: Option[Int] = None
   val path: String = "/"
@@ -11,24 +11,15 @@ abstract class CookieType {
   val httpOnly: Boolean = false
 }
 
-/**
- * Represents data of type [[A]] being able to set the value for a given cookie type [[C]].
- */
-trait CookieValue[A, C <: CookieType] {
-  def value(data: A): String
-}
 
-object CookieType {
+object Cookies {
 
   /**
    * Create a cookie from a cookie type, using the data to set its value.
    */
-  def createCookie[C <: CookieType, A](data: A)(implicit c: C, cv: CookieValue[A, C]): Cookie = {
-    Cookie(c.name, cv.value(data), c.maxAge, c.path, c.domain, c.secure, c.httpOnly)
+  def createCookie[CA <: CookieAttributes](data: String)(implicit ca: CA): Cookie = {
+    Cookie(ca.name, data, ca.maxAge, ca.path, ca.domain, ca.secure, ca.httpOnly)
   }
-}
-
-object Cookies {
 
   /**
    * Common max ages for cookies.
