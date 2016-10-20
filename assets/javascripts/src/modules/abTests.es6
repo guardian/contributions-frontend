@@ -8,11 +8,8 @@ import { SET_AMOUNT } from 'src/actions';
 export function init() {
     const state = store.getState();
 
-    ophan.loaded.then(function (ophan) {
-        ophan.record({
-            abTestRegister: abTestData(state.data.abTests, false)
-        })
-    });
+    registerTestsWithOphan(state.data.abTests, false);
+    completeAARecurringTestIfApplicable(state.data.abTests);
 
     // only set the amount from the A/B test if it isn't already set
     // this prevents the A/B test overriding the preset amount (query param) functionality)
@@ -21,7 +18,7 @@ export function init() {
     }
 }
 
-function abTestData(tests, complete) {
+function registerTestsWithOphan(tests, complete) {
     const data = {};
 
     for (var test of tests) {
@@ -31,17 +28,33 @@ function abTestData(tests, complete) {
         }
     }
 
-    return data;
+    ophan.loaded.then(function (ophan) {
+        ophan.record({
+            abTestRegister: data
+        })
+    })
 }
 
-function trackComplete() {
-    const state = store.getState();
+function registerTestWithOphan(test, complete) {
+    registerTestsWithOphan([test], complete)
+}
 
-    return ophan.loaded.then(function (ophan) {
-        ophan.record({
-            abTestRegister: abTestData(state.data.abTests, true)
-        });
-    });
+/**
+ * If the tests contains the AA recurring test, its complete flag is set to true in Ophan, and an event is sent to GA.
+ * The aim of this is to check that the two methods of tracking the test reconcile.
+ *
+ * @param tests an array of tests
+ */
+function completeAARecurringTestIfApplicable(tests) {
+    // only one variant name to check
+    const targetTest = tests.find(test =>
+        (test.testName == 'AARecurringTest') && (test.variantName == 'default')
+    );
+
+    if (targetTest !== undefined) {
+        registerTestWithOphan(targetTest, true);
+        GA.event('no-object', 'pageview', 'aa-recurring-test');
+    }
 }
 
 function testFor(tests, testName) {
@@ -61,7 +74,6 @@ function countryId() {
     }
 }
 
-
 export function amounts(tests) {
     const amounts = {
         'au': {
@@ -73,7 +85,7 @@ export function amounts(tests) {
             'one-off': [25, 50, 100, 250],
             'monthly': [2, 5, 10, 20]
         }
-    }
+    };
 
     const state = store.getState();
     const data = testDataFor(state.data.abTests, 'AmountHighlightTest');
