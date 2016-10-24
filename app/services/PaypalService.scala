@@ -201,16 +201,23 @@ class PaypalService(
         marketingOptIn = None
       )
 
-      SavedContributionData(
-        contributor = contributor,
-        contributionMetaData = metadata
+      val contributorRow = ContributorRow(
+        email = payerInfo.getEmail,
+        created = created,
+        amount = BigDecimal(transaction.getAmount.getTotal),
+        currency = transaction.getAmount.getCurrency,
+        name = fullName(payerInfo).getOrElse("")
       )
+
+      (contributor, metadata, contributorRow)
     }
 
     for {
       data <- contributionDataToSave
-      contributionMetaData <- contributionData.insertPaymentMetaData(data.contributionMetaData)
-      contributor <- contributionData.saveContributor(data.contributor)
+      (contributor, contributionMetaData, contributorRow) = data
+      contributionMetaData <- contributionData.insertPaymentMetaData(contributionMetaData)
+      contributor <- contributionData.saveContributor(contributor)
+      _ <- emailService.thank(contributorRow).leftMap(e => e.getMessage)
     } yield SavedContributionData(
       contributor = contributor,
       contributionMetaData = contributionMetaData
@@ -242,26 +249,8 @@ class PaypalService(
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] = {
-
-    def tryToXorT[A](block: => A): XorT[Future, String, A] = {
-      XorT.fromXor[Future](Xor.catchNonFatal(block).leftMap { t: Throwable =>
-        Logger.error("Unable to retrieve payment meta data", t)
-        "Unable to retrieve payment meta data"
-      })
-    }
-
-    for {
-      payment <- asyncExecute(Payment.get(apiContext, paypalHook.paymentId))
-      payerInfo <- tryToXorT(payment.getPayer.getPayerInfo)
-    } yield {
-      val name = fullName(payerInfo).getOrElse("")
-      val email = payerInfo.getEmail
-      val contributorRow = ContributorRow.fromPaypal(paypalHook, name, email)
-      emailService.thank(contributorRow)
-    }
-
+  def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] =
     contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
-  }
+
 
 }
