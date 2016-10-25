@@ -128,7 +128,6 @@ case class StripeHook(
   amount: BigDecimal,
   cardCountry: String,
   status: PaymentStatus,
-  name: String,
   email: String
 )
 
@@ -147,7 +146,6 @@ object StripeHook {
         amount <- (payload \ "amount").validate[Long]
         cardCountry <- (payload \ "source" \ "country").validate[String]
         status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
-        name <- (metadata \ "name").validate[String]
         email <- (metadata \ "email").validate[String]
       } yield {
         StripeHook(
@@ -160,7 +158,6 @@ object StripeHook {
           amount = BigDecimal(amount, 2),
           cardCountry = cardCountry,
           status = status,
-          name = name,
           email = email
         )
       }
