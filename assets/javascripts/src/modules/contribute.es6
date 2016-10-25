@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import Main from 'src/components/Main';
 import store from 'src/store';
 
-import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT, GO_FORWARD } from 'src/actions';
+import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT, GO_FORWARD, AUTOFILL} from 'src/actions';
 import { attachCurrencyListeners, attachErrorDialogListener } from 'src/modules/domListeners';
 import * as ophan from 'src/modules/analytics/ophan';
 
@@ -30,6 +30,29 @@ export function init() {
     attachCurrencyListeners();
     attachErrorDialogListener();
     setOphanIds();
+    autoFill();
+}
+
+
+function autoFill() {
+    let IDENTITY_API = 'https://idapi.theguardian.com/user/me/';
+    fetch(IDENTITY_API, {
+        method: 'get',
+        credentials: 'include',
+        mode: 'cors'
+    }).then(resp => {
+        return resp.json();
+    }).then(json => {
+        if (json.user) {
+            store.dispatch({
+                type: AUTOFILL,
+                details: {
+                    name: json.user.publicFields.displayName,
+                    email: json.user.primaryEmailAddress
+                }
+            });
+        }
+    });
 }
 
 /**
