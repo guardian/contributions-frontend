@@ -18,14 +18,11 @@ export default class MobileWrapper extends React.Component {
 
     renderInForm(pages) {
         return <form className={'flex-vertical contribute-form__inner'} onSubmit={this.props.submit.bind(this)}>
-            {pages.filter(p => !(this.props.reducedCheckout && p===PAGES.DETAILS)).map(p =>
+            {pages.map(p =>
                 <section className="contribute-section" key={p}>
                     <div className="contribute-form__heading">
                         <Title page={p}/>
-                        <ProgressIndicator page={this.props.page}
-                                           reducedCheckout={this.props.reducedCheckout}
-
-                        />
+                        <ProgressIndicator page={this.props.page} />
                     </div>
 
                     {this.props.componentFor(p)}
@@ -42,7 +39,6 @@ export default class MobileWrapper extends React.Component {
                         jumpToFirstPage={this.props.jumpToFirstPage}
                         mobile={true}
                         clearPaymentFlags={this.props.clearPaymentFlags}
-                        reducedCheckout={this.props.reducedCheckout}
                     />
 
                     {!this.props.processing  && p== PAGES.CONTRIBUTION && <LegalNotice countryGroup={this.props.countryGroup}/>}
