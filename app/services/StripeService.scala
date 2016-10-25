@@ -35,13 +35,23 @@ class StripeService(
     intCmp: Option[String],
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
-    idUser: Option[IdentityId]
+    idUser: Option[IdentityId],
+    amount: BigDecimal,
+    currency: String
   ): XorT[Future, String, SavedContributionData] = {
 
     // Fire and forget: we don't want to stop the user flow
     idUser.map { id =>
       identityService.updateMarketingPreferences(id, marketing)
     }
+    emailService.thank(ContributorRow(
+      email = email,
+      created = created,
+      amount = amount,
+      currency = currency,
+      name = name,
+      cmp = cmp
+    ))
 
     val metadata = ContributionMetaData(
       contributionId = contributionId,
@@ -96,7 +106,6 @@ class StripeService(
     for {
       hook <- paymentHook.toRight(s"Unable to find the stripe event identified by ${stripeHook.eventId}")
       insertResult <- contributionData.insertPaymentHook(hook)
-      _ <- emailService.thank(ContributorRow.fromStripe(stripeHook)).leftMap(e => e.getMessage)
     } yield insertResult
   }
 }

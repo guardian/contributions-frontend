@@ -1,6 +1,7 @@
 package services
 
 import cats.data.{Xor, XorT}
+import cats.implicits._
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.typesafe.scalalogging.LazyLogging
@@ -29,8 +30,16 @@ class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
 
   val thankYouQueueUrl = sqsClient.getQueueUrl(Config.thankYouEmailQueue).getQueueUrl
 
+  // these are campaign codes use to ask people to contribute again.
+  // We don't want to send them an automatic email yet
+  val noEmailCampaignCodes = Set("co_uk_ema_cns_a", "co_uk_ema_cns_b")
+
   def thank(row: ContributorRow): XorT[Future, Throwable, SendMessageResult] = {
-    sendEmailToQueue(thankYouQueueUrl, row)
+    if (noEmailCampaignCodes.exists(row.cmp.contains)) {
+      XorT.pure[Future, Throwable, SendMessageResult](new SendMessageResult)
+    } else {
+      sendEmailToQueue(thankYouQueueUrl, row)
+    }
   }
 
   def sendEmailToQueue(queueUrl: String, row: ContributorRow): XorT[Future, Throwable, SendMessageResult] = {
