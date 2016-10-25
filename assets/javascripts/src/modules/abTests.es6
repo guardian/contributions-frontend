@@ -53,7 +53,7 @@ function completeAARecurringTestIfApplicable(tests) {
 
     if (targetTest !== undefined) {
         registerTestWithOphan(targetTest, true);
-        GA.event('no-object', 'pageview', 'aa-recurring-test');
+        GA.waitForGA().then(_ => GA.event('Test', 'NoAction', 'AARecurringTest'));
     }
 }
 
