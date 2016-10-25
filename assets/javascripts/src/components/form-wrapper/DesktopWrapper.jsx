@@ -12,9 +12,7 @@ export default class DesktopWrapper extends React.Component {
            <section className={'contribute-section'} key={this.props.page}>
                 <div className="contribute-form__heading">
                     <Title page={this.props.page}/>
-                    <ProgressIndicator page={this.props.page}
-                        reducedCheckout={this.props.reducedCheckout}
-                    />
+                    <ProgressIndicator page={this.props.page} />
                 </div>
                 <form className={'flex-vertical contribute-form__inner'}
                       onSubmit={this.props.submit.bind(this)} key={this.props.page}>
@@ -33,7 +31,6 @@ export default class DesktopWrapper extends React.Component {
                             payWithCard={this.props.payWithCard}
                             mobile={false}
                             clearPaymentFlags={this.props.clearPaymentFlags}
-                            reducedCheckout={this.props.reducedCheckout}
                         />
                     </div>
 

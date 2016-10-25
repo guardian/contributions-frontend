@@ -82,15 +82,6 @@ export default class Payment extends React.Component {
                             required/>
 
             </div>
-            {this.props.reducedCheckout && <InputField label="Email" id="email2" type="email" value={this.props.details.email}
-                                                      onChange={ event => this.props.updateDetails({ email: event.target.value })}
-                                                      required />}
-            {this.props.reducedCheckout && <div className="giraffe-checkbox">
-                <input id="guardian-opt-in" type="checkbox" name="guardian-opt-in"
-                       checked={this.props.details.optIn}
-                       onChange={event => this.props.updateDetails({ optIn: event.target.checked })} />
-                <label htmlFor="guardian-opt-in">Keep me up to date with offers from the Guardian</label>
-            </div>}
 
             {this.props.error.show &&
             <div className="payment-error">

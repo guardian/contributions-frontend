@@ -65,19 +65,6 @@ trait TestTrait {
   }
 }
 
-object ReducedCheckoutTest extends TestTrait {
-  def name = "ReducedCheckoutTest"
-
-  def slug = "2sc"
-
-  def variants = NonEmptyList(
-    makeVariant("control", "c", 1, None),
-    makeVariant("test", "t", 1, None)
-  )
-
-
-}
-
 object AmountHighlightTest extends TestTrait {
   def name = "AmountHighlightTest"
 
@@ -115,7 +102,7 @@ object Test {
   val CookiePrefix     = "gu.contributions.test"
   val TestIdCookieName = s"$CookiePrefix.id"
 
-  val allTests = List(AmountHighlightTest, ReducedCheckoutTest, AARecurringTest)
+  val allTests = List(AmountHighlightTest, AARecurringTest)
 
   def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
   def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"

@@ -95,10 +95,6 @@ export function amounts(tests) {
     return (data && data.values) || defaults;
 }
 
-export function reducedCheckout(tests) {
-    return (tests[0].testName == 'ReducedCheckoutTest') && (tests[0].variantName = 'test')
-}
-
 export function presetAmount(tests) {
     const data = testDataFor(tests, 'AmountHighlightTest');
     const defaultAmount = countryId() === 'au' ? 100 : 25;
