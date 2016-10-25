@@ -10,7 +10,8 @@ case class ContributorRow(
   created: DateTime,
   amount: BigDecimal,
   currency: String,
-  name: String
+  name: String,
+  cmp: Option[String]
 ) {
   def edition: String = currency match {
     case "GBP" => "uk"

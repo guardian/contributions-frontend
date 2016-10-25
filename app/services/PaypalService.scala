@@ -206,7 +206,8 @@ class PaypalService(
         created = created,
         amount = BigDecimal(transaction.getAmount.getTotal),
         currency = transaction.getAmount.getCurrency,
-        name = fullName(payerInfo).getOrElse("")
+        name = fullName(payerInfo).getOrElse(""),
+        cmp = cmp
       )
 
       (contributor, metadata, contributorRow)

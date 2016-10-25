@@ -49,7 +49,8 @@ class StripeService(
       created = created,
       amount = amount,
       currency = currency,
-      name = name
+      name = name,
+      cmp = cmp
     ))
 
     val metadata = ContributionMetaData(
