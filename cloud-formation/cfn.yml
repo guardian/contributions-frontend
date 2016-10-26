@@ -185,11 +185,11 @@
                 -
                   Effect: "Allow"
                   Action: "s3:GetObject"
-                  Resource: "arn:aws:s3:::github-team-keys/*"
+                  Resource: "arn:aws:s3:::github-public-keys/*"
                 -
                   Effect: "Allow"
                   Action: "s3:ListBucket"
-                  Resource: "arn:aws:s3:::github-team-keys"
+                  Resource: "arn:aws:s3:::github-public-keys"
           -
             PolicyName: "PushMetrics"
             PolicyDocument:
