@@ -1,4 +1,6 @@
-import { SET_DATA, SET_COUNTRY_GROUP } from 'src/actions';
+import { SET_DATA, SET_COUNTRY_GROUP, SUBMIT_PAYMENT } from 'src/actions';
+
+import * as ophan from 'src/modules/analytics/ophan';
 
 const initialState = {
     abTests: [],
@@ -31,6 +33,12 @@ export default function dataReducer(state = initialState, action) {
             const { currency, ...countryGroup } = action.countryGroup;
 
             return Object.assign({}, state, { currency: currency, countryGroup: countryGroup });
+
+        case SUBMIT_PAYMENT:
+            return Object.assign({}, state, { ophan: {
+                pageviewId: state.ophan.pageviewId,
+                browserId: ophan.browserId()
+            }});
 
         default:
             return state;
