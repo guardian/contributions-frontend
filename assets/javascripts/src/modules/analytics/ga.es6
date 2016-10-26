@@ -114,7 +114,6 @@ export function pageView() {
     });
 }
 
-
 /**
  * @returns {Promise} a Promise that will resolved when the call to ga comes back, or after a timeout define by gaTimeout
  * it will never be rejected
@@ -162,4 +161,17 @@ export function trackPayment(price, currency) {
     });
 
     return event('Payment', 'Contribute', 'purchase');
+}
+
+export function waitForGA() {
+    return new Promise(resolve => {
+        function wait() {
+            if (window.ga === undefined) {
+                setTimeout(wait, 100);
+            } else {
+                return resolve();
+            }
+        }
+        wait();
+    })
 }
