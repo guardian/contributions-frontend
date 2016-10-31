@@ -5,6 +5,7 @@ import models.PaymentProvider.{Paypal, Stripe}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import models.PaymentMode.{Default, Testing}
+import models.PaymentStatus.Refunded
 
 sealed trait PaymentProvider extends EnumEntry
 
@@ -34,11 +35,14 @@ object PaymentStatus extends Enum[PaymentStatus] {
     }
   }
 
+  /**
+    * Stripe doesn't use the payment ("charge", in their terms) status to represent a refund. Completed refunds are
+    * created as separate charges that still have a status of "succeeded" but a "refunded" flag set to true.
+    */
   val stripeReads = new Reads[PaymentStatus] {
     override def reads(json: JsValue): JsResult[PaymentStatus] = json match {
       case JsString("succeeded") => JsSuccess(Paid)
       case JsString("failed") => JsSuccess(Failed)
-      case JsString("refunded") => JsSuccess(Refunded)
       case JsString(wrongStatus) => JsError(s"Unexpected stripe status: $wrongStatus")
       case _ => JsError("Unknown stripe status type, a JsString was expected")
     }
@@ -147,6 +151,7 @@ object StripeHook {
         cardCountry <- (payload \ "source" \ "country").validate[String]
         status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
         email <- (metadata \ "email").validate[String]
+        refunded <- (payload \ "refunded").validate[Boolean]
       } yield {
         StripeHook(
           contributionId = contributionId,
@@ -157,7 +162,7 @@ object StripeHook {
           currency = currency.toUpperCase,
           amount = BigDecimal(amount, 2),
           cardCountry = cardCountry,
-          status = status,
+          status = if (refunded) Refunded else status,
           email = email
         )
       }
