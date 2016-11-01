@@ -63,13 +63,13 @@ case class PaymentHook(
 )
 
 object PaymentHook {
-  def fromPaypal(paypalHook: PaypalHook): PaymentHook = PaymentHook(
+  def fromPaypal(paypalHook: PaypalHook, countryCode: Option[String]): PaymentHook = PaymentHook(
     contributionId = paypalHook.contributionId,
     paymentId = paypalHook.paymentId,
     provider = Paypal,
     created = paypalHook.created,
     currency = paypalHook.currency,
-    cardCountry = None,
+    cardCountry = countryCode,
     amount = paypalHook.amount,
     convertedAmount = None,
     status = paypalHook.status,

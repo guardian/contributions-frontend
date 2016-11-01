@@ -250,8 +250,27 @@ class PaypalService(
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] =
-    contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
+  def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] = {
+
+    def countryCode(rawPayment: Payment): Option[String] = {
+      val country = for {
+        payment <- Option(rawPayment)
+        payer <- Option(payment.getPayer)
+        info <- Option(payer.getPayerInfo)
+        countryCode <- Option(info.getCountryCode)
+      } yield countryCode
+      if (country.isEmpty) {
+        Logger.error(s"unable to fetch the country code for a webhook ${paypalHook.contributionId}")
+      }
+      country
+    }
+
+    for {
+      payment <- asyncExecute(Payment.get(apiContext, paypalHook.paymentId))
+      result <- contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook, countryCode(payment)))
+    } yield result
+  }
+
 
 
 }
