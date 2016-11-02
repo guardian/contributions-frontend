@@ -81,6 +81,7 @@ object AmountHighlightTest extends TestTrait {
     US,
     Canada,
     NewZealand,
+    Ireland,
     Europe,
     RestOfTheWorld
   )

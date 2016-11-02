@@ -26,6 +26,7 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
 
     val countryGroup = request.getFastlyCountry match {
       case Some(Canada) | Some(NewZealand) | Some(RestOfTheWorld) => UK
+      case Some(Ireland) => Europe // IE Country used to resolve to Europe CountryGroup. Keeping it same to not to break any A/B test variants.
       case Some(other) => other
       case None => UK
     }
