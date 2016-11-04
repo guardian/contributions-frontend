@@ -97,7 +97,7 @@ export function amounts(tests) {
 
 export function presetAmount(tests) {
     const data = testDataFor(tests, 'AmountHighlightTest');
-    const defaultAmount = countryId() === 'au' ? 100 : 25;
+    const defaultAmount = countryId() === 'au' ? 100 : 50;
 
     return (data && data.preselect) || defaultAmount;
 }

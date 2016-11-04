@@ -1,23 +1,18 @@
 package views.support
 
 import com.gu.i18n.CountryGroup
-import com.gu.i18n.CountryGroup._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Cookie, Request}
 import scala.util.Random
 import scalaz.NonEmptyList
-import views.support.AmountHighlightTest.AmountVariantData
 
 sealed trait VariantData
 
 object VariantData {
   implicit val formatter: Writes[VariantData] = new Writes[VariantData] {
-    def writes(o: VariantData): JsValue = {
-      o match {
-        case amount: AmountVariantData => AmountVariantData.format.writes(amount)
-      }
-    }
+    // please implement here when a variant require data
+    def writes(o: VariantData): JsValue = JsNull
   }
 }
 
@@ -65,45 +60,12 @@ trait TestTrait {
   }
 }
 
-object AmountHighlightTest extends TestTrait {
-  def name = "AmountHighlightTest"
-
-  def slug = "highlight"
-
-  case class AmountVariantData(values: List[Int], preselect: Option[Int]) extends VariantData
-
-  object AmountVariantData {
-    implicit val format: Format[AmountVariantData] = Json.format[AmountVariantData]
-  }
-
-  private lazy val notAustralia: Set[CountryGroup] = Set(
-    UK,
-    US,
-    Canada,
-    NewZealand,
-    Ireland,
-    Europe,
-    RestOfTheWorld
-  )
-
-  def variants = NonEmptyList(
-    //New variants go here.
-    makeVariant("6 values - 25 highlight", "6-25", 1, Some(AmountVariantData(List(5,10,25, 50, 100, 250), Some(25))), notAustralia),
-
-    makeVariant("Amount - 25 highlight", "25", 1, Some(AmountVariantData(List(25, 50, 100, 250), Some(25))), notAustralia),
-    makeVariant("Amount - 50 highlight", "50", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(50))), notAustralia),
-    makeVariant("Amount - 100 highlight", "100", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(100))), notAustralia),
-    makeVariant("Amount - 250 highlight", "250", 0, Some(AmountVariantData(List(25, 50, 100, 250), Some(250))), notAustralia),
-    makeVariant("Amount - 100 highlight Australia", "100-Australia", 1, Some(AmountVariantData(List(50, 100, 250, 500), Some(100))), Set(Australia))
-  )
-}
-
 object Test {
   private val MaxTestId = 100
   val CookiePrefix     = "gu.contributions.test"
   val TestIdCookieName = s"$CookiePrefix.id"
 
-  val allTests = List(AmountHighlightTest, AARecurringTest)
+  val allTests = List(AARecurringTest)
 
   def cookieName(v: Variant) = s"$CookiePrefix.${v.testSlug}"
   def cookieName(t: TestTrait) = s"$CookiePrefix.${t.slug}"
