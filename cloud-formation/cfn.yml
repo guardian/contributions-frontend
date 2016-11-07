@@ -31,11 +31,6 @@
     InstanceType:
       Description: "EC2 instance type"
       Type: "String"
-      AllowedValues:
-        - "t2.micro"
-        - "t2.medium"
-        - "m3.medium"
-      ConstraintDescription: "must be a valid EC2 instance type."
     ImageId:
       Description: "AMI ID"
       Type: "String"
