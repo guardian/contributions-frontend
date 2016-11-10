@@ -32,7 +32,7 @@ class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
 
   // these are campaign codes use to ask people to contribute again.
   // We don't want to send them an automatic email yet
-  val noEmailCampaignCodes = Set("co_uk_ema_cns_a", "co_uk_ema_cns_b")
+  val noEmailCampaignCodes = Set("co_uk_ema_cns_a", "co_uk_ema_cns_b", "co_us_ema_cnsus_a")
 
   def thank(row: ContributorRow): XorT[Future, Throwable, SendMessageResult] = {
     if (noEmailCampaignCodes.exists(row.cmp.contains)) {
