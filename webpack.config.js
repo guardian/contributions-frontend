@@ -38,7 +38,8 @@ module.exports = {
                     plugins: [
                         'transform-object-rest-spread',
                         'transform-object-assign',
-                        'transform-es2015-classes'
+                        'transform-es2015-classes',
+                        'transform-runtime'
                     ],
                     cacheDirectory: ''
                 }
@@ -53,7 +54,8 @@ module.exports = {
                     plugins: [
                         'transform-object-rest-spread',
                         'transform-object-assign',
-                        'transform-es2015-classes'
+                        'transform-es2015-classes',
+                        'transform-runtime'
                     ],
                     cacheDirectory: ''
                 }

@@ -182,6 +182,7 @@ $control-spacing: 5px;
 }
 
 .contribute-form__inner {
+    width: 100%;
     margin-bottom: auto;
 
     @include mq(tablet) {
@@ -298,7 +299,6 @@ $control-spacing: 5px;
     flex-grow: 1;
     margin-bottom: 7px;
     height: 36px;
-    flex-basis: 20%;
 }
 
 .contribute-controls__input {
@@ -337,7 +337,6 @@ $control-spacing: 5px;
 .option-button {
     @include button();
     text-align: center;
-    flex-basis: 20%;
 
     .opaque .opacity-wrapper &:hover:not(.active),
     .opaque .opacity-wrapper &:focus:not(.active) {
@@ -356,14 +355,6 @@ $control-spacing: 5px;
 
 .option-button__recurring {
     flex: 1;
-}
-
-.option-button__three {
-    flex-basis: 30%;
-}
-
-.option-button__four {
-    flex-basis: 20%;
 }
 
 .with-card-icon {
