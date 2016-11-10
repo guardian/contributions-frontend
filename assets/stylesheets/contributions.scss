@@ -182,6 +182,7 @@ $control-spacing: 5px;
 }
 
 .contribute-form__inner {
+    width: 100%;
     margin-bottom: auto;
 
     @include mq(tablet) {
