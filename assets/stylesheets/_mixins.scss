@@ -269,3 +269,15 @@ $gs-max-columns: 16;
         color: white;
     }
 }
+
+@mixin heading-indent($mobile, $tablet, $desktop) {
+    padding-left: $mobile;
+
+    @include mq(tablet) {
+        padding-left: $tablet;
+    }
+
+    @include mq(desktop) {
+        padding-left: $desktop;
+    }
+}
