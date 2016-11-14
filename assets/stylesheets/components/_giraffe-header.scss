@@ -3,6 +3,7 @@
 
     @include mq(tablet) {
         margin-top: $gs-baseline * 4;
+        margin-bottom: $gs-baseline * 2;
     }
 }
 
