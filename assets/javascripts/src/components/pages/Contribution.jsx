@@ -65,6 +65,8 @@ export default class Contribution extends React.Component {
 
     render() {
         return <div className="contribute-controls contribute-fields">
+            <h2 className="contribute-controls-title">One-off contribution</h2>
+
             {this.props.amounts.map(amount =>
                 <AmountButton amount={amount}
                               key={amount}

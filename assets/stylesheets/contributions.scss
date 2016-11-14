@@ -152,7 +152,7 @@ $control-spacing: 5px;
 .contributions__inner,
 .feedback {
     padding: 0 $gs-baseline $gs-gutter;
-    
+
     @include mq(mem-full) {
         padding-left: $gs-gutter * 2;
         padding-right: $gs-gutter * 2;
@@ -313,6 +313,14 @@ $control-spacing: 5px;
     margin-left: -$control-spacing/2;
     margin-right: -$control-spacing/2;
     margin-top: auto;
+}
+
+.contribute-controls-title {
+    flex: 0 0 100%;
+    font-size: 16px;
+    font-weight: normal;
+    font-family: $f-serif-headline;
+    margin-bottom: 6px;
 }
 
 .contribute-controls--recurring {
