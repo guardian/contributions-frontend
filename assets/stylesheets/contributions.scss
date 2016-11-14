@@ -217,7 +217,7 @@ $control-spacing: 5px;
     position: relative;
 
     @include mq(tablet) {
-        margin-top: $gs-baseline * 2;
+        margin-top: 40px;
         width: 300px;
         min-width: 300px;
     }
