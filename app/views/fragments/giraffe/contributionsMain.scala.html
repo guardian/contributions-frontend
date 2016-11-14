@@ -9,7 +9,7 @@
     errorMessage:Option[String])(content: Html)
 
 @main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
-    <main class="giraffe__wrapper currency-@countryGroup.currency.toString.toLowerCase">
+    <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
 
         @for(message <- errorMessage) {
             <div id="errorDialog" class="overlay">
@@ -22,22 +22,26 @@
             </div>
         }
 
-        <div class="giraffe__inner page-slice l-constrained flex-horizontal-from-tablet">
-            <section class="giraffe__heading">
-                <h1 class="giraffe__heading--main">
-                    <span>Support the Guardian’s</span><br />
-                    <span class="heading-line--indent-max">quality journalism</span><br />
-                    <span class="heading-line--indent-min">and independent voice</span>
-                </h1>
+        <section class="contributions__inner page-slice l-constrained flex-horizontal-from-tablet">
+            <div>
+                <hgroup class="contributions__heading">
+                    <h1 class="contributions__heading--main">
+                        <span>Support the Guardian’s</span> <br />
+                        <span class="heading-line--indent-max">quality journalism</span> <br />
+                        <span class="heading-line--indent-min">and independent voice</span>
+                    </h1>
 
-                <h2 class="giraffe__heading--sub">
-                    <span>Make a one-off</span><br />
-                    <span class="sub-heading-line--indent">contribution today</span>
-                </h2>
-            </section>
+                    <h2 class="contributions__heading--sub">
+                        <span>Make a one-off</span> <br />
+                        <span class="sub-heading-line--indent">contribution today</span>
+                    </h2>
+                </hgroup>
+            </div>
+
             @content
-        </div>
+        </section>
     </main>
+
     <section class="disclaimer">
         <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="feedback">

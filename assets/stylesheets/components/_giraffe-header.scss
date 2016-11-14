@@ -1,4 +1,4 @@
-.giraffe__heading {
+.contributions__heading {
     margin: $gs-baseline 0;
 
     @include mq(tablet) {
@@ -6,7 +6,7 @@
     }
 }
 
-.giraffe__heading--main, .giraffe__heading--sub {
+.contributions__heading--main, .contributions__heading--sub {
     font-family: $f-serif-headline;
     font-weight: 900;
     font-size: 24px;
@@ -22,11 +22,11 @@
     }
 }
 
-.giraffe__heading--main {
+.contributions__heading--main {
     color: color(neutral-1);
 }
 
-.giraffe__heading--sub {
+.contributions__heading--sub {
     color: white;
 }
 
