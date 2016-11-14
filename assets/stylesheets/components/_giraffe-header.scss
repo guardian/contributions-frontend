@@ -2,8 +2,12 @@
     margin: $gs-baseline 0;
 
     @include mq(tablet) {
-        margin-top: $gs-baseline * 4;
-        margin-bottom: $gs-baseline * 2;
+        margin-top: 60px;
+        margin-bottom: 24px;
+    }
+
+    @include mq(desktop) {
+        margin-bottom: 36px;
     }
 }
 
@@ -17,6 +21,7 @@
         font-size: 36px;
         line-height: 36px;
     }
+
     @include mq(desktop){
         font-size: 44px;
         line-height: 44px;
