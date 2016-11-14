@@ -1,51 +1,46 @@
-@mixin jaunty($indents--main,$indents--sub) {
-    .giraffe__heading--main--jaunty {
-        @for $i from 1 through length($indents--main) {
-            &:nth-child(#{$i}) {
-                padding-left: nth($indents--main, $i)
-            }
-        }    }
-    .giraffe__heading--sub--jaunty{
-    @for $i from 1 through length($indents--sub) {
-        &:nth-child(#{$i}) {
-            padding-left: nth($indents--sub, $i)
-        }
-    }
-    }
-}
-
 .giraffe__heading {
-    padding-top: 10px;
-    padding-bottom: 20px;
+    margin: $gs-baseline 0;
+
+    @include mq(tablet) {
+        margin-top: $gs-baseline * 4;
+    }
 }
-    .giraffe__heading--main, .giraffe__heading--sub {
-        font-family: $f-serif-headline;
-        font-weight: 900;
-        font-size: 24px;
-        line-height: 24px;
 
-        @include mq(tablet){
-            font-size: 36px;
-            line-height: 36px;
-        }
-        @include mq(desktop){
-            font-size: 44px;
-            line-height: 44px;
-        }
-    }
+.giraffe__heading--main, .giraffe__heading--sub {
+    font-family: $f-serif-headline;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 24px;
 
-    .giraffe__heading--main {
-        color: black;
+    @include mq(tablet){
+        font-size: 36px;
+        line-height: 36px;
     }
-    .giraffe__heading--sub {
-        color: white;
+    @include mq(desktop){
+        font-size: 44px;
+        line-height: 44px;
     }
+}
 
-    .giraffe__heading--sub--jaunty,
-    .giraffe__heading--main--jaunty {
-        display: block;
-    }
-@include jaunty((0,40px,80px,0),(80px,0,40px));
+.giraffe__heading--main {
+    color: color(neutral-1);
+}
+
+.giraffe__heading--sub {
+    color: white;
+}
+
+.heading-line--indent-min {
+    @include heading-indent(30px, 25px, 40px);
+}
+
+.heading-line--indent-max {
+    @include heading-indent(90px, 100px, 200px);
+}
+
+.sub-heading-line--indent {
+    @include heading-indent(60px, 50px, 120px);
+}
 
 //Styles which make giraffe appear in global gu branding
 .container-global.container-global--giraffe, .global-footer.global-footer--giraffe {
