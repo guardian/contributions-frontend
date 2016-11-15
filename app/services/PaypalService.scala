@@ -182,7 +182,13 @@ class PaypalService(
 
       val postCode = {
         def billingPostCode = Option(payerInfo.getBillingAddress).flatMap(address => Option(address.getPostalCode))
-        def shippingPostcode = Option(payerInfo.getShippingAddress).flatMap(address => Option(address.getPostalCode))
+
+        def shippingPostcode = for {
+          itemList <- Option(transaction.getItemList)
+          shippingAddress <- Option(itemList.getShippingAddress)
+        } yield {
+          shippingAddress.getPostalCode
+        }
 
         billingPostCode orElse shippingPostcode
       }
