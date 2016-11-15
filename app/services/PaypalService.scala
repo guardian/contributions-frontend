@@ -173,6 +173,7 @@ class PaypalService(
         contributionId = ContributionId(contributionId),
         created = created,
         email = payerInfo.getEmail,
+        country = Option(payerInfo.getCountryCode),
         ophanPageviewId = ophanPageviewId,
         ophanBrowserId = ophanBrowserId,
         abTests = Json.toJson(variants),
@@ -251,9 +252,7 @@ class PaypalService(
   }
 
   def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] = {
-    for {
-      result <- contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook, None))
-    } yield result
+    contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 
 
