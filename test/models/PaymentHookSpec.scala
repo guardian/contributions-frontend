@@ -28,7 +28,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
     "be able to parse paypal's json and convert it to a payment hook" in {
 
       val json = Json.parse(paypalJson)
-      val jsResult = PaypalHook.reader.reads(json).map(hook => PaymentHook.fromPaypal(hook, Some("US")))
+      val jsResult = PaypalHook.reader.reads(json).map(hook => PaymentHook.fromPaypal(hook))
 
       jsResult mustBe a [JsSuccess[_]]
       jsResult.get mustEqual PaymentHook(
@@ -37,7 +37,6 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         provider = Paypal,
         created = new DateTime("2016-08-10T09:49:14Z"),
         currency = "GBP",
-        cardCountry = Some("US"),
         amount = BigDecimal("22.00"),
         convertedAmount = None,
         status = Paid,
@@ -59,7 +58,6 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         created = new DateTime("2016-09-15T17:32:54Z"),
         currency = "GBP",
         amount = BigDecimal("25.00"),
-        cardCountry = "US",
         status = Paid,
         email = "a@a.a"
       )
@@ -84,7 +82,6 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         provider = Stripe,
         created = new DateTime("2016-09-15T17:32:54Z"),
         currency = "GBP",
-        cardCountry = Some("US"),
         amount = BigDecimal("25.00"),
         convertedAmount = Some(BigDecimal("20.00")),
         status = Paid,

@@ -25,8 +25,8 @@ class StripeService(
 
   def storeMetaData(
     contributionId: ContributionId,
+    charge: Charge,
     created: DateTime,
-    email: String,
     name: String,
     postCode: Option[String],
     marketing: Boolean,
@@ -35,9 +35,7 @@ class StripeService(
     intCmp: Option[String],
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
-    idUser: Option[IdentityId],
-    amount: BigDecimal,
-    currency: String
+    idUser: Option[IdentityId]
   ): XorT[Future, String, SavedContributionData] = {
 
     // Fire and forget: we don't want to stop the user flow
@@ -45,10 +43,10 @@ class StripeService(
       identityService.updateMarketingPreferences(id, marketing)
     }
     emailService.thank(ContributorRow(
-      email = email,
+      email = charge.receipt_email,
       created = created,
-      amount = amount,
-      currency = currency,
+      amount = BigDecimal(charge.amount, 2),
+      currency = charge.currency.toUpperCase,
       name = name,
       cmp = cmp
     ))
@@ -56,7 +54,8 @@ class StripeService(
     val metadata = ContributionMetaData(
       contributionId = contributionId,
       created = created,
-      email = email,
+      email = charge.receipt_email,
+      country = Some(charge.source.country),
       ophanPageviewId = Some(ophanPageviewId),
       ophanBrowserId = ophanBrowserId,
       abTests = Json.toJson(variants),
@@ -64,7 +63,7 @@ class StripeService(
       intCmp = intCmp
     )
     val contributor = Contributor(
-      email = email,
+      email = charge.receipt_email,
       contributorId = Some(ContributorId.random),
       name = Some(name),
       firstName = None,

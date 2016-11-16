@@ -55,7 +55,6 @@ case class PaymentHook(
   provider: PaymentProvider,
   created: DateTime,
   currency: String,
-  cardCountry: Option[String],
   amount: BigDecimal,
   convertedAmount: Option[BigDecimal],
   status: PaymentStatus,
@@ -63,13 +62,12 @@ case class PaymentHook(
 )
 
 object PaymentHook {
-  def fromPaypal(paypalHook: PaypalHook, countryCode: Option[String]): PaymentHook = PaymentHook(
+  def fromPaypal(paypalHook: PaypalHook): PaymentHook = PaymentHook(
     contributionId = paypalHook.contributionId,
     paymentId = paypalHook.paymentId,
     provider = Paypal,
     created = paypalHook.created,
     currency = paypalHook.currency,
-    cardCountry = countryCode,
     amount = paypalHook.amount,
     convertedAmount = None,
     status = paypalHook.status,
@@ -82,7 +80,6 @@ object PaymentHook {
     provider = Stripe,
     created = stripeHook.created,
     currency = stripeHook.currency,
-    cardCountry = Some(stripeHook.cardCountry),
     amount = stripeHook.amount,
     convertedAmount = convertedAmount,
     status = stripeHook.status,
@@ -130,7 +127,6 @@ case class StripeHook(
   created: DateTime,
   currency: String,
   amount: BigDecimal,
-  cardCountry: String,
   status: PaymentStatus,
   email: String
 )
@@ -148,7 +144,6 @@ object StripeHook {
         created <- (payload \ "created").validate[Long]
         currency <- (payload \ "currency").validate[String]
         amount <- (payload \ "amount").validate[Long]
-        cardCountry <- (payload \ "source" \ "country").validate[String]
         status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
         email <- (metadata \ "email").validate[String]
         refunded <- (payload \ "refunded").validate[Boolean]
@@ -161,7 +156,6 @@ object StripeHook {
           created = new DateTime(created * 1000),
           currency = currency.toUpperCase,
           amount = BigDecimal(amount, 2),
-          cardCountry = cardCountry,
           status = if (refunded) Refunded else status,
           email = email
         )

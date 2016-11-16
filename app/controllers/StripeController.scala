@@ -132,8 +132,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     def storeMetaData(charge: Charge): XorT[Future, String, SavedContributionData] = {
       stripe.storeMetaData(
         contributionId = contributionId,
+        charge = charge,
         created = new DateTime(charge.created * 1000L),
-        email = charge.receipt_email,
         name = form.name,
         postCode = form.postcode,
         marketing = form.marketing,
@@ -142,9 +142,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
         intCmp = form.intcmp,
         ophanPageviewId = form.ophanPageviewId,
         ophanBrowserId = form.ophanBrowserId,
-        idUser = idUser,
-        amount = BigDecimal(charge.amount, 2),
-        currency = charge.currency.toUpperCase
+        idUser = idUser
       )
     }
 
