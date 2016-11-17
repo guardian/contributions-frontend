@@ -42,9 +42,9 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
     val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,
-      image = Some("https://media.guim.co.uk/5719a2b724efd8944e0222d57c839a7d2b6e39b3/0_0_1440_864/1000.jpg"),
+      image = Some(Asset.at("images/twitter-card.png")),
       stripePublicKey = None,
-      description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
+      description = Some("By making a contribution, you’ll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
@@ -64,9 +64,9 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
       val pageInfo = PageInfo(
         title = "Support the Guardian | Contribute today",
         url = request.path,
-        image = Some("https://media.guim.co.uk/5719a2b724efd8944e0222d57c839a7d2b6e39b3/0_0_1440_864/1000.jpg"),
+        image = Some(Asset.at("images/twitter-card.png")),
         stripePublicKey = Some(stripe.publicKey),
-        description = Some("By making a contribution, you'll be supporting independent journalism that speaks truth to power"),
+        description = Some("By making a contribution, you’ll be supporting independent journalism that speaks truth to power"),
         customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
       )
 
