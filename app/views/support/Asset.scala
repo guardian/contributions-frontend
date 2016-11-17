@@ -2,9 +2,11 @@ package views.support
 
 
 import com.amazonaws.util.IOUtils
+import controllers.routes
 import play.api.Play
 import play.api.Play.current
 import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 
 import scala.io.Source
@@ -17,8 +19,8 @@ object Asset {
   }
 
   def at(path: String): String = "/assets/" + map.getOrElse(path, path)
- // def at(path: String): String = "/public/" + map.getOrElse(path, path)
   def pathAt(path: String): String = "public/" + map.getOrElse(path, path)
+  def absoluteUrl(path: String)(implicit request: RequestHeader): String = routes.Assets.versioned(path).absoluteURL
 
   def inlineResource(path: String): Option[String] = {
     val resource = Play.resourceAsStream(pathAt(path))
