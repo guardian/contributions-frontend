@@ -28,7 +28,8 @@
         <meta property="og:description" content="@pageInfo.description"/>
 
         @for(pageImage <- pageInfo.image) {
-            <meta property="og:image" content="@pageImage"/>
+            <meta property="og:image" content="@pageImage" />
+            <meta name="twitter:image" content="@pageImage" />
         }
 
         <meta property="og:url" content="@(Config.contributeUrl + pageInfo.url)"/>
@@ -40,7 +41,6 @@
         <meta name="twitter:site" content="@@@Social.twitterUsername" />
         <meta name="twitter:title" content="@pageInfo.title" />
         <meta name="twitter:description" content="@pageInfo.description" />
-        <meta name="twitter:image" content="@Asset.at("images/twitter-card.png")" />
 
         <meta name="google-site-verification" content="qf7V0ceP_mY_0jTl7R7C1wZSKn2gK7TlharWVLr8Ea0" />
 
