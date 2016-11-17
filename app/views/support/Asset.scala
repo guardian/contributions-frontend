@@ -2,6 +2,7 @@ package views.support
 
 
 import com.amazonaws.util.IOUtils
+import configuration.Config
 import play.api.Play
 import play.api.Play.current
 import play.api.libs.json.{JsObject, Json}
@@ -17,8 +18,8 @@ object Asset {
   }
 
   def at(path: String): String = "/assets/" + map.getOrElse(path, path)
- // def at(path: String): String = "/public/" + map.getOrElse(path, path)
   def pathAt(path: String): String = "public/" + map.getOrElse(path, path)
+  def absoluteUrl(path: String): String = Config.contributeUrl + at(path)
 
   def inlineResource(path: String): Option[String] = {
     val resource = Play.resourceAsStream(pathAt(path))
