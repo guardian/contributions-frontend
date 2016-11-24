@@ -83,9 +83,6 @@ packageSummary := "contributions frontend"
 packageDescription := """take financial contributions"""
 
 riffRaffPackageType := (packageBin in Debian).value
-riffRaffBuildIdentifier := env("BUILD_NUMBER", "DEV")
-riffRaffManifestBranch := env("BRANCH_NAME", "unknown_branch")
-riffRaffManifestVcsUrl  := "git@github.com:guardian/contributions-frontend.git"
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffArtifactResources += (file("cloud-formation/cfn.yml"), "packages/cfn/cloud-formation/cfn.yml")
