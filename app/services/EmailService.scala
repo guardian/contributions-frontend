@@ -1,6 +1,6 @@
 package services
 
-import cats.data.{Xor, XorT}
+import cats.data.EitherT
 import cats.implicits._
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
@@ -34,26 +34,26 @@ class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
   // We don't want to send them an automatic email yet
   val noEmailCampaignCodes = Set("co_uk_ema_cns_a", "co_uk_ema_cns_b", "co_us_ema_cnsus_a", "co_int_email_patronask")
 
-  def thank(row: ContributorRow): XorT[Future, Throwable, SendMessageResult] = {
+  def thank(row: ContributorRow): EitherT[Future, Throwable, SendMessageResult] = {
     if (noEmailCampaignCodes.exists(row.cmp.contains)) {
-      XorT.pure[Future, Throwable, SendMessageResult](new SendMessageResult)
+      EitherT.pure[Future, Throwable, SendMessageResult](new SendMessageResult)
     } else {
       sendEmailToQueue(thankYouQueueUrl, row)
     }
   }
 
-  def sendEmailToQueue(queueUrl: String, row: ContributorRow): XorT[Future, Throwable, SendMessageResult] = {
+  def sendEmailToQueue(queueUrl: String, row: ContributorRow): EitherT[Future, Throwable, SendMessageResult] = {
     val payload = Json.stringify(Json.toJson(row))
 
     val handler = new AwsAsyncHandler[SendMessageRequest, SendMessageResult]
     sqsClient.sendMessageAsync(queueUrl, payload, handler)
 
-    XorT(handler.future.map { result =>
-      Xor.Right(result)
+    EitherT(handler.future.map { result =>
+      Right(result)
     } recover {
       case t: Throwable =>
         Logger.error(s"Unable to send message to the SQS queue $queueUrl", t)
-        Xor.Left(t)
+        Left(t)
     })
   }
 }

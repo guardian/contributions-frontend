@@ -1,8 +1,7 @@
 package controllers
 
 import actions.CommonActions._
-import cats.data.Xor
-import cats.data.XorT
+import cats.data.EitherT
 import cats.instances.future._
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
@@ -46,7 +45,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
     val paypalService = paymentServices.paypalServiceFor(request)
 
-    def storeMetaData(payment: Payment): XorT[Future, AppError, (Payment, SavedContributionData)] = {
+    def storeMetaData(payment: Payment): EitherT[Future, AppError, (Payment, SavedContributionData)] = {
       val mvtId = Test.testIdFor(request)
       val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
       val idUser = IdentityId.fromRequest(request)
@@ -130,8 +129,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
             ophanBrowserId = authRequest.ophanBrowserId
           )
           authResponse.value map {
-            case Xor.Right(url) => Ok(Json.toJson(AuthResponse(url)))
-            case Xor.Left(error) =>
+            case Right(url) => Ok(Json.toJson(AuthResponse(url)))
+            case Left(error) =>
               Logger.error(s"Error getting PayPal auth url: $error")
               InternalServerError("Error getting PayPal auth url")
           }
@@ -170,8 +169,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
     withParsedPaypalHook(bodyJson) { paypalHook =>
       paypalService.processPaymentHook(paypalHook).value.map {
-        case Xor.Right(_) => Ok
-        case Xor.Left(_) => InternalServerError
+        case Right(_) => Ok
+        case Left(_) => InternalServerError
       }
     }
   }

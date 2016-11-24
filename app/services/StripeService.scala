@@ -1,6 +1,6 @@
 package services
 
-import cats.data.{OptionT, XorT}
+import cats.data.{OptionT, EitherT}
 import com.gu.monitoring.ServiceMetrics
 import com.gu.stripe.{StripeApiConfig, StripeService => MembershipStripeService}
 import data.ContributionData
@@ -36,7 +36,7 @@ class StripeService(
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
-  ): XorT[Future, String, SavedContributionData] = {
+  ): EitherT[Future, String, SavedContributionData] = {
 
     // Fire and forget: we don't want to stop the user flow
     idUser.map { id =>
@@ -82,7 +82,7 @@ class StripeService(
     )
   }
 
-  def processPaymentHook(stripeHook: StripeHook): XorT[Future, String, PaymentHook] = {
+  def processPaymentHook(stripeHook: StripeHook): EitherT[Future, String, PaymentHook] = {
 
     def convertedAmount(event: Event[Charge]): OptionT[Future, BigDecimal] = {
       for {
