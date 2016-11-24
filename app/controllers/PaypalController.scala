@@ -71,7 +71,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     }
 
     paypalService.executePayment(paymentId, payerId)
-      .leftMap(PaypalPaymentError) // not necessary if executePayment() returns a custom error type
+      .leftMap[AppError](PaypalPaymentError) // not necessary if executePayment() returns a custom error type
       .flatMap(payment => storeMetaData(payment))
       .fold(notOkResult, okResult)
   }
