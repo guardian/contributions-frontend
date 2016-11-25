@@ -2,7 +2,7 @@ package services
 
 import java.util.UUID
 
-import cats.data.{Xor, XorT}
+import cats.data.EitherT
 import cats.implicits._
 import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
@@ -54,9 +54,9 @@ class PaypalService(
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  private def asyncExecute[A](block: => A): XorT[Future, String, A] = XorT(Future {
+  private def asyncExecute[A](block: => A): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(block)
-    Xor.fromTry(result).leftMap { exception =>
+    Either.fromTry(result).leftMap { exception =>
       Logger.error("Error while calling PayPal API", exception)
       exception.getMessage
     }
@@ -79,7 +79,7 @@ class PaypalService(
     intCmp: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
-  ): XorT[Future, String, Uri] = {
+  ): EitherT[Future, String, Uri] = {
 
     val paymentToCreate = {
 
@@ -118,8 +118,8 @@ class PaypalService(
     asyncExecute{
       paymentToCreate.create(apiContext)
     } transform {
-      case Xor.Right(createdPayment) => Xor.fromOption(getAuthLink(createdPayment), "No approval link returned from PayPal")
-      case Xor.Left(error) => Xor.left(error)
+      case Right(createdPayment) => Either.fromOption(getAuthLink(createdPayment), "No approval link returned from PayPal")
+      case Left(error) => Left(error)
     }
   }
 
@@ -134,13 +134,13 @@ class PaypalService(
       }
   }
 
-  def executePayment(paymentId: String, payerId: String): XorT[Future, String, Payment] = {
+  def executePayment(paymentId: String, payerId: String): EitherT[Future, String, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
-      case Xor.Right(p) if p.getState.toUpperCase != "APPROVED" => Xor.left(s"payment returned with state: ${payment.getState}")
-      case Xor.Right(p) => Xor.right(p)
-      case Xor.Left(error) => Xor.left(error)
+      case Right(p) if p.getState.toUpperCase != "APPROVED" => Left(s"payment returned with state: ${payment.getState}")
+      case Right(p) => Right(p)
+      case Left(error) => Left(error)
     }
 
   }
@@ -153,10 +153,10 @@ class PaypalService(
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
-  ): XorT[Future, String, SavedContributionData] = {
+  ): EitherT[Future, String, SavedContributionData] = {
 
-    def tryToXorT[A](block: => A): XorT[Future, String, A] = {
-      XorT.fromXor[Future](Xor.catchNonFatal(block).leftMap { t: Throwable =>
+    def tryToEitherT[A](block: => A): EitherT[Future, String, A] = {
+      EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
         Logger.error("Unable to store contribution metadata", t)
         "Unable to store contribution metadata"
       })
@@ -164,10 +164,10 @@ class PaypalService(
 
     val contributionDataToSave = for {
       payment <- asyncExecute(Payment.get(apiContext, paymentId))
-      transaction <- tryToXorT(payment.getTransactions.asScala.head)
-      contributionId <- tryToXorT(UUID.fromString(transaction.getCustom))
-      created <- tryToXorT(new DateTime(payment.getCreateTime))
-      payerInfo <- tryToXorT(payment.getPayer.getPayerInfo)
+      transaction <- tryToEitherT(payment.getTransactions.asScala.head)
+      contributionId <- tryToEitherT(UUID.fromString(transaction.getCustom))
+      created <- tryToEitherT(new DateTime(payment.getCreateTime))
+      payerInfo <- tryToEitherT(payment.getPayer.getPayerInfo)
     } yield {
       val metadata = ContributionMetaData(
         contributionId = ContributionId(contributionId),
@@ -232,7 +232,7 @@ class PaypalService(
     )
   }
 
-  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId]): XorT[Future, String, Contributor] = {
+  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId]): EitherT[Future, String, Contributor] = {
     val contributor = Contributor(
       email = email,
       contributorId = None,
@@ -257,7 +257,7 @@ class PaypalService(
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paypalHook: PaypalHook): XorT[Future, String, PaymentHook] = {
+  def processPaymentHook(paypalHook: PaypalHook): EitherT[Future, String, PaymentHook] = {
     contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 

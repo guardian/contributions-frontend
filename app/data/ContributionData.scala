@@ -3,7 +3,8 @@ package data
 import java.sql.Connection
 
 import anorm._
-import cats.data.{Xor, XorT}
+import cats.data.EitherT
+import cats.syntax.either._
 import data.AnormMappings._
 import models.{ContributionMetaData, Contributor, PaymentHook}
 import play.api.Logger
@@ -14,15 +15,15 @@ import scala.util.Try
 
 class ContributionData(db: Database)(implicit ec: ExecutionContext) {
 
-  def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A): XorT[Future, String, A] = XorT(Future {
+  def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(db.withConnection(autocommit)(block))
-    Xor.fromTry(result).leftMap { exception =>
+    Either.fromTry(result).leftMap { exception =>
       Logger.error("Error encountered during the execution of the sql query", exception)
       "Error encountered during the execution of the sql query"
     }
   })
 
-  def insertPaymentHook(paymentHook: PaymentHook): XorT[Future, String, PaymentHook] = {
+  def insertPaymentHook(paymentHook: PaymentHook): EitherT[Future, String, PaymentHook] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO payment_hooks(
@@ -61,7 +62,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
     }
   }
 
-  def insertPaymentMetaData(pmd: ContributionMetaData): XorT[Future, String, ContributionMetaData] = {
+  def insertPaymentMetaData(pmd: ContributionMetaData): EitherT[Future, String, ContributionMetaData] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO contribution_metadata(
@@ -100,7 +101,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
     }
   }
 
-  def saveContributor(contributor: Contributor): XorT[Future, String, Contributor] = {
+  def saveContributor(contributor: Contributor): EitherT[Future, String, Contributor] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       // Note that the contributor ID will only set on insert. it's not touched on update.
       val request = SQL"""

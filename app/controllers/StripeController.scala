@@ -4,7 +4,7 @@ import java.lang.Math._
 import java.time.Instant
 
 import actions.CommonActions._
-import cats.data.{Xor, XorT}
+import cats.data.EitherT
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.CountryGroup._
@@ -129,7 +129,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       stripe.Charge.create(amount, form.currency, form.email, "Your contribution", form.token, metadata)
     }
 
-    def storeMetaData(charge: Charge): XorT[Future, String, SavedContributionData] = {
+    def storeMetaData(charge: Charge): EitherT[Future, String, SavedContributionData] = {
       stripe.storeMetaData(
         contributionId = contributionId,
         charge = charge,
@@ -176,8 +176,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
         val stripeService = paymentServices.stripeServices(stripeHook.mode)
         stripeService.processPaymentHook(stripeHook)
           .value.map {
-          case Xor.Right(_) => Ok
-          case Xor.Left(_) => InternalServerError
+          case Right(_) => Ok
+          case Left(_) => InternalServerError
         }
       }
     }
