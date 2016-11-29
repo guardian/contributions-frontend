@@ -25,8 +25,13 @@
     data-country-group="@Json.stringify(Json.toJson(countryGroup))"
     data-max-amount="@maxAmount"
     data-csrf-token="@csrfToken.getOrElse("")"
-        @cmpCode.map(code => Html(s"""data-cmp-code="${code}""""))
-        @intCmpCode.map(code => Html(s"""data-int-cmp-code="${code}""""))>
+        @for(code <- cmpCode) {
+            data-cmp-code="@code"
+        }
+        @for(code <- intCmpCode) {
+            data-int-cmp-code="@code"
+        }
+    >
     </section>
 
 }
