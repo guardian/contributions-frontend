@@ -52,50 +52,34 @@
     FrontendAutoScalingGroup:
       Type: AWS::AutoScaling::AutoScalingGroup
       Properties:
-        AvailabilityZones:
-          Fn::GetAZs: ""
-        VPCZoneIdentifier:
-          Ref: Subnets
-        LaunchConfigurationName:
-          Ref: FrontendLaunchConfig
-        MinSize:
-          Fn::FindInMap: [ StageVariables, { Ref: Stage }, MinInstances ]
-        MaxSize:
-          Fn::FindInMap: [ StageVariables, { Ref: Stage }, MaxInstances ]
+        AvailabilityZones: !GetAZs
+        VPCZoneIdentifier: !Ref Subnets
+        LaunchConfigurationName: !Ref FrontendLaunchConfig
+        MinSize: !FindInMap [ StageVariables, !Ref Stage, MinInstances ]
+        MaxSize: !FindInMap [ StageVariables, !Ref Stage, MaxInstances ]
         LoadBalancerNames:
-          -
-            Ref: ContributionsFrontendElasticLoadBalancer
+          - !Ref ContributionsFrontendElasticLoadBalancer
         HealthCheckType: ELB
         HealthCheckGracePeriod: 300
         Tags:
-          -
-            Key: Stack
-            Value:
-              Ref: Stack
+          - Key: Stack
+            Value: !Ref Stack
             PropagateAtLaunch: true
-          -
-            Key: App
+          - Key: App
             Value: contributions-frontend
             PropagateAtLaunch: true
-          -
-            Key: Stage
-            Value:
-              Ref: Stage
+          - Key: Stage
+            Value: !Ref Stage
             PropagateAtLaunch: true
     FrontendLaunchConfig:
       Type: AWS::AutoScaling::LaunchConfiguration
       Properties:
-        ImageId:
-          Ref: ImageId
+        ImageId: !Ref ImageId
         SecurityGroups:
-          -
-            Ref: InstanceSecurityGroup
-        InstanceType:
-          Ref: InstanceType
-        KeyName:
-          Ref: KeyName
-        IamInstanceProfile:
-          Ref: ContributionsAppInstanceProfile
+          - !Ref InstanceSecurityGroup
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyName
+        IamInstanceProfile: !Ref ContributionsAppInstanceProfile
         AssociatePublicIpAddress: true
         UserData:
           Fn::Base64: !Sub |
@@ -123,59 +107,48 @@
         Path: "/"
         AssumeRolePolicyDocument:
           Statement:
-            -
-              Effect: Allow
+            - Effect: Allow
               Principal:
                 Service:
                   - ec2.amazonaws.com
               Action:
                 - sts:AssumeRole
         Policies:
-          -
-            PolicyName: PrivateBucket
+          - PolicyName: PrivateBucket
             PolicyDocument:
               Version: 2012-10-17
               Statement:
-                -
-                  Effect: Allow
+                - Effect: Allow
                   Action: s3:GetObject
                   Resource: arn:aws:s3:::contributions-private/*
-          -
-            PolicyName: PushMetrics
+          - PolicyName: PushMetrics
             PolicyDocument:
               Version: 2012-10-17
               Statement:
-                -
-                  Effect: Allow
+                - Effect: Allow
                   Action:
                     - cloudwatch:PutMetricData
                   Resource: '*'
-          -
-            PolicyName: PushLogs
+          - PolicyName: PushLogs
             PolicyDocument:
               Version: 2012-10-17
               Statement:
-                -
-                  Effect: Allow
+                - Effect: Allow
                   Action:
                     - logs:*
                   Resource:
                     - arn:aws:logs:*:*:*
-          -
-            PolicyName: SqsMessages
+          - PolicyName: SqsMessages
             PolicyDocument:
               Version: 2012-10-17
               Statement:
-                -
-                  Effect: Allow
+                - Effect: Allow
                   Action:
                     - sqs:GetQueueUrl
                     - sqs:SendMessage
                   Resource:
-                    -
-                      Ref: EmailSqsQueueArn
-          -
-            PolicyName: UpdateSSHKeys
+                    - !Ref EmailSqsQueueArn
+          - PolicyName: UpdateSSHKeys
             PolicyDocument:
               Version: 2012-10-17
               Statement:
@@ -187,25 +160,20 @@
       Properties:
         Path: "/"
         Roles:
-          -
-            Ref: ContributionsAppRole
+          - !Ref ContributionsAppRole
     ContributionsFrontendElasticLoadBalancer:
       Type: AWS::ElasticLoadBalancing::LoadBalancer
       Properties:
         Listeners:
-          -
-            LoadBalancerPort: 443
+          - LoadBalancerPort: 443
             InstancePort: 9000
             Protocol: HTTPS
-            SSLCertificateId:
-              Ref: ELBSSLCertificate
+            SSLCertificateId: !Ref ELBSSLCertificate
             PolicyNames:
               - CookieBasedPolicy
         SecurityGroups:
-          -
-            Ref: LoadBalancerSecurityGroup
-        Subnets:
-          Ref: Subnets
+          - !Ref LoadBalancerSecurityGroup
+        Subnets: !Ref Subnets
         HealthCheck:
           Target: HTTP:9000/healthcheck
           HealthyThreshold: 2
@@ -216,41 +184,32 @@
           Enabled: true
           Timeout: 60
         LBCookieStickinessPolicy:
-          -
-            CookieExpirationPeriod: 1800
+          - CookieExpirationPeriod: 1800
             PolicyName: CookieBasedPolicy
     LoadBalancerSecurityGroup:
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: Permit incoming HTTP access on port 80, egress to port 9000
-        VpcId:
-          Ref: VpcId
+        VpcId: !Ref VpcId
         SecurityGroupIngress:
-          -
-            IpProtocol: tcp
+          - IpProtocol: tcp
             FromPort: 80
             ToPort: 80
-            CidrIp:
-              Ref: AllowedIngressIps
-          -
-            IpProtocol: tcp
+            CidrIp: !Ref AllowedIngressIps
+          - IpProtocol: tcp
             FromPort: 443
             ToPort: 443
-            CidrIp:
-              Ref: AllowedIngressIps
-          -
-            IpProtocol: tcp
+            CidrIp: !Ref AllowedIngressIps
+          - IpProtocol: tcp
             FromPort: 80
             ToPort: 80
             CidrIp: 80.254.158.92/32
-          -
-            IpProtocol: tcp
+          - IpProtocol: tcp
             FromPort: 80
             ToPort: 80
             CidrIp: 80.254.146.68/32
         SecurityGroupEgress:
-          -
-            IpProtocol: tcp
+          - IpProtocol: tcp
             FromPort: 9000
             ToPort: 9000
             CidrIp: 0.0.0.0/0
@@ -258,22 +217,17 @@
       Type: AWS::EC2::SecurityGroup
       Properties:
         GroupDescription: Open up SSH access and enable HTTP access on the configured port
-        VpcId:
-          Ref: VpcId
+        VpcId: !Ref VpcId
         SecurityGroupIngress:
-          -
-            IpProtocol: tcp
+          - IpProtocol: tcp
             FromPort: 22
             ToPort: 22
             CidrIp: 77.91.248.0/21
-          -
-            IpProtocol: tcp
+          - IpProtocol: tcp
             FromPort: 9000
             ToPort: 9000
             CidrIp: 77.91.248.0/21
-          -
-            IpProtocol: tcp
+          - IpProtocol: tcp
             FromPort: 9000
             ToPort: 9000
-            SourceSecurityGroupId:
-              Ref: LoadBalancerSecurityGroup
+            SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
