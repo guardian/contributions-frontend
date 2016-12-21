@@ -1,0 +1,20 @@
+stacks: [membership]
+regions: [eu-west-1]
+deployments:
+  cfn:
+    type: cloud-formation
+    app: contributions-frontend
+    parameters:
+      prependStackToCloudFormationStackName: false
+      cloudFormationStackName: contributions-frontend
+  contributions-frontend-ami:
+    type: ami-cloudformation-parameter
+    app: contributions-frontend
+    parameters:
+      amiTags:
+        Recipe: xenial-membership
+        AmigoStage: PROD
+    dependencies: [cfn]
+  contributions-frontend:
+    type: autoscaling
+    dependencies: [cfn, contributions-frontend-ami]
