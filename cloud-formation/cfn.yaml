@@ -31,7 +31,7 @@
     InstanceType:
       Description: EC2 instance type
       Type: String
-    ImageId:
+    AMI:
       Description: AMI ID
       Type: String
     ELBSSLCertificate:
@@ -74,7 +74,7 @@
     FrontendLaunchConfig:
       Type: AWS::AutoScaling::LaunchConfiguration
       Properties:
-        ImageId: !Ref ImageId
+        ImageId: !Ref AMI
         SecurityGroups:
           - !Ref InstanceSecurityGroup
         InstanceType: !Ref InstanceType
