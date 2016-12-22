@@ -85,7 +85,7 @@ packageDescription := """take financial contributions"""
 riffRaffPackageType := (packageBin in Debian).value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffArtifactResources += (file("cloud-formation/cfn.yml"), "packages/cfn/cloud-formation/cfn.yml")
+riffRaffArtifactResources += (file("cloud-formation/cfn.yaml"), "cfn/cfn.yaml")
 
 javaOptions in Universal ++= Seq(
     "-Dpidfile.path=/dev/null",
