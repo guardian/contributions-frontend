@@ -35,20 +35,19 @@ export function init() {
 
 
 function autoFill() {
-    let IDENTITY_API = 'https://idapi.theguardian.com/user/me/';
+    let IDENTITY_API = '/user/autofill';
     fetch(IDENTITY_API, {
         method: 'get',
-        credentials: 'include',
-        mode: 'cors'
+        credentials: 'include'
     }).then(resp => {
         return resp.json();
     }).then(json => {
-        if (json.user) {
+        if (json.email || json.name) {
             store.dispatch({
                 type: AUTOFILL,
                 details: {
-                    name: json.user.publicFields.displayName,
-                    email: json.user.primaryEmailAddress
+                    name: json.name,
+                    email: json.email
                 }
             });
         }

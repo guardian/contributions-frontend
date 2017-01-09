@@ -64,6 +64,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val assetController = wire[Assets]
   lazy val paypalController = wire[PaypalController]
   lazy val stripeController = new StripeController(paymentServices, stripeConfig)
+  lazy val userController = wire[UserController]
 
   override lazy val httpErrorHandler =
     new monitoring.ErrorHandler(identityAuthProvider, environment, configuration, sourceMapper, Some(router))
