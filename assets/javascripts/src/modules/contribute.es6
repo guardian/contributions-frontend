@@ -35,8 +35,7 @@ export function init() {
 
 
 function autoFill() {
-    let IDENTITY_API = '/user/autofill';
-    fetch(IDENTITY_API, {
+    fetch('/user/autofill', {
         method: 'get',
         credentials: 'include'
     }).then(resp => {
