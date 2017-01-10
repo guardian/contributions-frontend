@@ -31,5 +31,7 @@ GET            /:countryGroup                   controllers.Giraffe.contribute(c
 GET            /:countryGroup/thank-you         controllers.Giraffe.thanks(countryGroup: CountryGroup)
 GET            /:countryGroup/post-payment      controllers.Giraffe.postPayment(countryGroup: CountryGroup)
 
+GET            /user/autofill                   controllers.UserController.autofill
+
 
 
