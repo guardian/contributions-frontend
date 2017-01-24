@@ -5,6 +5,8 @@ import { urls } from 'src/constants';
 import * as stripe from 'src/modules/stripe';
 import { trackCheckout, trackPayment } from 'src/modules/analytics/ga';
 
+import {showCheckout} from 'src/modules/stripeCheckout'
+
 export const SET_DATA = "SET_DATA";
 export const SET_COUNTRY_GROUP = "SET_COUNTRY_GROUP";
 
@@ -14,6 +16,8 @@ export const SET_AMOUNT = "SET_AMOUNT";
 export const UPDATE_DETAILS = "UPDATE_DETAILS";
 export const UPDATE_CARD = "UPDATE_CARD";
 
+export const OPEN_STRIPE = "OPEN_STRIPE";
+export const CLOSE_STRIPE = "CLOSE_STRIPE";
 export const SUBMIT_PAYMENT = "SUBMIT_PAYMENT";
 export const PAYMENT_COMPLETE = "PAYMENT_COMPLETE";
 export const PAYMENT_ERROR = "PAYMENT_ERROR";
@@ -28,6 +32,48 @@ export const GA_ENABLED = "GA_ENABLED";
 
 export const AUTOFILL = "AUTOFILL";
 
+export function openStripeCheckout(dispatch) {
+    const state = store.getState();
+    console.log('is this thing on');
+    let hide = () => {
+        dispatch({type:CLOSE_STRIPE});
+    };
+    let process = (token) => {
+        let data = paymentFormData(state, token.id);
+        console.log('testy');
+        console.log(state);
+        fetch(urls.pay, {
+            credentials: 'same-origin',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json() // response: Response
+            .then(json => {
+                return { response: response, json: json }
+            }))
+            .then((response) => {
+                if (response.response.ok)
+                    return trackPayment(state.card.amount, state.data.currency.code).then(() => response);
+                else
+                    return response;
+            })
+            .then(response => {
+                if (response.response.ok) {
+                    dispatch({ type: PAYMENT_COMPLETE, response: response.json })
+                }
+                else{
+                    dispatch({ type: PAYMENT_ERROR, kind: 'card', error: response.json })
+                }
+            })
+            .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'network', error: error }));
+    };
+    showCheckout(process,hide, state.details.email,state.card.amount,state.data.currency.code);
+    dispatch({type: OPEN_STRIPE});
+
+
+}
+
 export function submitPayment(dispatch) {
     const state = store.getState();
 
@@ -41,9 +87,10 @@ export function submitPayment(dispatch) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         }))
-        .then(response => response.json().then(json => {
-            return { response: response, json: json }
-        }))
+        .then(response => response.json() // response: Response
+            .then(json => {
+                return { response: response, json: json }
+            }))
         .then((response) => {
             if (response.response.ok)
                 return trackPayment(state.card.amount, state.data.currency.code).then(() => response);

@@ -1,4 +1,4 @@
-import { GO_BACK, GO_FORWARD, SUBMIT_PAYMENT, PAYMENT_COMPLETE, PAYMENT_ERROR, PAYPAL_PAY, CARD_PAY, JUMP_TO_PAGE, UPDATE_DETAILS, CLEAR_PAYMENT_FLAGS } from 'src/actions';
+import { GO_BACK, GO_FORWARD, SUBMIT_PAYMENT, OPEN_STRIPE, CLOSE_STRIPE, PAYMENT_COMPLETE, PAYMENT_ERROR, PAYPAL_PAY, CARD_PAY, JUMP_TO_PAGE, UPDATE_DETAILS, CLEAR_PAYMENT_FLAGS } from 'src/actions';
 import { PAGES } from 'src/constants';
 
 const initialState = {
@@ -23,8 +23,14 @@ export default function pageReducer(state = initialState, action) {
             else return Object.assign({}, state, { page: action.page, paymentError: { show: false } });
 
         case GO_FORWARD:
-            if (state.page === PAGES.PAYMENT) return state;
+            if (state.page === PAGES.DETAILS) return state;
             else return Object.assign({}, state, { page: state.page + 1, paymentError: { show: false } });
+
+        case OPEN_STRIPE:
+            return Object.assign({}, state, { processing: true, paymentError: { show: false } });
+
+        case CLOSE_STRIPE:
+            return Object.assign({}, state, { processing: false, paymentError: { show: false } });
 
         case SUBMIT_PAYMENT:
             return Object.assign({}, state, { processing: true, paymentError: { show: false } });

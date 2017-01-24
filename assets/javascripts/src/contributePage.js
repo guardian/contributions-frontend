@@ -3,6 +3,7 @@ require([
     'src/modules/analytics/ga',
     'src/modules/contribute',
     'src/modules/stripe',
+    'src/modules/stripeCheckout',
     'src/modules/dropdown',
     'src/modules/identityPopup',
     'src/modules/identityPopupDetails',
@@ -13,6 +14,7 @@ require([
     ga,
     contribute,
     stripe,
+    stripeCheckout,
     dropdown,
     identityPopup,
     identityPopupDetails,
@@ -26,6 +28,7 @@ require([
     });
     contribute.init();
     stripe.init();
+    stripeCheckout.init();
 
     dropdown.init();
     identityPopup.init();

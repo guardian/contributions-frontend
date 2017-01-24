@@ -21,8 +21,8 @@ export default class Navigation extends React.Component {
         const isFirstPage = !processing && this.props.page === PAGES.CONTRIBUTION;
         const showMobileBack = !processing && this.props.page == PAGES.PAYMENT;
         const showBack = !processing && this.props.page !== PAGES.CONTRIBUTION;
-        const showPay = !processing && !!this.props.amount && this.props.page === PAGES.PAYMENT;
-        const showNext = !processing && this.props.page == PAGES.DETAILS;
+        const showPay = !processing && !!this.props.amount && this.props.page === PAGES.DETAILS;
+        const showNext = false && !processing && this.props.page == PAGES.DETAILS;
         const classes = {
             nav: () => {'contribute-navigation ' + this.classNameFor(this.props.page)},
             desktop: {
@@ -34,7 +34,6 @@ export default class Navigation extends React.Component {
             ccnext: 'contribute-navigation__button action action--button contribute-navigation__next action--next contribute_card__button',
             paypal: 'contribute-navigation__button action action--button  paypal__button'
         };
-        const amount = this.props.currency.prefix + this.props.currency.symbol + this.props.amount;
 
         return <div className={classes.nav()}>
             {showBack && <Back type="button"
@@ -45,12 +44,12 @@ export default class Navigation extends React.Component {
             <Forward className={classes.desktop.next}>Next</Forward>
             }
             {showPay && <Forward className={classes.pay}
-                                 onClick={this.props.payWithCard}>Pay {amount}</Forward>
+                                 onClick={this.props.payWithCard}>Pay {this.props.currency.prefix}{this.props.currency.symbol}{this.props.amount}</Forward>
             }
             {showMobileBack && <Back className={classes.mobile.back}
                                      onClick={this.props.jumpToFirstPage}>Back</Back>
             }
-            {isFirstPage && <Forward className={classes.cc}
+            {isFirstPage && <Forward className={classes.ccnext}
                                        onClick={this.props.clearPaymentFlags}
                                               >{"Contribute with debit/credit card"}</Forward>
             }

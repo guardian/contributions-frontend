@@ -9,9 +9,12 @@ import {
     UPDATE_CARD,
     SET_AMOUNT,
     JUMP_TO_PAGE,
+    OPEN_STRIPE,
+    CLOSE_STRIPE,
     PAYPAL_PAY,
     CARD_PAY,
     CLEAR_PAYMENT_FLAGS,
+    openStripeCheckout,
     paypalRedirect,
     submitPayment,
     trackCheckoutStep
@@ -45,6 +48,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
+    console.log('hey',openStripeCheckout);
     return {
         goBack: () => dispatch({ type: GO_BACK }),
         goForward: () => dispatch({ type: GO_FORWARD }),
@@ -58,9 +62,11 @@ function mapDispatchToProps(dispatch) {
             dispatch({ type: UPDATE_DETAILS, details: d })
         },
         updateCard: c => dispatch({ type: UPDATE_CARD, card: c }),
+        openStripe: () => {dispatch()},
+        //closeStripe: () => {dispatch({type: CLOSE_STRIPE})},
         pay: () => {
             dispatch(trackCheckoutStep(3, 'checkout', 'Pay with Stripe'));
-            dispatch(submitPayment)
+            dispatch(openStripeCheckout)
         },
         payWithPaypal: () => {
             dispatch(trackCheckoutStep(3, 'checkout', 'Pay with Paypal'));
@@ -98,7 +104,7 @@ class Main extends React.Component {
 
     submit(event) {
         event.preventDefault(); // we never want the standard submit behaviour, which triggers a reload
-
+//TODO: where does stripe checkout live here???
         if (!event.target.checkValidity()) return;
 
         if (this.props.paypalPay) {
