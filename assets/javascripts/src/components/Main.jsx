@@ -39,6 +39,7 @@ function mapStateToProps(state) {
         card: state.card,
         currency: state.data.currency,
         maxAmount: state.data.maxAmount,
+        stripeCheckout: state.data.stripeCheckout,
         paypalPay: state.page.paypalPay,
         cardPay: state.page.cardPay,
         paymentError: state.page.paymentError,
@@ -65,6 +66,10 @@ function mapDispatchToProps(dispatch) {
         openStripe: () => {dispatch()},
         //closeStripe: () => {dispatch({type: CLOSE_STRIPE})},
         pay: () => {
+            dispatch(trackCheckoutStep(3, 'checkout', 'Pay with Stripe'));
+            dispatch(submitPayment)
+        },
+        payWithStripe: () => {
             dispatch(trackCheckoutStep(3, 'checkout', 'Pay with Stripe'));
             dispatch(openStripeCheckout)
         },
@@ -113,7 +118,11 @@ class Main extends React.Component {
 
         else {
             if (this.props.cardPay) {
-                this.props.pay();
+                if(this.props.stripeCheckout){
+                    this.props.payWithStripe()
+                } else {
+                    this.props.pay();
+                }
             } else {
                 this.props.goForward();
             }

@@ -21,8 +21,8 @@ export default class Navigation extends React.Component {
         const isFirstPage = !processing && this.props.page === PAGES.CONTRIBUTION;
         const showMobileBack = !processing && this.props.page == PAGES.PAYMENT;
         const showBack = !processing && this.props.page !== PAGES.CONTRIBUTION;
-        const showPay = !processing && !!this.props.amount && this.props.page === PAGES.DETAILS;
-        const showNext = false && !processing && this.props.page == PAGES.DETAILS;
+        const showPay = !processing && !!this.props.amount && this.props.page === (this.props.stripeCheckout?PAGES.DETAILS:PAGES.PAYMENT);
+        const showNext = (!this.props.stripeCheckout) && !processing && this.props.page == PAGES.DETAILS;
         const classes = {
             nav: () => {'contribute-navigation ' + this.classNameFor(this.props.page)},
             desktop: {

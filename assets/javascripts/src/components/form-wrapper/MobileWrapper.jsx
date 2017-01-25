@@ -40,6 +40,7 @@ export default class MobileWrapper extends React.Component {
                         jumpToFirstPage={this.props.jumpToFirstPage}
                         mobile={true}
                         clearPaymentFlags={this.props.clearPaymentFlags}
+                        stripeCheckout={this.props.stripeCheckout}
                     />
 
                     {!this.props.processing  && p== PAGES.CONTRIBUTION && <LegalNotice countryGroup={this.props.countryGroup}/>}

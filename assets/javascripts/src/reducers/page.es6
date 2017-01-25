@@ -23,7 +23,7 @@ export default function pageReducer(state = initialState, action) {
             else return Object.assign({}, state, { page: action.page, paymentError: { show: false } });
 
         case GO_FORWARD:
-            if (state.page === PAGES.DETAILS) return state;
+            if (state.page === PAGES.PAYMENT) return state; //this would be safer as details post stripe ab test
             else return Object.assign({}, state, { page: state.page + 1, paymentError: { show: false } });
 
         case OPEN_STRIPE:
