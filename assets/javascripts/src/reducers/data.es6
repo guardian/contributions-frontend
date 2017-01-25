@@ -3,7 +3,7 @@ import { SET_DATA, SET_COUNTRY_GROUP, SUBMIT_PAYMENT } from 'src/actions';
 import * as ophan from 'src/modules/analytics/ophan';
 
 const initialState = {
-    stripeCheckout: false,
+    stripeCheckout: true,
     abTests: [],
     maxAmount: Infinity,
     countryGroup: {},

@@ -39,9 +39,8 @@ export function openStripeCheckout(dispatch) {
         dispatch({type:CLOSE_STRIPE});
     };
     let process = (token) => {
+        dispatch({ type: SUBMIT_PAYMENT });
         let data = paymentFormData(state, token.id);
-        console.log('testy');
-        console.log(state);
         fetch(urls.pay, {
             credentials: 'same-origin',
             method: 'POST',
