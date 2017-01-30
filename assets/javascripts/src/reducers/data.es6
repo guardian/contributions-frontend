@@ -14,6 +14,8 @@ const initialState = {
     },
     cmpCode: '',
     intCmpCode: '',
+    refererPageviewId: '',
+    refererUrl: '',
     ophan: {
         pageviewId: null,
         browserId: null

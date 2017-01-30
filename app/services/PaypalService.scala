@@ -77,6 +77,8 @@ class PaypalService(
     contributionId: ContributionId,
     cmp: Option[String],
     intCmp: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
   ): EitherT[Future, String, Uri] = {
@@ -88,7 +90,9 @@ class PaypalService(
           cmp.map(value => s"CMP=$value"),
           intCmp.map(value => s"INTCMP=$value"),
           ophanPageviewId.map(value => s"pvid=$value"),
-          ophanBrowserId.map(value => s"bid=$value")
+          ophanBrowserId.map(value => s"bid=$value"),
+          refererPageviewId.map(value => s"refererPageviewId=$value"),
+          refererUrl.map(value => s"refererUrl=$value")
         ).flatten match {
           case Nil => ""
           case params => params.mkString("?", "&", "")
@@ -150,6 +154,8 @@ class PaypalService(
     variants: Seq[Variant],
     cmp: Option[String],
     intCmp: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
@@ -178,7 +184,9 @@ class PaypalService(
         ophanBrowserId = ophanBrowserId,
         abTests = Json.toJson(variants),
         cmp = cmp,
-        intCmp = intCmp
+        intCmp = intCmp,
+        refererPageviewId =refererPageviewId,
+        refererUrl = refererUrl
       )
 
       val postCode = {

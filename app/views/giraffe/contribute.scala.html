@@ -12,6 +12,8 @@
     variant: Variant,
     cmpCode: Option[String],
     intCmpCode: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String],
     creditCardExpiryYears: List[Int],
     errorMessage: Option[String],
     csrfToken: Option[String]
@@ -31,6 +33,13 @@
         @for(code <- intCmpCode) {
             data-int-cmp-code="@code"
         }
+        @for(refId <- refererPageviewId) {
+            data-referrer-pageview-id="@refId"
+        }
+        @for(refUrl <- refererUrl) {
+            data-referrer-url="@refUrl"
+        }
+
     >
     </section>
 

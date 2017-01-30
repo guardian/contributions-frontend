@@ -74,7 +74,9 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           ophan_browser_id,
           abtests,
           cmp,
-          intcmp
+          intcmp,
+          referer_url,
+          referer_pageview_id
         ) VALUES (
           ${pmd.contributionId.id}::uuid,
           ${pmd.created},
@@ -84,7 +86,9 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           ${pmd.ophanBrowserId},
           ${pmd.abTests},
           ${pmd.cmp},
-          ${pmd.intCmp}
+          ${pmd.intCmp},
+          ${pmd.refererUrl},
+          ${pmd.refererPageviewId}
         ) ON CONFLICT(contributionId) DO
         UPDATE SET
           contributionid = excluded.contributionid,
@@ -95,7 +99,9 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
           ophan_browser_id = excluded.ophan_browser_id,
           abtests = excluded.abtests,
           cmp = excluded.cmp,
-          intcmp = excluded.intcmp"""
+          intcmp = excluded.intcmp,
+          referer_url = excluded.referer_url,
+          referer_pageview_id = excluded.referer_pageview_id"""
       request.execute()
       pmd
     }

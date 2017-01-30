@@ -60,7 +60,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
     cmp: Option[String],
-    intcmp: Option[String]
+    intcmp: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String]
 
   )
 
@@ -82,7 +84,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       "ophanPageviewId" -> text,
       "ophanBrowserId" -> optional(text),
       "cmp" -> optional(text),
-      "intcmp" -> optional(text)
+      "intcmp" -> optional(text),
+      "refererPageviewId" -> optional(text),
+      "refererUrl" -> optional(text)
     )(SupportForm.apply)(SupportForm.unapply)
   )
 
@@ -113,6 +117,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       "ophanBrowserId" -> form.ophanBrowserId.getOrElse(""),
       "cmp" -> form.cmp.mkString,
       "intcmp" -> form.intcmp.mkString,
+      "refererPageviewId" -> form.refererPageviewId.mkString,
+      "refererUrl" -> form.refererUrl.mkString,
       "contributionId" -> contributionId.toString
     ) ++ List(
       form.postcode.map("postcode" -> _),
@@ -140,6 +146,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
         variants = Seq(variant),
         cmp = form.cmp,
         intCmp = form.intcmp,
+        refererPageviewId = form.refererPageviewId,
+        refererUrl = form.refererUrl,
         ophanPageviewId = form.ophanPageviewId,
         ophanBrowserId = form.ophanBrowserId,
         idUser = idUser

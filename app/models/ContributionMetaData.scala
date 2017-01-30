@@ -12,5 +12,7 @@ case class ContributionMetaData(
   ophanBrowserId: Option[String],
   abTests: JsValue,
   cmp: Option[String],
-  intCmp: Option[String]
+  intCmp: Option[String],
+  refererPageviewId: Option[String],
+  refererUrl: Option[String]
 )
