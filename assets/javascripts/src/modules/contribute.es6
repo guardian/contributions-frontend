@@ -69,6 +69,8 @@ function appDataFrom(container) {
         currency: currency,
         cmpCode: container.getAttribute('data-cmp-code'),
         intCmpCode: container.getAttribute('data-int-cmp-code'),
+        refererPageviewId: container.getAttribute('data-referrer-pageview-id'),
+        refererUrl: container.getAttribute('data-referrer-url'),
         csrfToken: container.getAttribute('data-csrf-token')
     };
 }

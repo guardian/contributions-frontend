@@ -66,6 +66,8 @@ export function paypalRedirect(dispatch) {
         amount: state.card.amount, //TODO should the amount be somewhere else rather than in the card section?,
         cmp: state.data.cmpCode,
         intCmp: state.data.intCmpCode,
+        refererPageviewId: state.data.refererPageviewId,
+        refererUrl: state.data.refererUrl,
         ophanPageviewId: state.data.ophan.pageviewId,
         ophanBrowserId: state.data.ophan.browserId
     };
@@ -126,6 +128,8 @@ function paymentFormData(state, token) {
         ophanPageviewId: state.data.ophan.pageviewId,
         ophanBrowserId: state.data.ophan.browserId,
         cmp: state.data.cmpCode,
-        intcmp: state.data.intCmpCode
+        intcmp: state.data.intCmpCode,
+        refererPageviewId: state.data.refererPageviewId,
+        refererUrl: state.data.refererUrl
     };
 }

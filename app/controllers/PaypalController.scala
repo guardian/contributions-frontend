@@ -39,6 +39,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     payerId: String,
     cmp: Option[String],
     intCmp: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
   ) = NoCacheAction.async { implicit request =>
@@ -50,7 +52,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
       val idUser = IdentityId.fromRequest(request)
 
-      paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, ophanPageviewId, ophanBrowserId, idUser)
+      paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, refererPageviewId, refererUrl, ophanPageviewId, ophanBrowserId, idUser)
         .leftMap[AppError](StoreMetaDataError) // not necessary if storeMetaData() returns a custom error type
         .map(data => (payment, data))
     }
@@ -81,6 +83,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     amount: BigDecimal,
     cmp: Option[String],
     intCmp: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
   )
@@ -91,6 +95,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         (__ \ "amount").read(min[BigDecimal](1)) and
         (__ \ "cmp").readNullable[String] and
         (__ \ "intCmp").readNullable[String] and
+        (__ \ "refererPageviewId").readNullable[String] and
+        (__ \ "refererUrl").readNullable[String] and
         (__ \ "ophanPageviewId").readNullable[String] and
         (__ \ "ophanBrowserId").readNullable[String]
       ) (AuthRequest.apply _)
@@ -125,6 +131,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
             contributionId = ContributionId.random,
             cmp = authRequest.cmp,
             intCmp = authRequest.intCmp,
+            refererPageviewId = authRequest.refererPageviewId,
+            refererUrl = authRequest.refererUrl,
             ophanPageviewId = authRequest.ophanPageviewId,
             ophanBrowserId = authRequest.ophanBrowserId
           )

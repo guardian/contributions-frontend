@@ -59,6 +59,8 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
       val stripe = paymentServices.stripeServiceFor(request)
       val cmp = request.getQueryString("CMP")
       val intCmp = request.getQueryString("INTCMP")
+      val refererPageviewId = request.getQueryString("REFPVID")
+      val refererUrl = request.headers.get("referer")
 
       val pageInfo = PageInfo(
         title = "Support the Guardian | Contribute today",
@@ -75,7 +77,7 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
       val testsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix)) map (_.name)
 
       Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp,
-        creditCardExpiryYears, errorMessage, CSRF.getToken.map(_.value)))
+        refererPageviewId, refererUrl, creditCardExpiryYears, errorMessage, CSRF.getToken.map(_.value)))
         .discardingCookies(testsInCookies.toSeq map (DiscardingCookie(_)): _*)
         .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
     }

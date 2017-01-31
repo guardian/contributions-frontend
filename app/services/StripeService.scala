@@ -33,6 +33,8 @@ class StripeService(
     variants: Seq[Variant],
     cmp: Option[String],
     intCmp: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String],
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
@@ -60,7 +62,9 @@ class StripeService(
       ophanBrowserId = ophanBrowserId,
       abTests = Json.toJson(variants),
       cmp = cmp,
-      intCmp = intCmp
+      intCmp = intCmp,
+      refererPageviewId = refererPageviewId,
+      refererUrl = refererUrl
     )
     val contributor = Contributor(
       email = charge.receipt_email,
