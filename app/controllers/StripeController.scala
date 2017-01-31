@@ -24,7 +24,6 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import utils.MaxAmount
-import views.support.Test
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -90,7 +89,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     )(SupportForm.apply)(SupportForm.unapply)
   )
 
-  def pay = NoCacheAction.async(parse.form(supportForm)) { implicit request =>
+  def pay = (NoCacheAction andThen ABTestAction).async(parse.form(supportForm)) { implicit request =>
 
     val form = request.body
 
@@ -104,15 +103,13 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       case _ => UK
     }
 
-    val variant = Test.getContributePageVariant(countryGroup, Test.testIdFor(request), request)
-
     val contributionId = ContributionId.random
 
     val metadata = Map(
       "marketing-opt-in" -> form.marketing.toString,
       "email" -> form.email,
       "name" -> form.name,
-      "abTests" -> Json.toJson(Seq(variant)).toString,
+      "abTests" -> Json.toJson(request.testAllocations).toString,
       "ophanPageviewId" -> form.ophanPageviewId,
       "ophanBrowserId" -> form.ophanBrowserId.getOrElse(""),
       "cmp" -> form.cmp.mkString,
@@ -143,7 +140,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
         name = form.name,
         postCode = form.postcode,
         marketing = form.marketing,
-        variants = Seq(variant),
+        testAllocations = request.testAllocations,
         cmp = form.cmp,
         intCmp = form.intcmp,
         refererPageviewId = form.refererPageviewId,

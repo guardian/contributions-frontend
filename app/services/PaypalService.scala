@@ -2,6 +2,7 @@ package services
 
 import java.util.UUID
 
+import abtests.Allocation
 import cats.data.EitherT
 import cats.implicits._
 import com.gu.i18n.CountryGroup
@@ -9,16 +10,14 @@ import com.netaporter.uri.Uri
 import com.paypal.api.payments._
 import com.paypal.base.Constants
 import com.paypal.base.rest.APIContext
-
-import scala.collection.JavaConverters._
 import com.typesafe.config.Config
 import data.ContributionData
 import models._
 import org.joda.time.DateTime
 import play.api.Logger
 import play.api.libs.json.Json
-import views.support.Variant
 
+import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
@@ -151,7 +150,7 @@ class PaypalService(
 
   def storeMetaData(
     paymentId: String,
-    variants: Seq[Variant],
+    testAllocations: Set[Allocation],
     cmp: Option[String],
     intCmp: Option[String],
     refererPageviewId: Option[String],
@@ -182,7 +181,7 @@ class PaypalService(
         country = Option(payerInfo.getCountryCode),
         ophanPageviewId = ophanPageviewId,
         ophanBrowserId = ophanBrowserId,
-        abTests = Json.toJson(variants),
+        abTests = Json.toJson(testAllocations),
         cmp = cmp,
         intCmp = intCmp,
         refererPageviewId =refererPageviewId,

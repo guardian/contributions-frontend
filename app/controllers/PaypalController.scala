@@ -15,7 +15,6 @@ import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import play.api.Logger
 import play.api.data.Form
-import views.support.Test
 import utils.MaxAmount
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -43,16 +42,15 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
-  ) = NoCacheAction.async { implicit request =>
+  ) = (NoCacheAction andThen ABTestAction).async { implicit request =>
 
     val paypalService = paymentServices.paypalServiceFor(request)
 
     def storeMetaData(payment: Payment): EitherT[Future, AppError, (Payment, SavedContributionData)] = {
-      val mvtId = Test.testIdFor(request)
-      val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
       val idUser = IdentityId.fromRequest(request)
 
-      paypalService.storeMetaData(paymentId, Seq(variant), cmp, intCmp, refererPageviewId, refererUrl, ophanPageviewId, ophanBrowserId, idUser)
+
+      paypalService.storeMetaData(paymentId, request.testAllocations, cmp, intCmp, refererPageviewId, refererUrl, ophanPageviewId, ophanBrowserId, idUser)
         .leftMap[AppError](StoreMetaDataError) // not necessary if storeMetaData() returns a custom error type
         .map(data => (payment, data))
     }

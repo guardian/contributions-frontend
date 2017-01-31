@@ -9,7 +9,6 @@ export function init() {
     const state = store.getState();
 
     registerTestsWithOphan(state.data.abTests, false);
-    completeAARecurringTestIfApplicable(state.data.abTests);
 
     // only set the amount from the A/B test if it isn't already set
     // this prevents the A/B test overriding the preset amount (query param) functionality)
@@ -19,14 +18,12 @@ export function init() {
 }
 
 function registerTestsWithOphan(tests, complete) {
-    const data = {};
-
-    for (var test of tests) {
-        data[test.testSlug] = {
+    const data = tests && tests.reduce((obj, test) => {
+        obj[test.testSlug] = {
             'variantName': test.variantSlug,
             'complete': String(complete)
         }
-    }
+    }, {}) || {};
 
     ophan.loaded.then(function (ophan) {
         ophan.record({
@@ -39,26 +36,8 @@ function registerTestWithOphan(test, complete) {
     registerTestsWithOphan([test], complete)
 }
 
-/**
- * If the tests contains the AA recurring test, its complete flag is set to true in Ophan, and an event is sent to GA.
- * The aim of this is to check that the two methods of tracking the test reconcile.
- *
- * @param tests an array of tests
- */
-function completeAARecurringTestIfApplicable(tests) {
-    // only one variant name to check
-    const targetTest = tests.find(test =>
-        (test.testName == 'AARecurringTest') && (test.variantName == 'default')
-    );
-
-    if (targetTest !== undefined) {
-        registerTestWithOphan(targetTest, true);
-        GA.waitForGA().then(_ => GA.event('Test', 'NoAction', 'AARecurringTest'));
-    }
-}
-
 function testFor(tests, testName) {
-    return tests.find(t => t.testName == testName);
+    return tests && tests.find(t => t.testName == testName);
 }
 
 function testDataFor(tests, testName) {

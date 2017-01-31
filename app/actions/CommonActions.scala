@@ -1,10 +1,12 @@
 package actions
 
+import abtests.Test
 import controllers.{Cached, NoCache}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Random
 
 object CommonActions {
 
@@ -24,6 +26,22 @@ object CommonActions {
         action.apply(request)
       } else {
         Future.successful(Results.Forbidden)
+      }
+    }
+  }
+
+  case class ABTestRequest[A](testId: Int, request: Request[A]) extends WrappedRequest(request) {
+    val testAllocations = Test.allocations(testId)
+  }
+
+  object ABTestAction extends ActionBuilder[ABTestRequest] {
+    override def invokeBlock[A](request: Request[A], block: (ABTestRequest[A]) => Future[Result]): Future[Result] = {
+      val idFromCookie: Option[Int] = request.cookies.get(Test.testIdCookieName).map(_.value.toInt)
+      val testId: Int = idFromCookie.getOrElse(Random.nextInt(Test.maxTestId))
+
+      block(ABTestRequest(testId, request)).map { result =>
+        if (idFromCookie.isEmpty) result.withCookies(Test.idCookie(testId))
+        else result
       }
     }
   }
