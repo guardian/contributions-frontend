@@ -129,7 +129,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(form.currency) * 100
     val amount = min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit)
 
-    val redirect = routes.Giraffe.thanks(countryGroup).url
+    val redirect = routes.Contributions.thanks(countryGroup).url
 
     def createCharge: Future[Stripe.Charge] = {
       stripe.Charge.create(amount, form.currency, form.email, "Your contribution", form.token, metadata)

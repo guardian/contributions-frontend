@@ -15,7 +15,7 @@ import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
 
-class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
+class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),
@@ -30,10 +30,10 @@ class Giraffe(paymentServices: PaymentServices, addToken: CSRFAddToken) extends 
       case None => UK
     }
 
-    redirectWithQueryParams(routes.Giraffe.contribute(countryGroup).url)
+    redirectWithQueryParams(routes.Contributions.contribute(countryGroup).url)
   }
 
-  def redirectToUk = NoCacheAction { implicit request => redirectWithQueryParams(routes.Giraffe.contribute(UK).url) }
+  def redirectToUk = NoCacheAction { implicit request => redirectWithQueryParams(routes.Contributions.contribute(UK).url) }
 
   private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) = redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight"))
 

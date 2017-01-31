@@ -61,13 +61,13 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       case PaypalPaymentError(message) =>
         handleError(countryGroup, s"Error executing PayPal payment: $message")
       case _ =>
-        val thanksUrl = routes.Giraffe.thanks(countryGroup).url
+        val thanksUrl = routes.Contributions.thanks(countryGroup).url
         redirectWithCampaignCodes(thanksUrl)
     }
 
     def okResult(data: (Payment, SavedContributionData)): Result = data match {
       case (payment, savedData) =>
-        redirectWithCampaignCodes(routes.Giraffe.postPayment(countryGroup).url)
+        redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url)
           .withSession(request.session + ("email" -> savedData.contributor.email))
           .setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
@@ -151,7 +151,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
   def handleError(countryGroup: CountryGroup, error: String) = {
     Logger.error(error)
-    Redirect(routes.Giraffe.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
+    Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
   }
 
   def hook = NoCacheAction.async(BodyParsers.parse.tolerantText) { request =>
@@ -200,7 +200,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         case None => Future.successful(Logger.error("email not found in session while trying to update marketing opt in"))
       }
       contributor.map { _ =>
-        Redirect(routes.Giraffe.thanks(countryGroup).url, SEE_OTHER)
+        Redirect(routes.Contributions.thanks(countryGroup).url, SEE_OTHER)
       }
   }
 }
