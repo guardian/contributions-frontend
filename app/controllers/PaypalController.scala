@@ -120,31 +120,26 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
   private def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = amount min MaxAmount.forCurrency(currency)
 
   def authorize = checkToken {
-    NoCacheAction.async(parse.json) { request =>
-
-      request.body.validate[AuthRequest] match {
-        case JsSuccess(authRequest, _) =>
-          val paypalService = paymentServices.paypalServiceFor(request)
-          val authResponse = paypalService.getAuthUrl(
-            amount = capAmount(authRequest.amount, authRequest.countryGroup.currency),
-            countryGroup = authRequest.countryGroup,
-            contributionId = ContributionId.random,
-            cmp = authRequest.cmp,
-            intCmp = authRequest.intCmp,
-            refererPageviewId = authRequest.refererPageviewId,
-            refererUrl = authRequest.refererUrl,
-            ophanPageviewId = authRequest.ophanPageviewId,
-            ophanBrowserId = authRequest.ophanBrowserId
-          )
-          authResponse.value map {
-            case Right(url) => Ok(Json.toJson(AuthResponse(url)))
-            case Left(error) =>
-              Logger.error(s"Error getting PayPal auth url: $error")
-              InternalServerError("Error getting PayPal auth url")
-          }
-        case JsError(error) =>
-          Logger.error(s"Invalid request=$error")
-          Future.successful(BadRequest(s"Invalid request=$error"))
+    NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
+      val authRequest = request.body
+      val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
+      val paypalService = paymentServices.paypalServiceFor(request)
+      val authResponse = paypalService.getAuthUrl(
+        amount = amount,
+        countryGroup = authRequest.countryGroup,
+        contributionId = ContributionId.random,
+        cmp = authRequest.cmp,
+        intCmp = authRequest.intCmp,
+        refererPageviewId = authRequest.refererPageviewId,
+        refererUrl = authRequest.refererUrl,
+        ophanPageviewId = authRequest.ophanPageviewId,
+        ophanBrowserId = authRequest.ophanBrowserId
+      )
+      authResponse.value map {
+        case Right(url) => Ok(Json.toJson(AuthResponse(url)))
+        case Left(error) =>
+          Logger.error(s"Error getting PayPal auth url: $error")
+          InternalServerError("Error getting PayPal auth url")
       }
     }
   }
