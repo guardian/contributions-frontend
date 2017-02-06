@@ -4,8 +4,6 @@ import com.github.slugify.Slugify
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.Cookie
 
-import scala.util.Try
-
 case class Percentage(value: Double) {
   def of[B](x: B)(implicit numB: Numeric[B]): Double = numB.toDouble(x) / 100 * value
 }
@@ -20,7 +18,7 @@ case class Test(name: String, audienceSize: Percentage, audienceOffset: Percenta
 
   def allocate(id: Int): Option[Allocation] = {
     if (!idRange.contains(id)) None
-    else Try(variants.toList(id % variants.size)).toOption.map(v => Allocation(this, v))
+    else Some(Allocation(this, variants.toList(id % variants.size)))
   }
 }
 
