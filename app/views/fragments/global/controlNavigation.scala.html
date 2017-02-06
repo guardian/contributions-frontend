@@ -72,7 +72,7 @@
                 <ul class="nav-popup__list">
                 @for(countryGroup <- Seq(UK, Europe, US, Australia)) {
                     <li class="nav-popup__item">
-                        <a href="@routes.Giraffe.contribute(countryGroup)" class="nav-popup__link" data-country-group="@Json.toJson(countryGroup)" data-max-amount="@MaxAmount.forCurrency(countryGroup.currency)">@countryGroup.name (@countryGroup.currency.identifier)</a>
+                        <a href="@routes.Contributions.contribute(countryGroup)" class="nav-popup__link" data-country-group="@Json.toJson(countryGroup)" data-max-amount="@MaxAmount.forCurrency(countryGroup.currency)">@countryGroup.name (@countryGroup.currency.identifier)</a>
                     </li>
                 }
                 </ul>

@@ -59,7 +59,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val identityService = new IdentityService(wsClient, idConfig)
   lazy val emailService = wire[EmailService]
 
-  lazy val giraffeController = wire[Giraffe]
+  lazy val giraffeController = wire[Contributions]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
   lazy val paypalController = wire[PaypalController]

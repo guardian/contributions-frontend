@@ -1,16 +1,12 @@
 package filters
 
-import javax.inject.{Inject, Singleton}
-
 import akka.stream.Materializer
 import controllers.Cached.suitableForCaching
-import play.api.Logger
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class CheckCacheHeadersFilter @Inject()(
+class CheckCacheHeadersFilter(
   implicit override val mat: Materializer,
   exec: ExecutionContext) extends Filter {
 

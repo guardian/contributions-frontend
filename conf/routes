@@ -11,8 +11,8 @@ GET            /assets/*file                    controllers.Assets.versioned(pat
 
 
 # Giraffe
-GET            /                                controllers.Giraffe.contributeRedirect
-GET            /home                            controllers.Giraffe.contributeRedirect
+GET            /                                controllers.Contributions.contributeRedirect
+GET            /home                            controllers.Contributions.contributeRedirect
 GET            /healthcheck                     controllers.Healthcheck.healthcheck
 POST           /paypal/auth                     controllers.PaypalController.authorize
 
@@ -23,13 +23,13 @@ POST           /:countryGroup/update-metadata   controllers.PaypalController.upd
 POST           /stripe/pay                      controllers.StripeController.pay
 POST           /stripe/hook                     controllers.StripeController.hook
 
-GET            /ca                              controllers.Giraffe.redirectToUk
-GET            /nz                              controllers.Giraffe.redirectToUk
-GET            /int                             controllers.Giraffe.redirectToUk
-GET            /:countryGroup                   controllers.Giraffe.contribute(countryGroup: CountryGroup, error_code: Option[PaymentError]?=None)
+GET            /ca                              controllers.Contributions.redirectToUk
+GET            /nz                              controllers.Contributions.redirectToUk
+GET            /int                             controllers.Contributions.redirectToUk
+GET            /:countryGroup                   controllers.Contributions.contribute(countryGroup: CountryGroup, error_code: Option[PaymentError]?=None)
 
-GET            /:countryGroup/thank-you         controllers.Giraffe.thanks(countryGroup: CountryGroup)
-GET            /:countryGroup/post-payment      controllers.Giraffe.postPayment(countryGroup: CountryGroup)
+GET            /:countryGroup/thank-you         controllers.Contributions.thanks(countryGroup: CountryGroup)
+GET            /:countryGroup/post-payment      controllers.Contributions.postPayment(countryGroup: CountryGroup)
 
 GET            /user/autofill                   controllers.UserController.autofill
 
