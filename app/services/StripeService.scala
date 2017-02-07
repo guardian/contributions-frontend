@@ -1,6 +1,7 @@
 package services
 
-import cats.data.{OptionT, EitherT}
+import abtests.Allocation
+import cats.data.{EitherT, OptionT}
 import com.gu.monitoring.ServiceMetrics
 import com.gu.stripe.{StripeApiConfig, StripeService => MembershipStripeService}
 import data.ContributionData
@@ -10,7 +11,6 @@ import com.gu.okhttp.RequestRunners
 import com.gu.stripe.Stripe.{Charge, Event}
 import org.joda.time.DateTime
 import play.api.libs.json.Json
-import views.support.Variant
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,7 +30,7 @@ class StripeService(
     name: String,
     postCode: Option[String],
     marketing: Boolean,
-    variants: Seq[Variant],
+    testAllocations: Set[Allocation],
     cmp: Option[String],
     intCmp: Option[String],
     refererPageviewId: Option[String],
@@ -60,7 +60,7 @@ class StripeService(
       country = Some(charge.source.country),
       ophanPageviewId = Some(ophanPageviewId),
       ophanBrowserId = ophanBrowserId,
-      abTests = Json.toJson(variants),
+      abTests = Json.toJson(testAllocations),
       cmp = cmp,
       intCmp = intCmp,
       refererPageviewId = refererPageviewId,

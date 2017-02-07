@@ -2,14 +2,13 @@ package controllers
 
 import java.time.LocalDate
 
-import actions.CommonActions.NoCacheAction
+import actions.CommonActions.{ABTestAction, NoCacheAction}
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
 import play.api.mvc._
-import play.filters.csrf.CSRF
-import play.filters.csrf.CSRFAddToken
+import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
 import utils.MaxAmount
 import utils.RequestCountry._
@@ -50,11 +49,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
   }
 
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
-    NoCacheAction { implicit request =>
-
-      val mvtId = Test.testIdFor(request)
-      val variant = Test.getContributePageVariant(countryGroup, mvtId, request)
-
+    (NoCacheAction andThen ABTestAction) { implicit request =>
       val errorMessage = error.map(_.message)
       val stripe = paymentServices.stripeServiceFor(request)
       val cmp = request.getQueryString("CMP")
@@ -74,12 +69,19 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
       val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-      val testsInCookies = request.cookies.filter(_.name.contains(Test.CookiePrefix)) map (_.name)
-
-      Ok(views.html.giraffe.contribute(pageInfo, maxAmountInLocalCurrency, countryGroup, variant, cmp, intCmp,
-        refererPageviewId, refererUrl, creditCardExpiryYears, errorMessage, CSRF.getToken.map(_.value)))
-        .discardingCookies(testsInCookies.toSeq map (DiscardingCookie(_)): _*)
-        .withCookies(Test.testIdCookie(mvtId), Test.variantCookie(variant))
+      Ok(views.html.giraffe.contribute(
+        pageInfo,
+        maxAmountInLocalCurrency,
+        countryGroup,
+        request.testAllocations,
+        cmp,
+        intCmp,
+        refererPageviewId,
+        refererUrl,
+        creditCardExpiryYears,
+        errorMessage,
+        CSRF.getToken.map(_.value)
+      ))
     }
   }
 

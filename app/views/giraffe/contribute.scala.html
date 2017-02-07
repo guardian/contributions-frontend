@@ -1,15 +1,15 @@
+@import abtests._
 @import com.gu.i18n.CountryGroup
-@import views.support.PageInfo
 @import fragments.giraffe.contributionsMain
-@import views.support.CountryGroupImplicits._
 @import play.api.libs.json.Json
-@import views.support.Variant
+@import views.support.CountryGroupImplicits._
+@import views.support.PageInfo
 
 @(
     pageInfo: PageInfo,
     maxAmount: Int,
     countryGroup: CountryGroup,
-    variant: Variant,
+    testAllocations: Set[Allocation],
     cmpCode: Option[String],
     intCmpCode: Option[String],
     refererPageviewId: Option[String],
@@ -23,7 +23,7 @@
 
     <!-- react injects its components here -->
     <section id="contribute" class="contribute-container"
-    data-ab-tests="@Json.stringify(Json.toJson(Seq(variant)))"
+    data-ab-tests="@Json.toJson(testAllocations)"
     data-country-group="@Json.stringify(Json.toJson(countryGroup))"
     data-max-amount="@maxAmount"
     data-csrf-token="@csrfToken.getOrElse("")"
