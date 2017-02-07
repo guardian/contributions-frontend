@@ -16,8 +16,12 @@ object ABTestSpec extends Properties("test") {
     variants <- Gen.nonEmptyContainerOf[Seq, Variant](arbitrary[Variant])
   } yield Test(name, audienceSize, audienceOffset, variants: _*))
 
-  property("test allocation") = forAll { (test: Test) =>
+  property("test allocation covers IDs correctly") = forAll { (test: Test) =>
     test.idRange.forall(id => test.allocate(id).nonEmpty) &&
     (1 to Test.maxTestId).diff(test.idRange).forall(id => test.allocate(id).isEmpty)
+  }
+
+  property("test allocation assigns all variants") = forAll { (test: Test) =>
+    test.idRange.flatMap(id => test.allocate(id)).map(_.variant).toSet == test.variants.toSet
   }
 }
