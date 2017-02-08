@@ -45,4 +45,22 @@ object CommonActions {
       }
     }
   }
+
+  implicit class MobileSupportRequest[A](val request: Request[A]) extends AnyVal {
+    def platform: Option[String] = request.getQueryString("platform") orElse request.session.get("platform")
+    def isMobile: Boolean = platform.contains("android") || platform.contains("ios")
+  }
+
+  object MobileSupportAction extends ActionBuilder[Request] {
+    override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
+      implicit val r = request
+      val platform = request.getQueryString("platform") orElse request.session.get("platform")
+      block(request).map { result =>
+        platform match {
+          case Some(value) => result.addingToSession("platform" -> value)
+          case None => result
+        }
+      }
+    }
+  }
 }

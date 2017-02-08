@@ -89,7 +89,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     )(SupportForm.apply)(SupportForm.unapply)
   )
 
-  def pay = (NoCacheAction andThen ABTestAction andThen MobileSupportAction).async(parse.form(supportForm)) { implicit request =>
+  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async(parse.form(supportForm)) { implicit request =>
 
     val form = request.body
 

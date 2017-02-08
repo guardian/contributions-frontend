@@ -42,7 +42,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
-  ) = (NoCacheAction andThen ABTestAction andThen MobileSupportAction).async { implicit request =>
+  ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
 
     val paypalService = paymentServices.paypalServiceFor(request)
 
