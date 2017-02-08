@@ -5,6 +5,7 @@ import java.util.UUID
 import abtests.Allocation
 import cats.data.EitherT
 import cats.implicits._
+import com.gu.i18n
 import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
 import com.paypal.api.payments._
@@ -268,6 +269,11 @@ class PaypalService(
     contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 
-
+  def paymentAmount(payment: Payment): Option[ContributionAmount] = for {
+    transaction <- payment.getTransactions.asScala.headOption
+    paypalAmount <- Option(transaction.getAmount)
+    amount <- Try(BigDecimal.exact(paypalAmount.getTotal)).toOption
+    currency <- Option(paypalAmount.getCurrency).flatMap(i18n.Currency.fromString)
+  } yield ContributionAmount(amount, currency)
 
 }

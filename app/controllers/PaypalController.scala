@@ -11,7 +11,7 @@ import com.paypal.api.payments.Payment
 import models.SavedContributionData
 import models.{ContributionId, IdentityId, PaypalHook}
 import play.api.libs.ws.WSClient
-import play.api.mvc.{BodyParsers, Controller, Result}
+import play.api.mvc._
 import services.PaymentServices
 import play.api.Logger
 import play.api.data.Form
@@ -42,7 +42,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
-  ) = (NoCacheAction andThen ABTestAction).async { implicit request =>
+  ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
 
     val paypalService = paymentServices.paypalServiceFor(request)
 
@@ -63,11 +63,18 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         redirectWithCampaignCodes(thanksUrl)
     }
 
-    def okResult(data: (Payment, SavedContributionData)): Result = data match {
-      case (payment, savedData) =>
-        redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url)
-          .withSession(request.session + ("email" -> savedData.contributor.email))
-          .setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
+    def okResult(data: (Payment, SavedContributionData)): Result = {
+      val (payment, savedData) = data
+
+      val mobileUrl = paypalService.paymentAmount(payment)
+        .filter(_ => request.isMobile)
+        .map(thankYouMobileUri)
+
+      val redirectUrl = mobileUrl.getOrElse(routes.Contributions.postPayment(countryGroup).url)
+
+      redirectWithCampaignCodes(redirectUrl)
+        .withSession(request.session + ("email" -> savedData.contributor.email))
+        .setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
     paypalService.executePayment(paymentId, payerId)
