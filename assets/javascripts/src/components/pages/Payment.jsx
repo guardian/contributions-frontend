@@ -46,7 +46,7 @@ export default class Payment extends React.Component {
     render() {
         return <div className='contribute-payment contribute-fields'>
 
-            <InputField label="Card number" type="text" value={formatCardNumber(this.props.card.number)}
+            <InputField label="Card number" type="tel" value={formatCardNumber(this.props.card.number)}
                         autoFocus={window.matchMedia('(min-width: 741px)').matches}
                         onChange={event => this.props.updateCard({number: event.target.value})}
                         onKeyDown={event => this.clearValidation(event.target)}
@@ -60,7 +60,7 @@ export default class Payment extends React.Component {
 
             <div className="flex-horizontal">
                 <InputField label="Expiry date"
-                            type="text"
+                            type="tel"
                             value={this.props.card.expiry}
                             onChange={event => this.props.updateCard({expiry: this.formatExpiry(event.target.value)})}
                             onKeyDown={event => this.clearValidation(event.target)}
@@ -72,7 +72,7 @@ export default class Payment extends React.Component {
                             required/>
 
                 <InputField label="Security code"
-                            type="text"
+                            type="number"
                             value={this.props.card.cvc}
                             onChange={event => this.props.updateCard({cvc: event.target.value})}
                             onKeyDown={event => this.clearValidation(event.target)}
