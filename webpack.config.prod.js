@@ -2,7 +2,6 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-    context: 'assets/javascripts',
     entry: {
         contributePage: 'src/contributePage',
         thankYouPage: 'src/thankYouPage'
@@ -10,7 +9,7 @@ module.exports = {
     target: 'web',
 
     output: {
-        path: 'public/',
+        path: path.resolve(__dirname, 'public'),
         chunkFilename: 'webpack/[chunkhash].js',
         filename: "javascripts/[name].js",
         publicPath: '/assets/'
@@ -19,7 +18,7 @@ module.exports = {
     resolve: {
         root: [
             path.resolve(__dirname, "assets/javascripts"),
-            path.resolve(__dirname, "node_modules")
+            path.resolve(__dirname, "node_modules
         ],
         extensions: ["", ".js", ".jsx", ".es6"],
         alias: {
@@ -29,12 +28,12 @@ module.exports = {
     },
 
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.es6$/,
                 exclude: /node_modules/,
                 loader: 'babel',
-                query: {
+                options: {
                     presets: ['es2015'],
                     plugins: [
                         'transform-object-rest-spread',
@@ -50,7 +49,7 @@ module.exports = {
                 test: /\.jsx$/,
                 exclude: /node_modules/,
                 loader: 'babel',
-                query: {
+                options: {
                     presets: ['react', 'es2015'],
                     plugins: [
                         'transform-object-rest-spread',
@@ -76,19 +75,11 @@ module.exports = {
         root: path.join(__dirname, "node_modules")
     },
 
-    progress: true,
-    failOnError: true,
-    keepalive: false,
-    inline: true,
-    hot: false,
-    watch: false,
-
     stats: {
         modules: true,
         reasons: true,
         colors: true
     },
 
-    debug: false,
     devtool: 'source-map'
 };

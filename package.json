@@ -18,21 +18,20 @@
   "devDependencies": {
     "autoprefixer": "^6.4.0",
     "autoprefixer-core": "^6.0.1",
-    "babel-core": "^6.11.4",
+    "babel-core": "^6.23.1",
     "babel-jest": "^15.0.0",
-    "babel-loader": "^6.2.4",
+    "babel-loader": "^6.3.0",
     "babel-plugin-transform-es2015-classes": "^6.14.0",
     "babel-plugin-transform-object-assign": "^6.8.0",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
     "babel-plugin-transform-runtime": "^6.15.0",
     "babel-polyfill": "^6.13.0",
-    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-es2015": "^6.22.0",
     "babel-preset-react": "^6.11.1",
     "bean": "~1.0.15",
     "bonzo": "~2.0.0",
     "bower": "^1.7.9",
     "concurrently": "^2.2.0",
-    "curl-amd": "~0.8.12",
     "domready": "~1.0.8",
     "grunt": "^1.0.1",
     "grunt-asset-hash": "0.1.9",
@@ -48,7 +47,7 @@
     "grunt-sass": "^1.2.0",
     "grunt-svgmin": "^3.3.0",
     "grunt-svgstore": "^1.0.0",
-    "grunt-webpack": "^1.0.11",
+    "grunt-webpack": "^2.0.1",
     "gumshoe": "cferdinandi/gumshoe",
     "jasmine-core": "^2.4.1",
     "jest": "^15.1.1",
@@ -66,21 +65,13 @@
     "postcss-pxtorem": "^3.3.1",
     "qwery": "~4.0.0",
     "raven-js": "^3.2.1",
-    "react": "^15.3.0",
-    "react-dom": "^15.3.0",
-    "react-redux": "^4.4.5",
-    "react-responsive": "^1.1.4",
-    "redux": "^3.5.2",
-    "redux-thunk": "^2.1.0",
-    "reqwest": "~2.0.5",
     "respimage": "~1.4.2",
     "rimraf": "^2.5.3",
-    "smooth-scroll": "cferdinandi/smooth-scroll",
     "text-loader": "0.0.1",
     "time-grunt": "^1.4.0",
     "vinyl-fs": "2.4.3",
-    "webpack": "^1.13.1",
-    "webpack-dev-server": "1.15.1",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.3.0",
     "whatwg-fetch": "^1.0.0"
   },
   "jest": {
@@ -92,5 +83,15 @@
     "modulePaths": [
       "assets/javascripts"
     ]
+  },
+  "dependencies": {
+    "ophan-tracker-js": "^1.3.1",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0",
+    "react-redux": "^4.4.5",
+    "react-responsive": "^1.1.4",
+    "redux": "^3.5.2",
+    "redux-thunk": "^2.1.0",
+    "reqwest": "~2.0.5"
   }
 }
