@@ -48,7 +48,9 @@ object CommonActions {
 
   implicit class MobileSupportRequest[A](val request: Request[A]) extends AnyVal {
     def platform: Option[String] = request.getQueryString("platform") orElse request.session.get("platform")
-    def isMobile: Boolean = platform.contains("android") || platform.contains("ios")
+    def isAndroid: Boolean = platform.contains("android")
+    def isIos: Boolean = platform.contains("ios")
+    def isMobile: Boolean = isAndroid || isIos
   }
 
   object MobileSupportAction extends ActionBuilder[Request] {
