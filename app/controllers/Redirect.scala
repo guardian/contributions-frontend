@@ -12,6 +12,6 @@ trait Redirect {
   }
 
   def thankYouMobileUri(amount: ContributionAmount): String = {
-    s"x-gu://contribution?date${LocalDate.now().toString}&amount=$amount"
+    s"x-gu://contribution?date=${LocalDate.now().toString}&amount=$amount"
   }
 }
