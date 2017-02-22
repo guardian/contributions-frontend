@@ -11,7 +11,7 @@ trait Redirect {
     Redirect(destinationUrl, request.queryString.filterKeys(queryParamsToForward), SEE_OTHER)
   }
 
-  def thankYouMobileUri(amount: ContributionAmount): String = {
+  def mobileRedirectUrl(amount: ContributionAmount): String = {
     s"x-gu://contribution?date=${LocalDate.now().toString}&amount=$amount"
   }
 }

@@ -69,9 +69,12 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
       val amount = paypalService.paymentAmount(payment)
 
+      val session = List(
+        "email" -> savedData.contributor.email
+      ) ++ amount.map("amount" -> _.toString)
+
       redirectWithCampaignCodes(redirectUrl)
-        .addingToSession("email" -> savedData.contributor.email)
-        .addingToSession("amount" -> amount.toString)
+        .addingToSession(session :_ *)
         .setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
@@ -199,7 +202,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
     val url = request.session.get("amount").flatMap(ContributionAmount.apply)
       .filter(_ => request.isAndroid)
-      .map(thankYouMobileUri)
+      .map(mobileRedirectUrl)
       .getOrElse(routes.Contributions.thanks(countryGroup).url)
 
     contributor.map { _ =>

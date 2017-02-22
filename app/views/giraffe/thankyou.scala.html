@@ -2,27 +2,32 @@
 
 @import views.support.Social
 @import com.gu.i18n.CountryGroup
-@(pageInfo: PageInfo, social: Set[Social], countryGroup: CountryGroup, charge: Option[String])
+@(pageInfo: PageInfo, social: Set[Social], countryGroup: CountryGroup, charge: Option[String], iosRedirectUrl: Option[String])
     @main(pageInfo, mainScript = Some("thankYouPage.js")) {
     <script type="text/javascript">
         @if(charge.isDefined) {
-          guardian.productDetails = {
-            charge: '@charge.get'
-        };
+            guardian.productDetails = {
+                charge: '@charge.get'
+            };
         }
-
-
     </script>
     <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
         <div class="contributions__inner page-slice l-constrained flex-horizontal-from-tablet thanks">
             <section>
             <h1>@pageInfo.title
-
-            <span class="thanks--description">@pageInfo.description</span>
-                </h1>
+                <span class="thanks--description">@pageInfo.description</span>
+            </h1>
+            @if(iosRedirectUrl.isDefined) {
+                <a class="action action--button action--button--forward action action--button contribute-navigation__next action--next" href="@iosRedirectUrl.get">
+                    <span>Return to the Guardian app</span>
+                    <svg class="action--button__arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="17.89" viewBox="0 0 20 17.89">
+                        <path d="M20 9.35l-9.08 8.54-.86-.81 6.54-7.31H0V8.12h16.6L10.06.81l.86-.81L20 8.51v.84zm20-.81L49.08 0l.86.81-6.54 7.31H60v1.65H43.4l6.54 7.31-.86.81L40 9.39v-.85z"/>
+                    </svg>
+                </a>
+            }
             </section>
- </div>
-</main>
+        </div>
+    </main>
     <section class="disclaimer">
         <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
             <div class="feedback">
