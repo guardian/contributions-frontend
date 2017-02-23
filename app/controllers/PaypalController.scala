@@ -3,6 +3,7 @@ package controllers
 import actions.CommonActions._
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.show._
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
@@ -71,7 +72,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
       val session = List(
         "email" -> savedData.contributor.email
-      ) ++ amount.map("amount" -> _.toString)
+      ) ++ amount.map("amount" -> _.show)
 
       redirectWithCampaignCodes(redirectUrl)
         .addingToSession(session :_ *)

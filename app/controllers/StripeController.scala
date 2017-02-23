@@ -5,6 +5,7 @@ import java.time.Instant
 
 import actions.CommonActions._
 import cats.data.EitherT
+import cats.syntax.show._
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.CountryGroup._
@@ -160,7 +161,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       storeMetaData(charge) // fire and forget. If it fails we don't want to stop the user
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
-        .addingToSession("amount" -> contributionAmount.toString)
+        .addingToSession("amount" -> contributionAmount.show)
         .setCookie[ContribTimestampCookieAttributes](Instant.ofEpochSecond(charge.created).toString)
     }.recover {
       case e: Stripe.Error => BadRequest(Json.toJson(e))
