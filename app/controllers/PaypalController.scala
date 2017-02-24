@@ -3,13 +3,13 @@ package controllers
 import actions.CommonActions._
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.show._
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
-import models.SavedContributionData
-import models.{ContributionId, IdentityId, PaypalHook}
+import models._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.PaymentServices
@@ -66,14 +66,16 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     def okResult(data: (Payment, SavedContributionData)): Result = {
       val (payment, savedData) = data
 
-      val mobileUrl = paypalService.paymentAmount(payment)
-        .filter(_ => request.isMobile)
-        .map(thankYouMobileUri)
+      val redirectUrl = routes.Contributions.postPayment(countryGroup).url
 
-      val redirectUrl = mobileUrl.getOrElse(routes.Contributions.postPayment(countryGroup).url)
+      val amount = paypalService.paymentAmount(payment)
+
+      val session = List(
+        "email" -> savedData.contributor.email
+      ) ++ amount.map("amount" -> _.show)
 
       redirectWithCampaignCodes(redirectUrl)
-        .withSession(request.session + ("email" -> savedData.contributor.email))
+        .addingToSession(session :_ *)
         .setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
@@ -190,17 +192,22 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     )(MetadataUpdate.apply)(MetadataUpdate.unapply)
   )
 
-  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async(parse.form(metadataUpdateForm)) {
-    implicit request =>
-      val paypalService = paymentServices.paypalServiceFor(request)
-      val marketingOptIn = request.body.marketingOptIn
-      val idUser = IdentityId.fromRequest(request)
-      val contributor = request.session.data.get("email") match {
-        case Some(email) => paypalService.updateMarketingOptIn(email, marketingOptIn, idUser).value
-        case None => Future.successful(Logger.error("email not found in session while trying to update marketing opt in"))
-      }
-      contributor.map { _ =>
-        Redirect(routes.Contributions.thanks(countryGroup).url, SEE_OTHER)
-      }
+  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async(parse.form(metadataUpdateForm)) { implicit request =>
+    val paypalService = paymentServices.paypalServiceFor(request)
+    val marketingOptIn = request.body.marketingOptIn
+    val idUser = IdentityId.fromRequest(request)
+    val contributor = request.session.data.get("email") match {
+      case Some(email) => paypalService.updateMarketingOptIn(email, marketingOptIn, idUser).value
+      case None => Future.successful(Logger.error("email not found in session while trying to update marketing opt in"))
+    }
+
+    val url = request.session.get("amount").flatMap(ContributionAmount.apply)
+      .filter(_ => request.isAndroid)
+      .map(mobileRedirectUrl)
+      .getOrElse(routes.Contributions.thanks(countryGroup).url)
+
+    contributor.map { _ =>
+      Redirect(url, SEE_OTHER)
+    }
   }
 }

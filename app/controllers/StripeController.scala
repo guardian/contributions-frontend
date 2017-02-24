@@ -5,6 +5,7 @@ import java.time.Instant
 
 import actions.CommonActions._
 import cats.data.EitherT
+import cats.syntax.show._
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.CountryGroup._
@@ -125,9 +126,10 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     val amountInSmallestCurrencyUnit = (form.amount * 100).toInt
     val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(form.currency) * 100
     val amount = min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit)
+    val contributionAmount = ContributionAmount(BigDecimal(amount, 2), form.currency)
 
-    def thankYouUri = if (request.isMobile) {
-      thankYouMobileUri(ContributionAmount(BigDecimal(amount, 2), form.currency))
+    def thankYouUri = if (request.isAndroid) {
+      mobileRedirectUrl(contributionAmount)
     } else {
       routes.Contributions.thanks(countryGroup).url
     }
@@ -158,7 +160,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     createCharge.map { charge =>
       storeMetaData(charge) // fire and forget. If it fails we don't want to stop the user
       Ok(Json.obj("redirect" -> thankYouUri))
-        .withSession("charge_id" -> charge.id)
+        .addingToSession("charge_id" -> charge.id)
+        .addingToSession("amount" -> contributionAmount.show)
         .setCookie[ContribTimestampCookieAttributes](Instant.ofEpochSecond(charge.created).toString)
     }.recover {
       case e: Stripe.Error => BadRequest(Json.toJson(e))

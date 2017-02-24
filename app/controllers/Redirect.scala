@@ -1,5 +1,6 @@
 package controllers
 
+import cats.syntax.show._
 import models.ContributionAmount
 import org.joda.time.LocalDate
 import play.api.mvc.{Controller, Request}
@@ -11,7 +12,7 @@ trait Redirect {
     Redirect(destinationUrl, request.queryString.filterKeys(queryParamsToForward), SEE_OTHER)
   }
 
-  def thankYouMobileUri(amount: ContributionAmount): String = {
-    s"x-gu://contribution?date=${LocalDate.now().toString}&amount=$amount"
+  def mobileRedirectUrl(amount: ContributionAmount): String = {
+    s"x-gu://contribution?date=${LocalDate.now().toString}&amount=${amount.show}"
   }
 }

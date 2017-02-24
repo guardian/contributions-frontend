@@ -7,6 +7,7 @@ import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
+import models.ContributionAmount
 import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
@@ -89,12 +90,17 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
     val charge = request.session.get("charge_id")
     val title = "Thank you!"
 
+    val iosRedirectUrl = request.session.get("amount")
+      .flatMap(ContributionAmount.apply)
+      .map(mobileRedirectUrl)
+      .filter(_ => request.isIos)
+
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,
       url = request.path,
       image = None,
       description = Some("You’ve made a vital contribution that will help us maintain our independent, investigative journalism")
-    ), social, countryGroup, charge))
+    ), social, countryGroup, charge, iosRedirectUrl))
   }
 }
 
