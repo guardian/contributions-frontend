@@ -26,11 +26,13 @@ export default class DesktopWrapper extends React.Component {
                             amount={this.props.card.amount}
                             currency={this.props.currency}
                             processing={this.props.processing}
+                            openStripe={this.props.openStripe}
                             pay={this.props.pay}
                             payWithPaypal={this.props.payWithPaypal}
                             payWithCard={this.props.payWithCard}
                             mobile={false}
                             clearPaymentFlags={this.props.clearPaymentFlags}
+                            stripeCheckout={this.props.stripeCheckout}
                         />
                     </div>
 

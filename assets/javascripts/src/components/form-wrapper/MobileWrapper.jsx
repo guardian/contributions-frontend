@@ -12,7 +12,7 @@ export default class MobileWrapper extends React.Component {
         if (this.props.page == PAGES.CONTRIBUTION)
             return this.renderInForm([PAGES.CONTRIBUTION]);
         else
-            return this.renderInForm([PAGES.DETAILS, PAGES.PAYMENT]);
+            return this.renderInForm([PAGES.DETAILS]);
 
     }
 
@@ -33,12 +33,14 @@ export default class MobileWrapper extends React.Component {
                         amount={this.props.card.amount}
                         currency={this.props.currency}
                         processing={this.props.processing}
+                        openStripe={this.props.openStripe}
                         pay={this.props.pay}
                         payWithPaypal={this.props.payWithPaypal}
                         payWithCard={this.props.payWithCard}
                         jumpToFirstPage={this.props.jumpToFirstPage}
                         mobile={true}
                         clearPaymentFlags={this.props.clearPaymentFlags}
+                        stripeCheckout={this.props.stripeCheckout}
                     />
 
                     {!this.props.processing  && p== PAGES.CONTRIBUTION && <LegalNotice countryGroup={this.props.countryGroup}/>}
