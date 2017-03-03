@@ -25,11 +25,9 @@ function registerTestsWithOphan(tests, complete) {
         }
     }, {}) || {};
 
-    ophan.loaded.then(function (ophan) {
-        ophan.record({
-            abTestRegister: data
-        })
-    })
+    return ophan.record({
+        abTestRegister: data
+    });
 }
 
 function registerTestWithOphan(test, complete) {

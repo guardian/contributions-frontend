@@ -7,8 +7,8 @@ import store from 'src/store';
 
 import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT, GO_FORWARD, AUTOFILL} from 'src/actions';
 import { attachCurrencyListeners, attachErrorDialogListener } from 'src/modules/domListeners';
-import * as ophan from 'src/modules/analytics/ophan';
 
+import * as ophan from 'src/modules/analytics/ophan';
 
 export function init() {
     const container = document.getElementById('contribute');
@@ -87,11 +87,11 @@ function getUrlParameter(rawName, url) {
 }
 
 function setOphanIds() {
-    ophan.loaded.then(o => store.dispatch({
+    store.dispatch({
         type: SET_DATA,
         data: { ophan: {
-            pageviewId: o.viewId,
-            browserId: ophan.browserId()
+            pageviewId: ophan.viewId,
+            browserId: ophan.browserId
         }}
-    }));
+    });
 }

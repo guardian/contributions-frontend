@@ -1,15 +1,7 @@
-import raven from 'src/modules/raven';
-import {getCookie} from 'src/utils/cookie';
+import ophan from 'ophan-tracker-js/build/ophan.contribution';
+import cookie from 'src/utils/cookie';
 
-const ophanUrl = '//j.ophan.co.uk/contribution.js';
-const ophan = curl(ophanUrl);
+export const viewId = ophan.viewId;
+export const browserId = cookie.getCookie('bwid');
 
-export const loaded = ophan;
-
-export function init() {
-    return ophan.then(null, raven.Raven.captureException);
-}
-
-export function browserId() {
-    return getCookie('bwid');
-}
+export const record = event => new Promise(resolve => ophan.record(event, resolve));

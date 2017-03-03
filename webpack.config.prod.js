@@ -16,11 +16,11 @@ module.exports = {
     },
 
     resolve: {
-        root: [
+        modules: [
             path.resolve(__dirname, "assets/javascripts"),
-            path.resolve(__dirname, "node_modules
+            path.resolve(__dirname, "node_modules")
         ],
-        extensions: ["", ".js", ".jsx", ".es6"],
+        extensions: [".js", ".jsx", ".es6"],
         alias: {
             'respimage': 'respimage/respimage',
             'lazySizes': 'lazysizes/lazysizes'
@@ -32,7 +32,7 @@ module.exports = {
             {
                 test: /\.es6$/,
                 exclude: /node_modules/,
-                loader: 'babel',
+                loader: 'babel-loader',
                 options: {
                     presets: ['es2015'],
                     plugins: [
@@ -48,7 +48,7 @@ module.exports = {
             {
                 test: /\.jsx$/,
                 exclude: /node_modules/,
-                loader: 'babel',
+                loader: 'babel-loader',
                 options: {
                     presets: ['react', 'es2015'],
                     plugins: [
@@ -67,13 +67,8 @@ module.exports = {
         new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }),
         new webpack.DefinePlugin({
             "process.env": { NODE_ENV: JSON.stringify("production") }
-        }),
-        new webpack.optimize.DedupePlugin()
+        })
     ],
-
-    resolveLoader: {
-        root: path.join(__dirname, "node_modules")
-    },
 
     stats: {
         modules: true,
