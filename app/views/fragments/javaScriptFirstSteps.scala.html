@@ -27,7 +27,10 @@
             loaded: false
         },
         @for(stripePublicKey <- pageInfo.stripePublicKey) {
-        stripePublicKey: '@stripePublicKey',
+            stripe: {
+                key: '@stripePublicKey',
+                image: '@Asset.at("images/gu.png")'
+            },
         }
         membership: {
             buildNumber: '@app.BuildInfo.buildNumber',

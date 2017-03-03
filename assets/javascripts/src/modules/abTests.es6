@@ -31,7 +31,12 @@ function registerTestsWithOphan(tests, complete) {
 }
 
 function registerTestWithOphan(test, complete) {
-    registerTestsWithOphan([test], complete)
+    return registerTestsWithOphan([test], complete);
+}
+
+export function completeTests() {
+    const state = store.getState();
+    return registerTestsWithOphan(state.data.abTests, true);
 }
 
 function testFor(tests, testName) {

@@ -1,5 +1,24 @@
+import {SET_STRIPE_HANDLER, processStripePayment} from 'src/actions';
+import store from 'src/store';
+
 export function init() {
-    Stripe.setPublishableKey(guardian.stripePublicKey);
+    const handler = StripeCheckout.configure({
+        key: guardian.stripe.key,
+        image: guardian.stripe.image,
+        locale: 'auto',
+        name: 'The Guardian',
+        description: 'Make a contribution',
+        allowRememberMe: false,
+        zipCode: false,
+        token: token => processStripePayment(token).then(() => {
+            console.log('handler');
+        })
+    });
+
+    store.dispatch({
+        type: SET_STRIPE_HANDLER,
+        handler: handler
+    });
 }
 
 export function createToken(card) {
