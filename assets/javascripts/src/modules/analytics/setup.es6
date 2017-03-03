@@ -29,6 +29,5 @@ function setupAnalytics(enabled) {
 }
 
 export function init() {
-    return setupAnalytics(analyticsEnabled)
-        .then(() => setupKrux(analyticsEnabled && !guardian.isDev));
+    return setupAnalytics(analyticsEnabled);
 }
