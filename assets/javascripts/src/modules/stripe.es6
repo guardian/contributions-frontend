@@ -10,9 +10,7 @@ export function init() {
         description: 'Make a contribution',
         allowRememberMe: false,
         zipCode: false,
-        token: token => processStripePayment(token).then(() => {
-            console.log('handler');
-        })
+        token: token => processStripePayment(token)
     });
 
     store.dispatch({
