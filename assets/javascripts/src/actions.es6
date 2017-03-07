@@ -3,7 +3,8 @@ import 'whatwg-fetch';
 import store from 'src/store';
 import { urls } from 'src/constants';
 import { trackCheckout, trackPayment } from 'src/modules/analytics/ga';
-import { completeTests } from 'src/modules/abTests';
+import { completeTests, inStripeCheckoutTest } from 'src/modules/abTests';
+import * as stripe from 'src/modules/stripe';
 
 export const SET_DATA = "SET_DATA";
 export const SET_COUNTRY_GROUP = "SET_COUNTRY_GROUP";
@@ -32,13 +33,11 @@ export const AUTOFILL = "AUTOFILL";
 
 export function submitPayment(dispatch) {
     const state = store.getState();
-    const stripeHandler = state.data.stripe.handler;
 
     dispatch({ type: SUBMIT_PAYMENT });
 
-    stripeHandler.open({
-        email: state.details.email
-    });
+    if (inStripeCheckoutTest()) state.data.stripe.handler.open({ email: state.details.email });
+    else stripe.createToken(state.card).then(processStripePayment);
 }
 
 export function processStripePayment(token) {

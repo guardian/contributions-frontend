@@ -116,15 +116,16 @@ class Main extends React.Component {
 
     render() {
         const showSummary = !!this.props.card.amount && this.props.page !== PAGES.CONTRIBUTION;
+        const stripeCheckout = abTests.inStripeCheckoutTest();
 
         return <div>
             <AmountSummary currency={this.props.currency} amount={this.props.card.amount} visible={showSummary} />
             <MediaQuery query='(max-width: 740px)'>
-                <MobileWrapper submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
+                <MobileWrapper stripeCheckout={stripeCheckout} submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
 
             <MediaQuery query='(min-width: 741px)'>
-                <DesktopWrapper submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
+                <DesktopWrapper stripeCheckout={stripeCheckout} submit={this.submit.bind(this)} componentFor={this.componentFor.bind(this)} {...this.props} />
             </MediaQuery>
         </div>
     }
