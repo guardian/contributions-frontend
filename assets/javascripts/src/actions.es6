@@ -2,8 +2,9 @@ import 'whatwg-fetch';
 
 import store from 'src/store';
 import { urls } from 'src/constants';
-import * as stripe from 'src/modules/stripe';
 import { trackCheckout, trackPayment } from 'src/modules/analytics/ga';
+import { completeTests, inStripeCheckoutTest } from 'src/modules/abTests';
+import * as stripe from 'src/modules/stripe';
 
 export const SET_DATA = "SET_DATA";
 export const SET_COUNTRY_GROUP = "SET_COUNTRY_GROUP";
@@ -23,6 +24,8 @@ export const CARD_PAY = "CARD_PAY";
 export const JUMP_TO_PAGE = "JUMP_TO_PAGE";
 export const CLEAR_PAYMENT_FLAGS = "CLEAR_PAYMENT_FLAGS";
 
+export const SET_STRIPE_HANDLER = 'SET_STRIPE_HANDLER';
+
 export const TRACK_STEP = "TRACK_STEP";
 export const GA_ENABLED = "GA_ENABLED";
 
@@ -33,28 +36,32 @@ export function submitPayment(dispatch) {
 
     dispatch({ type: SUBMIT_PAYMENT });
 
-    stripe.createToken(state.card)
-        .then(token => paymentFormData(state, token))
-        .then(data => fetch(urls.pay, {
-            credentials: 'same-origin',
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }))
-        .then(response => response.json().then(json => {
-            return { response: response, json: json }
-        }))
-        .then((response) => {
-            if (response.response.ok)
-                return trackPayment(state.card.amount, state.data.currency.code).then(() => response);
-            else
+    if (inStripeCheckoutTest()) state.data.stripe.handler.open({ email: state.details.email });
+    else stripe.createToken(state.card).then(processStripePayment);
+}
+
+export function processStripePayment(token) {
+    const state = store.getState();
+    const data = paymentFormData(state, token.id);
+
+    return fetch(urls.pay, {
+        credentials: 'same-origin',
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    }).then(response => response.json().then(json => {
+        return { response: response, json: json }
+    })).then(response => {
+        if (response.response.ok) {
+            completeTests();
+
+            return trackPayment(state.card.amount, state.data.currency.code).then(() => {
+                store.dispatch({type: PAYMENT_COMPLETE, response: response.json});
                 return response;
-        })
-        .then(response => {
-            if (response.response.ok) dispatch({ type: PAYMENT_COMPLETE, response: response.json })
-            else dispatch({ type: PAYMENT_ERROR, kind: 'card', error: response.json })
-        })
-        .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'network', error: error }));
+            });
+        }
+        else return store.dispatch({type: PAYMENT_ERROR, kind: 'card', error: response.json});
+    }).catch(error => store.dispatch({type: PAYMENT_ERROR, kind: 'network', error: error}));
 }
 
 export function paypalRedirect(dispatch) {

@@ -17,6 +17,24 @@ export function init() {
     }
 }
 
+export function isAllocated(testSlug, variantSlug) {
+    const forced = (() => {
+        try {
+            const [slug, variant] = location.hash.split('#ab-')[1].split('=');
+            return slug === testSlug && variant === variantSlug;
+        } catch(e) {
+            return false;
+        }
+    })();
+
+    const tests = store.getState().data.abTests || [];
+    return forced || tests.some(t => t.testSlug == testSlug && t.variantSlug == variantSlug);
+}
+
+export function inStripeCheckoutTest() {
+    return isAllocated('stripe-checkout', 'stripe');
+}
+
 function registerTestsWithOphan(tests, complete) {
     const data = tests && tests.reduce((obj, test) => {
         obj[test.testSlug] = {
@@ -25,15 +43,18 @@ function registerTestsWithOphan(tests, complete) {
         }
     }, {}) || {};
 
-    ophan.loaded.then(function (ophan) {
-        ophan.record({
-            abTestRegister: data
-        })
-    })
+    return ophan.record({
+        abTestRegister: data
+    });
 }
 
 function registerTestWithOphan(test, complete) {
-    registerTestsWithOphan([test], complete)
+    return registerTestsWithOphan([test], complete);
+}
+
+export function completeTests() {
+    const state = store.getState();
+    return registerTestsWithOphan(state.data.abTests, true);
 }
 
 function testFor(tests, testName) {

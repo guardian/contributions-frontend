@@ -1,6 +1,35 @@
+import {SET_STRIPE_HANDLER, processStripePayment} from 'src/actions';
+import {inStripeCheckoutTest} from 'src/modules/abTests';
+
+import store from 'src/store';
+
 export function init() {
-    Stripe.setPublishableKey(guardian.stripePublicKey);
+    if (inStripeCheckoutTest()) initStripeCheckout();
+    else initStripeJS();
 }
+
+function initStripeCheckout() {
+    const handler = StripeCheckout.configure({
+        key: guardian.stripe.key,
+        image: guardian.stripe.image,
+        locale: 'auto',
+        name: 'The Guardian',
+        description: 'Make a contribution',
+        allowRememberMe: false,
+        zipCode: false,
+        token: token => processStripePayment(token)
+    });
+
+    store.dispatch({
+        type: SET_STRIPE_HANDLER,
+        handler: handler
+    });
+}
+
+function initStripeJS() {
+    Stripe.setPublishableKey(guardian.stripe.key);
+}
+
 
 export function createToken(card) {
     return new Promise((resolve, reject) => {
@@ -10,7 +39,7 @@ export function createToken(card) {
             exp: card.expiry
         }, (status, response) => {
             if (response.error) reject(response.error);
-            else resolve(response.id);
+            else resolve(response);
         });
     });
 };

@@ -62,8 +62,7 @@ module.exports = function (grunt) {
 
                 entry: {
                     contributePage: 'src/contributePage',
-                    thankYouPage: 'src/thankYouPage',
-                    tools: './src/tools'
+                    thankYouPage: 'src/thankYouPage'
                 }
             }
         },
@@ -123,12 +122,6 @@ module.exports = function (grunt) {
             polyfills: {
                 src: '<%= dirs.assets.javascripts %>/lib/polyfills.min.js',
                 dest: '<%= dirs.publicDir.javascripts %>/lib/polyfills.min.js'
-            },
-            curl: {
-                src: 'node_modules/curl-amd/dist/curl-with-js-and-domReady/curl.js',
-                dest: '<%= dirs.publicDir.javascripts %>/lib/curl/',
-                expand: true,
-                flatten: true
             },
             bundles: {
                 src: '<%= dirs.publicDir.root %>/bundles/*.js',
@@ -340,8 +333,7 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:js',
             'webpack',
-            'copy:polyfills',
-            'copy:curl'
+            'copy:polyfills'
         ]);
     });
     grunt.registerTask('compile', function(){
@@ -367,7 +359,6 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:js',
             'copy:polyfills',
-            'copy:curl',
             'watch'
         ]);
     });
