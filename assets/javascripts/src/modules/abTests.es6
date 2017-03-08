@@ -37,7 +37,7 @@ export function inStripeCheckoutTest() {
 
 function registerTestsWithOphan(tests, complete) {
     const data = tests && tests.reduce((obj, test) => {
-        return obj[test.testSlug] = {
+        obj[test.testSlug] = {
             'variantName': test.variantSlug,
             'complete': String(complete)
         }
