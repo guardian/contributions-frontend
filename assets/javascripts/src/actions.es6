@@ -34,10 +34,14 @@ export const AUTOFILL = "AUTOFILL";
 export function submitPayment(dispatch) {
     const state = store.getState();
 
-    dispatch({ type: SUBMIT_PAYMENT });
+    if (inStripeCheckoutTest()) {
+        state.data.stripe.handler.open({ email: state.details.email });
+    }
 
-    if (inStripeCheckoutTest()) state.data.stripe.handler.open({ email: state.details.email });
-    else stripe.createToken(state.card).then(processStripePayment);
+    else {
+        dispatch({type: SUBMIT_PAYMENT});
+        stripe.createToken(state.card).then(processStripePayment);
+    }
 }
 
 export function processStripePayment(token) {
