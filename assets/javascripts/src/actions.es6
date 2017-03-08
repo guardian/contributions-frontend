@@ -37,7 +37,6 @@ export function submitPayment(dispatch) {
     if (inStripeCheckoutTest()) {
         state.data.stripe.handler.open({ email: state.details.email });
     }
-
     else {
         dispatch({type: SUBMIT_PAYMENT});
         stripe.createToken(state.card).then(processStripePayment);
@@ -57,14 +56,14 @@ export function processStripePayment(token) {
         return { response: response, json: json }
     })).then(response => {
         if (response.response.ok) {
-            completeTests();
-
-            return trackPayment(state.card.amount, state.data.currency.code).then(() => {
-                store.dispatch({type: PAYMENT_COMPLETE, response: response.json});
-                return response;
-            });
+            return trackPayment(state.card.amount, state.data.currency.code)
+                .then(completeTests)
+                .then(() => store.dispatch({type: PAYMENT_COMPLETE, response: response.json}))
+                .then(() => response);
         }
-        else return store.dispatch({type: PAYMENT_ERROR, kind: 'card', error: response.json});
+        else {
+            return store.dispatch({type: PAYMENT_ERROR, kind: 'card', error: response.json});
+        }
     }).catch(error => store.dispatch({type: PAYMENT_ERROR, kind: 'network', error: error}));
 }
 
@@ -102,7 +101,9 @@ export function paypalRedirect(dispatch) {
         }
     })
     .then(response => {
-        return trackPayment(state.card.amount, state.data.currency.code).then(() => response);
+        return trackPayment(state.card.amount, state.data.currency.code)
+            .then(completeTests)
+            .then(() => response);
     })
     .then((res) =>  window.location = res.approvalUrl)
     .catch(error => dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }}));
