@@ -1,4 +1,4 @@
-import {SET_STRIPE_HANDLER, processStripePayment} from 'src/actions';
+import {SET_STRIPE_HANDLER, SUBMIT_PAYMENT, processStripePayment} from 'src/actions';
 import {inStripeCheckoutTest} from 'src/modules/abTests';
 
 import store from 'src/store';
@@ -17,7 +17,10 @@ function initStripeCheckout() {
         description: 'Make a contribution',
         allowRememberMe: false,
         zipCode: false,
-        token: token => processStripePayment(token)
+        token: token => {
+            store.dispatch({ type: SUBMIT_PAYMENT });
+            processStripePayment(token);
+        }
     });
 
     store.dispatch({
