@@ -41,6 +41,8 @@ function registerTestsWithOphan(tests, complete) {
             'variantName': test.variantSlug,
             'complete': String(complete)
         }
+
+        return obj;
     }, {}) || {};
 
     return ophan.record({
