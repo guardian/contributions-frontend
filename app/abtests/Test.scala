@@ -33,7 +33,7 @@ object Test {
   val cookiePrefix = "gu.contributions.ab"
   val testIdCookieName: String = s"$cookiePrefix.id"
 
-  val stripeTest = Test("Stripe checkout", 30.percent, 0.percent, Variant("control"), Variant("stripe"))
+  val stripeTest = Test("Stripe checkout", 100.percent, 0.percent, Variant("control"), Variant("stripe"))
   val allTests: Set[Test] = Set(stripeTest)
 
   def slugify(s: String): String = slugifier.slugify(s)
