@@ -4,7 +4,8 @@
 @(  pageInfo: PageInfo = views.support.PageInfo(),
     countryGroup: Option[CountryGroup] = None,
     maxAmount: Option[Int] = None,
-    mainScript: Option[String] = None
+    mainScript: Option[String] = None,
+    platform: Option[String] = None
 )(content: Html)
 @import play.api.libs.json.Json
 @import configuration.{Config, Social}
@@ -97,6 +98,7 @@
             Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.
         </div>
         <div class="container-global container-global--giraffe">
+            @if(!platform.contains("android")) {
             <header class="global-header hidden-print js-header" role="banner">
                 <div class="global-header__inner">
                     <div class="global-header__branding l-constrained">
@@ -142,6 +144,7 @@
                 </div>
                 @fragments.global.primaryNavigation(pageInfo, false)
             </header>
+            }
 
             <div id="container" class="giraffe-container">
                 @content
@@ -150,6 +153,7 @@
 
         <footer class="global-footer hidden-print global-footer--giraffe" role="contentinfo">
 
+            @if(!platform.contains("android")) {
             <div class="global-brandbar">
                 <div class="global-brandbar__inner l-constrained">
                     <div class="global-brandbar__top">
@@ -167,6 +171,7 @@
                     </div>
                 </div>
             </div>
+            }
 
             <div class="global-footer__info">
                 <div class="global-footer__info__inner l-constrained">
