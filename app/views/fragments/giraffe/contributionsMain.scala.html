@@ -7,9 +7,11 @@
     countryGroup: CountryGroup,
     maxAmount: Option[Int] = None,
     mainScript: Option[String] = None,
-    errorMessage:Option[String])(content: Html)
+    errorMessage: Option[String],
+    platform: Option[String]
+)(content: Html)
 
-@main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
+@main(pageInfo, Some(countryGroup), maxAmount, mainScript, platform) {
     <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
 
         @for(message <- errorMessage) {

@@ -1,9 +1,9 @@
 @import com.gu.i18n.CountryGroup
 @import views.support.PageInfo
 @import fragments.giraffe.contributionsMain
-@(pageInfo: PageInfo, countryGroup: CountryGroup)
+@(pageInfo: PageInfo, countryGroup: CountryGroup, platform: Option[String])
 
-@contributionsMain(pageInfo, countryGroup, None, None, None) {
+@contributionsMain(pageInfo, countryGroup, None, None, None, platform) {
 
     <div class="contribute-container">
         <div class="contribute-section postPaymentConfirmation">

@@ -16,10 +16,11 @@
     refererUrl: Option[String],
     creditCardExpiryYears: List[Int],
     errorMessage: Option[String],
-    csrfToken: Option[String]
+    csrfToken: Option[String],
+    platform: Option[String]
 )
 
-@contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage) {
+@contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage, platform) {
 
     <!-- react injects its components here -->
     <section id="contribute" class="contribute-container"
