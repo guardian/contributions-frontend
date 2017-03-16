@@ -2,8 +2,8 @@
 
 @import views.support.Social
 @import com.gu.i18n.CountryGroup
-@(pageInfo: PageInfo, social: Set[Social], countryGroup: CountryGroup, charge: Option[String], iosRedirectUrl: Option[String])
-    @main(pageInfo, mainScript = Some("thankYouPage.js")) {
+@(pageInfo: PageInfo, social: Set[Social], countryGroup: CountryGroup, charge: Option[String], iosRedirectUrl: Option[String], platform: Option[String])
+    @main(pageInfo, mainScript = Some("thankYouPage.js"), platform = platform) {
     <script type="text/javascript">
         @if(charge.isDefined) {
             guardian.productDetails = {
