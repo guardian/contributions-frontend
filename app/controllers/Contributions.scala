@@ -57,6 +57,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       val intCmp = request.getQueryString("INTCMP")
       val refererPageviewId = request.getQueryString("REFPVID")
       val refererUrl = request.headers.get("referer")
+      val platform = request.getQueryString("platform")
 
       val pageInfo = PageInfo(
         title = "Support the Guardian | Contribute today",
@@ -81,7 +82,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
         refererUrl,
         creditCardExpiryYears,
         errorMessage,
-        CSRF.getToken.map(_.value)
+        CSRF.getToken.map(_.value),
+        platform
       ))
     }
   }
