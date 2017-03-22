@@ -31,7 +31,7 @@ object CommonActions {
   }
 
   case class ABTestRequest[A](testId: Int, request: Request[A]) extends WrappedRequest(request) {
-    val testAllocations = Test.allocations(testId)
+    val testAllocations = Test.allocations(testId, request)
   }
 
   object ABTestAction extends ActionBuilder[ABTestRequest] {

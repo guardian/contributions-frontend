@@ -2,13 +2,20 @@ package abtests
 
 import com.github.slugify.Slugify
 import play.api.libs.json.{JsValue, Json, Writes}
-import play.api.mvc.Cookie
+import play.api.mvc.{Cookie, Request}
+
+import scala.util.matching.Regex
 
 case class Percentage(value: Double) {
   def of[B](x: B)(implicit numB: Numeric[B]): Double = numB.toDouble(x) / 100 * value
 }
 
-case class Test(name: String, audienceSize: Percentage, audienceOffset: Percentage, variants: Variant*) {
+sealed trait Test {
+  val name: String
+  val audienceSize: Percentage
+  val audienceOffset: Percentage
+  val variants: Iterable[Variant]
+
   val startId: Int = audienceOffset.of(Test.maxTestId).toInt
   val endId: Int = startId + audienceSize.of(Test.maxTestId).toInt
   val idRange: Range = startId.to(endId).tail
@@ -16,10 +23,19 @@ case class Test(name: String, audienceSize: Percentage, audienceOffset: Percenta
   val slug: String = Test.slugify(name)
   val cookieName: String = s"${Test.cookiePrefix}.${slug}"
 
-  def allocate(id: Int): Option[Allocation] = {
-    if (!idRange.contains(id)) None
-    else Some(Allocation(this, variants.toList(id % variants.size)))
+  def canRun(req: Request[_]): Boolean
+
+  def allocate(id: Int, request: Request[_]): Option[Allocation] = {
+    if (idRange.contains(id) && canRun(request)) Some(Allocation(this, variants.toList(id % variants.size)))
+    else None
   }
+}
+
+case class SplitTest(name: String, audienceSize: Percentage, audienceOffset: Percentage, variants: Variant*) extends Test {
+  override def canRun(req: Request[_]): Boolean = true
+}
+case class ConditionalTest(name: String, audienceSize: Percentage, audienceOffset: Percentage, canRunCheck: Request[_] => Boolean, variants: Variant*) extends Test {
+  override def canRun(req: Request[_]): Boolean = canRunCheck(req)
 }
 
 object Test {
@@ -33,12 +49,16 @@ object Test {
   val cookiePrefix = "gu.contributions.ab"
   val testIdCookieName: String = s"$cookiePrefix.id"
 
-  val stripeTest = Test("Stripe checkout", 100.percent, 0.percent, Variant("control"), Variant("stripe"))
-  val allTests: Set[Test] = Set(stripeTest)
+  def cmpCheck(pattern: Regex)(r: Request[_]): Boolean =
+    r.getQueryString("INTCMP").exists(pattern.findAllIn(_).nonEmpty)
+
+  val stripeTest = SplitTest("Stripe checkout", 100.percent, 0.percent, Variant("control"), Variant("stripe"))
+  val landingPageTest = ConditionalTest("Landing page", 100.percent, 0.percent, cmpCheck("mem_.*_banner".r), Variant("control"), Variant("with-copy"))
+  val allTests: Set[Test] = Set(stripeTest, landingPageTest)
 
   def slugify(s: String): String = slugifier.slugify(s)
   def idCookie(id: Int) = Cookie(testIdCookieName, id.toString, maxAge = Some(604800))
-  def allocations(id: Int): Set[Allocation] = allTests.flatMap(_.allocate(id))
+  def allocations(id: Int, request: Request[_]): Set[Allocation] = allTests.flatMap(_.allocate(id, request))
 }
 
 case class Variant(name: String) {
