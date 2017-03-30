@@ -1,0 +1,73 @@
+@import com.gu.i18n.CountryGroup
+@import views.support.PageInfo
+@import views.support.CountryGroupImplicits._
+@import abtests.Allocation
+
+@(pageInfo: PageInfo = views.support.PageInfo(),
+    countryGroup: CountryGroup,
+    maxAmount: Option[Int] = None,
+    mainScript: Option[String] = None,
+    errorMessage:Option[String])(content: Html)
+
+@main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
+    <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
+
+        @for(message <- errorMessage) {
+            <div id="errorDialog" class="overlay">
+                <div>
+                    <h1 class="errorHeader">We're sorry</h1>
+                    <p class="errorMessage">@message</p>
+                    <button class="action action--button contribute-navigation__next" id="errorDialogButton">OK</button>
+
+                </div>
+            </div>
+        }
+
+        <section class="contributions__inner page-slice l-constrained flex-horizontal-from-tablet">
+            <div class="contributions__inner-wrapper">
+                <div class="contributions__landing">
+                    <hr />
+                    <h2 class="contributions__intro--landing">Now that you’re here …</h2>
+
+                    <p>… we’d like to explain why we need your support. Advertising revenues across the media are falling fast. And unlike many news organisations, we haven’t put up a paywall – we want to keep our journalism as open as we can. The Guardian's independent, investigative journalism takes a lot of time, money and hard work to produce.</p>
+                    <p>If everyone who reads our reporting, who likes it, helps to support it, our future would be much more secure. Reader contributions support the Guardian’s editorial operations.</p>
+                </div>
+
+                <div class="contributions__landing-headers">
+                    <h1 class="contributions__heading--main contributions__heading--landing">
+                        Support the Guardian’s journalism.</h1>
+                    <h2 class="contributions__heading--sub contributions__heading--landing">
+                        Make a one-off contribution today.</h2>
+                </div>
+            </div>
+
+            @content
+        </section>
+    </main>
+
+    <section class="disclaimer">
+        <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
+            <div class="feedback">
+                <p>
+                    The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
+                </p>
+
+                <p data-shown="gbp aud eur">
+                    Please note that your support of the Guardian’s journalism does not constitute a charitable donation, as such your contribution is not eligible for Gift Aid in the UK nor a tax-deduction elsewhere.
+                </p>
+
+                <p data-shown="usd">
+                    Please note that the Guardian is not a charity, will not use your support for charitable
+                    programs, and your support of the Guardian’s journalism does not constitute a
+                    charitable donation. As such your contribution is not eligible to be treated as a
+                    charitable deduction for federal or state taxes in the United States or elsewhere.
+                </p>
+
+                <p>
+                    If you have any questions about contributing to the Guardian, please <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">
+                    contact us here</a>.
+                </p>
+            </div>
+        </div>
+    </section>
+}
