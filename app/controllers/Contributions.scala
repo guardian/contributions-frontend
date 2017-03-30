@@ -2,6 +2,7 @@ package controllers
 
 import java.time.LocalDate
 
+import abtests.Test
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
@@ -81,7 +82,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
         refererUrl,
         creditCardExpiryYears,
         errorMessage,
-        CSRF.getToken.map(_.value)
+        CSRF.getToken.map(_.value),
+        request.isAllocated(Test.landingPageTest, "with-copy")
       ))
     }
   }

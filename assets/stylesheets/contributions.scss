@@ -168,17 +168,7 @@ $control-spacing: 5px;
     }
 
     hr {
-        border: 0;
-        width: 80px;
-        height: 1px;
-        color: color(neutral-1);
-        background: color(neutral-1);
-        margin-left: 0;
-        margin-bottom: 7px;
-
-        @include mq(desktop) {
-            margin-bottom: 8px;
-        }
+        @include black-line(80px);
     }
 }
 
@@ -549,4 +539,56 @@ $currencies: gbp usd aud eur nzd cad;
 :invalid {
     box-shadow: none;
     outline: 0;
+}
+
+.contributions__landing {
+    margin-top: 40px;
+    max-width: 612px;
+
+    @include mq(tablet) {
+        margin-right: 40px;
+    }
+
+    .contributions__intro--landing {
+        @include fs-header(4);
+        margin-bottom: 20px;
+    }
+
+    p {
+        @include fs-bodyCopy(2);
+    }
+
+    hr {
+        @include black-line(140px);
+    }
+}
+
+.contributions__heading--landing {
+    font-size: 24px;
+    line-height: 28px;
+
+    @include mq(tablet) {
+        font-size: 36px;
+        line-height: 36px;
+    }
+}
+
+.contributions__heading--main.contributions__heading--landing {
+    margin-top: 20px;
+
+    @include mq(tablet) {
+        margin-top: 40px;
+    }
+}
+
+.contributions__heading--sub.contributions__heading--landing {
+    margin-bottom: 20px;
+
+    @include mq(desktop) {
+        margin-left: 80px;
+    }
+}
+
+.contributions__landing-headers {
+    margin-right: 10px;
 }
