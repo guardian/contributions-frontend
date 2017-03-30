@@ -32,6 +32,7 @@ object CommonActions {
 
   case class ABTestRequest[A](testId: Int, request: Request[A]) extends WrappedRequest(request) {
     val testAllocations = Test.allocations(testId, request)
+    def isAllocated(test: Test, variantName: String) = testAllocations.exists(a => a.test == test && a.variant.name == variantName)
   }
 
   object ABTestAction extends ActionBuilder[ABTestRequest] {

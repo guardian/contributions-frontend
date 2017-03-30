@@ -44,7 +44,13 @@ object Test {
 
   def slugify(s: String): String = slugifier.slugify(s)
   def idCookie(id: Int) = Cookie(testIdCookieName, id.toString, maxAge = Some(604800))
-  def allocations(id: Int, request: Request[_]): Set[Allocation] = allTests.flatMap(_.allocate(id, request))
+
+  def allocations(id: Int, request: Request[_]): Set[Allocation] = {
+    Allocation.force(request, allTests) match {
+      case Some(forced) => Set(forced)
+      case None => allTests.flatMap(_.allocate(id, request))
+    }
+  }
 }
 
 case class Variant(name: String) {
@@ -54,6 +60,15 @@ case class Variant(name: String) {
 case class Allocation(test: Test, variant: Variant)
 
 object Allocation {
+  def force(request: Request[_], tests: Set[Test]): Option[Allocation] = for {
+    params <- request.getQueryString("ab")
+    allocation = params.split('=')
+    testName <- allocation.lift(0)
+    variantName <- allocation.lift(1)
+    test <- tests.find(t => t.name.equalsIgnoreCase(testName) || t.slug.equalsIgnoreCase(testName))
+    variant <- test.variants.find(v => v.name.equalsIgnoreCase(variantName) || v.slug.equalsIgnoreCase(variantName))
+  } yield Allocation(test, variant)
+
   implicit val aw = new Writes[Allocation] {
     override def writes(a: Allocation): JsValue = Json.obj(
       "testName" -> a.test.name,
