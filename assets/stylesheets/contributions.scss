@@ -584,7 +584,9 @@ $currencies: gbp usd aud eur nzd cad;
 .contributions__heading--sub.contributions__heading--landing {
     margin-bottom: 20px;
 
-    @include mq(desktop) {
+    margin-left: 40px;
+
+    @include mq(tablet) {
         margin-left: 80px;
     }
 }
