@@ -54,7 +54,7 @@ module.exports = function (grunt) {
             options: isDev ? require('./webpack.config.js') : require('./webpack.config.prod.js'),
             frontend: {
                 output: {
-                    path: 'public/',
+                    path: require('path').resolve(__dirname, 'public'),
                     chunkFilename:  'webpack/[chunkhash].js',
                     filename: "javascripts/[name].js",
                     publicPath: '/assets/'
