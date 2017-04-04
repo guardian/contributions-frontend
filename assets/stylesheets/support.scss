@@ -1,16 +1,38 @@
+@import 'vars';
+@import 'functions';
+@import 'mixins';
+@import 'utilities/util-layout';
+
+
+.thanks--feedback {
+    display: flex;
+    flex-direction: column;
+    padding-left: 12px;
+    padding-right: 12px;
+
+    @include mq(desktop) {
+        flex-direction: row;
+    }
+
+    @include mq(mem-full) {
+        padding-left: $gs-gutter * 2.5;
+        padding-right: $gs-gutter * 2.5;
+    }
+}
 
 .thanks {
     &.contributions__inner {
         padding-top: $gs-baseline;
     }
 
-    @include mq(desktop) {
+    @include mq(mem-full) {
 
         section {
-            width: 650px;
+            width: 660px;
         }
-        padding-left: $gs-gutter * 3;
+        padding-left: $gs-gutter * 2.5;
     }
+
     .thanks--description {
         color: $c-neutral1;
         font-weight: normal;
@@ -50,8 +72,11 @@
     margin-top: -1em;
 }
 
-.thanks--social {
+.thanks--survey {
     margin-bottom: 50px;
+    padding-right:  $gs-gutter * 5;
+    flex-grow:2;
+
     h2 {
         color: #c05303;
         font-family: $f-sans-serif-headline;
@@ -62,4 +87,21 @@
         @include f-bodyCopy;
         @include fs-header(5, true);
     }
+
+    .action--button_survey {
+        background-color: #fff;
+        color: #000;
+        border-color: $c-neutral4;
+        height: 36px;
+        font-weight: normal;
+
+        span {
+            padding-right:10px;
+        }
+
+        &:hover, &:focus {
+            border-color: $c-neutral1;
+        }
+    }
+
 }
