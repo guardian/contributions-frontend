@@ -30,6 +30,7 @@
         display:block;
 
     }
+
     h1 {
         &:first-of-type {
             padding-top: 1em;
@@ -74,7 +75,7 @@
     p {
         color: $c-neutral1;
         @include f-bodyCopy;
-        @include font-size(24);
+        @include fs-header(5, true);
     }
 
     .action--button_survey {
