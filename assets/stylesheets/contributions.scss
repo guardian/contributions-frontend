@@ -162,7 +162,7 @@ $control-spacing: 5px;
 
 .contributions__inner,
 .feedback {
-    padding: 0 $gs-baseline $gs-gutter;
+    padding: 0 $gs-gutter $gs-baseline;
 
     @include mq(mem-full) {
         padding-left: $gs-gutter * 2;

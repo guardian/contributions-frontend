@@ -1,14 +1,11 @@
 .thanks--feedback {
     display: flex;
     flex-direction: column;
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: $gs-gutter;
+    padding-right: $gs-gutter;
 
     @include mq(desktop) {
         flex-direction: row;
-    }
-
-    @include mq(mem-full) {
         padding-left: $gs-gutter * 2.5;
         padding-right: $gs-gutter * 2.5;
     }
@@ -19,7 +16,7 @@
         padding-top: $gs-baseline;
     }
 
-    @include mq(mem-full) {
+    @include mq(desktop) {
 
         section {
             width: 660px;
