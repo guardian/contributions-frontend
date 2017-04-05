@@ -5,6 +5,17 @@
 
 $control-spacing: 5px;
 
+.container-global--giraffe {
+    display: flex;
+    flex-direction: column;
+}
+
+.giraffe-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
 .legal_notice {
     padding-top: 15px;
 
@@ -151,7 +162,7 @@ $control-spacing: 5px;
 
 .contributions__inner,
 .feedback {
-    padding: 0 $gs-baseline $gs-gutter;
+    padding: 0 $gs-gutter $gs-baseline;
 
     @include mq(mem-full) {
         padding-left: $gs-gutter * 2;
@@ -177,6 +188,10 @@ $control-spacing: 5px;
     font-size: 16px;
     line-height: 20px;
     margin-bottom: $gs-baseline;
+
+    &:last-of-type {
+        margin-bottom: $gs-baseline * 3;
+    }
 
     @include mq($until: tablet) {
         strong {
@@ -493,6 +508,8 @@ $currencies: gbp usd aud eur nzd cad;
 
 .disclaimer {
     background: #E7E7E7;
+    flex: 1 1 auto;
+    display: flex;
 
     .l-constrained {
         padding-top: $gs-baseline;

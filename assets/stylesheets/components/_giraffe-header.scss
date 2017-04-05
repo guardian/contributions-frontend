@@ -61,7 +61,7 @@
 
     .global-header {
         @include mq($until: tablet) {
-            height: unset;
+            height: auto;
         }
         background-color: #005689;
     }
