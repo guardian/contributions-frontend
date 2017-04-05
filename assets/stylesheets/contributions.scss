@@ -5,6 +5,17 @@
 
 $control-spacing: 5px;
 
+.container-global--giraffe {
+    display: flex;
+    flex-direction: column;
+}
+
+.giraffe-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
 .legal_notice {
     padding-top: 15px;
 
@@ -497,6 +508,8 @@ $currencies: gbp usd aud eur nzd cad;
 
 .disclaimer {
     background: #E7E7E7;
+    flex: 1 1 auto;
+    display: flex;
 
     .l-constrained {
         padding-top: $gs-baseline;
