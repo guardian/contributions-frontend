@@ -178,6 +178,10 @@ $control-spacing: 5px;
     line-height: 20px;
     margin-bottom: $gs-baseline;
 
+    &:last-of-type {
+        margin-bottom: $gs-baseline * 3;
+    }
+
     @include mq($until: tablet) {
         strong {
             font-weight: normal;
