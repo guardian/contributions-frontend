@@ -1,9 +1,3 @@
-@import 'vars';
-@import 'functions';
-@import 'mixins';
-@import 'utilities/util-layout';
-
-
 .thanks--feedback {
     display: flex;
     flex-direction: column;
@@ -12,9 +6,6 @@
 
     @include mq(desktop) {
         flex-direction: row;
-    }
-
-    @include mq(mem-full) {
         padding-left: $gs-gutter * 2.5;
         padding-right: $gs-gutter * 2.5;
     }
@@ -25,7 +16,7 @@
         padding-top: $gs-baseline;
     }
 
-    @include mq(mem-full) {
+    @include mq(desktop) {
 
         section {
             width: 660px;
