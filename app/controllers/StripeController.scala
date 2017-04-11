@@ -6,8 +6,6 @@ import java.time.Instant
 import actions.CommonActions._
 import cats.data.EitherT
 import cats.syntax.show._
-import cookies.ContribTimestampCookieAttributes
-import cookies.syntax._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n.{AUD, Currency, EUR, USD}
 import com.gu.stripe.Stripe
@@ -15,13 +13,16 @@ import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.typesafe.config.Config
 import cookies.ContribTimestampCookieAttributes
+import cookies.syntax._
 import models._
 import org.joda.time.DateTime
 import play.api.Logger
-import play.api.data.{Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.data.{Form, FormError}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Reads
+import play.api.libs.json._
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import utils.MaxAmount
@@ -49,22 +50,22 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
   }
 
   case class SupportForm(
-    name: String,
-    currency: Currency,
-    amount: BigDecimal,
-    email: String,
-    token: String,
-    marketing: Boolean,
-    postcode: Option[String],
-    abTests: Set[JsonAbTest],
-    ophanPageviewId: String,
-    ophanBrowserId: Option[String],
-    cmp: Option[String],
-    intcmp: Option[String],
-    refererPageviewId: Option[String],
-    refererUrl: Option[String]
+                          name: String,
+                          currency: Currency,
+                          amount: BigDecimal,
+                          email: String,
+                          token: String,
+                          marketing: Boolean,
+                          postcode: Option[String],
+                          abTests: Set[JsonAbTest],
+                          ophanPageviewId: String,
+                          ophanBrowserId: Option[String],
+                          cmp: Option[String],
+                          intcmp: Option[String],
+                          refererPageviewId: Option[String],
+                          refererUrl: Option[String]
 
-  )
+                        )
 
   val supportForm: Form[SupportForm] = Form(
     mapping(
@@ -194,4 +195,95 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       }
     }
   }
+
+  case class AppContributionRequest(
+    name: String,
+    currency: Currency,
+    amount: BigDecimal,
+    email: String,
+    token: String/*,
+    marketing: Boolean,
+    postcode: Option[String],
+    abTests: Set[JsonAbTest],
+    ophanPageviewId: String,
+    ophanBrowserId: Option[String],
+    intcmp: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String]
+    */
+  )
+
+  object AppContributionRequest {
+    implicit val currencyFormatter: Reads[Currency] = new Reads[Currency] {
+      override def reads(json: JsValue): JsResult[Currency] = json match {
+        case JsString(symbol) => Currency.fromString(symbol).map(currency => JsSuccess.apply(currency)).getOrElse(JsError(s"Unable to parse $symbol"))
+        case _ => JsError("Unable to parse currency, was expecting a JsString")
+      }
+    }
+    implicit val requestReads: Reads[AppContributionRequest] = (
+      (JsPath \ "name").read[String] and
+        (JsPath \ "currency").read[Currency] and
+        (JsPath \ "amount").read[BigDecimal] and
+        (JsPath \ "email").read[String](Reads.email) and
+        (JsPath \ "token").read[String]
+    )(AppContributionRequest.apply _)
+
+    /*
+    implicit val reader = new Reads[AppContributionRequest] {
+      override def reads(json: JsValue): JsResult[AppContributionRequest] = {
+        for {
+          name <- (json \ "name").validate[String]
+          currency <- (json \ "currency").validate[Currency]
+          amount <- (json \ "amount").validate[BigDecimal]
+          email <- (json \ "email").validate[String](Reads.email)
+          token <- (json \ "token").validate[String]
+          /*
+          payload <- (json \ "data" \ "object").validate[JsObject]
+          metadata <- (payload \ "metadata").validate[JsObject]
+          contributionId <- (metadata \ "contributionId").validate[ContributionId]
+          paymentId <- (payload \ "id").validate[String]
+          liveMode <- (payload \ "livemode").validate[Boolean]
+          created <- (payload \ "created").validate[Long]
+          currency <- (payload \ "currency").validate[String]
+          amount <- (payload \ "amount").validate[Long]
+          status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
+          email <- (metadata \ "email").validate[String]
+          refunded <- (payload \ "refunded").validate[Boolean]
+          */
+        } yield {
+          AppContributionRequest(
+            name,
+            currency,
+            amount,
+            token
+          )
+        }
+      }
+    }
+      */
+  }
+
+
+  def appPay = NoCacheAction.async(BodyParsers.parse.json[AppContributionRequest]) { request =>
+
+    val stripe = paymentServices.stripeServiceFor(request)
+
+    // Get the contribution amount in pence/cents/similar (only works for some currencies)
+    val amountInSmallestCurrencyUnit = (request.body.amount * 100).toInt
+    val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(request.body.currency) * 100
+
+    // TODO: I think that if the amount is too big then that's an error and we should report back to the user and ask
+    // them what they want to do rather than charging them an amount they didn't specify, but I'll leave this as it is
+    // at the moment because this is the behaviour of the existing pay method
+    val amount = min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit)
+
+    val metadata: Map[String, String] = Map.empty
+
+    def createCharge: Future[Stripe.Charge] = {
+      stripe.Charge.create(amount, request.body.currency, request.body.email, "Your contribution", request.body.token, metadata)
+    }
+
+    Future(Ok)
+  }
+
 }
