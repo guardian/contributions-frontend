@@ -4,6 +4,8 @@ import java.lang.Math._
 import java.time.Instant
 
 import actions.CommonActions._
+import cats.data.EitherT
+import cats.syntax.show._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n.{AUD, Currency, EUR, USD}
 import com.gu.stripe.Stripe
@@ -14,6 +16,13 @@ import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import models._
 import org.joda.time.DateTime
+import play.api.Logger
+import play.api.data.Forms._
+import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import utils.MaxAmount
 
@@ -21,7 +30,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
   extends Controller with Redirect {
-  import ContribTimestampCookieAttributes._
 
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
@@ -193,8 +201,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     amount: BigDecimal,
     token: String,
     platform: String,
+    ophanPageViewId: String,
     intcmp: Option[String],
-    ophanPageViewId: Option[String],
     ophanBrowserId: Option[String],
     referrerPageViewId: Option[String],
     referrerUrl: Option[String]
@@ -214,8 +222,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
         (JsPath \ "amount").read[BigDecimal] and
         (JsPath \ "token").read[String] and
         (JsPath \ "platform").read[String] and
+        (JsPath \ "ophanPageViewId").read[String] and
         (JsPath \ "intcmp").readNullable[String] and
-        (JsPath \ "ophanPageViewId").readNullable[String] and
         (JsPath \ "ophanBrowserId").readNullable[String] and
         (JsPath \ "referrerPageViewId").readNullable[String] and
         (JsPath \ "referrerUrl").readNullable[String]
@@ -244,10 +252,10 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       "email" -> request.body.email,
       "name" -> request.body.name,
       "platform" -> request.body.platform,
-      "contributionId" -> contributionId.toString
+      "contributionId" -> contributionId.toString,
+      "ophanPageviewId" -> request.body.ophanPageViewId
     ) ++ List(
       request.body.intcmp.map("intcmp" -> _),
-      request.body.ophanPagewViewId.map("ophanPageviewId" -> _),
       request.body.ophanBrowserId.map("ophanBrowserId" -> _),
       request.body.referrerPageViewId.map("refererPageviewId" -> _),
       request.body.referrerUrl.map("refererUrl" -> _),
@@ -269,7 +277,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
         testAllocations = Set.empty,
         cmp = None,
         intCmp = request.body.intcmp,
-        refererPageviewId = request.body.referrerPathViewId,
+        refererPageviewId = request.body.referrerPageViewId,
         refererUrl = request.body.referrerUrl,
         ophanPageviewId = request.body.ophanPageViewId,
         ophanBrowserId = request.body.ophanBrowserId,
