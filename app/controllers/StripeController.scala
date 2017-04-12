@@ -48,22 +48,21 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
   }
 
   case class SupportForm(
-                          name: String,
-                          currency: Currency,
-                          amount: BigDecimal,
-                          email: String,
-                          token: String,
-                          marketing: Boolean,
-                          postcode: Option[String],
-                          abTests: Set[JsonAbTest],
-                          ophanPageviewId: String,
-                          ophanBrowserId: Option[String],
-                          cmp: Option[String],
-                          intcmp: Option[String],
-                          refererPageviewId: Option[String],
-                          refererUrl: Option[String]
-
-                        )
+    name: String,
+    currency: Currency,
+    amount: BigDecimal,
+    email: String,
+    token: String,
+    marketing: Boolean,
+    postcode: Option[String],
+    abTests: Set[JsonAbTest],
+    ophanPageviewId: String,
+    ophanBrowserId: Option[String],
+    cmp: Option[String],
+    intcmp: Option[String],
+    refererPageviewId: Option[String],
+    refererUrl: Option[String]
+  )
 
   val supportForm: Form[SupportForm] = Form(
     mapping(
