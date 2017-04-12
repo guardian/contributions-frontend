@@ -258,7 +258,31 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       stripe.Charge.create(amount, request.body.currency, request.body.email, "Your contribution", request.body.token, metadata)
     }
 
-    Future(Ok)
+    def storeMetaData(charge: Charge) = {
+      stripe.storeMetaData(
+        contributionId = contributionId,
+        charge = charge,
+        created = new DateTime(charge.created * 1000L),
+        name = request.body.name,
+        postCode = None,
+        marketing = false,
+        testAllocations = Set.empty,
+        cmp = None,
+        intCmp = request.body.intcmp,
+        refererPageviewId = request.body.referrerPathViewId,
+        refererUrl = request.body.referrerUrl,
+        ophanPageviewId = request.body.ophanPageViewId,
+        ophanBrowserId = request.body.ophanBrowserId,
+        idUser = userId
+      )
+    }
+
+    createCharge.map { charge =>
+      storeMetaData(charge)
+      Ok
+    }.recover {
+      case e: Stripe.Error => BadRequest(Json.toJson(e))
+    }
   }
 
 }
