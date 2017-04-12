@@ -4,8 +4,6 @@ import java.lang.Math._
 import java.time.Instant
 
 import actions.CommonActions._
-import cats.data.EitherT
-import cats.syntax.show._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n.{AUD, Currency, EUR, USD}
 import com.gu.stripe.Stripe
@@ -16,14 +14,6 @@ import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import models._
 import org.joda.time.DateTime
-import play.api.Logger
-import play.api.data.Forms._
-import play.api.data.format.Formatter
-import play.api.data.{Form, FormError}
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads
-import play.api.libs.json._
-import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import utils.MaxAmount
 
@@ -198,19 +188,16 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
 
   case class AppContributionRequest(
     name: String,
+    email: String,
     currency: Currency,
     amount: BigDecimal,
-    email: String,
-    token: String/*,
-    marketing: Boolean,
-    postcode: Option[String],
-    abTests: Set[JsonAbTest],
-    ophanPageviewId: String,
-    ophanBrowserId: Option[String],
+    token: String,
+    platform: String,
     intcmp: Option[String],
-    refererPageviewId: Option[String],
-    refererUrl: Option[String]
-    */
+    ophanPageViewId: Option[String],
+    ophanBrowserId: Option[String],
+    referrerPageViewId: Option[String],
+    referrerUrl: Option[String]
   )
 
   object AppContributionRequest {
@@ -222,62 +209,50 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     }
     implicit val requestReads: Reads[AppContributionRequest] = (
       (JsPath \ "name").read[String] and
+        (JsPath \ "email").read[String](Reads.email) and
         (JsPath \ "currency").read[Currency] and
         (JsPath \ "amount").read[BigDecimal] and
-        (JsPath \ "email").read[String](Reads.email) and
-        (JsPath \ "token").read[String]
+        (JsPath \ "token").read[String] and
+        (JsPath \ "platform").read[String] and
+        (JsPath \ "intcmp").readNullable[String] and
+        (JsPath \ "ophanPageViewId").readNullable[String] and
+        (JsPath \ "ophanBrowserId").readNullable[String] and
+        (JsPath \ "referrerPageViewId").readNullable[String] and
+        (JsPath \ "referrerUrl").readNullable[String]
     )(AppContributionRequest.apply _)
-
-    /*
-    implicit val reader = new Reads[AppContributionRequest] {
-      override def reads(json: JsValue): JsResult[AppContributionRequest] = {
-        for {
-          name <- (json \ "name").validate[String]
-          currency <- (json \ "currency").validate[Currency]
-          amount <- (json \ "amount").validate[BigDecimal]
-          email <- (json \ "email").validate[String](Reads.email)
-          token <- (json \ "token").validate[String]
-          /*
-          payload <- (json \ "data" \ "object").validate[JsObject]
-          metadata <- (payload \ "metadata").validate[JsObject]
-          contributionId <- (metadata \ "contributionId").validate[ContributionId]
-          paymentId <- (payload \ "id").validate[String]
-          liveMode <- (payload \ "livemode").validate[Boolean]
-          created <- (payload \ "created").validate[Long]
-          currency <- (payload \ "currency").validate[String]
-          amount <- (payload \ "amount").validate[Long]
-          status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
-          email <- (metadata \ "email").validate[String]
-          refunded <- (payload \ "refunded").validate[Boolean]
-          */
-        } yield {
-          AppContributionRequest(
-            name,
-            currency,
-            amount,
-            token
-          )
-        }
-      }
-    }
-      */
   }
 
 
   def appPay = NoCacheAction.async(BodyParsers.parse.json[AppContributionRequest]) { request =>
-
     val stripe = paymentServices.stripeServiceFor(request)
+
+    val contributionId = ContributionId.random
+    val userId = IdentityId.fromRequest(request) // TODO (won't work)
 
     // Get the contribution amount in pence/cents/similar (only works for some currencies)
     val amountInSmallestCurrencyUnit = (request.body.amount * 100).toInt
-    val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(request.body.currency) * 100
 
+    // Cap the contribution amount, according to currency
     // TODO: I think that if the amount is too big then that's an error and we should report back to the user and ask
     // them what they want to do rather than charging them an amount they didn't specify, but I'll leave this as it is
     // at the moment because this is the behaviour of the existing pay method
+    val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(request.body.currency) * 100
     val amount = min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit)
 
-    val metadata: Map[String, String] = Map.empty
+    // Pull together the metadata for this contribution into a map
+    val metadata = Map(
+      "email" -> request.body.email,
+      "name" -> request.body.name,
+      "platform" -> request.body.platform,
+      "contributionId" -> contributionId.toString
+    ) ++ List(
+      request.body.intcmp.map("intcmp" -> _),
+      request.body.ophanPagewViewId.map("ophanPageviewId" -> _),
+      request.body.ophanBrowserId.map("ophanBrowserId" -> _),
+      request.body.referrerPageViewId.map("refererPageviewId" -> _),
+      request.body.referrerUrl.map("refererUrl" -> _),
+      userId.map("idUser" -> _.id)
+    ).flatten.toMap
 
     def createCharge: Future[Stripe.Charge] = {
       stripe.Charge.create(amount, request.body.currency, request.body.email, "Your contribution", request.body.token, metadata)
