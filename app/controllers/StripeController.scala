@@ -229,7 +229,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     )(AppContributionRequest.apply _)
   }
 
-
   def appPay = NoCacheAction.async(BodyParsers.parse.json[AppContributionRequest]) { request =>
     val stripe = paymentServices.stripeServiceFor(request)
 
