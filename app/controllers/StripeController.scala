@@ -42,12 +42,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       Map(key -> value.identifier)
   }
 
-  case class JsonAbTest(testName: String, testSlug: String, variantName: String, variantSlug: String)
-
-  object JsonAbTest {
-    implicit val abTestFormat = Json.format[JsonAbTest]
-  }
-
   case class SupportForm(
     name: String,
     currency: Currency,
@@ -56,7 +50,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     token: String,
     marketing: Boolean,
     postcode: Option[String],
-    abTests: Set[JsonAbTest],
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
     cmp: Option[String],
@@ -75,12 +68,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       "token" -> nonEmptyText,
       "marketing" -> boolean,
       "postcode" -> optional(nonEmptyText),
-      "abTests" -> set(mapping(
-        "testName" -> text,
-        "testSlug" -> text,
-        "variantName" -> text,
-        "variantSlug" -> text
-      )(JsonAbTest.apply)(JsonAbTest.unapply)),
       "ophanPageviewId" -> text,
       "ophanBrowserId" -> optional(text),
       "cmp" -> optional(text),
