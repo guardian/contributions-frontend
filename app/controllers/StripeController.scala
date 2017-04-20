@@ -6,8 +6,6 @@ import java.time.Instant
 import actions.CommonActions._
 import cats.data.EitherT
 import cats.syntax.show._
-import cookies.ContribTimestampCookieAttributes
-import cookies.syntax._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n.{AUD, Currency, EUR, USD}
 import com.gu.stripe.Stripe
@@ -15,12 +13,13 @@ import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.typesafe.config.Config
 import cookies.ContribTimestampCookieAttributes
+import cookies.syntax._
 import models._
 import org.joda.time.DateTime
 import play.api.Logger
-import play.api.data.{Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
@@ -30,7 +29,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
   extends Controller with Redirect {
-  import ContribTimestampCookieAttributes._
 
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
