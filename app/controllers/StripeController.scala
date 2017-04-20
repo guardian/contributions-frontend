@@ -40,7 +40,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       Map(key -> value.identifier)
   }
 
-  case class SupportForm(
+  case class ContributionRequest(
     name: String,
     currency: Currency,
     amount: BigDecimal,
@@ -57,7 +57,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
 
   )
 
-  val supportForm: Form[SupportForm] = Form(
+  val contributionForm: Form[ContributionRequest] = Form(
     mapping(
       "name" -> text,
       "currency" -> of[Currency],
@@ -72,10 +72,10 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       "intcmp" -> optional(text),
       "refererPageviewId" -> optional(text),
       "refererUrl" -> optional(text)
-    )(SupportForm.apply)(SupportForm.unapply)
+    )(ContributionRequest.apply)(ContributionRequest.unapply)
   )
 
-  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async(parse.form(supportForm)) { implicit request =>
+  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async(parse.form(contributionForm)) { implicit request =>
 
     val form = request.body
 
