@@ -20,8 +20,8 @@ import play.api.Logger
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{BodyParsers, Controller, Result}
+import play.api.libs.json._
+import play.api.mvc._
 import services.PaymentServices
 import utils.MaxAmount
 
@@ -54,7 +54,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     intcmp: Option[String],
     refererPageviewId: Option[String],
     refererUrl: Option[String]
-
   )
 
   val contributionForm: Form[ContributionRequest] = Form(
@@ -75,7 +74,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     )(ContributionRequest.apply)(ContributionRequest.unapply)
   )
 
-  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async(parse.form(contributionForm)) { implicit request =>
+  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async(BodyParsers.jsonOrMultipart(contributionForm)) { implicit request =>
 
     val form = request.body
 
@@ -156,7 +155,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
   val webhookKey = stripeConfig.getString("webhook.key")
 
   def hook = SharedSecretAction(webhookKey) {
-    NoCacheAction.async(BodyParsers.parse.json) { request =>
+    NoCacheAction.async(parse.json) { request =>
 
       def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result]): Future[Result] = {
         stripeHookJson.validate[StripeHook] match {
