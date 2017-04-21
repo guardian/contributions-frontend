@@ -2,6 +2,7 @@
 @import 'functions';
 @import 'mixins';
 @import 'utilities/util-layout';
+@import 'svg';
 
 $control-spacing: 5px;
 
@@ -611,3 +612,37 @@ $currencies: gbp usd aud eur nzd cad;
 .contributions__landing-headers {
     margin-right: 10px;
 }
+
+
+// Humanise tests
+
+.contributions__landing {
+
+    .contributions__header__testimonial--landing {
+        font-size: 32px;
+        color: #ffffff;
+    }
+
+    .contributions__name__testimonial--landing {
+        font-style: italic;
+    }
+
+    .contributions__paragraph__testimonial {
+        margin-top: 32px;
+        font-family: "Guardian Text Sans Web";
+        font-size: 14pt;
+    }
+}
+
+
+
+
+//.contributions__paragraph__testimonial:before {
+//    color: white;
+//    content: "\"";
+//    font-size: 4em;
+//    line-height: 0.1em;
+//    margin-right: 0.2em;
+//    vertical-align: -0.4em;
+//}
+//
