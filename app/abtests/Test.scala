@@ -48,7 +48,6 @@ object Test {
     object Variants {
       val control = Variant("control")
       val testimonials = Variant("testimonials")
-      val contributionCount = Variant("contributionCount")
       val location = Variant("location")
     }
 
@@ -56,7 +55,7 @@ object Test {
       name = "Humanise Test",
       audienceSize = 100.percent,
       audienceOffset = 0.percent,
-      variants = Seq(control, testimonials, contributionCount, location)
+      variants = Seq(control, testimonials,  location)
     )
   }
 

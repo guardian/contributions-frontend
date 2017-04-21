@@ -38,9 +38,9 @@
 
         } else {
 
-            @if(humaniseTestVariant.get == HumaniseTest.Variants.contributionCount) {
+            @if(humaniseTestVariant.get == HumaniseTest.Variants.location) {
 
-                @views.html.fragments.tests.humanise.contributionCount(
+                @views.html.fragments.tests.humanise.location(
                     pageInfo,
                     countryGroup,
                     Some(maxAmount),
@@ -50,28 +50,16 @@
 
             } else {
 
-                @if(humaniseTestVariant.get == HumaniseTest.Variants.location) {
+                @contributionsMain(
+                    pageInfo,
+                    countryGroup,
+                    Some(maxAmount),
+                    Some("contributePage.js"),
+                    errorMessage
+                )(block)
 
-                    @views.html.fragments.tests.humanise.location(
-                        pageInfo,
-                        countryGroup,
-                        Some(maxAmount),
-                        Some("contributePage.js"),
-                        errorMessage
-                    )(block)
-
-                } else {
-
-                    @contributionsMain(
-                        pageInfo,
-                        countryGroup,
-                        Some(maxAmount),
-                        Some("contributePage.js"),
-                        errorMessage
-                    )(block)
-
-                }
             }
+
         }
     } else {
         @if(inLandingPageTest) {
