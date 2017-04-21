@@ -12,8 +12,90 @@
 )
 
 @main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
-    <div>Testimonials variant - please implement me!</div>
-    @content
+    <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
+
+        @for(message <- errorMessage) {
+            <div id="errorDialog" class="overlay">
+                <div>
+                    <h1 class="errorHeader">We're sorry</h1>
+                    <p class="errorMessage">@message</p>
+                    <button class="action action--button contribute-navigation__next" id="errorDialogButton">OK</button>
+
+                </div>
+            </div>
+        }
+
+        <section class="contributions__inner page-slice l-constrained flex-horizontal-from-tablet">
+
+            <div class="contributions__inner-wrapper">
+                <div class="contributions__landing">
+                    <hr />
+
+                    <h1 class="contributions__intro--landing contributions__header__testimonial--landing">
+                        Why our readers are supporting us:
+                    </h1>
+
+                    <svg width="17" height="10" viewBox="0 0 33 20" class="inline-quote__svg inline-icon__svg">
+                        <path d="M9.002 20c3.85.068 6.932-3.104 7-6.994.068-3.892-3.15-6.937-7-7.006-2.016-.036-3.59.694-4.888 2.053A9.968 9.968 0 0 1 4.001 6.5C4.064 2.97 7.414.937 11.003 1l-1-1C3.98 0 .098 4.447.002 10.006c-.097 5.557 3.35 9.892 9 9.994zm17 0c3.85.068 6.932-3.104 7-6.994.068-3.892-3.15-6.937-7-7.006-2.016-.036-3.59.694-4.888 2.053a9.968 9.968 0 0 1-.113-1.553c.063-3.53 3.413-5.563 7.002-5.5l-1-1c-6.022 0-9.904 4.447-10 10.006-.097 5.557 3.35 9.892 9 9.994z"></path>
+                    </svg>
+                    <p class="contributions__paragraph__testimonial">
+
+                    I read it fairly often and enjoy the variety of news and entertainment content.
+                        It never occurred to me that you wanted contributions, but I'd like you to stick around.
+                        Sometimes you actually have to pay for stuff you like. Go figure.
+                        <span class="contributions__name__testimonial--landing"> - Mike L</span>
+                    </p>
+
+                    <p class="contributions__paragraph__testimonial">
+                        Because I appreciate there not being a paywall:
+                        it is more democratic for the media to be available for all and not a commodity to be purchased by a few.
+                        I'm happy to make a contribution so others with less means still have access to information.
+                        <span class="contributions__name__testimonial--landing"> - Thomasine F-R</span>
+                    </p>
+
+
+                </div>
+
+                <div class="contributions__landing-headers">
+                    <h1 class="contributions__heading--main contributions__heading--landing">
+                        Support the Guardian’s journalism.
+                    </h1>
+
+                    <h2 class="contributions__heading--sub contributions__heading--landing">
+                        Make a one-off contribution today.
+                    </h2>
+                </div>
+            </div>
+
+            @content
+        </section>
+    </main>
+
+    <section class="disclaimer">
+        <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
+            <div class="feedback">
+                <p>
+                    The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
+                </p>
+
+                <p data-shown="gbp aud eur">
+                    Please note that your support of the Guardian’s journalism does not constitute a charitable donation, as such your contribution is not eligible for Gift Aid in the UK nor a tax-deduction elsewhere.
+                </p>
+
+                <p data-shown="usd">
+                    Please note that the Guardian is not a charity, will not use your support for charitable
+                    programs, and your support of the Guardian’s journalism does not constitute a
+                    charitable donation. As such your contribution is not eligible to be treated as a
+                    charitable deduction for federal or state taxes in the United States or elsewhere.
+                </p>
+
+                <p>
+                    If you have any questions about contributing to the Guardian, please <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">
+                    contact us here</a>.
+                </p>
+            </div>
+        </div>
+    </section>
 }
 
 
