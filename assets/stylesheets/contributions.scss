@@ -591,6 +591,17 @@ $currencies: gbp usd aud eur nzd cad;
     }
 }
 
+.contributions__heading--landing--location {
+    font-size: 22px;
+    line-height: 26px;
+
+    @include mq(tablet) {
+        font-size: 32px;
+        line-height: 32px;
+    }
+    color:white;
+}
+
 .contributions__heading--main.contributions__heading--landing {
     margin-top: 20px;
 
@@ -638,8 +649,27 @@ $currencies: gbp usd aud eur nzd cad;
     }
 
 }
+.location__countries {
+    display: flex;
+    margin-top: 20px;
+}
+
+.location__world {
+    margin-left: 20px;
+    width: 100px;
+    height: 100px;
+    @include mq(tablet) {
+        margin-left: 50px;
+        width: 180px;
+        height: 180px;
+    }
+
+}
 
 
+.contributions__name__location--slash{
+    color: white;
+}
 
 
 //.contributions__paragraph__testimonial:before {
