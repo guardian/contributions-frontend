@@ -3,6 +3,7 @@ package controllers
 import java.time.LocalDate
 
 import abtests.Test
+import abtests.Test.HumaniseTest
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
@@ -16,7 +17,9 @@ import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
 
-class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
+class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, humaniseTestDataProvider: HumaniseTest.TestDataProvider)
+  extends Controller with Redirect {
+  import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),
@@ -51,7 +54,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
   }
 
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
-    (NoCacheAction andThen MobileSupportAction andThen ABTestAction) { implicit request =>
+    (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
       val errorMessage = error.map(_.message)
       val stripe = paymentServices.stripeServiceFor(request)
       val cmp = request.getQueryString("CMP")
@@ -71,21 +74,23 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
       val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-      Ok(views.html.giraffe.contribute(
-        pageInfo,
-        maxAmountInLocalCurrency,
-        countryGroup,
-        request.testAllocations,
-        cmp,
-        intCmp,
-        refererPageviewId,
-        refererUrl,
-        creditCardExpiryYears,
-        errorMessage,
-        CSRF.getToken.map(_.value),
-        request.isAllocated(Test.landingPageTest, "with-copy"),
-        request.getVariant(Test.HumaniseTest.test)
-      ))
+      humaniseTestDataProvider.getTestData(request).map { testData =>
+        Ok(views.html.giraffe.contribute(
+          pageInfo,
+          maxAmountInLocalCurrency,
+          countryGroup,
+          request.testAllocations,
+          cmp,
+          intCmp,
+          refererPageviewId,
+          refererUrl,
+          creditCardExpiryYears,
+          errorMessage,
+          CSRF.getToken.map(_.value),
+          request.isAllocated(Test.landingPageTest, "with-copy"),
+          testData
+        ))
+      }
     }
   }
 

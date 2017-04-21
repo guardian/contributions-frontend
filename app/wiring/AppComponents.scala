@@ -1,5 +1,7 @@
 package wiring
 
+import abtests.Test
+import abtests.Test.HumaniseTest
 import com.github.nscala_time.time.Imports._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.identity.play.AccessCredentials.{Cookies, Token}
@@ -15,7 +17,6 @@ import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services.{EmailService, IdentityService, PaymentServices}
-
 import router.Routes
 
 //Sometimes intellij deletes this -> (import router.Routes)
@@ -42,6 +43,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     val dbConfig = config.getConfig("dbConf")
     def contributionDataFor(mode: PaymentMode) = {
       val modeKey = dbConfig.getString(mode.entryName.toLowerCase)
+      println(modeKey)
       new ContributionData(dbApi.database(modeKey))(jdbcExecutionContext) // explicit execution context to avoid blocking the app
     }
     PaymentMode.values.map(mode => mode -> contributionDataFor(mode)).toMap
@@ -58,6 +60,9 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   )
   lazy val identityService = new IdentityService(wsClient, idConfig)
   lazy val emailService = wire[EmailService]
+
+  lazy val humaniseTestDataProvider = Test.HumaniseTest.HardCodedTestDataProvider
+    // new Test.HumaniseTest.PostgreDataProvider(dbApi.database("TEST"), jdbcExecutionContext)
 
   lazy val giraffeController = wire[Contributions]
   lazy val healthcheckController = wire[Healthcheck]

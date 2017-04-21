@@ -1,9 +1,18 @@
 package abtests
 
+import actions.CommonActions.ABTestRequest
+import akka.actor.ActorSystem
+import akka.dispatch.MessageDispatcher
+import anorm.ResultSetParser
+import anorm.SQL
 import com.github.slugify.Slugify
+import play.api.db.Database
 import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.mvc.AnyContent
 import play.api.mvc.{Cookie, Request}
 
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 import scala.util.matching.Regex
 
 case class Percentage(value: Double) {
@@ -57,6 +66,49 @@ object Test {
       audienceOffset = 0.percent,
       variants = Seq(control, testimonials,  location)
     )
+
+    case class TestData(variant: Option[Variant], contributionCount: Option[Int])
+
+    trait TestDataProvider {
+
+      def getContributionsInLastWeek: Future[Int]
+
+      def getTestData(request: ABTestRequest[AnyContent])(implicit ec: ExecutionContext): Future[TestData] = {
+        val variant = request.getVariant(test)
+        val isContributionCountVariant = variant.contains(Variants.contributionCount)
+
+        if (!isContributionCountVariant) {
+          Future.successful(TestData(variant, contributionCount = None))
+        } else {
+          getContributionsInLastWeek.map(count => TestData(variant, Some(count)))
+        }
+      }
+    }
+
+    object HardCodedTestDataProvider extends TestDataProvider {
+
+      override def getContributionsInLastWeek: Future[Int] =
+        Future.successful(3000)
+    }
+
+    class PostgreDataProvider(db: Database, threadPool: ExecutionContext) extends TestDataProvider {
+      import anorm._
+
+      private val query = SQL"""
+        SELECT count(1)
+        FROM payment_hooks
+        WHERE status = 'Paid'
+      """
+
+      override def getContributionsInLastWeek: Future[Int] =
+        Future {
+          import anorm._
+
+          db.withConnection(autocommit = true) { implicit conn =>
+            query.as(SqlParser.scalar[Int].single)
+          }
+        }(threadPool)
+    }
   }
 
   val allTests: Set[Test] = Set(stripeTest, landingPageTest, HumaniseTest.test)
