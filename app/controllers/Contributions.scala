@@ -83,7 +83,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
         creditCardExpiryYears,
         errorMessage,
         CSRF.getToken.map(_.value),
-        request.isAllocated(Test.landingPageTest, "with-copy")
+        request.isAllocated(Test.landingPageTest, "with-copy"),
+        request.getVariant(Test.HumaniseTest.test)
       ))
     }
   }

@@ -41,7 +41,26 @@ object Test {
   val stripeTest = Test("Stripe checkout", 100.percent, 0.percent, Seq(Variant("stripe")))
   val landingPageTest = Test("Landing page", 100.percent, 0.percent, Seq(Variant("with-copy")), cmpCheck("cont_.*_banner".r))
 
-  val allTests: Set[Test] = Set(stripeTest, landingPageTest)
+
+  object HumaniseTest {
+    import Variants._
+
+    object Variants {
+      val control = Variant("control")
+      val testimonials = Variant("testimonials")
+      val contributionCount = Variant("contributionCount")
+      val location = Variant("location")
+    }
+
+    val test = Test(
+      name = "Humanise Test",
+      audienceSize = 100.percent,
+      audienceOffset = 0.percent,
+      variants = Seq(control, testimonials, contributionCount, location)
+    )
+  }
+
+  val allTests: Set[Test] = Set(stripeTest, landingPageTest, HumaniseTest.test)
 
   def slugify(s: String): String = slugifier.slugify(s)
   def idCookie(id: Int) = Cookie(testIdCookieName, id.toString, maxAge = Some(604800))

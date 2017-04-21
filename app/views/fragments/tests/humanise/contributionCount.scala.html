@@ -1,0 +1,17 @@
+@import com.gu.i18n.CountryGroup
+@import views.support.PageInfo
+
+@(
+    pageInfo: PageInfo = views.support.PageInfo(),
+    countryGroup: CountryGroup,
+    maxAmount: Option[Int] = None,
+    mainScript: Option[String] = None,
+    errorMessage:Option[String]
+)(
+    content: Html
+)
+
+@main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
+    <div>Contribution count variant - please implement me!</div>
+    @content
+}
