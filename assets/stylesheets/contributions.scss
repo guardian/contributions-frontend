@@ -628,10 +628,15 @@ $currencies: gbp usd aud eur nzd cad;
     }
 
     .contributions__paragraph__testimonial {
-        margin-top: 32px;
         font-family: "Guardian Text Sans Web";
         font-size: 14pt;
     }
+
+    .contributions__paragraph__container {
+        display:flex;
+        flex-direction: row;
+    }
+
 }
 
 
