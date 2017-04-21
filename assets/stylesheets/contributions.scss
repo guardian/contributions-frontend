@@ -2,6 +2,7 @@
 @import 'functions';
 @import 'mixins';
 @import 'utilities/util-layout';
+@import 'svg';
 
 $control-spacing: 5px;
 
@@ -590,6 +591,19 @@ $currencies: gbp usd aud eur nzd cad;
     }
 }
 
+.contributions__heading--landing--location {
+    font-size: 22px;
+    line-height: 26px;
+    font-family: "Guardian Egyptian Web",Georgia,serif;
+    font-weight: 900;
+
+    @include mq(tablet) {
+        font-size: 32px;
+        line-height: 32px;
+    }
+    color:white;
+}
+
 .contributions__heading--main.contributions__heading--landing {
     margin-top: 20px;
 
@@ -610,4 +624,52 @@ $currencies: gbp usd aud eur nzd cad;
 
 .contributions__landing-headers {
     margin-right: 10px;
+}
+
+
+// Humanise tests
+
+.contributions__landing {
+
+    .contributions__header__testimonial--landing {
+        font-size: 32px;
+        color: #ffffff;
+    }
+
+    .contributions__name__testimonial--landing {
+        font-style: italic;
+    }
+
+    .contributions__paragraph__testimonial {
+        font-family: "Guardian Text Sans Web";
+        font-size: 14pt;
+        margin-top: 0;
+    }
+
+    .contributions__paragraph__container {
+        display:flex;
+        flex-direction: row;
+    }
+
+}
+.location__countries {
+    display: flex;
+    margin-top: 20px;
+}
+
+.location__world {
+    margin-left: 20px;
+    width: 60px;
+    height: 60px;
+    @include mq(tablet) {
+        margin-left: 50px;
+        width: 140px;
+        height: 140px;
+    }
+
+}
+
+
+.contributions__name__location--slash{
+    color: white;
 }
