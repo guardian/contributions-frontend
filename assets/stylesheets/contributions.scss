@@ -594,6 +594,8 @@ $currencies: gbp usd aud eur nzd cad;
 .contributions__heading--landing--location {
     font-size: 22px;
     line-height: 26px;
+    font-family: "Guardian Egyptian Web",Georgia,serif;
+    font-weight: 900;
 
     @include mq(tablet) {
         font-size: 32px;
@@ -656,12 +658,12 @@ $currencies: gbp usd aud eur nzd cad;
 
 .location__world {
     margin-left: 20px;
-    width: 100px;
-    height: 100px;
+    width: 60px;
+    height: 60px;
     @include mq(tablet) {
         margin-left: 50px;
-        width: 180px;
-        height: 180px;
+        width: 140px;
+        height: 140px;
     }
 
 }
