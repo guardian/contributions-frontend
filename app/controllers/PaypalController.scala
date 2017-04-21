@@ -156,7 +156,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
   }
 
-  def hook = NoCacheAction.async(BodyParsers.parse.tolerantText) { request =>
+  def hook = NoCacheAction.async(parse.tolerantText) { request =>
     val bodyText = request.body
     val bodyJson = Json.parse(request.body)
 
