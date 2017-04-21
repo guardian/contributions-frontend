@@ -4,6 +4,7 @@
 @import play.api.libs.json.Json
 @import views.support.CountryGroupImplicits._
 @import views.support.PageInfo
+@import abtests.Test.HumaniseTest
 
 @(
     pageInfo: PageInfo,
@@ -17,15 +18,69 @@
     creditCardExpiryYears: List[Int],
     errorMessage: Option[String],
     csrfToken: Option[String],
-    inLandingPageTest: Boolean
+    inLandingPageTest: Boolean,
+    humaniseTestVariant: Option[Variant]
 )
 
 @defining { (block: Html) =>
-    @if(inLandingPageTest) {
-        @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+
+    @if(humaniseTestVariant.isDefined) {
+
+        @if(humaniseTestVariant.get == HumaniseTest.Variants.testimonials) {
+
+            @views.html.fragments.tests.humanise.testimonials(
+                pageInfo,
+                countryGroup,
+                Some(maxAmount),
+                Some("contributePage.js"),
+                errorMessage
+            )(block)
+
+        } else {
+
+            @if(humaniseTestVariant.get == HumaniseTest.Variants.contributionCount) {
+
+                @views.html.fragments.tests.humanise.contributionCount(
+                    pageInfo,
+                    countryGroup,
+                    Some(maxAmount),
+                    Some("contributePage.js"),
+                    errorMessage
+                )(block)
+
+            } else {
+
+                @if(humaniseTestVariant.get == HumaniseTest.Variants.location) {
+
+                    @views.html.fragments.tests.humanise.location(
+                        pageInfo,
+                        countryGroup,
+                        Some(maxAmount),
+                        Some("contributePage.js"),
+                        errorMessage
+                    )(block)
+
+                } else {
+
+                    @contributionsMain(
+                        pageInfo,
+                        countryGroup,
+                        Some(maxAmount),
+                        Some("contributePage.js"),
+                        errorMessage
+                    )(block)
+
+                }
+            }
+        }
     } else {
-        @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        @if(inLandingPageTest) {
+            @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        } else {
+            @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        }
     }
+
 } { template =>
     @template {
         <!-- react injects its components here -->
