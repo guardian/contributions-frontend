@@ -67,7 +67,6 @@ object Test {
     final case class VariantData(variant: Option[Variant], contributionCount: Option[Int])
 
     object VariantData {
-
       def empty = VariantData(variant = None, contributionCount = None)
     }
 
@@ -76,7 +75,7 @@ object Test {
     // should they be in the contribution count variant.
     trait TestDataProvider {
 
-      protected[this] def getContributionsInLastWeek: Future[Int]
+      protected[this] def getContributionsInLast7Days: Future[Int]
 
       def getVariantData(request: ABTestRequest[AnyContent])(implicit ec: ExecutionContext): Future[VariantData] = {
         val variant = request.getVariant(test)
@@ -85,14 +84,14 @@ object Test {
         if (!isContributionCountVariant) {
           Future.successful(VariantData(variant, contributionCount = None))
         } else {
-          getContributionsInLastWeek
+          getContributionsInLast7Days
             .map(count => VariantData(variant, Some(count)))
             .recover {
               // If the reader is in the contribution variant,
               // and we aren't able to get the number of contributions,
               // don't put them in a variant for this test.
               case NonFatal(error) =>
-                Logger.error("error getting contributions in last week", error)
+                Logger.error("error getting contributions for the last 7 days", error)
                 VariantData.empty
             }
         }
@@ -102,17 +101,18 @@ object Test {
     class PostgreDataProvider(db: Database)(implicit ec: ExecutionContext) extends TestDataProvider {
       import anorm._
 
+      // Use payment_hooks instead of all_payments due to access rights.
       private val query = SQL"""
         SELECT count(1)
         FROM payment_hooks
         WHERE
           status = 'Paid' AND
-          created::date >= '2017-04-01'
+          created::date >= current_date - INTERVAL '6 day'
       """
 
       private val scalarIntParser = SqlParser.scalar[Int].single
 
-      override def getContributionsInLastWeek: Future[Int] =
+      override def getContributionsInLast7Days: Future[Int] =
         Future {
           db.withConnection(autocommit = true) { implicit conn =>
             query.as(scalarIntParser)
