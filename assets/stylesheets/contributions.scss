@@ -627,6 +627,8 @@ $currencies: gbp usd aud eur nzd cad;
 }
 
 
+
+
 // Humanise tests
 
 .contributions__landing {
@@ -651,6 +653,28 @@ $currencies: gbp usd aud eur nzd cad;
         flex-direction: row;
     }
 
+    .contributions__header__contribution_count--landing {
+        color: white;
+        font-family: "Guardian Text Egyptian Web";
+        line-height: 1;
+        font-size: 72px;
+        @include mq(tablet) {
+            font-size: 144px;
+        }
+    }
+
+    .contributions__info__contribution_count--landing {
+        color: white;
+        font-family: "Guardian Text Egyptian Web";
+        font-size: 20px;
+        line-height: 1;
+        font-weight: 900;
+        margin-bottom: 0;
+        @include mq(tablet) {
+            font-size: 36px;
+        }
+    }
+
 }
 .location__countries {
     display: flex;
@@ -668,7 +692,6 @@ $currencies: gbp usd aud eur nzd cad;
     }
 
 }
-
 
 .contributions__name__location--slash{
     color: white;
