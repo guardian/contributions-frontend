@@ -1,4 +1,6 @@
+@import cats.syntax.show._
 @import com.gu.i18n.CountryGroup
+@import instances.int.integerShow
 @import views.support.PageInfo
 
 @(
@@ -34,11 +36,11 @@
 
                     <div>
                         <h1 class="contributions__header__contribution_count--landing">
-                            @contributionCount
+                            @contributionCount.show
                         </h1>
 
                         <p class="contributions__info__contribution_count--landing">
-                            readers have supported us the last 7 days
+                            readers have supported us in the last 7 days
                         </p>
                     </div>
                 </div>
