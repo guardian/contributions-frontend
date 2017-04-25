@@ -3,7 +3,6 @@ package controllers
 import java.time.LocalDate
 
 import abtests.Test
-import abtests.Test.HumaniseTest
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
@@ -17,8 +16,7 @@ import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
 
-class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, humaniseTestDataProvider: HumaniseTest.TestDataProvider)
-  extends Controller with Redirect {
+class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
   import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   val social: Set[Social] = Set(
@@ -74,7 +72,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, hu
       val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
       val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-      humaniseTestDataProvider.getTestData(request).map { testData =>
+      paymentServices.getHumaniseTestV2VariantData(request).map { variantData =>
         Ok(views.html.giraffe.contribute(
           pageInfo,
           maxAmountInLocalCurrency,
@@ -88,7 +86,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, hu
           errorMessage,
           CSRF.getToken.map(_.value),
           request.isAllocated(Test.landingPageTest, "with-copy"),
-          testData
+          variantData
         ))
       }
     }

@@ -4,7 +4,7 @@
 @import play.api.libs.json.Json
 @import views.support.CountryGroupImplicits._
 @import views.support.PageInfo
-@import abtests.Test.HumaniseTest
+@import abtests.Test.HumaniseTestV2
 
 @(
     pageInfo: PageInfo,
@@ -19,16 +19,27 @@
     errorMessage: Option[String],
     csrfToken: Option[String],
     inLandingPageTest: Boolean,
-    humaniseTestVariant: Option[Variant]
+    variantData: HumaniseTestV2.VariantData
 )
 
 @defining { (block: Html) =>
 
-    @if(humaniseTestVariant.isDefined) {
+    @if(variantData.variant.isDefined) {
 
-        @if(humaniseTestVariant.get == HumaniseTest.Variants.testimonials) {
+        @if(variantData.variant.get == HumaniseTestV2.Variants.contributionCount) {
 
-            @views.html.fragments.tests.humanise.testimonials(
+            @views.html.fragments.tests.humanise.contributionCount(
+                pageInfo,
+                countryGroup,
+                Some(maxAmount),
+                Some("contributePage.js"),
+                variantData.contributionCount.get,
+                errorMessage
+            )(block)
+
+        } else {
+
+            @contributionsMain(
                 pageInfo,
                 countryGroup,
                 Some(maxAmount),
@@ -36,31 +47,8 @@
                 errorMessage
             )(block)
 
-        } else {
-
-            @if(humaniseTestVariant.get == HumaniseTest.Variants.location) {
-
-                @views.html.fragments.tests.humanise.location(
-                    pageInfo,
-                    countryGroup,
-                    Some(maxAmount),
-                    Some("contributePage.js"),
-                    errorMessage
-                )(block)
-
-            } else {
-
-                @contributionsMain(
-                    pageInfo,
-                    countryGroup,
-                    Some(maxAmount),
-                    Some("contributePage.js"),
-                    errorMessage
-                )(block)
-
-            }
-
         }
+
     } else {
         @if(inLandingPageTest) {
             @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
