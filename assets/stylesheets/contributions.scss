@@ -674,10 +674,10 @@ $currencies: gbp usd aud eur nzd cad;
         line-height: 1;
         font-weight: 900;
         margin-bottom: 0;
-        margin-top: -8px;
+        margin-top: -6px;
         @include mq(tablet) {
             font-size: 24px;
-            margin-top: -18px;
+            margin-top: -12px;
         }
     }
 }
