@@ -1,9 +1,16 @@
 package abtests
 
+import actions.CommonActions.ABTestRequest
 import com.github.slugify.Slugify
+import play.api.Logger
+import play.api.db.Database
 import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.mvc.AnyContent
 import play.api.mvc.{Cookie, Request}
 
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+import scala.util.control.NonFatal
 import scala.util.matching.Regex
 
 case class Percentage(value: Double) {
@@ -38,28 +45,83 @@ object Test {
   def cmpCheck(pattern: Regex)(r: Request[_]): Boolean =
     r.getQueryString("INTCMP").exists(pattern.findAllIn(_).nonEmpty)
 
-  val stripeTest = Test("Stripe checkout", 100.percent, 0.percent, Seq(Variant("stripe")))
-  val landingPageTest = Test("Landing page", 100.percent, 0.percent, Seq(Variant("with-copy")), cmpCheck("cont_.*_banner".r))
+  val stripeTest = Test("Stripe checkout", 100.percent, 0.percent, Seq(Variant("control"), Variant("stripe")))
 
+  val landingPageTest = Test("Landing page", 100.percent, 0.percent, Seq(Variant("control"), Variant("with-copy")), cmpCheck("cont_.*_banner".r))
 
-  object HumaniseTest {
+  object HumaniseTestV2 {
     import Variants._
 
     object Variants {
       val control = Variant("control")
-      val testimonials = Variant("testimonials")
-      val location = Variant("location")
+      val contributionCount = Variant("contributionCount")
     }
 
     val test = Test(
-      name = "Humanise Test",
+      name = "Humanise Test V2",
       audienceSize = 100.percent,
       audienceOffset = 0.percent,
-      variants = Seq(control, testimonials,  location)
+      variants = Seq(control, contributionCount)
     )
+
+    final case class VariantData(variant: Option[Variant], contributionCount: Option[Int])
+
+    object VariantData {
+      def empty = VariantData(variant = None, contributionCount = None)
+    }
+
+    // Provides the humanise-test-v2 variant a reader is in,
+    // and in addition the number of contributions,
+    // should they be in the contribution count variant.
+    trait TestDataProvider {
+
+      protected[this] def getContributionsInLast7Days: Future[Int]
+
+      def getVariantData(request: ABTestRequest[AnyContent])(implicit ec: ExecutionContext): Future[VariantData] = {
+        val variant = request.getVariant(test)
+        val isContributionCountVariant = variant.contains(Variants.contributionCount)
+
+        if (!isContributionCountVariant) {
+          Future.successful(VariantData(variant, contributionCount = None))
+        } else {
+          getContributionsInLast7Days
+            .map(count => VariantData(variant, Some(count)))
+            .recover {
+              // If the reader is in the contribution variant,
+              // and we aren't able to get the number of contributions,
+              // don't put them in a variant for this test.
+              case NonFatal(error) =>
+                Logger.error("error getting contributions for the last 7 days", error)
+                VariantData.empty
+            }
+        }
+      }
+    }
+
+    class PostgreDataProvider(db: Database)(implicit ec: ExecutionContext) extends TestDataProvider {
+      import anorm._
+
+      // Use payment_hooks instead of all_payments due to access rights.
+      private val query = SQL"""
+        SELECT count(1)
+        FROM payment_hooks
+        WHERE
+          status = 'Paid' AND
+          created::date >= current_date - INTERVAL '6 day'
+      """
+
+      private val scalarIntParser = SqlParser.scalar[Int].single
+
+      override def getContributionsInLast7Days: Future[Int] =
+        Future {
+          db.withConnection(autocommit = true) { implicit conn =>
+            query.as(scalarIntParser)
+          }
+        }
+    }
   }
 
-  val allTests: Set[Test] = Set(stripeTest, landingPageTest, HumaniseTest.test)
+  val allTests: Set[Test] = Set(stripeTest, landingPageTest, HumaniseTestV2.test)
 
   def slugify(s: String): String = slugifier.slugify(s)
   def idCookie(id: Int) = Cookie(testIdCookieName, id.toString, maxAge = Some(604800))

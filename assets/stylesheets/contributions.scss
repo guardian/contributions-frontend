@@ -626,8 +626,14 @@ $currencies: gbp usd aud eur nzd cad;
     margin-right: 10px;
 }
 
-
 // Humanise tests
+
+.contributions__landing__contributions_count-headers {
+    margin-right: 10px;
+    @include mq(tablet) {
+        margin-top: 72px;
+    }
+}
 
 .contributions__landing {
 
@@ -651,7 +657,31 @@ $currencies: gbp usd aud eur nzd cad;
         flex-direction: row;
     }
 
+    .contributions__header__contribution_count--landing {
+        color: #ffffff;
+        font-family: "Guardian Egyptian Web",Georgia,serif;
+        line-height: 1;
+        font-size: 72px;
+        @include mq(tablet) {
+            font-size: 144px;
+        }
+    }
+
+    .contributions__info__contribution_count--landing {
+        color: #333333;
+        font-family: "Guardian Egyptian Web",Georgia,serif;
+        font-size: 20px;
+        line-height: 1;
+        font-weight: 900;
+        margin-bottom: 0;
+        margin-top: -8px;
+        @include mq(tablet) {
+            font-size: 24px;
+            margin-top: -18px;
+        }
+    }
 }
+
 .location__countries {
     display: flex;
     margin-top: 20px;
@@ -668,7 +698,6 @@ $currencies: gbp usd aud eur nzd cad;
     }
 
 }
-
 
 .contributions__name__location--slash{
     color: white;
