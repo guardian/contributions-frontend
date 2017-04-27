@@ -9,6 +9,11 @@ sudo ln -fs ${DIR}/contributions.conf ${NGINX_HOME}/sites-enabled/contributions.
 aws s3 cp s3://identity-local-ssl/contribute-thegulocal-com-exp2017-07-19-bundle.crt ${GU_KEYS}/ --profile membership
 aws s3 cp s3://identity-local-ssl/contribute-thegulocal-com-exp2017-07-19.key ${GU_KEYS}/ --profile membership
 
+aws s3 cp s3://identity-local-ssl/wildcard-thegulocal-com-exp2019-01-09.crt ${NGINX_HOME} --profile membership
+
+aws s3 cp s3://identity-local-ssl/wildcard-thegulocal-com-exp2019-01-09.key ${NGINX_HOME} --profile membership
+
+
 sudo ln -fs ${GU_KEYS}/ ${NGINX_HOME}/keys
 
 sudo nginx -s stop
