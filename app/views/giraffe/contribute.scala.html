@@ -1,9 +1,10 @@
 @import abtests._
 @import com.gu.i18n.CountryGroup
-@import fragments.giraffe.contributionsMain
+@import fragments.giraffe.{contributionsMain, contributionsAlt}
 @import play.api.libs.json.Json
 @import views.support.CountryGroupImplicits._
 @import views.support.PageInfo
+@import abtests.Test.HumaniseTestV2
 
 @(
     pageInfo: PageInfo,
@@ -16,31 +17,68 @@
     refererUrl: Option[String],
     creditCardExpiryYears: List[Int],
     errorMessage: Option[String],
-    csrfToken: Option[String]
+    csrfToken: Option[String],
+    inLandingPageTest: Boolean,
+    variantData: HumaniseTestV2.VariantData
 )
 
-@contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage) {
+@defining { (block: Html) =>
 
-    <!-- react injects its components here -->
-    <section id="contribute" class="contribute-container"
-    data-ab-tests="@Json.toJson(testAllocations)"
-    data-country-group="@Json.stringify(Json.toJson(countryGroup))"
-    data-max-amount="@maxAmount"
-    data-csrf-token="@csrfToken.getOrElse("")"
-        @for(code <- cmpCode) {
-            data-cmp-code="@code"
-        }
-        @for(code <- intCmpCode) {
-            data-int-cmp-code="@code"
-        }
-        @for(refId <- refererPageviewId) {
-            data-referrer-pageview-id="@refId"
-        }
-        @for(refUrl <- refererUrl) {
-            data-referrer-url="@refUrl"
+    @if(variantData.variant.isDefined) {
+
+        @if(variantData.variant.get == HumaniseTestV2.Variants.contributionCount) {
+
+            @views.html.fragments.tests.humanise.contributionCount(
+                pageInfo,
+                countryGroup,
+                Some(maxAmount),
+                Some("contributePage.js"),
+                variantData.contributionCount.get,
+                errorMessage
+            )(block)
+
+        } else {
+
+            @contributionsMain(
+                pageInfo,
+                countryGroup,
+                Some(maxAmount),
+                Some("contributePage.js"),
+                errorMessage
+            )(block)
+
         }
 
-    >
-    </section>
+    } else {
+        @if(inLandingPageTest) {
+            @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        } else {
+            @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        }
+    }
 
+} { template =>
+    @template {
+        <!-- react injects its components here -->
+        <section id="contribute" class="contribute-container"
+        data-ab-tests="@Json.toJson(testAllocations)"
+        data-country-group="@Json.stringify(Json.toJson(countryGroup))"
+        data-max-amount="@maxAmount"
+        data-csrf-token="@csrfToken.getOrElse("")"
+            @for(code <- cmpCode) {
+                data-cmp-code="@code"
+            }
+            @for(code <- intCmpCode) {
+                data-int-cmp-code="@code"
+            }
+            @for(refId <- refererPageviewId) {
+                data-referrer-pageview-id="@refId"
+            }
+            @for(refUrl <- refererUrl) {
+                data-referrer-url="@refUrl"
+                }
+        >
+        </section>
+
+    }
 }

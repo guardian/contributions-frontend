@@ -281,3 +281,17 @@ $gs-max-columns: 16;
         padding-left: $desktop;
     }
 }
+
+@mixin black-line($width) {
+    border: 0;
+    width: $width;
+    height: 1px;
+    color: color(neutral-1);
+    background: color(neutral-1);
+    margin-left: 0;
+    margin-bottom: 7px;
+
+    @include mq(desktop) {
+        margin-bottom: 8px;
+    }
+}

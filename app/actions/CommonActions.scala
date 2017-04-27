@@ -1,6 +1,7 @@
 package actions
 
 import abtests.Test
+import abtests.Variant
 import controllers.{Cached, NoCache}
 import play.api.mvc._
 
@@ -31,7 +32,11 @@ object CommonActions {
   }
 
   case class ABTestRequest[A](testId: Int, request: Request[A]) extends WrappedRequest(request) {
-    val testAllocations = Test.allocations(testId)
+    val testAllocations = Test.allocations(testId, request)
+    def isAllocated(test: Test, variantName: String) = testAllocations.exists(a => a.test == test && a.variant.name == variantName)
+
+    def getVariant(test: Test): Option[Variant] =
+      testAllocations.find(_.test == test).map(_.variant)
   }
 
   object ABTestAction extends ActionBuilder[ABTestRequest] {

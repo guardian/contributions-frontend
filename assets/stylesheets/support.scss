@@ -1,3 +1,15 @@
+.thanks--feedback {
+    display: flex;
+    flex-direction: column;
+    padding-left: $gs-gutter;
+    padding-right: $gs-gutter;
+
+    @include mq(desktop) {
+        flex-direction: row;
+        padding-left: $gs-gutter * 2.5;
+        padding-right: $gs-gutter * 2.5;
+    }
+}
 
 .thanks {
     &.contributions__inner {
@@ -7,16 +19,18 @@
     @include mq(desktop) {
 
         section {
-            width: 650px;
+            width: 660px;
         }
-        padding-left: $gs-gutter * 3;
+        padding-left: $gs-gutter * 2.5;
     }
+
     .thanks--description {
         color: $c-neutral1;
         font-weight: normal;
         display:block;
 
     }
+
     h1 {
         &:first-of-type {
             padding-top: 1em;
@@ -26,20 +40,16 @@
         }
         padding-bottom: $gs-baseline;
 
-        color: white;
-        font-family: $f-serif-headline;
-        font-weight: 900;
+        color: #fff;
 
-        font-size: 24px;
-        line-height: 24px;
+        @include f-header;
+        @include font-size(24);
 
         @include mq(tablet) {
-            font-size: 36px;
-            line-height: 36px;
+            @include font-size(36);
         }
         @include mq(desktop) {
-            font-size: 44px;
-            line-height: 44px;
+            @include font-size(44);
         }
 
     }
@@ -50,11 +60,16 @@
     margin-top: -1em;
 }
 
-.thanks--social {
+.thanks--survey {
     margin-bottom: 50px;
+    flex-grow:2;
+
+    @include mq(desktop) {
+        padding-right: $gs-gutter * 5;
+    }
+
     h2 {
         color: #c05303;
-        font-family: $f-sans-serif-headline;
         @include fs-header(5);
     }
     p {
@@ -62,4 +77,21 @@
         @include f-bodyCopy;
         @include fs-header(5, true);
     }
+
+    .action--button_survey {
+        background-color: #fff;
+        color: #000;
+        border-color: $c-neutral4;
+        height: 36px;
+        font-weight: normal;
+
+        span {
+            padding-right: $gs-gutter / 2;
+        }
+
+        &:hover, &:focus {
+            border-color: $c-neutral1;
+        }
+    }
+
 }

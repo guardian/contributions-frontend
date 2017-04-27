@@ -2,8 +2,20 @@
 @import 'functions';
 @import 'mixins';
 @import 'utilities/util-layout';
+@import 'svg';
 
 $control-spacing: 5px;
+
+.container-global--giraffe {
+    display: flex;
+    flex-direction: column;
+}
+
+.giraffe-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
 
 .legal_notice {
     padding-top: 15px;
@@ -151,7 +163,7 @@ $control-spacing: 5px;
 
 .contributions__inner,
 .feedback {
-    padding: 0 $gs-baseline $gs-gutter;
+    padding: 0 $gs-gutter $gs-baseline;
 
     @include mq(mem-full) {
         padding-left: $gs-gutter * 2;
@@ -168,17 +180,7 @@ $control-spacing: 5px;
     }
 
     hr {
-        border: 0;
-        width: 80px;
-        height: 1px;
-        color: color(neutral-1);
-        background: color(neutral-1);
-        margin-left: 0;
-        margin-bottom: 7px;
-
-        @include mq(desktop) {
-            margin-bottom: 8px;
-        }
+        @include black-line(80px);
     }
 }
 
@@ -187,6 +189,10 @@ $control-spacing: 5px;
     font-size: 16px;
     line-height: 20px;
     margin-bottom: $gs-baseline;
+
+    &:last-of-type {
+        margin-bottom: $gs-baseline * 3;
+    }
 
     @include mq($until: tablet) {
         strong {
@@ -503,6 +509,8 @@ $currencies: gbp usd aud eur nzd cad;
 
 .disclaimer {
     background: #E7E7E7;
+    flex: 1 1 auto;
+    display: flex;
 
     .l-constrained {
         padding-top: $gs-baseline;
@@ -549,4 +557,148 @@ $currencies: gbp usd aud eur nzd cad;
 :invalid {
     box-shadow: none;
     outline: 0;
+}
+
+.contributions__landing {
+    margin-top: 40px;
+    max-width: 612px;
+
+    @include mq(tablet) {
+        margin-right: 40px;
+    }
+
+    .contributions__intro--landing {
+        @include fs-header(4);
+        margin-bottom: 20px;
+    }
+
+    p {
+        @include fs-bodyCopy(2);
+    }
+
+    hr {
+        @include black-line(140px);
+    }
+}
+
+.contributions__heading--landing {
+    font-size: 24px;
+    line-height: 28px;
+
+    @include mq(tablet) {
+        font-size: 36px;
+        line-height: 36px;
+    }
+}
+
+.contributions__heading--landing--location {
+    font-size: 22px;
+    line-height: 26px;
+    font-family: "Guardian Egyptian Web",Georgia,serif;
+    font-weight: 900;
+
+    @include mq(tablet) {
+        font-size: 32px;
+        line-height: 32px;
+    }
+    color:white;
+}
+
+.contributions__heading--main.contributions__heading--landing {
+    margin-top: 20px;
+
+    @include mq(tablet) {
+        margin-top: 40px;
+    }
+}
+
+.contributions__heading--sub.contributions__heading--landing {
+    margin-bottom: 20px;
+
+    margin-left: 40px;
+
+    @include mq(tablet) {
+        margin-left: 80px;
+    }
+}
+
+.contributions__landing-headers {
+    margin-right: 10px;
+}
+
+// Humanise tests
+
+.contributions__landing__contributions_count-headers {
+    margin-right: 10px;
+    @include mq(tablet) {
+        margin-top: 72px;
+    }
+}
+
+.contributions__landing {
+
+    .contributions__header__testimonial--landing {
+        font-size: 32px;
+        color: #ffffff;
+    }
+
+    .contributions__name__testimonial--landing {
+        font-style: italic;
+    }
+
+    .contributions__paragraph__testimonial {
+        font-family: "Guardian Text Sans Web";
+        font-size: 14pt;
+        margin-top: 0;
+    }
+
+    .contributions__paragraph__container {
+        display:flex;
+        flex-direction: row;
+    }
+
+    .contributions__header__contribution_count--landing {
+        color: #ffffff;
+        font-family: "Guardian Egyptian Web",Georgia,serif;
+        line-height: 1;
+        font-size: 72px;
+        @include mq(tablet) {
+            font-size: 144px;
+        }
+    }
+
+    .contributions__info__contribution_count--landing {
+        color: #333333;
+        font-family: "Guardian Egyptian Web",Georgia,serif;
+        font-size: 20px;
+        line-height: 1;
+        font-weight: 900;
+        margin-bottom: 0;
+        margin-top: -6px;
+        @include mq(tablet) {
+            font-size: 24px;
+            margin-top: -12px;
+        }
+    }
+}
+
+.location__countries {
+    display: flex;
+    margin-top: 20px;
+}
+
+.location__world {
+    margin-left: 20px;
+    width: 60px;
+    height: 60px;
+    @include mq(tablet) {
+        margin-left: 50px;
+        width: 140px;
+        height: 140px;
+    }
+
+}
+
+.contributions__name__location--slash{
+    color: white;
 }

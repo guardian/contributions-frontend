@@ -1,5 +1,7 @@
 package wiring
 
+import abtests.Test
+import abtests.Test.HumaniseTestV2
 import com.github.nscala_time.time.Imports._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.identity.play.AccessCredentials.{Cookies, Token}
@@ -15,7 +17,6 @@ import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services.{EmailService, IdentityService, PaymentServices}
-
 import router.Routes
 
 //Sometimes intellij deletes this -> (import router.Routes)
