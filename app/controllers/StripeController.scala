@@ -35,7 +35,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     val form = request.body
 
     val stripe = paymentServices.stripeServiceFor(request)
-    val idUser = IdentityId.fromRequest(request)
+    val idUser = IdentityId.fromRequest(request) orElse form.idUser
 
     val countryGroup = form.currency match {
       case USD => US
