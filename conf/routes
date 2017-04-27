@@ -22,6 +22,7 @@ POST           /:countryGroup/update-metadata   controllers.PaypalController.upd
 
 POST           /stripe/pay                      controllers.StripeController.pay
 POST           /stripe/hook                     controllers.StripeController.hook
+POST           /stripe/app-pay                  controllers.StripeController.appPay
 
 GET            /ca                              controllers.Contributions.redirectToUk
 GET            /nz                              controllers.Contributions.redirectToUk

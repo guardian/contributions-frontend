@@ -6,8 +6,6 @@ import java.time.Instant
 import actions.CommonActions._
 import cats.data.EitherT
 import cats.syntax.show._
-import cookies.ContribTimestampCookieAttributes
-import cookies.syntax._
 import com.gu.i18n.CountryGroup._
 import com.gu.i18n.{AUD, Currency, EUR, USD}
 import com.gu.stripe.Stripe
@@ -15,13 +13,15 @@ import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.typesafe.config.Config
 import cookies.ContribTimestampCookieAttributes
+import cookies.syntax._
 import models._
 import org.joda.time.DateTime
 import play.api.Logger
-import play.api.data.{Form, FormError}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.data.{Form, FormError}
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import play.api.mvc.{BodyParsers, Controller, Result}
 import services.PaymentServices
 import utils.MaxAmount
@@ -30,7 +30,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
   extends Controller with Redirect {
-  import ContribTimestampCookieAttributes._
 
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
@@ -63,7 +62,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
     intcmp: Option[String],
     refererPageviewId: Option[String],
     refererUrl: Option[String]
-
   )
 
   val supportForm: Form[SupportForm] = Form(
@@ -194,4 +192,103 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       }
     }
   }
+
+  case class AppContributionRequest(
+    name: String,
+    email: String,
+    currency: Currency,
+    amount: BigDecimal,
+    token: String,
+    platform: String,
+    ophanPageViewId: String,
+    intcmp: Option[String],
+    ophanBrowserId: Option[String],
+    referrerPageViewId: Option[String],
+    referrerUrl: Option[String]
+  )
+
+  object AppContributionRequest {
+    implicit val currencyFormatter: Reads[Currency] = new Reads[Currency] {
+      override def reads(json: JsValue): JsResult[Currency] = json match {
+        case JsString(symbol) => Currency.fromString(symbol).map(currency => JsSuccess.apply(currency)).getOrElse(JsError(s"Unable to parse $symbol"))
+        case _ => JsError("Unable to parse currency, was expecting a JsString")
+      }
+    }
+    implicit val requestReads: Reads[AppContributionRequest] = (
+      (JsPath \ "name").read[String] and
+        (JsPath \ "email").read[String](Reads.email) and
+        (JsPath \ "currency").read[Currency] and
+        (JsPath \ "amount").read[BigDecimal] and
+        (JsPath \ "token").read[String] and
+        (JsPath \ "platform").read[String] and
+        (JsPath \ "ophanPageViewId").read[String] and
+        (JsPath \ "intcmp").readNullable[String] and
+        (JsPath \ "ophanBrowserId").readNullable[String] and
+        (JsPath \ "referrerPageViewId").readNullable[String] and
+        (JsPath \ "referrerUrl").readNullable[String]
+    )(AppContributionRequest.apply _)
+  }
+
+  def appPay = NoCacheAction.async(BodyParsers.parse.json[AppContributionRequest]) { request =>
+    val stripe = paymentServices.stripeServiceFor(request)
+
+    val contributionId = ContributionId.random
+    val userId = IdentityId.fromRequest(request) // TODO (won't work)
+
+    // Get the contribution amount in pence/cents/similar (only works for some currencies)
+    val amountInSmallestCurrencyUnit = (request.body.amount * 100).toInt
+
+    // Cap the contribution amount, according to currency
+    // TODO: I think that if the amount is too big then that's an error and we should report back to the user and ask
+    // them what they want to do rather than charging them an amount they didn't specify, but I'll leave this as it is
+    // at the moment because this is the behaviour of the existing pay method
+    val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(request.body.currency) * 100
+    val amount = min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit)
+
+    // Pull together the metadata for this contribution into a map
+    val metadata = Map(
+      "email" -> request.body.email,
+      "name" -> request.body.name,
+      "platform" -> request.body.platform,
+      "contributionId" -> contributionId.toString,
+      "ophanPageviewId" -> request.body.ophanPageViewId
+    ) ++ List(
+      request.body.intcmp.map("intcmp" -> _),
+      request.body.ophanBrowserId.map("ophanBrowserId" -> _),
+      request.body.referrerPageViewId.map("refererPageviewId" -> _),
+      request.body.referrerUrl.map("refererUrl" -> _),
+      userId.map("idUser" -> _.id)
+    ).flatten.toMap
+
+    def createCharge: Future[Stripe.Charge] = {
+      stripe.Charge.create(amount, request.body.currency, request.body.email, "Your contribution", request.body.token, metadata)
+    }
+
+    def storeMetaData(charge: Charge) = {
+      stripe.storeMetaData(
+        contributionId = contributionId,
+        charge = charge,
+        created = new DateTime(charge.created * 1000L),
+        name = request.body.name,
+        postCode = None,
+        marketing = false,
+        testAllocations = Set.empty,
+        cmp = None,
+        intCmp = request.body.intcmp,
+        refererPageviewId = request.body.referrerPageViewId,
+        refererUrl = request.body.referrerUrl,
+        ophanPageviewId = request.body.ophanPageViewId,
+        ophanBrowserId = request.body.ophanBrowserId,
+        idUser = userId
+      )
+    }
+
+    createCharge.map { charge =>
+      storeMetaData(charge)
+      Ok
+    }.recover {
+      case e: Stripe.Error => BadRequest(Json.toJson(e))
+    }
+  }
+
 }
