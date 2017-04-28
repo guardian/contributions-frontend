@@ -6,23 +6,20 @@ import java.time.Instant
 import actions.CommonActions._
 import cats.data.EitherT
 import cats.syntax.show._
-import cookies.ContribTimestampCookieAttributes
-import cookies.syntax._
 import com.gu.i18n.CountryGroup._
-import com.gu.i18n.{AUD, Currency, EUR, USD}
+import com.gu.i18n.{AUD, EUR, USD}
 import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.typesafe.config.Config
+import controllers.forms.ContributionRequest
 import cookies.ContribTimestampCookieAttributes
+import cookies.syntax._
 import models._
 import org.joda.time.DateTime
 import play.api.Logger
-import play.api.data.{Form, FormError}
-import play.api.data.Forms._
-import play.api.data.format.Formatter
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{BodyParsers, Controller, Result}
+import play.api.libs.json._
+import play.api.mvc._
 import services.PaymentServices
 import utils.MaxAmount
 
@@ -30,72 +27,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
   extends Controller with Redirect {
-  import ContribTimestampCookieAttributes._
 
-  implicit val currencyFormatter = new Formatter[Currency] {
-    type Result = Either[Seq[FormError], Currency]
-
-    override def bind(key: String, data: Map[String, String]): Result =
-      data.get(key).map(_.toUpperCase).flatMap(Currency.fromString).fold[Result](Left(Seq.empty))(currency => Right(currency))
-
-    override def unbind(key: String, value: Currency): Map[String, String] =
-      Map(key -> value.identifier)
-  }
-
-  case class JsonAbTest(testName: String, testSlug: String, variantName: String, variantSlug: String)
-
-  object JsonAbTest {
-    implicit val abTestFormat = Json.format[JsonAbTest]
-  }
-
-  case class SupportForm(
-    name: String,
-    currency: Currency,
-    amount: BigDecimal,
-    email: String,
-    token: String,
-    marketing: Boolean,
-    postcode: Option[String],
-    abTests: Set[JsonAbTest],
-    ophanPageviewId: String,
-    ophanBrowserId: Option[String],
-    cmp: Option[String],
-    intcmp: Option[String],
-    refererPageviewId: Option[String],
-    refererUrl: Option[String]
-
-  )
-
-  val supportForm: Form[SupportForm] = Form(
-    mapping(
-      "name" -> text,
-      "currency" -> of[Currency],
-      "amount" -> bigDecimal(10, 2),
-      "email" -> email,
-      "token" -> nonEmptyText,
-      "marketing" -> boolean,
-      "postcode" -> optional(nonEmptyText),
-      "abTests" -> set(mapping(
-        "testName" -> text,
-        "testSlug" -> text,
-        "variantName" -> text,
-        "variantSlug" -> text
-      )(JsonAbTest.apply)(JsonAbTest.unapply)),
-      "ophanPageviewId" -> text,
-      "ophanBrowserId" -> optional(text),
-      "cmp" -> optional(text),
-      "intcmp" -> optional(text),
-      "refererPageviewId" -> optional(text),
-      "refererUrl" -> optional(text)
-    )(SupportForm.apply)(SupportForm.unapply)
-  )
-
-  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async(parse.form(supportForm)) { implicit request =>
+  // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
+  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
+    .async(BodyParsers.jsonOrMultipart(ContributionRequest.contributionForm)) { implicit request =>
 
     val form = request.body
 
     val stripe = paymentServices.stripeServiceFor(request)
-    val idUser = IdentityId.fromRequest(request)
+    val idUser = IdentityId.fromRequest(request) orElse form.idUser
 
     val countryGroup = form.currency match {
       case USD => US
@@ -171,7 +111,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
   val webhookKey = stripeConfig.getString("webhook.key")
 
   def hook = SharedSecretAction(webhookKey) {
-    NoCacheAction.async(BodyParsers.parse.json) { request =>
+    NoCacheAction.async(parse.json) { request =>
 
       def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result]): Future[Result] = {
         stripeHookJson.validate[StripeHook] match {
