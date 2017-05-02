@@ -45,7 +45,7 @@ object Test {
   def cmpCheck(pattern: Regex)(r: Request[_]): Boolean =
     r.getQueryString("INTCMP").exists(pattern.findAllIn(_).nonEmpty)
 
-  val stripeTest = Test("Stripe checkout", 100.percent, 0.percent, Seq(Variant("control"), Variant("stripe")))
+  val stripeTest = Test("Stripe checkout", 100.percent, 0.percent, Seq(Variant("stripe")))
 
   val landingPageTest = Test("Landing page", 100.percent, 0.percent, Seq(Variant("control"), Variant("with-copy")), cmpCheck("cont_.*_banner".r))
 
