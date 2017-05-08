@@ -4,7 +4,6 @@
 @import play.api.libs.json.Json
 @import views.support.CountryGroupImplicits._
 @import views.support.PageInfo
-@import abtests.Test.HumaniseTestV2
 
 @(
     pageInfo: PageInfo,
@@ -18,45 +17,15 @@
     creditCardExpiryYears: List[Int],
     errorMessage: Option[String],
     csrfToken: Option[String],
-    inLandingPageTest: Boolean,
-    variantData: HumaniseTestV2.VariantData
+    inLandingPageTest: Boolean
 )
 
 @defining { (block: Html) =>
-
-    @if(variantData.variant.isDefined) {
-
-        @if(variantData.variant.get == HumaniseTestV2.Variants.contributionCount) {
-
-            @views.html.fragments.tests.humanise.contributionCount(
-                pageInfo,
-                countryGroup,
-                Some(maxAmount),
-                Some("contributePage.js"),
-                variantData.contributionCount.get,
-                errorMessage
-            )(block)
-
-        } else {
-
-            @contributionsMain(
-                pageInfo,
-                countryGroup,
-                Some(maxAmount),
-                Some("contributePage.js"),
-                errorMessage
-            )(block)
-
-        }
-
+    @if(inLandingPageTest) {
+        @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
     } else {
-        @if(inLandingPageTest) {
-            @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
-        } else {
-            @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
-        }
+        @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
     }
-
 } { template =>
     @template {
         <!-- react injects its components here -->
