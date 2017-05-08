@@ -97,7 +97,7 @@ export function paypalRedirect(dispatch) {
         if (response.ok) {
             return response.json();
         } else {
-            dispatch({ type: PAYMENT_ERROR, kind: 'paypal', error: {message: 'Sorry, an error occurred, please try again or use another payment method.' }})
+            throw response;
         }
     })
     .then(response => {
