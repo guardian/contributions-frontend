@@ -2,8 +2,6 @@ package data
 
 import java.sql.Connection
 
-import abtests.Test.HumaniseTestV2
-import actions.CommonActions.ABTestRequest
 import anorm._
 import cats.data.EitherT
 import cats.syntax.either._
@@ -11,7 +9,6 @@ import data.AnormMappings._
 import models.{ContributionMetaData, Contributor, PaymentHook}
 import play.api.Logger
 import play.api.db.Database
-import play.api.mvc.AnyContent
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -148,9 +145,4 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
       contributor
     }
   }
-
-  private[this] val humaniseTestV2DataProvider = new HumaniseTestV2.PostgreDataProvider(db)
-
-  def getHumaniseTestV2VariantData(request: ABTestRequest[AnyContent]): Future[HumaniseTestV2.VariantData] =
-    humaniseTestV2DataProvider.getVariantData(request)
 }

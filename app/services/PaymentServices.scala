@@ -1,7 +1,5 @@
 package services
 
-import abtests.Test.HumaniseTestV2
-import actions.CommonActions.ABTestRequest
 import akka.actor.ActorSystem
 import com.gu.identity.play.AuthenticatedIdUser
 import com.gu.identity.testing.usernames.TestUsernames
@@ -11,11 +9,9 @@ import com.typesafe.config.Config
 import data.ContributionData
 import models.PaymentMode
 import models.PaymentMode.{Default, Testing}
-import play.api.mvc.AnyContent
 import play.api.mvc.RequestHeader
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
 
 class PaymentServices(
   config: Config,
@@ -78,6 +74,4 @@ class PaymentServices(
 
   def paypalServiceFor(request: RequestHeader): PaypalService = paypalServices(modeFor(request))
 
-  def getHumaniseTestV2VariantData(request: ABTestRequest[AnyContent]): Future[HumaniseTestV2.VariantData] =
-    contributionDataPerMode(modeFor(request)).getHumaniseTestV2VariantData(request)
 }

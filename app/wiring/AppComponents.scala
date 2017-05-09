@@ -1,7 +1,5 @@
 package wiring
 
-import abtests.Test
-import abtests.Test.HumaniseTestV2
 import com.github.nscala_time.time.Imports._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.identity.play.AccessCredentials.{Cookies, Token}
