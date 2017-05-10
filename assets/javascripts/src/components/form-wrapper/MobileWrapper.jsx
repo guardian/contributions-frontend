@@ -12,7 +12,7 @@ export default class MobileWrapper extends React.Component {
         if (this.props.page == PAGES.CONTRIBUTION)
             return this.renderInForm([PAGES.CONTRIBUTION]);
         else
-            return this.renderInForm([PAGES.DETAILS, PAGES.PAYMENT]);
+            return this.renderInForm([PAGES.DETAILS]);
 
     }
 
