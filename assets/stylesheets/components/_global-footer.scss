@@ -16,10 +16,14 @@
     }
 }
 .global-footer__info__inner {
-    padding: ($gs-baseline * 2) ($gs-gutter / 2);
+    padding: ($gs-baseline * 2) $mobile-gutter;
 
     @include mq(tablet) {
-        padding: ($gs-baseline * 2) $gs-gutter;
+        padding: ($gs-baseline * 2) $tablet-gutter;
+    }
+
+    @include mq(mem-full) {
+        padding: ($gs-baseline * 2) $mem-full-gutter;
     }
 }
 .global-footer__copyright {
@@ -47,11 +51,15 @@
 }
 .global-brandbar__inner {
    @include clearfix();
-   padding: ($gs-gutter / 2) ($gs-gutter / 4);
+   padding: $mobile-gutter;
 
    @include mq(tablet) {
-       padding: ($gs-gutter / 2) ($gs-gutter / 2) $gs-baseline
+       padding: ($gs-gutter / 2) $tablet-gutter $gs-baseline;
    }
+
+    @include mq(mem-full) {
+        padding: ($gs-gutter / 2) $mem-full-gutter $gs-baseline;
+    }
 }
 .global-brandbar__top {
     float: left;

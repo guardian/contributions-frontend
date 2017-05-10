@@ -30,11 +30,15 @@ $global-header-height-mobile: 116px;
 }
 .global-header__branding {
     @include clearfix();
-    padding: ($gs-gutter / 2);
+    padding: $mobile-gutter;
     padding-bottom: $gs-gutter;
 
     @include mq(tablet) {
-        padding: ($gs-gutter / 2) $gs-gutter;
+        padding: ($gs-gutter / 2) $tablet-gutter;
+    }
+
+    @include mq(mem-full) {
+        padding: ($gs-gutter / 2) $mem-full-gutter;
     }
 }
 .global-header__primary {
