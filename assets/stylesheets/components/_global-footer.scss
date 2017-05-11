@@ -21,10 +21,6 @@
     @include mq(tablet) {
         padding: ($gs-baseline * 2) $tablet-gutter;
     }
-
-    @include mq(mem-full) {
-        padding: ($gs-baseline * 2) $mem-full-gutter;
-    }
 }
 .global-footer__copyright {
     @include fs-textSans(1);
@@ -56,10 +52,6 @@
    @include mq(tablet) {
        padding: ($gs-gutter / 2) $tablet-gutter $gs-baseline;
    }
-
-    @include mq(mem-full) {
-        padding: ($gs-gutter / 2) $mem-full-gutter $gs-baseline;
-    }
 }
 .global-brandbar__top {
     float: left;

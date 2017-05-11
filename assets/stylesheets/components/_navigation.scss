@@ -56,9 +56,6 @@
     @include mq(desktop) {
         width: 100%;
     }
-    @include mq(mem-full) {
-        padding: 0 $mem-full-gutter;
-    }
 }
 .global-navigation__list {
     margin: 0;

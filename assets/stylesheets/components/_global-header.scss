@@ -36,10 +36,6 @@ $global-header-height-mobile: 116px;
     @include mq(tablet) {
         padding: ($gs-gutter / 2) $tablet-gutter;
     }
-
-    @include mq(mem-full) {
-        padding: ($gs-gutter / 2) $mem-full-gutter;
-    }
 }
 .global-header__primary {
     float: left;
