@@ -34,7 +34,7 @@ $global-header-height-mobile: 116px;
     padding-bottom: $gs-gutter;
 
     @include mq(tablet) {
-        padding: ($gs-gutter / 2) $tablet-gutter;
+        padding: $gs-baseline $tablet-gutter;
     }
 }
 .global-header__primary {

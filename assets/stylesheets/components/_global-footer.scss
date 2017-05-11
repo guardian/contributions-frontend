@@ -50,7 +50,7 @@
    padding: $mobile-gutter;
 
    @include mq(tablet) {
-       padding: ($gs-gutter / 2) $tablet-gutter $gs-baseline;
+       padding: $gs-baseline $tablet-gutter;
    }
 }
 .global-brandbar__top {
