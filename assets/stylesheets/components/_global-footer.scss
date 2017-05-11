@@ -16,10 +16,10 @@
     }
 }
 .global-footer__info__inner {
-    padding: ($gs-baseline * 2) ($gs-gutter / 2);
+    padding: ($gs-baseline * 2) $mobile-gutter;
 
     @include mq(tablet) {
-        padding: ($gs-baseline * 2) $gs-gutter;
+        padding: ($gs-baseline * 2) $tablet-gutter;
     }
 }
 .global-footer__copyright {
@@ -47,10 +47,10 @@
 }
 .global-brandbar__inner {
    @include clearfix();
-   padding: ($gs-gutter / 2) ($gs-gutter / 4);
+   padding: $mobile-gutter;
 
    @include mq(tablet) {
-       padding: ($gs-gutter / 2) ($gs-gutter / 2) $gs-baseline
+       padding: $gs-baseline $tablet-gutter;
    }
 }
 .global-brandbar__top {

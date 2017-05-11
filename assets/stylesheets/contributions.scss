@@ -163,11 +163,16 @@ $control-spacing: 5px;
 
 .contributions__inner,
 .feedback {
-    padding: 0 $gs-gutter $gs-baseline;
+    padding: 0 $mobile-gutter $gs-baseline;
+
+    @include mq(tablet) {
+        padding-left: $tablet-gutter;
+        padding-right: $tablet-gutter;
+    }
 
     @include mq(mem-full) {
-        padding-left: $gs-gutter * 2;
-        padding-right: $gs-gutter * 2;
+        padding-left: $mem-full-gutter;
+        padding-right: $mem-full-gutter;
     }
 }
 

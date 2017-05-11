@@ -47,10 +47,10 @@
     width: auto;
     vertical-align: middle;
     height: $global-toggle-height;
-    padding: 0 ($global-toggle-height * 2) 0 ($gs-gutter / 2);
+    padding: 0 ($global-toggle-height * 2) 0 $mobile-gutter;
 
     @include mq(tablet) {
-        padding: 0 $gs-gutter;
+        padding: 0 $tablet-gutter;
         display: block;
     }
     @include mq(desktop) {
