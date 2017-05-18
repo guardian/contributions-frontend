@@ -11,13 +11,13 @@ import com.amazonaws.services.sqs.model._
 import configuration.Config
 import models.ContributorRow
 import monitoring.SentryLoggingTags
-import monitoring.{SentryTagLogger => Logger}
+import monitoring.SentryLogger
 import play.api.libs.json._
 import utils.AwsAsyncHandler
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
+class EmailService(implicit ec: ExecutionContext) extends SentryLogger {
 
   val credentialsProviderChain: AWSCredentialsProviderChain = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider,
@@ -53,7 +53,7 @@ class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
       Right(result)
     } recover {
       case t: Throwable =>
-        Logger.error(s"Unable to send message to the SQS queue $queueUrl", t)
+        error(s"Unable to send message to the SQS queue $queueUrl", t)
         Left(t)
     })
   }

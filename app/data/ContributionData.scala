@@ -8,18 +8,18 @@ import cats.syntax.either._
 import data.AnormMappings._
 import models.{ContributionMetaData, Contributor, PaymentHook}
 import monitoring.SentryLoggingTags
-import monitoring.{SentryTagLogger => Logger}
+import monitoring.SentryLogger
 import play.api.db.Database
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class ContributionData(db: Database)(implicit ec: ExecutionContext) {
+class ContributionData(db: Database)(implicit ec: ExecutionContext) extends SentryLogger {
 
   def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A)(implicit tags: SentryLoggingTags): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(db.withConnection(autocommit)(block))
     Either.fromTry(result).leftMap { exception =>
-      Logger.error("Error encountered during the execution of the sql query", exception)
+      error("Error encountered during the execution of the sql query", exception)
       "Error encountered during the execution of the sql query"
     }
   })

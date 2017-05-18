@@ -18,7 +18,7 @@ import cookies.syntax._
 import models._
 import monitoring.SentryLoggingTags
 import org.joda.time.DateTime
-import monitoring.{SentryTagLogger => Logger}
+import monitoring.SentryLogger
 import play.api.libs.json._
 import play.api.mvc._
 import services.PaymentServices
@@ -27,7 +27,7 @@ import utils.MaxAmount
 import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
-  extends Controller with Redirect {
+  extends Controller with Redirect with SentryLogger {
 
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
   def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
@@ -116,11 +116,11 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
 
       def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result])(implicit tags: SentryLoggingTags): Future[Result] = {
         stripeHookJson.validate[StripeHook] match {
-          case JsError(error) =>
-            Logger.error(s"Unable to parse the stripe hook: $error")
+          case JsError(err) =>
+            error(s"Unable to parse the stripe hook: $err")
             Future.successful(BadRequest("Invalid Json"))
           case JsSuccess(stripeHook, _) =>
-            Logger.info(s"Processing a stripe hook ${stripeHook.eventId}")
+            info(s"Processing a stripe hook ${stripeHook.eventId}")
             block(stripeHook)
         }
       }

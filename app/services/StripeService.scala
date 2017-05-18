@@ -10,7 +10,7 @@ import cats.implicits._
 import com.gu.okhttp.RequestRunners
 import com.gu.stripe.Stripe.{Charge, Event}
 import monitoring.SentryLoggingTags
-import monitoring.SentryTagLogger
+import monitoring.SentryLogger
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 

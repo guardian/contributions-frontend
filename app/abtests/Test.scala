@@ -2,7 +2,6 @@ package abtests
 
 import actions.CommonActions.ABTestRequest
 import com.github.slugify.Slugify
-import monitoring.{SentryTagLogger => Logger}
 import play.api.db.Database
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.AnyContent

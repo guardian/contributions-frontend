@@ -7,6 +7,7 @@ import ch.qos.logback.classic.{Logger, LoggerContext}
 import com.getsentry.raven.RavenFactory
 import com.getsentry.raven.dsn.Dsn
 import com.getsentry.raven.logback.SentryAppender
+import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import org.slf4j.Logger.ROOT_LOGGER_NAME
 import org.slf4j.LoggerFactory
@@ -15,14 +16,16 @@ import play.api.mvc.Request
 
 import scala.util.{Failure, Success, Try}
 
-object SentryLogging {
+// Don't have this object extend the SentryLogging trait.
+// There is no contextual information at this stage of the application's life-cycle.
+object SentryLogging extends LazyLogging {
 
   def init(config: com.typesafe.config.Config) {
     Try(new Dsn(config.getString("sentry.dsn"))) match {
       case Failure(ex) =>
-        play.api.Logger.warn("No server-side Sentry logging configured (OK for dev)")
+        logger.warn("No server-side Sentry logging configured (OK for dev)")
       case Success(dsn) =>
-        play.api.Logger.info(s"Initialising Sentry logging for ${dsn.getHost}")
+        logger.info(s"Initialising Sentry logging for ${dsn.getHost}")
         val buildInfo: Map[String, Any] = app.BuildInfo.toMap
         val tags = Map("stage" -> Config.stage) ++ buildInfo
         val tagsString = tags.map { case (key, value) => s"$key:$value"}.mkString(",")
@@ -42,7 +45,6 @@ object SentryLogging {
     }
   }
 }
-
 
 case class SentryLoggingTags(browserId: String, requestId: UUID) {
 
@@ -69,16 +71,15 @@ object SentryLoggingTags {
   }
 }
 
-class SentryTagLogger private(logger: org.slf4j.Logger) {
+trait SentryLogger extends LazyLogging {
 
-  def withTags(expr: => Unit)(implicit tags: SentryLoggingTags): Unit = {
+  private[this] def withTags(loggingExpr: => Unit)(implicit tags: SentryLoggingTags): Unit =
     try {
-      for ((k, v) <- tags.toMap) MDC.put(k, v)
-      expr
+      for ((tagName, tagValue) <- tags.toMap) MDC.put(tagName, tagValue)
+      loggingExpr
     } finally {
       MDC.clear()
     }
-  }
 
   def info(msg: String)(implicit tags: SentryLoggingTags): Unit =
     withTags(logger.info(msg))
@@ -89,5 +90,3 @@ class SentryTagLogger private(logger: org.slf4j.Logger) {
   def error(msg: String)(implicit tags: SentryLoggingTags): Unit =
     withTags(logger.error(msg))
 }
-
-object SentryTagLogger extends SentryTagLogger(play.api.Logger.logger)

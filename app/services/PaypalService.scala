@@ -14,7 +14,7 @@ import com.paypal.base.rest.APIContext
 import com.typesafe.config.Config
 import data.ContributionData
 import models._
-import monitoring.{SentryTagLogger => Logger}
+import monitoring.SentryLogger
 import monitoring.SentryLoggingTags
 import org.joda.time.DateTime
 import play.api.libs.json.Json
@@ -49,7 +49,7 @@ class PaypalService(
   contributionData: ContributionData,
   identityService: IdentityService,
   emailService: EmailService
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext) extends SentryLogger {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
 
@@ -58,7 +58,7 @@ class PaypalService(
   private def asyncExecute[A](block: => A)(implicit tags: SentryLoggingTags): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(block)
     Either.fromTry(result).leftMap { exception =>
-      Logger.error("Error while calling PayPal API", exception)
+      error("Error while calling PayPal API", exception)
       exception.getMessage
     }
   })
@@ -164,7 +164,7 @@ class PaypalService(
 
     def tryToEitherT[A](block: => A): EitherT[Future, String, A] = {
       EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
-        Logger.error("Unable to store contribution metadata", t)
+        error("Unable to store contribution metadata", t)
         "Unable to store contribution metadata"
       })
     }

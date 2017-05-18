@@ -1,7 +1,7 @@
 package controllers
 
 import models.Autofill
-import monitoring.SentryTagLogger
+import monitoring.SentryLogger
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller, Result}
 import services.IdentityService

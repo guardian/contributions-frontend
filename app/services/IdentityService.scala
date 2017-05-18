@@ -3,13 +3,13 @@ package services
 import com.typesafe.config.Config
 import models.{Autofill, IdentityId}
 import monitoring.SentryLoggingTags
-import monitoring.{SentryTagLogger => Logger}
+import monitoring.SentryLogger
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IdentityService(wsClient: WSClient, config: Config)(implicit ec: ExecutionContext) {
+class IdentityService(wsClient: WSClient, config: Config)(implicit ec: ExecutionContext) extends SentryLogger {
   private val identityUrl = config.getString("apiUrl")
   private val token = config.getString("token")
 
@@ -24,7 +24,7 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
       response.status >= 200 && response.status < 300
     } recover {
       case e: Exception =>
-        Logger.error("Impossible to update the user's preferences", e)
+        error("Impossible to update the user's preferences", e)
         false
     }
   }
@@ -47,14 +47,14 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
         if (status == "ok") {
           Autofill(name(firstName, secondName), email)
         } else {
-          Logger.error(s"Invalid identity API response status: $status")
+          error(s"Invalid identity API response status: $status")
           Autofill.empty
         }
       }
       result match {
         case JsSuccess(autofill, _) => autofill
         case JsError(e) =>
-          Logger.error(s"Unable to parse json from identity $e")
+          error(s"Unable to parse json from identity $e")
           Autofill.empty
       }
     }
@@ -70,7 +70,7 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
       .get()
       .map(_.json)
       .recover { case e: Exception =>
-        Logger.error("Unable to fetch user from identity", e)
+        error("Unable to fetch user from identity", e)
         JsObject(Seq.empty)
       }
   }
