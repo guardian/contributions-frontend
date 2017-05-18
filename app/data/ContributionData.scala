@@ -7,23 +7,24 @@ import cats.data.EitherT
 import cats.syntax.either._
 import data.AnormMappings._
 import models.{ContributionMetaData, Contributor, PaymentHook}
-import play.api.Logger
+import monitoring.LoggingTags
+import monitoring.TagAwareLogger
 import play.api.db.Database
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class ContributionData(db: Database)(implicit ec: ExecutionContext) {
+class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagAwareLogger {
 
-  def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A): EitherT[Future, String, A] = EitherT(Future {
+  def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(db.withConnection(autocommit)(block))
     Either.fromTry(result).leftMap { exception =>
-      Logger.error("Error encountered during the execution of the sql query", exception)
+      error("Error encountered during the execution of the sql query", exception)
       "Error encountered during the execution of the sql query"
     }
   })
 
-  def insertPaymentHook(paymentHook: PaymentHook): EitherT[Future, String, PaymentHook] = {
+  def insertPaymentHook(paymentHook: PaymentHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO payment_hooks(
@@ -62,7 +63,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
     }
   }
 
-  def insertPaymentMetaData(pmd: ContributionMetaData): EitherT[Future, String, ContributionMetaData] = {
+  def insertPaymentMetaData(pmd: ContributionMetaData)(implicit tags: LoggingTags): EitherT[Future, String, ContributionMetaData] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO contribution_metadata(
@@ -107,7 +108,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) {
     }
   }
 
-  def saveContributor(contributor: Contributor): EitherT[Future, String, Contributor] = {
+  def saveContributor(contributor: Contributor)(implicit tags: LoggingTags): EitherT[Future, String, Contributor] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       // Note that the contributor ID will only set on insert. it's not touched on update.
       val request = SQL"""

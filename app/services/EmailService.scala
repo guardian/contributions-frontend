@@ -10,13 +10,14 @@ import com.amazonaws.services.sqs.AmazonSQSAsyncClient
 import com.amazonaws.services.sqs.model._
 import configuration.Config
 import models.ContributorRow
-import play.api.Logger
+import monitoring.LoggingTags
+import monitoring.TagAwareLogger
 import play.api.libs.json._
 import utils.AwsAsyncHandler
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
+class EmailService(implicit ec: ExecutionContext) extends TagAwareLogger {
 
   val credentialsProviderChain: AWSCredentialsProviderChain = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider,
@@ -34,7 +35,7 @@ class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
   // We don't want to send them an automatic email yet
   val noEmailCampaignCodes = Set("co_uk_ema_cns_a", "co_uk_ema_cns_b", "co_us_ema_cnsus_a", "co_int_email_patronask")
 
-  def thank(row: ContributorRow): EitherT[Future, Throwable, SendMessageResult] = {
+  def thank(row: ContributorRow)(implicit tags: LoggingTags): EitherT[Future, Throwable, SendMessageResult] = {
     if (noEmailCampaignCodes.exists(row.cmp.contains)) {
       EitherT.pure[Future, Throwable, SendMessageResult](new SendMessageResult)
     } else {
@@ -42,7 +43,7 @@ class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
     }
   }
 
-  def sendEmailToQueue(queueUrl: String, row: ContributorRow): EitherT[Future, Throwable, SendMessageResult] = {
+  def sendEmailToQueue(queueUrl: String, row: ContributorRow)(implicit tags: LoggingTags): EitherT[Future, Throwable, SendMessageResult] = {
     val payload = Json.stringify(Json.toJson(row))
 
     val handler = new AwsAsyncHandler[SendMessageRequest, SendMessageResult]
@@ -52,7 +53,7 @@ class EmailService(implicit ec: ExecutionContext) extends LazyLogging {
       Right(result)
     } recover {
       case t: Throwable =>
-        Logger.error(s"Unable to send message to the SQS queue $queueUrl", t)
+        error(s"Unable to send message to the SQS queue $queueUrl", t)
         Left(t)
     })
   }

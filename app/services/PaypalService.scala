@@ -14,8 +14,9 @@ import com.paypal.base.rest.APIContext
 import com.typesafe.config.Config
 import data.ContributionData
 import models._
+import monitoring.TagAwareLogger
+import monitoring.LoggingTags
 import org.joda.time.DateTime
-import play.api.Logger
 import play.api.libs.json.Json
 
 import scala.collection.JavaConverters._
@@ -48,16 +49,16 @@ class PaypalService(
   contributionData: ContributionData,
   identityService: IdentityService,
   emailService: EmailService
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext) extends TagAwareLogger {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  private def asyncExecute[A](block: => A): EitherT[Future, String, A] = EitherT(Future {
+  private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(block)
     Either.fromTry(result).leftMap { exception =>
-      Logger.error("Error while calling PayPal API", exception)
+      error("Error while calling PayPal API", exception)
       exception.getMessage
     }
   })
@@ -81,7 +82,7 @@ class PaypalService(
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
-  ): EitherT[Future, String, Uri] = {
+  )(implicit tags: LoggingTags): EitherT[Future, String, Uri] = {
 
     val paymentToCreate = {
 
@@ -138,7 +139,7 @@ class PaypalService(
       }
   }
 
-  def executePayment(paymentId: String, payerId: String): EitherT[Future, String, Payment] = {
+  def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
@@ -159,11 +160,11 @@ class PaypalService(
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
-  ): EitherT[Future, String, SavedContributionData] = {
+  )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     def tryToEitherT[A](block: => A): EitherT[Future, String, A] = {
       EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
-        Logger.error("Unable to store contribution metadata", t)
+        error("Unable to store contribution metadata", t)
         "Unable to store contribution metadata"
       })
     }
@@ -240,7 +241,7 @@ class PaypalService(
     )
   }
 
-  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId]): EitherT[Future, String, Contributor] = {
+  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId])(implicit tags: LoggingTags): EitherT[Future, String, Contributor] = {
     val contributor = Contributor(
       email = email,
       contributorId = None,
@@ -265,7 +266,7 @@ class PaypalService(
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paypalHook: PaypalHook): EitherT[Future, String, PaymentHook] = {
+  def processPaymentHook(paypalHook: PaypalHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
     contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 

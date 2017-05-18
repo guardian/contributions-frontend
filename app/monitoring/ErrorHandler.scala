@@ -27,7 +27,7 @@ class ErrorHandler @Inject()(
 
   override def logServerError(request: RequestHeader, usefulException: UsefulException) {
     try {
-      for (identityUser <- identityAuthProvider(request)) { MDC.put(UserIdentityId, identityUser.id) }
+      for (identityUser <- identityAuthProvider(request)) MDC.put(UserIdentityId, identityUser.id)
 
       MDC.put(PlayErrorId, usefulException.id)
 

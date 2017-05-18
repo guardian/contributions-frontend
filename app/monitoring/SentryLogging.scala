@@ -5,13 +5,16 @@ import ch.qos.logback.classic.{Logger, LoggerContext}
 import com.getsentry.raven.RavenFactory
 import com.getsentry.raven.dsn.Dsn
 import com.getsentry.raven.logback.SentryAppender
+import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import org.slf4j.Logger.ROOT_LOGGER_NAME
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 
-object SentryLogging {
+// Don't have this object extend the SentryLogging trait.
+// There is no contextual information at this stage of the application's life-cycle.
+object SentryLogging extends LazyLogging {
 
   val UserIdentityId = "userIdentityId"
   val UserGoogleId = "userGoogleId"
@@ -21,9 +24,9 @@ object SentryLogging {
   def init(config: com.typesafe.config.Config) {
     Try(new Dsn(config.getString("sentry.dsn"))) match {
       case Failure(ex) =>
-        play.api.Logger.warn("No server-side Sentry logging configured (OK for dev)")
+        logger.warn("No server-side Sentry logging configured (OK for dev)")
       case Success(dsn) =>
-        play.api.Logger.info(s"Initialising Sentry logging for ${dsn.getHost}")
+        logger.info(s"Initialising Sentry logging for ${dsn.getHost}")
         val buildInfo: Map[String, Any] = app.BuildInfo.toMap
         val tags = Map("stage" -> Config.stage) ++ buildInfo
         val tagsString = tags.map { case (key, value) => s"$key:$value"}.mkString(",")
@@ -35,7 +38,7 @@ object SentryLogging {
           addFilter(filter)
           setTags(tagsString)
           setRelease(app.BuildInfo.gitCommitId)
-          setExtraTags(AllMDCTags.mkString(","))
+          setExtraTags((AllMDCTags ++ LoggingTags.allTags).mkString(","))
           setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
         }
         sentryAppender.start()

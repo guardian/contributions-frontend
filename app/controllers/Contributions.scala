@@ -9,6 +9,7 @@ import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
 import models.ContributionAmount
+import monitoring.TagAwareLogger
 import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
@@ -52,6 +53,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
 
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
     (NoCacheAction andThen MobileSupportAction andThen ABTestAction) { implicit request =>
+
       val errorMessage = error.map(_.message)
       val stripe = paymentServices.stripeServiceFor(request)
       val cmp = request.getQueryString("CMP")

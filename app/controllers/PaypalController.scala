@@ -10,10 +10,11 @@ import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
 import models._
+import monitoring.TagAwareLogger
+import monitoring.LoggingTags
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.PaymentServices
-import play.api.Logger
 import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
@@ -28,7 +29,7 @@ import utils.StoreMetaDataError
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)(implicit ec: ExecutionContext)
-  extends Controller with Redirect {
+  extends Controller with Redirect with TagAwareLogger {
   import ContribTimestampCookieAttributes._
 
   def executePayment(
@@ -144,35 +145,35 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       )
       authResponse.value map {
         case Right(url) => Ok(Json.toJson(AuthResponse(url)))
-        case Left(error) =>
-          Logger.error(s"Error getting PayPal auth url: $error")
+        case Left(err) =>
+          error(s"Error getting PayPal auth url: $err")
           InternalServerError("Error getting PayPal auth url")
       }
     }
   }
 
-  def handleError(countryGroup: CountryGroup, error: String) = {
-    Logger.error(error)
+  def handleError(countryGroup: CountryGroup, err: String)(implicit tags: LoggingTags) = {
+    error(err)
     Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
   }
 
-  def hook = NoCacheAction.async(parse.tolerantText) { request =>
+  def hook = NoCacheAction.async(parse.tolerantText) { implicit request =>
     val bodyText = request.body
     val bodyJson = Json.parse(request.body)
 
     val paypalService = paymentServices.paypalServiceFor(request)
     val validHook = paypalService.validateEvent(request.headers.toSimpleMap, bodyText)
 
-    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result]): Future[Result] = {
+    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result])(implicit tags: LoggingTags): Future[Result] = {
       bodyJson.validate[PaypalHook] match {
         case JsSuccess(paypalHook, _) if validHook =>
-          Logger.info(s"Received paymentHook: ${paypalHook.paymentId}")
+          info(s"Received paymentHook: ${paypalHook.paymentId}")
           block(paypalHook)
-        case JsError(errors) =>
-          Logger.error(s"Unable to parse Json, parsing errors: $errors")
+        case JsError(err) =>
+          error(s"Unable to parse Json, parsing errors: $err")
           Future.successful(InternalServerError("Unable to parse json payload"))
         case _ =>
-          Logger.error(s"A webhook request wasn't valid: $request, headers: ${request.headers.toSimpleMap},body: $bodyText")
+          error(s"A webhook request wasn't valid: $request, headers: ${request.headers.toSimpleMap},body: $bodyText")
           Future.successful(Forbidden("Request isn't signed by Paypal"))
       }
     }
@@ -198,7 +199,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     val idUser = IdentityId.fromRequest(request)
     val contributor = request.session.data.get("email") match {
       case Some(email) => paypalService.updateMarketingOptIn(email, marketingOptIn, idUser).value
-      case None => Future.successful(Logger.error("email not found in session while trying to update marketing opt in"))
+      case None => Future.successful(error("email not found in session while trying to update marketing opt in"))
     }
 
     val url = request.session.get("amount").flatMap(ContributionAmount.apply)
