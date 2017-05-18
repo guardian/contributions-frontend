@@ -28,7 +28,7 @@ object LoggingTags {
 
   val allTags = Seq(browserId, requestId)
 
-  // Means that if `implicit request =>` is used in an Action, an implicit SentryLoggingTags instance will be in scope.
+  // Means that if `implicit request =>` is used in an Action, an implicit LoggingTags instance will be in scope.
   implicit def fromRequest(implicit request: Request[Any]): LoggingTags = {
     val browserId = request.cookies.get("bwid").map(_.value).getOrElse("unknown")
     LoggingTags(browserId, UUID.randomUUID)
