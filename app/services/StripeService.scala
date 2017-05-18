@@ -9,8 +9,8 @@ import models._
 import cats.implicits._
 import com.gu.okhttp.RequestRunners
 import com.gu.stripe.Stripe.{Charge, Event}
-import monitoring.SentryLoggingTags
-import monitoring.SentryLogger
+import monitoring.LoggingTags
+import monitoring.TagAwareLogger
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
@@ -40,7 +40,7 @@ class StripeService(
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
-  )(implicit tags: SentryLoggingTags): EitherT[Future, String, SavedContributionData] = {
+  )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     // Fire and forget: we don't want to stop the user flow
     idUser.map { id =>
@@ -88,7 +88,7 @@ class StripeService(
     )
   }
 
-  def processPaymentHook(stripeHook: StripeHook)(implicit tags: SentryLoggingTags): EitherT[Future, String, PaymentHook] = {
+  def processPaymentHook(stripeHook: StripeHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
 
     def convertedAmount(event: Event[Charge]): OptionT[Future, BigDecimal] = {
       for {

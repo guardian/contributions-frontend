@@ -14,8 +14,8 @@ import com.paypal.base.rest.APIContext
 import com.typesafe.config.Config
 import data.ContributionData
 import models._
-import monitoring.SentryLogger
-import monitoring.SentryLoggingTags
+import monitoring.TagAwareLogger
+import monitoring.LoggingTags
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
@@ -49,13 +49,13 @@ class PaypalService(
   contributionData: ContributionData,
   identityService: IdentityService,
   emailService: EmailService
-)(implicit ec: ExecutionContext) extends SentryLogger {
+)(implicit ec: ExecutionContext) extends TagAwareLogger {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  private def asyncExecute[A](block: => A)(implicit tags: SentryLoggingTags): EitherT[Future, String, A] = EitherT(Future {
+  private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(block)
     Either.fromTry(result).leftMap { exception =>
       error("Error while calling PayPal API", exception)
@@ -82,7 +82,7 @@ class PaypalService(
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
-  )(implicit tags: SentryLoggingTags): EitherT[Future, String, Uri] = {
+  )(implicit tags: LoggingTags): EitherT[Future, String, Uri] = {
 
     val paymentToCreate = {
 
@@ -139,7 +139,7 @@ class PaypalService(
       }
   }
 
-  def executePayment(paymentId: String, payerId: String)(implicit tags: SentryLoggingTags): EitherT[Future, String, Payment] = {
+  def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
@@ -160,7 +160,7 @@ class PaypalService(
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId]
-  )(implicit tags: SentryLoggingTags): EitherT[Future, String, SavedContributionData] = {
+  )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     def tryToEitherT[A](block: => A): EitherT[Future, String, A] = {
       EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
@@ -241,7 +241,7 @@ class PaypalService(
     )
   }
 
-  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId])(implicit tags: SentryLoggingTags): EitherT[Future, String, Contributor] = {
+  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId])(implicit tags: LoggingTags): EitherT[Future, String, Contributor] = {
     val contributor = Contributor(
       email = email,
       contributorId = None,
@@ -266,7 +266,7 @@ class PaypalService(
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paypalHook: PaypalHook)(implicit tags: SentryLoggingTags): EitherT[Future, String, PaymentHook] = {
+  def processPaymentHook(paypalHook: PaypalHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
     contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
   }
 

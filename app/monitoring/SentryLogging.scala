@@ -1,7 +1,5 @@
 package monitoring
 
-import java.util.UUID
-
 import ch.qos.logback.classic.filter.ThresholdFilter
 import ch.qos.logback.classic.{Logger, LoggerContext}
 import com.getsentry.raven.RavenFactory
@@ -11,14 +9,17 @@ import com.typesafe.scalalogging.LazyLogging
 import configuration.Config
 import org.slf4j.Logger.ROOT_LOGGER_NAME
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
-import play.api.mvc.Request
 
 import scala.util.{Failure, Success, Try}
 
 // Don't have this object extend the SentryLogging trait.
 // There is no contextual information at this stage of the application's life-cycle.
 object SentryLogging extends LazyLogging {
+
+  val UserIdentityId = "userIdentityId"
+  val UserGoogleId = "userGoogleId"
+  val PlayErrorId = "playErrorId"
+  val AllMDCTags = Seq(UserIdentityId, UserGoogleId,PlayErrorId)
 
   def init(config: com.typesafe.config.Config) {
     Try(new Dsn(config.getString("sentry.dsn"))) match {
@@ -37,56 +38,11 @@ object SentryLogging extends LazyLogging {
           addFilter(filter)
           setTags(tagsString)
           setRelease(app.BuildInfo.gitCommitId)
-          setExtraTags(SentryLoggingTags.AllTags.mkString(","))
+          setExtraTags((AllMDCTags ++ LoggingTags.allTags).mkString(","))
           setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
         }
         sentryAppender.start()
         LoggerFactory.getLogger(ROOT_LOGGER_NAME).asInstanceOf[Logger].addAppender(sentryAppender)
     }
   }
-}
-
-case class SentryLoggingTags(browserId: String, requestId: UUID) {
-
-  def toMap: Map[String, String] = Map(
-    SentryLoggingTags.browserId -> browserId,
-    SentryLoggingTags.requestId -> requestId.toString
-  )
-}
-
-object SentryLoggingTags {
-
-  val userIdentityId = "userIdentityId"
-  val userGoogleId = "userGoogleId"
-  val playErrorId = "playErrorId"
-  val browserId = "browserId"
-  val requestId = "requestId"
-
-  val AllTags = Seq(userIdentityId, userGoogleId, playErrorId, browserId, requestId)
-
-  // Means that if `implicit request =>` is used in an Action, an implicit SentryLoggingTags instance will be in scope.
-  implicit def fromRequest(implicit request: Request[Any]): SentryLoggingTags = {
-    val browserId = request.cookies.get("bwid").map(_.value).getOrElse("unknown")
-    SentryLoggingTags(browserId, UUID.randomUUID)
-  }
-}
-
-trait SentryLogger extends LazyLogging {
-
-  private[this] def withTags(loggingExpr: => Unit)(implicit tags: SentryLoggingTags): Unit =
-    try {
-      for ((tagName, tagValue) <- tags.toMap) MDC.put(tagName, tagValue)
-      loggingExpr
-    } finally {
-      MDC.clear()
-    }
-
-  def info(msg: String)(implicit tags: SentryLoggingTags): Unit =
-    withTags(logger.info(msg))
-
-  def error(msg: String, t: Throwable)(implicit tags: SentryLoggingTags): Unit =
-    withTags(logger.error(msg, t))
-
-  def error(msg: String)(implicit tags: SentryLoggingTags): Unit =
-    withTags(logger.error(msg))
 }

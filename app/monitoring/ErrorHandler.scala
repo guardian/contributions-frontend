@@ -4,7 +4,7 @@ import javax.inject._
 
 import com.gu.identity.play.AuthenticatedIdUser
 import controllers.{Cached, NoCache}
-import monitoring.SentryLoggingTags._
+import monitoring.SentryLogging._
 import org.slf4j.MDC
 import play.api._
 import play.api.http.DefaultHttpErrorHandler
@@ -27,9 +27,9 @@ class ErrorHandler @Inject()(
 
   override def logServerError(request: RequestHeader, usefulException: UsefulException) {
     try {
-      for (identityUser <- identityAuthProvider(request)) MDC.put(userIdentityId, identityUser.id)
+      for (identityUser <- identityAuthProvider(request)) MDC.put(UserIdentityId, identityUser.id)
 
-      MDC.put(playErrorId, usefulException.id)
+      MDC.put(PlayErrorId, usefulException.id)
 
       super.logServerError(request, usefulException)
 

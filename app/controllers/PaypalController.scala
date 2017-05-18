@@ -10,8 +10,8 @@ import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
 import models._
-import monitoring.SentryLogger
-import monitoring.SentryLoggingTags
+import monitoring.TagAwareLogger
+import monitoring.LoggingTags
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.PaymentServices
@@ -29,7 +29,7 @@ import utils.StoreMetaDataError
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)(implicit ec: ExecutionContext)
-  extends Controller with Redirect with SentryLogger {
+  extends Controller with Redirect with TagAwareLogger {
   import ContribTimestampCookieAttributes._
 
   def executePayment(
@@ -152,7 +152,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     }
   }
 
-  def handleError(countryGroup: CountryGroup, err: String)(implicit tags: SentryLoggingTags) = {
+  def handleError(countryGroup: CountryGroup, err: String)(implicit tags: LoggingTags) = {
     error(err)
     Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
   }
@@ -164,7 +164,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     val paypalService = paymentServices.paypalServiceFor(request)
     val validHook = paypalService.validateEvent(request.headers.toSimpleMap, bodyText)
 
-    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result])(implicit tags: SentryLoggingTags): Future[Result] = {
+    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result])(implicit tags: LoggingTags): Future[Result] = {
       bodyJson.validate[PaypalHook] match {
         case JsSuccess(paypalHook, _) if validHook =>
           info(s"Received paymentHook: ${paypalHook.paymentId}")

@@ -9,7 +9,7 @@ import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
 import models.ContributionAmount
-import monitoring.SentryLogger
+import monitoring.TagAwareLogger
 import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
