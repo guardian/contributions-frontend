@@ -10,10 +10,11 @@ import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
 import models._
+import monitoring.SentryLoggingTags
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.PaymentServices
-import play.api.Logger
+import monitoring.{SentryTagLogger => Logger}
 import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
@@ -151,19 +152,19 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     }
   }
 
-  def handleError(countryGroup: CountryGroup, error: String) = {
+  def handleError(countryGroup: CountryGroup, error: String)(implicit tags: SentryLoggingTags) = {
     Logger.error(error)
     Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
   }
 
-  def hook = NoCacheAction.async(parse.tolerantText) { request =>
+  def hook = NoCacheAction.async(parse.tolerantText) { implicit request =>
     val bodyText = request.body
     val bodyJson = Json.parse(request.body)
 
     val paypalService = paymentServices.paypalServiceFor(request)
     val validHook = paypalService.validateEvent(request.headers.toSimpleMap, bodyText)
 
-    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result]): Future[Result] = {
+    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result])(implicit tags: SentryLoggingTags): Future[Result] = {
       bodyJson.validate[PaypalHook] match {
         case JsSuccess(paypalHook, _) if validHook =>
           Logger.info(s"Received paymentHook: ${paypalHook.paymentId}")

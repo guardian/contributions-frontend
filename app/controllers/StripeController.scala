@@ -16,8 +16,9 @@ import controllers.forms.ContributionRequest
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import models._
+import monitoring.SentryLoggingTags
 import org.joda.time.DateTime
-import play.api.Logger
+import monitoring.{SentryTagLogger => Logger}
 import play.api.libs.json._
 import play.api.mvc._
 import services.PaymentServices
@@ -111,9 +112,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
   val webhookKey = stripeConfig.getString("webhook.key")
 
   def hook = SharedSecretAction(webhookKey) {
-    NoCacheAction.async(parse.json) { request =>
+    NoCacheAction.async(parse.json) { implicit request =>
 
-      def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result]): Future[Result] = {
+      def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result])(implicit tags: SentryLoggingTags): Future[Result] = {
         stripeHookJson.validate[StripeHook] match {
           case JsError(error) =>
             Logger.error(s"Unable to parse the stripe hook: $error")

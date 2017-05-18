@@ -2,11 +2,8 @@ package configuration
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
 import com.typesafe.config.ConfigFactory
-import play.api.Logger
 
 object Config {
-
-  val logger = Logger(this.getClass)
 
   val config = ConfigFactory.load()
   val contributeUrl = config.getString("contribute.url")

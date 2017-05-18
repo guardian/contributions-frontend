@@ -2,7 +2,8 @@ package services
 
 import com.typesafe.config.Config
 import models.{Autofill, IdentityId}
-import play.api.Logger
+import monitoring.SentryLoggingTags
+import monitoring.{SentryTagLogger => Logger}
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSRequest}
 
@@ -17,7 +18,7 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
       .withHeaders("Authorization" -> s"Bearer $token")
   }
 
-  def updateMarketingPreferences(userId: IdentityId, marketing: Boolean): Future[Boolean] = {
+  def updateMarketingPreferences(userId: IdentityId, marketing: Boolean)(implicit tags: SentryLoggingTags): Future[Boolean] = {
     val payload = Json.obj("statusFields" -> Json.obj("receiveGnmMarketing" -> marketing))
     request(s"user/${userId.id}").post(payload).map { response =>
       response.status >= 200 && response.status < 300
@@ -28,14 +29,14 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
     }
   }
 
-  def autofill(cookie: String): Future[Autofill] = {
+  def autofill(cookie: String)(implicit tags: SentryLoggingTags): Future[Autofill] = {
 
     def name(optionalFirstName: Option[String], optionalSecondName: Option[String]): Option[String] = for {
       firstName <- optionalFirstName
       secondName <- optionalSecondName
     } yield s"$firstName $secondName"
 
-    def parse(jsValue: JsValue): Autofill = {
+    def parse(jsValue: JsValue)(implicit tags: SentryLoggingTags): Autofill = {
       val result = for {
         status <- (jsValue \ "status").validate[String]
         user <- (jsValue \ "user").validate[JsValue]
@@ -62,7 +63,7 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
   }
 
 
-  def readUser(cookie: String): Future[JsValue] = {
+  def readUser(cookie: String)(implicit tags: SentryLoggingTags): Future[JsValue] = {
     request("user/me")
       .withHeaders("X-GU-ID-FOWARDED-SC-GU-U" -> cookie)
       .withHeaders("X-GU-ID-Client-Access-Token" -> s"Bearer $token")
