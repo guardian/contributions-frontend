@@ -38,7 +38,7 @@ object SentryLogging extends LazyLogging {
           addFilter(filter)
           setTags(tagsString)
           setRelease(app.BuildInfo.gitCommitId)
-          setExtraTags((AllMDCTags ++ LoggingTags.allTags).mkString(","))
+          setExtraTags((AllMDCTags ++ LoggingTag.names).mkString(","))
           setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
         }
         sentryAppender.start()
