@@ -1,7 +1,5 @@
 package monitoring
 
-import java.util.UUID
-
 import com.typesafe.scalalogging.LazyLogging
 import org.slf4j.MDC
 import play.api.mvc.RequestHeader
@@ -34,7 +32,7 @@ object LoggingTag extends enumeratum.Enum[LoggingTag] {
 
   case object RequestId extends LoggingTag {
     override def value(header: RequestHeader): String =
-      UUID.randomUUID().toString
+      header.id.toString
   }
 }
 
