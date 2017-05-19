@@ -4,5 +4,8 @@
             "url": "https://contribute.theguardian.com/uk",
             "overdue": "14M"
         }
+    },
+    "sentry": {
+        "projects": ["contributions", "contributions-js"]
     }
 }
