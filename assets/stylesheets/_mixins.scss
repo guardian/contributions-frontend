@@ -35,15 +35,13 @@ $gs-max-columns: 16;
 
 @mixin constrain-layout($offset: $gs-gutter * 2) {
     margin: 0 auto;
+    width: 100%;
 
-    @include mq($until:tablet){
-        width: 100%;
-    }
     @include mq(desktop) {
-        max-width: map-get($max-widths, max-desktop) + $offset;
+        width: map-get($max-widths, max-desktop) + $offset;
     }
     @include mq(mem-full) {
-        max-width: map-get($max-widths, max-mem-full) + $offset;
+        width: map-get($max-widths, max-mem-full) + $offset;
     }
 }
 
