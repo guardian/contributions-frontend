@@ -50,7 +50,7 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
       firstName <- (user \ "privateFields" \ "firstName").validateOpt[String]
       secondName <- (user \ "privateFields" \ "secondName").validateOpt[String]
     } yield Autofill(concatNames(firstName, secondName), email)).getOrElse {
-      error(s"Unable to parse json returned from Identity API to an autofill instance: ${Json.stringify(json)}")
+      error(s"Unable to parse json returned from Identity API to an autofill instance")
       Autofill.empty
     }
 
