@@ -18,12 +18,12 @@ import scala.concurrent._
 
 @Singleton
 class ErrorHandler @Inject()(
-                               identityAuthProvider: AuthenticatedIdUser.Provider,
-                               env: Environment,
-                               config: Configuration,
-                               sourceMapper: Option[SourceMapper],
-                               router: => Option[Router]
-                               ) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
+    identityAuthProvider: AuthenticatedIdUser.Provider,
+    env: Environment,
+    config: Configuration,
+    sourceMapper: Option[SourceMapper],
+    router: => Option[Router]
+) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with TagAwareLogger {
 
   override def logServerError(request: RequestHeader, usefulException: UsefulException) {
     try {
@@ -48,7 +48,8 @@ class ErrorHandler @Inject()(
     Future.successful(NoCache(InternalServerError(views.html.error500(exception))))
 
   override protected def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
-    logServerError(request, new PlayException("Bad request","A very bad request was received!"))
+    // Implicit logging tags passed explicitly as it can not be derived implicitly (the request is not implicit).
+    error(s"Bad request: $message")(LoggingTags.fromRequestHeader(request))
     Future.successful(NoCache(BadRequest(views.html.error400(request,message))))
   }
 }
