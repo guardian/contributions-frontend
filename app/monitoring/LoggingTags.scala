@@ -31,8 +31,11 @@ object LoggingTag extends enumeratum.Enum[LoggingTag] {
   }
 
   case object RequestId extends LoggingTag {
-    override def value(header: RequestHeader): String =
-      header.id.toString
+    override def value(header: RequestHeader): String = header.id.toString
+  }
+
+  case object Path extends LoggingTag {
+    override def value(header: RequestHeader): String = header.path
   }
 }
 
