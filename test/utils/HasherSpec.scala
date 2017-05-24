@@ -19,4 +19,10 @@ class HasherSpec extends Properties("test") {
     forAll(browserIds) { (browserId: String) =>
       SHA256Hasher.hash(browserId) != SHA256Hasher.hashWithoutSalt(browserId)
     }
+
+  property("The application hasher should hash a browser id to the same value each time") =
+    forAll(browserIds) { (browserId: String) =>
+      // 10 chosen arbitrarily
+      (0 to 10).map(_ => SHA256Hasher.hash(browserId)).toSet.size == 1
+    }
 }
