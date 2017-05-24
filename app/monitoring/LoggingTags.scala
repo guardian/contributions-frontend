@@ -58,7 +58,7 @@ case class LoggingTags private (tags: Map[TagKey, TagValue])
 trait LoggingTagsProvider {
 
   // InfoSec have said it is ok to use the SHA-256 algorithm for hashing sensitive data.
-  private val hasher: Hasher = SHA256Hasher.instance
+  private val hasher: Hasher = SHA256Hasher
 
   implicit def loggingTagsFromRequestHeader(implicit header: RequestHeader): LoggingTags =
     LoggingTags {
