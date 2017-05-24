@@ -1,6 +1,7 @@
 package controllers
 
 import models.Autofill
+import monitoring.LoggingTagsProvider
 import monitoring.TagAwareLogger
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller, Result}
@@ -8,7 +9,8 @@ import services.IdentityService
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UserController(identityService: IdentityService)(implicit ec: ExecutionContext) extends Controller {
+class UserController(identityService: IdentityService)(implicit ec: ExecutionContext)
+  extends Controller with LoggingTagsProvider {
 
   def autofill: Action[AnyContent] = Action.async { implicit request =>
 

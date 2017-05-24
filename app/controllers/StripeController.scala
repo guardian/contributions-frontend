@@ -17,6 +17,7 @@ import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import models._
 import monitoring.LoggingTags
+import monitoring.LoggingTagsProvider
 import org.joda.time.DateTime
 import monitoring.TagAwareLogger
 import play.api.libs.json._
@@ -27,7 +28,7 @@ import utils.MaxAmount
 import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
-  extends Controller with Redirect with TagAwareLogger {
+  extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
 
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
   def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
@@ -114,7 +115,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
   def hook = SharedSecretAction(webhookKey) {
     NoCacheAction.async(parse.json) { implicit request =>
 
-      def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result])(implicit tags: LoggingTags): Future[Result] = {
+      def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result]): Future[Result] = {
         stripeHookJson.validate[StripeHook] match {
           case JsError(err) =>
             error(s"Unable to parse the stripe hook: $err")

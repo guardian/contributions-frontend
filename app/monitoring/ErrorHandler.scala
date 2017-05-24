@@ -23,7 +23,7 @@ class ErrorHandler @Inject()(
     config: Configuration,
     sourceMapper: Option[SourceMapper],
     router: => Option[Router]
-) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with TagAwareLogger {
+) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with TagAwareLogger with LoggingTagsProvider {
 
   override def logServerError(request: RequestHeader, usefulException: UsefulException) {
     try {
@@ -47,9 +47,9 @@ class ErrorHandler @Inject()(
   override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] =
     Future.successful(NoCache(InternalServerError(views.html.error500(exception))))
 
-  override protected def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
+  override protected def onBadRequest(header: RequestHeader, message: String): Future[Result] = {
     // Implicit logging tags passed explicitly as it can not be derived implicitly (the request is not implicit).
-    error(s"Bad request: $message")(LoggingTags.fromRequestHeader(request))
-    Future.successful(NoCache(BadRequest(views.html.error400(request,message))))
+    error(s"Bad request: $message")(loggingTagsFromRequestHeader(header))
+    Future.successful(NoCache(BadRequest(views.html.error400(header, message))))
   }
 }

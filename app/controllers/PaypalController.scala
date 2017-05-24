@@ -12,6 +12,7 @@ import com.paypal.api.payments.Payment
 import models._
 import monitoring.TagAwareLogger
 import monitoring.LoggingTags
+import monitoring.LoggingTagsProvider
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.PaymentServices
@@ -29,7 +30,7 @@ import utils.StoreMetaDataError
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)(implicit ec: ExecutionContext)
-  extends Controller with Redirect with TagAwareLogger {
+  extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
   import ContribTimestampCookieAttributes._
 
   def executePayment(
@@ -164,7 +165,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     val paypalService = paymentServices.paypalServiceFor(request)
     val validHook = paypalService.validateEvent(request.headers.toSimpleMap, bodyText)
 
-    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result])(implicit tags: LoggingTags): Future[Result] = {
+    def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result]): Future[Result] = {
       bodyJson.validate[PaypalHook] match {
         case JsSuccess(paypalHook, _) if validHook =>
           info(s"Received paymentHook: ${paypalHook.paymentId}")
