@@ -26,7 +26,10 @@ POST           /stripe/hook                     controllers.StripeController.hoo
 GET            /ca                              controllers.Contributions.redirectToUk
 GET            /nz                              controllers.Contributions.redirectToUk
 GET            /int                             controllers.Contributions.redirectToUk
-GET            /:countryGroup                   controllers.Contributions.contribute(countryGroup: CountryGroup, error_code: Option[PaymentError]?=None)
+GET            /uk                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.UK, error_code: Option[PaymentError]?=None)
+GET            /au                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.Australia, error_code: Option[PaymentError]?=None)
+GET            /us                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.US, error_code: Option[PaymentError]?=None)
+GET            /eu                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.Europe, error_code: Option[PaymentError]?=None)
 
 GET            /:countryGroup/thank-you         controllers.Contributions.thanks(countryGroup: CountryGroup)
 GET            /:countryGroup/post-payment      controllers.Contributions.postPayment(countryGroup: CountryGroup)
