@@ -14,5 +14,6 @@ case class ContributionMetaData(
   cmp: Option[String],
   intCmp: Option[String],
   refererPageviewId: Option[String],
-  refererUrl: Option[String]
+  refererUrl: Option[String],
+  platform: Option[String]
 )

@@ -94,7 +94,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
         refererUrl = form.refererUrl,
         ophanPageviewId = form.ophanPageviewId,
         ophanBrowserId = form.ophanBrowserId,
-        idUser = idUser
+        idUser = idUser,
+        platform = form.platform orElse request.platform
       )
     }
 
