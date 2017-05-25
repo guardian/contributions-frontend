@@ -77,7 +77,8 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
           cmp,
           intcmp,
           referer_url,
-          referer_pageview_id
+          referer_pageview_id,
+          platform
         ) VALUES (
           ${pmd.contributionId.id}::uuid,
           ${pmd.created},
@@ -89,7 +90,8 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
           ${pmd.cmp},
           ${pmd.intCmp},
           ${pmd.refererUrl},
-          ${pmd.refererPageviewId}
+          ${pmd.refererPageviewId},
+          ${pmd.platform}
         ) ON CONFLICT(contributionId) DO
         UPDATE SET
           contributionid = excluded.contributionid,
@@ -102,7 +104,8 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
           cmp = excluded.cmp,
           intcmp = excluded.intcmp,
           referer_url = excluded.referer_url,
-          referer_pageview_id = excluded.referer_pageview_id"""
+          referer_pageview_id = excluded.referer_pageview_id,
+          platform = excluded.platform"""
       request.execute()
       pmd
     }

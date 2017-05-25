@@ -52,7 +52,17 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       val idUser = IdentityId.fromRequest(request)
 
 
-      paypalService.storeMetaData(paymentId, request.testAllocations, cmp, intCmp, refererPageviewId, refererUrl, ophanPageviewId, ophanBrowserId, idUser)
+      paypalService.storeMetaData(
+        paymentId = paymentId,
+        testAllocations = request.testAllocations,
+        cmp = cmp,
+        intCmp = intCmp,
+        refererPageviewId = refererPageviewId,
+        refererUrl = refererUrl,
+        ophanPageviewId = ophanPageviewId,
+        ophanBrowserId = ophanBrowserId,
+        idUser = idUser,
+        platform = request.platform)
         .leftMap[AppError](StoreMetaDataError) // not necessary if storeMetaData() returns a custom error type
         .map(data => (payment, data))
     }

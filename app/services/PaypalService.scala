@@ -159,7 +159,8 @@ class PaypalService(
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
-    idUser: Option[IdentityId]
+    idUser: Option[IdentityId],
+    platform: Option[String]
   )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     def tryToEitherT[A](block: => A): EitherT[Future, String, A] = {
@@ -187,7 +188,8 @@ class PaypalService(
         cmp = cmp,
         intCmp = intCmp,
         refererPageviewId =refererPageviewId,
-        refererUrl = refererUrl
+        refererUrl = refererUrl,
+        platform = platform
       )
 
       val postCode = {

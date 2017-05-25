@@ -21,7 +21,8 @@ case class ContributionRequest(
   intcmp: Option[String],
   refererPageviewId: Option[String],
   refererUrl: Option[String],
-  idUser: Option[IdentityId]
+  idUser: Option[IdentityId],
+  platform: Option[String]
 )
 
 object ContributionRequest {
@@ -57,7 +58,8 @@ object ContributionRequest {
       "intcmp" -> optional(text),
       "refererPageviewId" -> optional(text),
       "refererUrl" -> optional(text),
-      "idUser" -> optional(of[IdentityId])
+      "idUser" -> optional(of[IdentityId]),
+      "platform" -> optional(text)
     )(ContributionRequest.apply)(ContributionRequest.unapply)
   )
 
