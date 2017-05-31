@@ -60,7 +60,11 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
         case response if response.status == Status.OK =>
           parseUserResponse(response.json)
         case response =>
-          error(s"Status ${response.status} returned from Identity API when getting user information")
+          var message = s"Status ${response.status} returned from Identity API when getting user information."
+          // Spoke to the identity team.
+          // If status code is FORBIDDEN/403, then it is ok to include the body in a log entry, otherwise omit it.
+          if (response.status == Status.FORBIDDEN) message += s" Body: ${response.body}"
+          error(message)
           Autofill.empty
       }
       .recover {
