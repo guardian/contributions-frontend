@@ -10,76 +10,104 @@
     errorMessage:Option[String])(content: Html)
 
 @main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
-    <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
-
-        @for(message <- errorMessage) {
-            <div id="errorDialog" class="overlay">
-                <div>
-                    <h1 class="errorHeader">We're sorry</h1>
-                    <p class="errorMessage">@message</p>
-                    <button class="action action--button contribute-navigation__next" id="errorDialogButton">OK</button>
-
-                </div>
-            </div>
-        }
-
-        <section class="contributions__inner page-slice l-constrained flex-horizontal-from-tablet">
-            <div class="contributions__inner-wrapper">
-                <hgroup class="contributions__heading">
-                    <h1 class="contributions__heading--main">
-                        <span>Support the Guardian’s</span> <br />
-                        <span class="heading-line--indent-max">quality journalism</span> <br />
-                        <span class="heading-line--indent-min">and independent voice</span>
-                    </h1>
-
-                    <h2 class="contributions__heading--sub">
-                        <span>Make a one-off</span> <br />
-                        <span class="sub-heading-line--indent">contribution today</span>
-                    </h2>
-                </hgroup>
-
-                <div class="contributions__detail">
-                    <div class="contributions__detail__para">
-                        <hr />
-                        <strong>Reader contributions support the Guardian’s editorial operations.</strong><br/>
-                        <span>All profit is reinvested to safeguard the quality of our journalism.</span>
-                    </div>
-
-                    <div class="contributions__detail__para">
-                        <hr />
-                        <strong>The Guardian is an independent voice, free from commercial or political interference.</strong><br/>
-                        <span>No one can tell us to censor, edit or drop a story.</span>
-                    </div>
-                </div>
-            </div>
-
-            @content
+    <div class='contributions--this-land-is-your-land'>
+        <section class="contributions__banner">
+            <div class='l-constrained'></div>
         </section>
-    </main>
 
-    <section class="disclaimer">
-        <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
-            <div class="feedback">
-                <p>
-                    The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
-                </p>
+        <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
 
-                <p data-shown="gbp aud eur">
-                    Please note that your support of the Guardian’s journalism does not constitute a charitable donation, as such your contribution is not eligible for Gift Aid in the UK nor a tax-deduction elsewhere.
-                </p>
+            @for(message <- errorMessage) {
+                <div id="errorDialog" class="overlay">
+                    <div>
+                        <h1 class="errorHeader">We're sorry</h1>
+                        <p class="errorMessage">@message</p>
+                        <button class="action action--button contribute-navigation__next" id="errorDialogButton">OK</button>
 
-                <p data-shown="usd">
-                    Please note that the Guardian is not a charity, will not use your support for charitable
-                    programs, and your support of the Guardian’s journalism does not constitute a
-                    charitable donation. As such your contribution is not eligible to be treated as a
-                    charitable deduction for federal or state taxes in the United States or elsewhere.
-                </p>
+                    </div>
+                </div>
+            }
 
-                <p>
-                    If you have any questions about contributing to the Guardian, please <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">
-                    contact us here</a>.
-                </p>
+            <section class="contributions__inner page-slice l-constrained flex-horizontal-from-tablet">
+                <div class="contributions__inner-wrapper">
+                    <hgroup class="contributions__heading">
+                        <h1 class="contributions__heading--main">
+                            <span>Support our reporting on</span> <br />
+                            <span class="heading-line--indent-max">America's public lands</span>
+                        </h1>
+
+                        <h2 class="contributions__heading--sub">
+                            <span>Make a contribution</span> <br />
+                            <span class="sub-heading-line--indent">and help us raise $50,000</span>
+                        </h2>
+                    </hgroup>
+                    <div class="contributions__detail">
+                        <div class="contributions__detail__para">
+                            <hr />
+                            <p>
+                                More than 640 million acres of land owned by the American people – including national monuments and parks used for hiking, camping, skiing, fishing, hunting and much more – are in danger because of proposed rollbacks of environmental protections, and an initiative in Congress to transfer land away from the American public. The plans would give oil, gas and mining interests increased control of our shared resources--and threaten the $646 billion outdoor recreation industry, including millions of American jobs.
+                            </p> 
+
+                            <p>
+                                The Guardian aims to raise $50,000 to support <a href='https://theguardian.com/environment/series/this-land-is-your-land'>This Land Is Your Land</a>, our series on the government’s giveaway of America’s public lands. Your support will fund the Guardian’s in-depth coverage of this critical and under covered  issue, and help us hold politicians to account. 
+                            </p>
+
+                            <p>
+                                We’re also seeking larger contributions to support the Guardian’s conservation and  environment reporting from companies, foundations and individuals. If you would like to get involved with this project or provide matching funds, please <a href="mailto:public.lands@@theguardian.com">contact us</a>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                @content
+            </section>
+        </main>
+
+        <section class="disclaimer">
+            <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
+                <div class="feedback">
+
+                    <div class="contributions__detail">
+                        <div class="contributions__detail__para">
+                            <p>
+                                More than 640 million acres of land owned by the American people – including national monuments and parks used for hiking, camping, skiing, fishing, hunting and much more – are in danger because of proposed rollbacks of environmental protections, and an initiative in Congress to transfer land away from the American public. The plans would give oil, gas and mining interests increased control of our shared resources--and threaten the $646 billion outdoor recreation industry, including millions of American jobs.
+                            </p> 
+
+                            <p>
+                                The Guardian aims to raise $50,000 to support <a href='https://theguardian.com/environment/series/this-land-is-your-land'>This Land Is Your Land</a>, our series on the government’s giveaway of America’s public lands. Your support will fund the Guardian’s in-depth coverage of this critical and under covered  issue, and help us hold politicians to account. 
+                            </p>
+
+                            <p>
+                                We’re also seeking larger contributions to support the Guardian’s conservation and  environment reporting from companies, foundations and individuals. If you would like to get involved with this project or provide matching funds, please <a href="mailto:public.lands@@theguardian.com">contact us</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <p>If we hit our goal, the Guardian will allocate $50,000 to its core operations that will fund our extended coverage of public lands, including editing, reporting, graphics and new commissions. If we exceed our fundraising target, the Guardian will allocate additional funds towards its core operations that fund our ongoing, in-depth environmental reporting on issues including climate change, conservation and environmental policy. If we fall short of the target, the Guardian will allocate funds for a scaled back project on public lands. Contributions will not be returned. You can read additional <a href="https://www.theguardian.com/info/2016/apr/07/us-contribution-terms-and-conditions">terms and conditions here</a>.</p>
+
+                    <p>
+                        The ultimate owner of the Guardian is The Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
+                    </p>
+
+                    <p data-shown="gbp aud eur">
+                        Please note that your support of the Guardian’s journalism does not constitute a charitable donation, as such your contribution is not eligible for Gift Aid in the UK nor a tax-deduction elsewhere.
+                    </p>
+
+                    <p data-shown="usd">
+                        Please note that the Guardian is not a charity, will not use your support for charitable
+                        programs, and your support of the Guardian’s journalism does not constitute a
+                        charitable donation. As such your contribution is not eligible to be treated as a
+                        charitable deduction for federal or state taxes in the United States or elsewhere.
+                    </p>
+
+                    <p>
+                        If you have any questions about contributing to the Guardian, please <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">
+                        contact us here</a>.
+                    </p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 }
