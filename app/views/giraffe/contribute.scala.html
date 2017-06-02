@@ -1,6 +1,6 @@
 @import abtests._
 @import com.gu.i18n.CountryGroup
-@import fragments.giraffe.{contributionsMain, contributionsAlt}
+@import fragments.giraffe.{contributionsMain, contributionsAlt, contributionsThisLandIsYourLand}
 @import play.api.libs.json.Json
 @import views.support.CountryGroupImplicits._
 @import views.support.PageInfo
@@ -24,7 +24,11 @@
     @if(inLandingPageTest) {
         @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
     } else {
-        @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        @if(intCmpCode.exists(_.contains("_this_land_"))) {
+            @contributionsThisLandIsYourLand(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        } else {
+            @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        }
     }
 } { template =>
     @template {
