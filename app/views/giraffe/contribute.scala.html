@@ -24,7 +24,7 @@
     @if(inLandingPageTest) {
         @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
     } else {
-        @if(intCmpCode == Some("gdnwb_copts_memco_this_land_epic_bottom") || intCmpCode == Some("gdnwb_copts_memco_this_land_epic_top") || intCmpCode == Some("gdnwb_copts_memco_this_land_thrasher")) {
+        @if(intCmpCode.exists(_.contains("_this_land_"))) {
             @contributionsThisLandIsYourLand(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
         } else {
             @contributionsMain(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
