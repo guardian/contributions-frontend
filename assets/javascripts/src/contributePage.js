@@ -7,8 +7,8 @@ require([
     'src/modules/identityPopup',
     'src/modules/identityPopupDetails',
     'src/modules/userDetails',
-    'src/modules/abTests',
-    'src/modules/ticker'
+    'src/modules/ticker',
+    'src/modules/abTests'
 ], function (
     analytics,
     ga,
@@ -18,8 +18,8 @@ require([
     identityPopup,
     identityPopupDetails,
     userDetails,
-    abTests,
-    ticker
+    ticker,
+    abTests
 ) {
     'use strict';
 
