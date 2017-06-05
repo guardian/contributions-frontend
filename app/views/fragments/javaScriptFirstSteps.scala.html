@@ -19,6 +19,7 @@
         'querySelector' in document
         && 'addEventListener' in window
         && 'localStorage' in window
+        && localStorage !== null
         && 'sessionStorage' in window
         && 'bind' in Function
         && (('XMLHttpRequest' in window && 'withCredentials' in new XMLHttpRequest())
