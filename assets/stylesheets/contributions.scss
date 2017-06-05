@@ -542,6 +542,55 @@ $currencies: gbp usd aud eur nzd cad;
     }
 }
 
+.ticker {
+    background-color: darken($c-neutral1, 5%);
+    color: white;
+}
+
+.ticker__wrapper {
+    background-color: $c-neutral1;
+    padding: 10px;
+
+    @include mq(mobileLandscape) {
+        padding: 8px 20px;
+    }
+}
+
+.ticker__count {
+    color: $medium-yellow;
+    font-family: "Guardian Egyptian Web",Georgia,serif;
+    font-size: 1.5rem;
+    line-height: 1.5rem;
+    font-weight: 900;
+}
+
+.ticker__label {
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.ticker__progress {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    max-width: 560px;
+    height: 12px;
+    margin: 4px 0;
+    border-radius: 12px;
+    background-color: lighten($c-neutral1, 5%);
+}
+
+.ticker__filled-progress {
+    background-color: $medium-yellow;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transition: transform 3s cubic-bezier(.25,.55,.2,.85);
+}
+
 .disclaimer {
     background: #E7E7E7;
     flex: 1 1 auto;
