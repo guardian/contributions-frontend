@@ -5,51 +5,86 @@
  * Sets the identity icon returnUrl when a user needs to sign in (controlled via JavaScript for caching reasons)
  */
 define([
-    'bean',
-    'src/utils/user'
-], function (bean, userUtil) {
+    'src/utils/$'
+], function ($) {
     'use strict';
 
-    var IDENTITY_MENU_CTA_ELEM = document.querySelector('.js-identity-menu-toggle');
-    var IDENTITY_MENU_CTA_URL = document.querySelector('.js-identity-menu-url');
-    var DROPDOWN_DISABLED_CLASS = 'js-dropdown-disabled';
+    var pledged = 0,
+        target = 50000,
+        count = 0,
+        interval;
 
     function init() {
-        if (userUtil.isLoggedIn()) {
-            disableLink();
-        } else {
-            disableMenu();
-            setIdentityCtaReturnUrl();
+        if (hasTicker()) {
+            getData();
         }
     }
 
-    function disableLink() {
-        bean.on(IDENTITY_MENU_CTA_ELEM, 'click', function(e) {
-            e.preventDefault();
+    function hasTicker() {
+        return $('.ticker').length > 0 ? true : false; 
+    }
+
+    function loadJSON(path, success) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    if (success) {
+                        success(JSON.parse(xhr.responseText));
+                    }
+                } else {
+                    if (error) {
+                        error(xhr);
+                    }
+                }
+            }
+        };
+        xhr.open('GET', path, true);
+        xhr.send();
+    }
+
+    function getData() {
+        loadJSON('https://interactive.guim.co.uk/docsdata-test/1no5r1O5A0omDkz4HALce4SrFWDGzSuR_jdB2MYOsPt4.json', function(data) {
+            pledged = data.sheets.Sheet1[0].total;
+            animateTicker();
         });
     }
 
-    function disableMenu() {
-        IDENTITY_MENU_CTA_ELEM.classList.add(DROPDOWN_DISABLED_CLASS);
+    function animateTicker() {
+        setTimeout(function() {
+            if (interval === undefined) {
+                interval = setInterval(increaseCounter, 30);
+            }
+
+            animateProgressBar();
+        }, 500);
     }
 
-    function setIdentityCtaReturnUrl() {
-        var windowLocation = window.location;
-        var currentUrl = windowLocation.pathname + windowLocation.search;
+    function increaseCounter() {
+        count += Math.floor(pledged / 100);
+        $('.ticker__count').text('$' + count.toLocaleString());
 
-        if (IDENTITY_MENU_CTA_URL) {
-            IDENTITY_MENU_CTA_URL.setAttribute('href',
-                populateReturnUrl(IDENTITY_MENU_CTA_ELEM.getAttribute('href'), currentUrl)
-            );
+        if (count >= pledged) {
+            clearInterval(interval);
+            $('.ticker__count').text('$' + count.toLocaleString());
         }
     }
 
-    function populateReturnUrl(href, currentUrl) {
-        return href.replace(/(returnUrl=[^&]+)/g, '$1' + currentUrl);
+    function animateProgressBar() {
+        $('.ticker__filled-progress').attr('style', 'transform: translateX(' + getPercentageAsNegativeTranslate() + ')');
+    }
+
+    function getPercentageAsNegativeTranslate() {
+        var percentage = pledged / target * 100 - 100;
+
+        if (percentage > 0) {
+            percentage = 0;
+        }
+
+        return Math.floor(percentage) + '%';
     }
 
     return {
-        init: init,
-        populateReturnUrl: populateReturnUrl
+        init: init
     };
 });

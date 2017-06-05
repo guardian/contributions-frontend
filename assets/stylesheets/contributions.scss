@@ -589,6 +589,7 @@ $currencies: gbp usd aud eur nzd cad;
     bottom: 0;
     left: 0;
     transition: transform 3s cubic-bezier(.25,.55,.2,.85);
+    transform: translateX(-100%);
 }
 
 .disclaimer {
