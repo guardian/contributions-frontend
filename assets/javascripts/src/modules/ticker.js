@@ -9,7 +9,8 @@ define([
     'use strict';
 
     var pledged = 0,
-        target = 50000,
+        target = 0,
+        overfund = 0,
         count = 0,
         interval;
 
@@ -44,9 +45,28 @@ define([
 
     function getData() {
         loadJSON('https://interactive.guim.co.uk/docsdata-test/1no5r1O5A0omDkz4HALce4SrFWDGzSuR_jdB2MYOsPt4.json', function(data) {
-            pledged = data.sheets.Sheet1[0].total;
+            pledged = parseInt(data.sheets.Sheet1[0].total);
+            target = parseInt(data.sheets.Sheet1[0].target);
+            overfund = parseInt(data.sheets.Sheet1[0].overfund);
+
+            populateText();
+            positionTarget();
             animateTicker();
         });
+    }
+
+    function populateText() {
+        $('.ticker__progress-label--target').text('$' + toK(target) + ' goal');
+        $('.ticker__progress-label--last').text('$' + toK(overfund));
+    }
+
+    function positionTarget() {
+        var percentage = target / overfund * 100;
+        $('.ticker__progress-label--target').attr('style', 'left: ' + percentage + '%');
+    }
+
+    function toK(val) {
+        return val / 1000 + 'K';
     }
 
     function animateTicker() {
@@ -74,7 +94,7 @@ define([
     }
 
     function getPercentageAsNegativeTranslate() {
-        var percentage = pledged / target * 100 - 100;
+        var percentage = pledged / overfund * 100 - 100;
 
         if (percentage > 0) {
             percentage = 0;
