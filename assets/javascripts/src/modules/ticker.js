@@ -21,7 +21,7 @@ define([
     }
 
     function hasTicker() {
-        return $('.ticker').length > 0 ? true : false; 
+        return $('.ticker').length > 0 ? true : false;
     }
 
     function loadJSON(path, success) {
@@ -31,10 +31,6 @@ define([
                 if (xhr.status === 200) {
                     if (success) {
                         success(JSON.parse(xhr.responseText));
-                    }
-                } else {
-                    if (error) {
-                        error(xhr);
                     }
                 }
             }
