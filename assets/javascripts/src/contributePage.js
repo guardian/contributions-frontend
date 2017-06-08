@@ -7,7 +7,6 @@ require([
     'src/modules/identityPopup',
     'src/modules/identityPopupDetails',
     'src/modules/userDetails',
-    'src/modules/ticker',
     'src/modules/abTests'
 ], function (
     analytics,
@@ -18,7 +17,6 @@ require([
     identityPopup,
     identityPopupDetails,
     userDetails,
-    ticker,
     abTests
 ) {
     'use strict';
@@ -33,7 +31,6 @@ require([
     identityPopup.init();
     identityPopupDetails.init();
     userDetails.init();
-    ticker.init();
 
     abTests.init();
 });

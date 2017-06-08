@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import Main from 'src/components/Main';
+import Ticker from 'src/components/Ticker';
 import store from 'src/store';
 
 import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT, GO_FORWARD, AUTOFILL} from 'src/actions';
@@ -27,12 +28,36 @@ export function init() {
         container
     );
 
+    const tickerContainer = document.getElementById('ticker');
+    if (tickerContainer) {
+        loadJSON(tickerContainer.getAttribute('data-src'), function(data) {
+            ReactDOM.render(
+                   React.createElement(Ticker, data.sheets.Sheet1[0]),
+                tickerContainer
+            ); 
+        });
+    }
+
     attachCurrencyListeners();
     attachErrorDialogListener();
     setOphanIds();
     autoFill();
 }
 
+function loadJSON(path, success) {
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                if (success) {
+                    success(JSON.parse(xhr.responseText));
+                }
+            }
+        }
+    };
+    xhr.open('GET', path, true);
+    xhr.send();
+}
 
 function autoFill() {
     fetch('/user/autofill', {
