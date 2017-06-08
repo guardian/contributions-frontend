@@ -23,7 +23,7 @@ export default class Ticker extends React.Component {
         return (
             <div className='ticker'>
                 <div className="ticker__wrapper l-constrained">
-                    <h3 className="ticker__count">${this.state.count}</h3>
+                    <h3 className="ticker__count">${this.state.count.toLocaleString()}</h3>
                     <h4 className="ticker__label">pledged so far</h4>
                     <div className="ticker__progress">
                         <div className="ticker__filled-progress" style={{transform: 'translateX(' + this.state.filledProgress + ')'}}></div>
