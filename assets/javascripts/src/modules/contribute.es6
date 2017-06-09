@@ -30,33 +30,23 @@ export function init() {
 
     const tickerContainer = document.getElementById('ticker');
     if (tickerContainer) {
-        loadJSON(tickerContainer.getAttribute('data-src'), function(data) {
+        fetch(tickerContainer.getAttribute('data-src'), {
+           method: 'get' 
+        }).then(resp => {
+            return resp.json();
+        }).then(json => {
             ReactDOM.render(
-                   React.createElement(Ticker, data.sheets.Sheet1[0]),
+                React.createElement(Ticker, json.sheets.Sheet1[0]),
                 tickerContainer
-            ); 
+            );
         });
+
     }
 
     attachCurrencyListeners();
     attachErrorDialogListener();
     setOphanIds();
     autoFill();
-}
-
-function loadJSON(path, success) {
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                if (success) {
-                    success(JSON.parse(xhr.responseText));
-                }
-            }
-        }
-    };
-    xhr.open('GET', path, true);
-    xhr.send();
 }
 
 function autoFill() {
