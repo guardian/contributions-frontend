@@ -46,7 +46,7 @@ object Test {
 
   val stripeTest = Test("Stripe checkout", 100.percent, 0.percent, Seq(Variant("stripe")))
 
-  val landingPageTest = Test("Landing page", 100.percent, 0.percent, Seq(Variant("with-copy")), cmpCheck("(gdnwb_copts(.*_banner)|(.*_thrasher))".r))
+  val landingPageTest = Test("Landing page", 100.percent, 0.percent, Seq(Variant("with-copy")), cmpCheck("(gdnwb_copts(.*_banner)|(.*_thrasher)|(.*_ge2017_interactive_slice.*))|(gdnwb_copts_memco_nugget_election)".r))
 
   val allTests: Set[Test] = Set(stripeTest, landingPageTest)
 
