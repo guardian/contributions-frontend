@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import Main from 'src/components/Main';
+import Ticker from 'src/components/Ticker';
 import store from 'src/store';
 
 import { SET_DATA, SET_COUNTRY_GROUP, SET_AMOUNT, GO_FORWARD, AUTOFILL} from 'src/actions';
@@ -27,12 +28,26 @@ export function init() {
         container
     );
 
+    const tickerContainer = document.getElementById('ticker');
+    if (tickerContainer) {
+        fetch(tickerContainer.getAttribute('data-src'), {
+           method: 'get' 
+        }).then(resp => {
+            return resp.json();
+        }).then(json => {
+            ReactDOM.render(
+                React.createElement(Ticker, json.sheets.Sheet1[0]),
+                tickerContainer
+            );
+        });
+
+    }
+
     attachCurrencyListeners();
     attachErrorDialogListener();
     setOphanIds();
     autoFill();
 }
-
 
 function autoFill() {
     fetch('/user/autofill', {
