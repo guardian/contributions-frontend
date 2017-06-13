@@ -48,8 +48,12 @@
     right: 0;
     bottom: 0;
     left: 0;
-    transition: transform 3s cubic-bezier(.25,.55,.2,.85);
     transform: translateX(-100%);
+}
+
+.ticker__progress-wrapper {
+    position: relative;
+    height: 40px;
 }
 
 .ticker__progress-labels {
@@ -68,7 +72,7 @@
 }
 
 .ticker__progress-label--target {
-    transform: translateX(-50%);
+    left: 50%;
 }
 
 .ticker__progress-label--target:before {
