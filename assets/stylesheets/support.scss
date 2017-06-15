@@ -59,39 +59,3 @@
 .thanks__list {
     margin-top: -1em;
 }
-
-.thanks--survey {
-    margin-bottom: 50px;
-    flex-grow:2;
-
-    @include mq(desktop) {
-        padding-right: $gs-gutter * 5;
-    }
-
-    h2 {
-        color: #c05303;
-        @include fs-header(5);
-    }
-    p {
-        color: $c-neutral1;
-        @include f-bodyCopy;
-        @include fs-header(5, true);
-    }
-
-    .action--button_survey {
-        background-color: #fff;
-        color: #000;
-        border-color: $c-neutral4;
-        height: 36px;
-        font-weight: normal;
-
-        span {
-            padding-right: $gs-gutter / 2;
-        }
-
-        &:hover, &:focus {
-            border-color: $c-neutral1;
-        }
-    }
-
-}
