@@ -14,14 +14,16 @@ export default class Counter extends React.Component {
     }
 
     componentDidMount() {
-        const rate = this.props.duration * 1000 / 60;
+        const rate = 1000 / 40;
+        const delay = 1000; //matches the delay for the progress bar
+        const increment = Math.floor(this.props.total / (((this.props.duration * 1000) - delay) / rate));
 
         const interval = setInterval(() => {
            if (this.state.count >= this.props.total) {
-                this.setState({ count: this.state.count});
+                this.setState({ count: parseInt(this.props.total) });
                 clearInterval(this.interval);
            } else {
-               this.setState( { count: this.state.count + Math.floor(this.props.total / 60)} )
+               this.setState( { count: this.state.count + increment } )
            }
         }, rate);
     }
