@@ -72,7 +72,8 @@
     "vinyl-fs": "2.4.3",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
-    "whatwg-fetch": "^1.0.0"
+    "whatwg-fetch": "^1.0.0",
+    "pasteup": "0.0.1-alpha.35"
   },
   "jest": {
     "moduleFileExtensions": [

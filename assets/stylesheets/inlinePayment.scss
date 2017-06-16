@@ -1,0 +1,66 @@
+// =============================================================================
+// epic iframe
+// =============================================================================
+
+//@import 'vars';
+//@import 'mixins';
+//@import 'functions';
+
+@import 'bower_components/guss-colours/_colours.scss';
+@import 'bower_components/pasteup-palette/src/_palette';
+@import 'bower_components/guss-typography/typography';
+@import 'mixins';
+@import 'svg';
+@import 'webfonts';
+
+$guss-colours: $pasteup-palette;
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.contributions__epic {
+    border-top: 1px solid guss-colour(multimedia-main-2);
+    background-color: guss-colour(comment-support-2);
+    padding: ($gs-baseline / 3) ($gs-gutter / 4) $gs-baseline;
+}
+
+.contributions__title {
+    @include fs-header(2);
+    margin: 0;
+}
+
+.contributions__option-button {
+    @include fs-textSans(4);
+
+    background-color: #fb0;
+    border: 0;
+    border-radius: 100px;
+    color: #333;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 0.5em 15px;
+    padding-right: 0;
+
+    &:after {
+        content: '';
+        display: inline-block;
+        background-repeat: no-repeat;
+        width: 30px;
+        height: 20px;
+        background-image: svg-url('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path fill="$neutral-1" stroke="$neutral-1" d="M22.8 14.6L15.2 7l-.7.7 5.5 6.6H6v1.5h14l-5.5 6.6.7.7 7.6-7.6v-.9"/></svg>');
+        background-size: 100%;
+        float: right;
+        margin-left: 5px;
+    }
+}
+
+.contributions__highlight {
+    background-color: #ffe399;
+    padding: 4px 2px;
+    margin-left: -2px;
+    margin-right: -2px;
+}

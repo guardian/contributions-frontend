@@ -62,7 +62,8 @@ module.exports = function (grunt) {
 
                 entry: {
                     contributePage: 'src/contributePage',
-                    thankYouPage: 'src/thankYouPage'
+                    thankYouPage: 'src/thankYouPage',
+                    inlinePayment: 'src/inlinePayment'
                 }
             }
         },
@@ -86,7 +87,8 @@ module.exports = function (grunt) {
                         'style.scss',
                         'ie9.style.scss',
                         'tools.style.scss',
-                        'event-card.scss'
+                        'event-card.scss',
+                        'inlinePayment.scss'
                     ],
                     dest: '<%= dirs.publicDir.stylesheets %>',
                     ext: '.css'

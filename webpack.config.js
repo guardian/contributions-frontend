@@ -4,7 +4,8 @@ var webpack = require('webpack');
 module.exports = {
     entry: {
         contributePage: 'src/contributePage',
-        thankYouPage: 'src/thankYouPage'
+        thankYouPage: 'src/thankYouPage',
+        inlinePayment: 'src/inlinePayment'
     },
     target: 'web',
 
