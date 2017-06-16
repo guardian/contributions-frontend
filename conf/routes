@@ -37,4 +37,5 @@ GET            /:countryGroup/post-payment      controllers.Contributions.postPa
 GET            /user/autofill                   controllers.UserController.autofill
 
 
+GET            /components/epic/inline-payment  controllers.EpicComponentsController.inlinePayment()
 
