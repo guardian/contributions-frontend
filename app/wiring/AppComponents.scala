@@ -71,6 +71,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val paypalController = wire[PaypalController]
   lazy val stripeController = new StripeController(paymentServices, stripeConfig, ophanService)
   lazy val userController = wire[UserController]
+  lazy val epicComponentsController = wire[EpicComponentsController]
 
   override lazy val httpErrorHandler =
     new monitoring.ErrorHandler(identityAuthProvider, environment, configuration, sourceMapper, Some(router))
@@ -80,7 +81,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     wire[CheckCacheHeadersFilter],
     SecurityHeadersFilter(SecurityHeadersConfig(
       contentSecurityPolicy = None,
-      frameOptions = Some("SAMEORIGIN")
+      frameOptions = Some("ALLOW-FROM http://localhost:8000")
     ))
   )
 
