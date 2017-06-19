@@ -136,7 +136,6 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
   def authorize = checkToken {
     NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
-      println(request.body)
       val authRequest = request.body
       val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
       val paypalService = paymentServices.paypalServiceFor(request)
