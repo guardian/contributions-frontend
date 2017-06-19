@@ -72,7 +72,7 @@ class PaypalService(
     }
   }
 
-  def getAuthUrl(
+  def getPayment(
     amount: BigDecimal,
     countryGroup: CountryGroup,
     contributionId: ContributionId,
@@ -82,7 +82,7 @@ class PaypalService(
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String]
-  )(implicit tags: LoggingTags): EitherT[Future, String, Uri] = {
+  )(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
 
     val paymentToCreate = {
 
@@ -120,23 +120,9 @@ class PaypalService(
       new Payment().setIntent("sale").setPayer(payer).setTransactions(transactions).setRedirectUrls(redirectUrls)
     }
 
-    asyncExecute{
+    asyncExecute {
       paymentToCreate.create(apiContext)
-    } transform {
-      case Right(createdPayment) => Either.fromOption(getAuthLink(createdPayment), "No approval link returned from PayPal")
-      case Left(error) => Left(error)
     }
-  }
-
-  private def getAuthLink(payment: Payment) = {
-    for {
-      links <- Option(payment.getLinks)
-      approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
-      authUrl <- Option(approvalLinks.getHref)
-    }
-      yield {
-        Uri.parse(authUrl).addParam("useraction", "commit")
-      }
   }
 
   def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
