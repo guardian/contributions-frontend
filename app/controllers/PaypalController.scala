@@ -105,7 +105,19 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       ) (AuthRequest.apply _)
   }
 
-  case class AuthResponse(approvalUrl:Uri)
+  case class AuthResponse(approvalUrl: Uri, paymentId: String)
+
+  object AuthResponse {
+    import cats.syntax.either._
+    import scala.collection.JavaConverters._
+
+    def fromPayment(payment: Payment): Either[String, AuthResponse] = Either.fromOption(for {
+        links <- Option(payment.getLinks)
+        approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
+        approvalUrl <- Option(approvalLinks.getHref)
+        paymentId <- Option(payment.getId)
+      } yield AuthResponse(Uri.parse(approvalUrl), paymentId), "Unable to parse payment")
+  }
 
   implicit val UriWrites = new Writes[Uri] {
     override def writes(uri: Uri): JsValue = JsString(uri.toString)
@@ -124,10 +136,11 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
   def authorize = checkToken {
     NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
+      println(request.body)
       val authRequest = request.body
       val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
       val paypalService = paymentServices.paypalServiceFor(request)
-      val authResponse = paypalService.getAuthUrl(
+      val payment = paypalService.getPayment(
         amount = amount,
         countryGroup = authRequest.countryGroup,
         contributionId = ContributionId.random,
@@ -139,12 +152,14 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         ophanBrowserId = authRequest.ophanBrowserId,
         ophanVisitId = authRequest.ophanVisitId
       )
-      authResponse.value map {
-        case Right(url) => Ok(Json.toJson(AuthResponse(url)))
-        case Left(err) =>
+
+      payment.subflatMap(AuthResponse.fromPayment).fold(
+        err => {
           error(s"Error getting PayPal auth url: $err")
           InternalServerError("Error getting PayPal auth url")
-      }
+        },
+        authResponse => Ok(Json.toJson(authResponse))
+      )
     }
   }
 
