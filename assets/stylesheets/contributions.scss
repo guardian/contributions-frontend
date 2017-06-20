@@ -688,6 +688,16 @@ $currencies: gbp usd aud eur nzd cad;
                 top: -92px;
                 right: 20px;
             }
+
+            &:after {
+                content: 'We prefer to collect contributions online. However, if you wish to mail us your contribution, please send checks to: 315 West 36th St., 8th Floor, New York, NY 10018';
+                display: block;
+                margin-top: 8px;
+                font-family: 'Guardian Text Sans Web';
+                font-size: 13px;
+                line-height: 18px;
+                color: $c-neutral2;
+            }
         }
 
         .contributions__heading {
@@ -696,8 +706,16 @@ $currencies: gbp usd aud eur nzd cad;
         }
 
         .heading-line--indent-max {
+            padding-left: 0;
+
             @include mq(desktop) {
                 padding-left: 140px;
+            }
+        }
+
+        .sub-heading-line--indent {
+            @include mq($until: tablet) {
+                padding-left: 0;
             }
         }
 
@@ -772,8 +790,11 @@ $currencies: gbp usd aud eur nzd cad;
         font-family: 'Guardian Text Egyptian Web', Georgia, serif;
         max-width: 620px;
         width: 100%;
-        padding-right: 60px;
         font-size: 16px;
         line-height: 1.5rem;
+
+        @include mq(tablet) {
+            padding-right: 60px;
+        }
     }
 }
