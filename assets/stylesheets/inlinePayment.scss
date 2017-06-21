@@ -2,16 +2,18 @@
 // epic iframe
 // =============================================================================
 
-//@import 'vars';
+
 //@import 'mixins';
 //@import 'functions';
 
+@import 'vars';
 @import 'bower_components/guss-colours/_colours.scss';
 @import 'bower_components/pasteup-palette/src/_palette';
 @import 'bower_components/guss-typography/typography';
 @import 'mixins';
 @import 'svg';
 @import 'webfonts';
+@import 'components/forms';
 
 $guss-colours: $pasteup-palette;
 
@@ -64,3 +66,38 @@ body {
     margin-left: -2px;
     margin-right: -2px;
 }
+
+.contributions-inline-epic__button-wrapper {
+    display: flex;
+}
+
+.contributions-inline-epic__button--amount {
+    @include button();
+    font-family: $f-data;
+    flex: 1;
+    text-align: center;
+    margin-right: 5px;
+
+    &:last-of-type {
+        margin-right: 0;
+    }
+
+    &:focus {
+        background-color: hotpink;
+    }
+}
+
+.contributions-inline-epic__input-wrapper {
+    display: flex;
+    margin-top: 10px;
+}
+
+.contributions-inline-epic__input--amount {
+    flex: 1;
+    padding: 5px 15px;
+}
+
+#contribution-button {
+    flex: 1;
+}
+

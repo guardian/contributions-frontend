@@ -2,10 +2,12 @@
 @()
 
 <!DOCTYPE html>
-<html lang="en-GB" >
+<html lang="en-GB" xmlns="http://www.w3.org/1999/html">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <script src="https://www.paypalobjects.com/api/checkout.js"></script>
         <script src="https://interactive.guim.co.uk/libs/iframe-messenger/iframeMessenger.js"></script>
@@ -36,19 +38,7 @@
                 </p>
             </div>
 
-            <div class="contributions__buttons">
-                <a class="contributions__option-button contributions__contribute contributions__contribute--epic contributions__contribute--epic-member contributions__contribute--epic-member-top"
-                href="<%=membershipUrl%>"
-                target="_blank">
-                    Become a supporter
-                </a>
-
-                <a class="contributions__option-button contributions__contribute contributions__contribute--epic contributions__contribute--epic-member"
-                id="contribution-button"
-                target="_blank">
-                    Make a contribution of £3
-                </a>
-            </div>
+            <div id="inline-form"></div>
         </div>
 
         <script src="@Asset.at("javascripts/inlinePayment.js")"></script>
