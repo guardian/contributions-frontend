@@ -21,12 +21,19 @@ const renderForm = (pageContext: PageContext) => render(
     document.getElementById('inline-form')
 );
 
-// if we haven't received region data from the parent window within 1 second, render the GB data
-const timeoutToRenderDefault = setTimeout(() => renderForm(defaultContext), 1000);
+const initialise = () => {
+    // if we haven't received region data from the parent window within 2 seconds, render the GB data
+    const timeoutToRenderDefault = setTimeout(() => renderForm(defaultContext), 2000);
 
-window.addEventListener('message', (data: { type: string, pageContext: PageContext }) => {
-    if (data.type === 'PAGE_CONTEXT') {
-        renderForm(data.pageContext);
-        clearTimeout(timeoutToRenderDefault);
-    }
-});
+    parent.postMessage({ type: 'CONTEXT_REQUEST' }, '*');
+
+    window.addEventListener('message', (event: { data: { type: string, pageContext: PageContext } }) => {
+        if (event.data.type === 'PAGE_CONTEXT' && event.data.pageContext) {
+            renderForm(event.data.pageContext);
+            clearTimeout(timeoutToRenderDefault);
+        }
+    });
+}
+
+initialise();
+
