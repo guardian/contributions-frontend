@@ -40,7 +40,8 @@ class StripeService(
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId],
-    platform: Option[String]
+    platform: Option[String],
+    ophanVisitId: Option[String]
   )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     // Fire and forget: we don't want to stop the user flow
@@ -68,7 +69,8 @@ class StripeService(
       intCmp = intCmp,
       refererPageviewId = refererPageviewId,
       refererUrl = refererUrl,
-      platform = platform
+      platform = platform,
+      ophanVisitId = ophanVisitId
     )
     val contributor = Contributor(
       email = charge.receipt_email,
