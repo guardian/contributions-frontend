@@ -79,7 +79,8 @@ export function paypalRedirect(dispatch) {
         refererPageviewId: state.data.refererPageviewId,
         refererUrl: state.data.refererUrl,
         ophanPageviewId: state.data.ophan.pageviewId,
-        ophanBrowserId: state.data.ophan.browserId
+        ophanBrowserId: state.data.ophan.browserId,
+        ophanVisitId: state.data.ophan.visitId
     };
 
     const url = '/paypal/auth?csrfToken=' + state.data.csrfToken;

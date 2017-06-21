@@ -16,7 +16,7 @@ GET            /home                            controllers.Contributions.contri
 GET            /healthcheck                     controllers.Healthcheck.healthcheck
 POST           /paypal/auth                     controllers.PaypalController.authorize
 
-GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], refererPageviewId: Option[String], refererUrl: Option[String],pvid: Option[String], bid: Option[String])
+GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], refererPageviewId: Option[String], refererUrl: Option[String],pvid: Option[String], bid: Option[String], ophanVisitId: Option[String])
 POST           /paypal/hook                     controllers.PaypalController.hook
 POST           /:countryGroup/update-metadata   controllers.PaypalController.updateMetadata(countryGroup:CountryGroup)
 

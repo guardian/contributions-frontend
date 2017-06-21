@@ -22,7 +22,8 @@ case class ContributionRequest(
   refererPageviewId: Option[String],
   refererUrl: Option[String],
   idUser: Option[IdentityId],
-  platform: Option[String]
+  platform: Option[String],
+  ophanVisitId: Option[String]
 )
 
 object ContributionRequest {
@@ -59,7 +60,8 @@ object ContributionRequest {
       "refererPageviewId" -> optional(text),
       "refererUrl" -> optional(text),
       "idUser" -> optional(of[IdentityId]),
-      "platform" -> optional(text)
+      "platform" -> optional(text),
+      "ophanVisitId" -> optional(text)
     )(ContributionRequest.apply)(ContributionRequest.unapply)
   )
 
