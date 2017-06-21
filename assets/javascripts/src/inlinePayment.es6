@@ -1,3 +1,5 @@
+// @flow
+
 import 'whatwg-fetch';
 import { h, render } from 'preact';
 
@@ -5,45 +7,35 @@ import InlinePaymentForm from 'src/components/inline-payment/Form';
 
 /** @jsx h */
 
-// TODO: await setup messasge from parent window (theguardian.com), containing amounts and currency data
+type PageContext = {
+    region: string,
+    countryGroup: string,
+    intCmp: string,
+    refererPageviewId: ?string,
+    refererUrl: ?string,
+    ophanBrowserId: ?string
+}
 
-const formDataByRegion = {
-    'GB': {
-        amounts: [25, 50, 100, 250],
-        symbol: '£'
-    },
-
-    'EU': {
-        amounts: [25, 50, 100, 250],
-        symbol: '€'
-    },
-
-    'US': {
-        amounts: [25, 50, 100, 250],
-        symbol: '$'
-    },
-
-    'AU': {
-        amounts: [50, 100, 250, 500],
-        symbol: '$'
-    }
+const defaultContext = {
+    region: 'GB',
+    countryGroup: 'uk',
+    intCmp: 'PAYPAL_TEST',
+    refererPageviewId: null,
+    refererUrl: null,
+    ophanBrowserId: null
 };
 
-const renderForm = formData => render(
-    <InlinePaymentForm amounts={formData.amounts} symbol={formData.symbol}/>,
+const renderForm = (pageContext: PageContext) => render(
+    <InlinePaymentForm pageContext={pageContext} />,
     document.getElementById('inline-form')
 );
 
 // if we haven't received region data from the parent window within 1 second, render the GB data
-const timeoutToRenderDefault = setTimeout(renderForm.bind(null, formDataByRegion.GB), 1000);
+const timeoutToRenderDefault = setTimeout(() => renderForm(defaultContext), 1000);
 
-window.addEventListener('message', data => {
-    if (data.type === 'SET_REGION' && data.region) {
-        const formData = formDataByRegion[data];
-
-        if (formData) {
-            renderForm(formData);
-            clearTimeout(timeoutToRenderDefault);
-        }
+window.addEventListener('message', (data: { type: string, pageContext: PageContext }) => {
+    if (data.type === 'PAGE_CONTEXT') {
+        renderForm(data.pageContext);
+        clearTimeout(timeoutToRenderDefault);
     }
 });
