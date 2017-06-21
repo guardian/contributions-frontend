@@ -35,7 +35,7 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: 'babel-loader',
                 options: {
-                    presets: ['es2015'],
+                    presets: ['es2015', 'flow'],
                     plugins: [
                         'transform-object-rest-spread',
                         'transform-object-assign',
@@ -51,7 +51,7 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: 'babel-loader',
                 options: {
-                    presets: ['react', 'es2015'],
+                    presets: ['react', 'es2015', 'flow'],
                     plugins: [
                         'transform-object-rest-spread',
                         'transform-object-assign',
