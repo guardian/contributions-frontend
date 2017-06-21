@@ -1,10 +1,9 @@
 import 'whatwg-fetch';
 import { h, render } from 'preact';
 
-import InlinePaymentForm from 'src/preact-components/inline-payment/Form';
+import InlinePaymentForm from 'src/components/inline-payment/Form';
 
 /** @jsx h */
-
 
 render(<InlinePaymentForm amounts={[1,5,10,25]} symbol="£" />, document.getElementById('inline-form'));
 
