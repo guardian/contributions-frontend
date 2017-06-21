@@ -17,11 +17,6 @@ export default class Form extends Component {
             selectedAmount: {
                 component: undefined,
                 value: undefined,
-            },
-
-            paypal: {
-                data: undefined,
-                actions: undefined,
             }
         }
     }
@@ -42,11 +37,37 @@ export default class Form extends Component {
         return amount.component === Input ? amount.value : null
     }
 
+    sendPaypalRequest() {
+        const authRequestData = {
+            countryGroup: 'uk',
+            amount: this.state.selectedAmount.value,
+            intCmp: 'PAYPAL_TEST',
+            refererPageviewId: null,
+            refererUrl: null,
+            ophanPageviewId: null,
+            ophanBrowserId: null,
+        };
+
+        return fetch('/paypal/auth', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(authRequestData)
+        })
+    }
+
     render(props, state) {
         return (
             <form>
                 <div class="contributions-inline-epic__button-wrapper">
-                    {props.amounts.map(amount => <AmountButton amount={amount} symbol={props.symbol} setAmount={this.setAmountFrom(Button).bind(this, amount)} />)}
+                    {props.amounts.map(amount =>
+                        <AmountButton
+                            amount={amount}
+                            symbol={props.symbol}
+                            setAmount={this.setAmountFrom(Button).bind(this, amount)} />
+                    )}
                 </div>
 
                 <div class="contributions-inline-epic__input-wrapper">
@@ -55,7 +76,9 @@ export default class Form extends Component {
                         amount={this.getInputAmountValue()} />
                 </div>
 
-                <ContributeButton test="123" />
+                <ContributeButton
+                    amount={state.selectedAmount.value}
+                    sendPaypalRequest={this.sendPaypalRequest.bind(this)} />
             </form>
         );
     }
