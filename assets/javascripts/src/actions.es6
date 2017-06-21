@@ -143,6 +143,7 @@ function paymentFormData(state, token) {
         cmp: state.data.cmpCode,
         intcmp: state.data.intCmpCode,
         refererPageviewId: state.data.refererPageviewId,
-        refererUrl: state.data.refererUrl
+        refererUrl: state.data.refererUrl,
+        ophanVisitId: state.data.ophan.visitId
     };
 }
