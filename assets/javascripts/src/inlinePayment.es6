@@ -7,15 +7,6 @@ import InlinePaymentForm from 'src/components/inline-payment/Form';
 
 /** @jsx h */
 
-type PageContext = {
-    region: string,
-    countryGroup: string,
-    intCmp: string,
-    refererPageviewId: ?string,
-    refererUrl: ?string,
-    ophanBrowserId: ?string
-}
-
 const defaultContext = {
     region: 'GB',
     countryGroup: 'uk',

@@ -9,9 +9,33 @@ import ContributeButton from './ContributeButton';
 const Button = 1;
 const Input = 2;
 
+const formDataByRegion = {
+    'GB': {
+        amounts: [25, 50, 100, 250],
+        symbol: '£'
+    },
+
+    'EU': {
+        amounts: [25, 50, 100, 250],
+        symbol: '€'
+    },
+
+    'US': {
+        amounts: [25, 50, 100, 250],
+        symbol: '$'
+    },
+
+    'AU': {
+        amounts: [50, 100, 250, 500],
+        symbol: '$'
+    }
+}
+
 export default class Form extends Component {
-    constructor() {
-        super();
+    constructor(props: { pageContext: PageContext }) {
+        super(props);
+
+        this.formData = formDataByRegion[props.pageContext.region] || formDataByRegion.GB;
 
         this.state = {
             selectedAmount: {
@@ -39,13 +63,13 @@ export default class Form extends Component {
 
     sendPaypalRequest() {
         const authRequestData = {
-            countryGroup: 'uk',
+            countryGroup: this.props.pageContext.countryGroup,
             amount: this.state.selectedAmount.value,
-            intCmp: 'PAYPAL_TEST',
-            refererPageviewId: null,
-            refererUrl: null,
-            ophanPageviewId: null,
-            ophanBrowserId: null,
+            intCmp: this.props.pageContext.intCmp,
+            refererPageviewId: this.props.pageContext.refererPageviewId,
+            refererUrl: this.props.pageContext.refererUrl,
+            ophanPageviewId: this.props.pageContext.ophanPageviewId,
+            ophanBrowserId: this.props.pageContext.ophanBrowserId,
         };
 
         return fetch('/paypal/auth', {
@@ -62,10 +86,10 @@ export default class Form extends Component {
         return (
             <form>
                 <div class="contributions-inline-epic__button-wrapper">
-                    {props.amounts.map(amount =>
+                    {this.formData.amounts.map(amount =>
                         <AmountButton
                             amount={amount}
-                            symbol={props.symbol}
+                            symbol={this.formData.symbol}
                             setAmount={this.setAmountFrom(Button).bind(this, amount)} />
                     )}
                 </div>
