@@ -16,13 +16,13 @@ import controllers.forms.ContributionRequest
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import models._
-import monitoring.LoggingTags
 import monitoring.LoggingTagsProvider
 import org.joda.time.DateTime
 import monitoring.TagAwareLogger
 import play.api.libs.json._
 import play.api.mvc._
-import services.PaymentServices
+import services.Ophan.OphanResponse
+import services.{OphanAcquisitionEvent, OphanService, PaymentServices}
 import utils.MaxAmount
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,6 +38,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
 
     val stripe = paymentServices.stripeServiceFor(request)
     val idUser = IdentityId.fromRequest(request) orElse form.idUser
+    val ophanService = OphanService.ophanService(browserId = form.ophanBrowserId.getOrElse(""), visitId = "")
 
     val countryGroup = form.currency match {
       case USD => US
@@ -80,8 +81,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       stripe.Charge.create(amount, form.currency, form.email, "Your contribution", form.token, metadata)
     }
 
-    def storeMetaData(charge: Charge): EitherT[Future, String, SavedContributionData] = {
-      stripe.storeMetaData(
+    def createMetaData(charge: Charge): stripe.StripeMetaData = {
+      stripe.createMetaData(
         contributionId = contributionId,
         charge = charge,
         created = new DateTime(charge.created * 1000L),
@@ -100,8 +101,29 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       )
     }
 
+    def storeMetaData(metadata: stripe.StripeMetaData, charge: Charge): EitherT[Future, String, SavedContributionData] = {
+      stripe.storeMetaData(
+        charge = charge,
+        created = new DateTime(charge.created * 1000L),
+        name = form.name,
+        cmp = form.cmp,
+        metadata = metadata.contributionMetadata,
+        contributor = metadata.contributor,
+        contributorRow = metadata.contributorRow,
+        idUser = idUser,
+        marketing = form.marketing
+      )
+    }
+
+    def recordToOphan(metadata: stripe.StripeMetaData): Option[Future[OphanResponse]] = {
+      val event = OphanAcquisitionEvent(metadata.contributionMetadata, metadata.contributorRow, None, PaymentProvider.Stripe)
+      event.map(ophanService.submitEvent)
+    }
+
     createCharge.map { charge =>
-      storeMetaData(charge) // fire and forget. If it fails we don't want to stop the user
+      val metadata = createMetaData(charge)
+      storeMetaData(metadata, charge) // fire and forget. If it fails we don't want to stop the user
+      recordToOphan(metadata) // again, fire and forget.
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
