@@ -24,7 +24,7 @@ const initialise = () => {
     // if we haven't received region data from the parent window within 2 seconds, render the GB data
     const timeoutToRenderDefault = setTimeout(() => renderForm(defaultContext), 2000);
 
-    parent.postMessage({ type: 'CONTEXT_REQUEST' }, '*');
+    parent.postMessage({ type: 'PAGE_CONTEXT_REQUEST' }, '*');
 
     window.addEventListener('message', (event: { data: { type: string, pageContext: PageContext } }) => {
         if (event.data.type === 'PAGE_CONTEXT' && event.data.pageContext) {
