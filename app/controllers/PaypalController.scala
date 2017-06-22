@@ -24,6 +24,7 @@ import play.api.data.Forms._
 import play.filters.csrf.CSRFCheck
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
@@ -79,7 +80,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       .fold(notOkResult, okResult)
   }
 
-  case class AuthRequest(
+  case class AuthRequest private (
     countryGroup: CountryGroup,
     amount: BigDecimal,
     cmp: Option[String],
@@ -92,6 +93,30 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
   )
 
   object AuthRequest {
+    /**
+      * We need to ensure there's no fragment in the URL here, as PayPal appends some query parameters to the end of it,
+      * which will be removed by the browser (due to the URL stripping rules) in its requests.
+      *
+      * See: https://www.w3.org/TR/referrer-policy/#strip-url
+      *
+      */
+    def withSafeRefererUrl(
+                            countryGroup: CountryGroup,
+                            amount: BigDecimal,
+                            cmp: Option[String],
+                            intCmp: Option[String],
+                            refererPageviewId: Option[String],
+                            refererUrl: Option[String],
+                            ophanPageviewId: Option[String],
+                            ophanBrowserId: Option[String],
+                            ophanVisitId: Option[String]
+                          ): AuthRequest = {
+      val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
+
+      new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId)
+    }
+
+
     implicit val authRequestReads: Reads[AuthRequest] = (
       (__ \ "countryGroup").read[CountryGroup] and
         (__ \ "amount").read(min[BigDecimal](1)) and
@@ -102,7 +127,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         (__ \ "ophanPageviewId").readNullable[String] and
         (__ \ "ophanBrowserId").readNullable[String] and
         (__ \ "ophanVisitId").readNullable[String]
-      ) (AuthRequest.apply _)
+      ) (AuthRequest.withSafeRefererUrl _)
   }
 
   case class AuthResponse(approvalUrl: Uri, paymentId: String)
