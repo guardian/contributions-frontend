@@ -12,24 +12,29 @@ const Input = 2;
 const formDataByRegion = {
     'GB': {
         amounts: [25, 50, 100, 250],
-        symbol: '£'
+        symbol: '£',
+        countryGroup: 'uk'
     },
 
     'EU': {
         amounts: [25, 50, 100, 250],
-        symbol: '€'
+        symbol: '€',
+        countryGroup: 'eu',
     },
 
     'US': {
         amounts: [25, 50, 100, 250],
-        symbol: '$'
+        symbol: '$',
+        countryGroup: 'us',
     },
 
     'AU': {
         amounts: [50, 100, 250, 500],
-        symbol: '$'
+        symbol: '$',
+        countryGroup: 'au'
     }
 }
+
 
 export default class Form extends Component {
     constructor(props: { pageContext: PageContext }) {
@@ -63,7 +68,7 @@ export default class Form extends Component {
 
     sendPaypalRequest() {
         const authRequestData = {
-            countryGroup: this.props.pageContext.countryGroup,
+            countryGroup: this.formData.countryGroup,
             amount: this.state.selectedAmount.value,
             intCmp: this.props.pageContext.intCmp,
             refererPageviewId: this.props.pageContext.refererPageviewId,

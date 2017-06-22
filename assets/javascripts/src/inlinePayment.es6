@@ -9,7 +9,6 @@ import InlinePaymentForm from 'src/components/inline-payment/Form';
 
 const defaultContext = {
     region: 'GB',
-    countryGroup: 'uk',
     intCmp: 'PAYPAL_TEST',
     refererPageviewId: null,
     refererUrl: null,
