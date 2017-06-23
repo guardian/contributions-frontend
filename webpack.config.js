@@ -73,6 +73,8 @@ module.exports = {
 
     devServer: {
         https: true,
+        
+        hot: true,
 
         port: 9111,
 
