@@ -9,6 +9,12 @@ import ContributeButton from './ContributeButton';
 const Button = 1;
 const Input = 2;
 
+const Pages = {
+    Epic: 1,
+    ThankYou: 2,
+    Error: 3
+};
+
 const formDataByRegion = {
     'GB': {
         amounts: [25, 50, 100, 250],
@@ -46,7 +52,8 @@ export default class Form extends Component {
             selectedAmount: {
                 component: undefined,
                 value: undefined,
-            }
+            },
+            page: Pages.Epic
         }
     }
 
@@ -87,6 +94,15 @@ export default class Form extends Component {
         })
     }
 
+    executePaypalPayment(url) {
+        return fetch(url, {
+            headers: { 'Accept': 'application/json' },
+        }).then(response => {
+            console.log(response);
+            if (response.status === 303) this.setState({ page: Pages.ThankYou });
+        });
+    }
+
     render(props, state) {
         return (
             <form>
@@ -107,7 +123,8 @@ export default class Form extends Component {
 
                 <ContributeButton
                     amount={state.selectedAmount.value}
-                    sendPaypalRequest={this.sendPaypalRequest.bind(this)} />
+                    sendPaypalRequest={this.sendPaypalRequest.bind(this)}
+                    executePaypalPayment={this.executePaypalPayment.bind(this)} />
             </form>
         );
     }
