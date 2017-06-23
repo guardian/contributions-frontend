@@ -72,11 +72,21 @@ module.exports = {
     devtool: 'source-map',
 
     devServer: {
+        https: true,
+
+        port: 9111,
+
         proxy: {
             '**': {
                 target: 'http://localhost:9112',
                 secure: false
             }
-        }
-    }
-};
+        },
+
+        public: 'contribute.thegulocal.com:9111'
+    },
+
+    plugins: [
+        new webpack.HotModuleReplacementPlugin()
+    ]
+}
