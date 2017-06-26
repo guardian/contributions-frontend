@@ -9,7 +9,7 @@ import InlinePaymentContainer from 'src/components/inline-payment/InlinePaymentC
 
 const defaultContext = {
     region: 'GB',
-    intCmp: 'PAYPAL_TEST',
+    intCmp: 'pay_in_epic_no_page_context',
     refererPageviewId: null,
     refererUrl: null,
     ophanBrowserId: null
