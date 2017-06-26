@@ -79,7 +79,8 @@ export function paypalRedirect(dispatch) {
         refererPageviewId: state.data.refererPageviewId,
         refererUrl: state.data.refererUrl,
         ophanPageviewId: state.data.ophan.pageviewId,
-        ophanBrowserId: state.data.ophan.browserId
+        ophanBrowserId: state.data.ophan.browserId,
+        ophanVisitId: state.data.ophan.visitId
     };
 
     const url = '/paypal/auth?csrfToken=' + state.data.csrfToken;
@@ -142,6 +143,7 @@ function paymentFormData(state, token) {
         cmp: state.data.cmpCode,
         intcmp: state.data.intCmpCode,
         refererPageviewId: state.data.refererPageviewId,
-        refererUrl: state.data.refererUrl
+        refererUrl: state.data.refererUrl,
+        ophanVisitId: state.data.ophan.visitId
     };
 }

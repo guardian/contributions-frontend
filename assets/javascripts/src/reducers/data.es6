@@ -45,7 +45,8 @@ export default function dataReducer(state = initialState, action) {
         case SUBMIT_PAYMENT:
             return Object.assign({}, state, { ophan: {
                 pageviewId: state.ophan.pageviewId,
-                browserId: state.ophan.browserId
+                browserId: state.ophan.browserId,
+                visitId: state.ophan.visitId
             }});
 
         default:

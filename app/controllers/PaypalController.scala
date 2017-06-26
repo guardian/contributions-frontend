@@ -43,7 +43,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     refererPageviewId: Option[String],
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
-    ophanBrowserId: Option[String]
+    ophanBrowserId: Option[String],
+    ophanVisitId: Option[String]
   ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
 
     val paypalService = paymentServices.paypalServiceFor(request)
@@ -62,7 +63,9 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         ophanPageviewId = ophanPageviewId,
         ophanBrowserId = ophanBrowserId,
         idUser = idUser,
-        platform = request.platform)
+        platform = request.platform,
+        ophanVisitId = ophanVisitId
+      )
         .leftMap[AppError](StoreMetaDataError) // not necessary if storeMetaData() returns a custom error type
         .map(data => (payment, data))
     }
@@ -105,7 +108,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     refererPageviewId: Option[String],
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
-    ophanBrowserId: Option[String]
+    ophanBrowserId: Option[String],
+    ophanVisitId: Option[String]
   )
 
   object AuthRequest {
@@ -117,7 +121,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         (__ \ "refererPageviewId").readNullable[String] and
         (__ \ "refererUrl").readNullable[String] and
         (__ \ "ophanPageviewId").readNullable[String] and
-        (__ \ "ophanBrowserId").readNullable[String]
+        (__ \ "ophanBrowserId").readNullable[String] and
+        (__ \ "ophanVisitId").readNullable[String]
       ) (AuthRequest.apply _)
   }
 
@@ -152,7 +157,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         refererPageviewId = authRequest.refererPageviewId,
         refererUrl = authRequest.refererUrl,
         ophanPageviewId = authRequest.ophanPageviewId,
-        ophanBrowserId = authRequest.ophanBrowserId
+        ophanBrowserId = authRequest.ophanBrowserId,
+        ophanVisitId = authRequest.ophanVisitId
       )
       authResponse.value map {
         case Right(url) => Ok(Json.toJson(AuthResponse(url)))

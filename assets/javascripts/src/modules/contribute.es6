@@ -31,7 +31,7 @@ export function init() {
     const tickerContainer = document.getElementById('ticker');
     if (tickerContainer) {
         fetch(tickerContainer.getAttribute('data-src'), {
-           method: 'get' 
+           method: 'get'
         }).then(resp => {
             return resp.json();
         }).then(json => {
@@ -106,7 +106,8 @@ function setOphanIds() {
         type: SET_DATA,
         data: { ophan: {
             pageviewId: ophan.viewId,
-            browserId: ophan.browserId
+            browserId: ophan.browserId,
+            visitId: ophan.visitId
         }}
     });
 }

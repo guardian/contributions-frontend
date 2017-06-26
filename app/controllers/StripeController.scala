@@ -55,6 +55,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
       "abTests" -> Json.toJson(request.testAllocations).toString,
       "ophanPageviewId" -> form.ophanPageviewId,
       "ophanBrowserId" -> form.ophanBrowserId.getOrElse(""),
+      "ophanVisitId" -> form.ophanVisitId.getOrElse(""),
       "cmp" -> form.cmp.mkString,
       "intcmp" -> form.intcmp.mkString,
       "refererPageviewId" -> form.refererPageviewId.mkString,
@@ -96,7 +97,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
         ophanPageviewId = form.ophanPageviewId,
         ophanBrowserId = form.ophanBrowserId,
         idUser = idUser,
-        platform = form.platform orElse request.platform
+        platform = form.platform orElse request.platform,
+        ophanVisitId = form.ophanVisitId
       )
     }
 
