@@ -1,7 +1,6 @@
 package controllers
 
 import actions.CommonActions._
-import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.show._
 import cookies.ContribTimestampCookieAttributes
@@ -23,9 +22,6 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
 import play.filters.csrf.CSRFCheck
-import utils.AppError
-import utils.PaypalPaymentError
-import utils.StoreMetaDataError
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,10 +45,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
     val paypalService = paymentServices.paypalServiceFor(request)
 
-    def storeMetaData(payment: Payment): EitherT[Future, AppError, (Payment, SavedContributionData)] = {
-      val idUser = IdentityId.fromRequest(request)
-
-
+    def storeMetaData(payment: Payment) =
       paypalService.storeMetaData(
         paymentId = paymentId,
         testAllocations = request.testAllocations,
@@ -62,32 +55,19 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         refererUrl = refererUrl,
         ophanPageviewId = ophanPageviewId,
         ophanBrowserId = ophanBrowserId,
-        idUser = idUser,
+        idUser = IdentityId.fromRequest(request),
         platform = request.platform,
         ophanVisitId = ophanVisitId
       )
-        .leftMap[AppError](StoreMetaDataError) // not necessary if storeMetaData() returns a custom error type
-        .map(data => (payment, data))
-    }
 
-    def notOkResult(error: AppError): Result = error match {
-      case PaypalPaymentError(message) =>
-        handleError(countryGroup, s"Error executing PayPal payment: $message")
-      case _ =>
-        val thanksUrl = routes.Contributions.thanks(countryGroup).url
-        redirectWithCampaignCodes(thanksUrl)
-    }
+    def notOkResult(message: String): Result =
+      handleError(countryGroup, s"Error executing PayPal payment: $message")
 
-    def okResult(data: (Payment, SavedContributionData)): Result = {
-      val (payment, savedData) = data
-
+    def okResult(payment: Payment): Result = {
       val redirectUrl = routes.Contributions.postPayment(countryGroup).url
-
       val amount = paypalService.paymentAmount(payment)
-
-      val session = List(
-        "email" -> savedData.contributor.email
-      ) ++ amount.map("amount" -> _.show)
+      val email = payment.getPayer.getPayerInfo.getEmail
+      val session = List("email" -> email) ++ amount.map("amount" -> _.show)
 
       redirectWithCampaignCodes(redirectUrl)
         .addingToSession(session :_ *)
@@ -95,8 +75,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     }
 
     paypalService.executePayment(paymentId, payerId)
-      .leftMap[AppError](PaypalPaymentError) // not necessary if executePayment() returns a custom error type
-      .flatMap(payment => storeMetaData(payment))
+      .map { payment => storeMetaData(payment); payment }
       .fold(notOkResult, okResult)
   }
 
