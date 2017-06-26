@@ -24,7 +24,6 @@ export default class ContributeButton {
             },
 
             onAuthorize: data => {
-                console.log(data);
                 return this.props.executePaypalPayment(data.returnUrl)
             }
         }, '#contribution-button');

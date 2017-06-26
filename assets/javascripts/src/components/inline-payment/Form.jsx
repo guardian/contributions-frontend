@@ -3,17 +3,13 @@ import { h, Component } from 'preact';
 import AmountButton from './AmountButton';
 import AmountInput from './AmountInput';
 import ContributeButton from './ContributeButton';
+import ErrorMessage from './ErrorMessage';
 
 /** @jsx h */
 
 const Button = 1;
 const Input = 2;
 
-const Pages = {
-    Epic: 1,
-    ThankYou: 2,
-    Error: 3
-};
 
 const formDataByRegion = {
     'GB': {
@@ -39,22 +35,26 @@ const formDataByRegion = {
         symbol: '$',
         countryGroup: 'au'
     }
-}
+};
 
 
 export default class Form extends Component {
-    constructor(props: { pageContext: PageContext }) {
+    constructor(props: {
+        pageContext: PageContext,
+        onPaymentComplete: () => void,
+        onPaymentFailed: () => void,
+        onPaymentSubmitted: () => void
+    }) {
         super(props);
-
-        this.formData = formDataByRegion[props.pageContext.region] || formDataByRegion.GB;
 
         this.state = {
             selectedAmount: {
                 component: undefined,
                 value: undefined,
-            },
-            page: Pages.Epic
-        }
+            }
+        };
+
+        this.formData = formDataByRegion[props.pageContext.region] || formDataByRegion.GB;
     }
 
     setAmountFrom(component) {
@@ -74,6 +74,8 @@ export default class Form extends Component {
     }
 
     sendPaypalRequest() {
+        this.props.onPaymentSubmitted();
+
         const authRequestData = {
             countryGroup: this.formData.countryGroup,
             amount: this.state.selectedAmount.value,
@@ -98,8 +100,8 @@ export default class Form extends Component {
         return fetch(url, {
             headers: { 'Accept': 'application/json' },
         }).then(response => {
-            console.log(response);
-            if (response.status === 303) this.setState({ page: Pages.ThankYou });
+            if (response.ok) this.props.onPaymentComplete()
+            else this.props.onPaymentFailed()
         });
     }
 
@@ -125,6 +127,8 @@ export default class Form extends Component {
                     amount={state.selectedAmount.value}
                     sendPaypalRequest={this.sendPaypalRequest.bind(this)}
                     executePaypalPayment={this.executePaypalPayment.bind(this)} />
+
+                { props.showErrorMessage && <ErrorMessage/> }
             </form>
         );
     }
