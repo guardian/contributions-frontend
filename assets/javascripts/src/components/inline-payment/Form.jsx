@@ -4,6 +4,7 @@ import AmountButton from './AmountButton';
 import AmountInput from './AmountInput';
 import ContributeButton from './ContributeButton';
 import ErrorMessage from './ErrorMessage';
+import TermsAndConditions from './TermsAndConditions';
 
 /** @jsx h */
 
@@ -129,6 +130,8 @@ export default class Form extends Component {
                     executePaypalPayment={this.executePaypalPayment.bind(this)} />
 
                 { props.showErrorMessage && <ErrorMessage/> }
+
+                <TermsAndConditions campaignCode={props.pageContext.intCmp}/>
             </form>
         );
     }
