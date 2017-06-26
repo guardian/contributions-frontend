@@ -3,7 +3,7 @@
 import 'whatwg-fetch';
 import { h, render } from 'preact';
 
-import InlinePaymentForm from 'src/components/inline-payment/Form';
+import InlinePaymentContainer from 'src/components/inline-payment/InlinePaymentContainer';
 
 /** @jsx h */
 
@@ -16,7 +16,7 @@ const defaultContext = {
 };
 
 const renderForm = (pageContext: PageContext) => render(
-    <InlinePaymentForm pageContext={pageContext} />,
+    <InlinePaymentContainer pageContext={pageContext} />,
     document.getElementById('inline-form')
 );
 

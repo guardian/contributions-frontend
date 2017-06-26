@@ -21,6 +21,7 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
+import play.api.http.Writeable
 import play.filters.csrf.CSRFCheck
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -61,18 +62,27 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         ophanVisitId = ophanVisitId
       )
 
-    def notOkResult(message: String): Result =
-      handleError(countryGroup, s"Error executing PayPal payment: $message")
+    def redirectUrl(error: Option[PaymentError]) =
+      routes.Contributions.contribute(countryGroup, Some(PaypalError)).url
+
+    def notOkResult(message: String): Result = {
+      error(s"Error executing PayPal payment: $message")
+      render {
+        case Accepts.Json() => BadRequest(JsNull)
+        case Accepts.Html() => Redirect(redirectUrl(Some(PaypalError)), SEE_OTHER)
+      }
+    }
 
     def okResult(payment: Payment): Result = {
-      val redirectUrl = routes.Contributions.postPayment(countryGroup).url
-      val amount = paypalService.paymentAmount(payment)
-      val email = payment.getPayer.getPayerInfo.getEmail
-      val session = List("email" -> email) ++ amount.map("amount" -> _.show)
-
-      redirectWithCampaignCodes(redirectUrl)
-        .addingToSession(session :_ *)
-        .setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
+      val response = render {
+        case Accepts.Json() => Ok(JsNull)
+        case Accepts.Html() =>
+          val amount = paypalService.paymentAmount(payment)
+          val email = payment.getPayer.getPayerInfo.getEmail
+          val session = List("email" -> email) ++ amount.map("amount" -> _.show)
+          redirectWithCampaignCodes(redirectUrl(error = None)).addingToSession(session: _ *)
+      }
+      response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
     paypalService.executePayment(paymentId, payerId)
@@ -185,11 +195,6 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         authResponse => Ok(Json.toJson(authResponse))
       )
     }
-  }
-
-  def handleError(countryGroup: CountryGroup, err: String)(implicit tags: LoggingTags) = {
-    error(err)
-    Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
   }
 
   def hook = NoCacheAction.async(parse.tolerantText) { implicit request =>
