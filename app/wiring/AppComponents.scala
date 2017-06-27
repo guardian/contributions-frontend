@@ -81,7 +81,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     wire[CheckCacheHeadersFilter],
     SecurityHeadersFilter(SecurityHeadersConfig(
       contentSecurityPolicy = None,
-      frameOptions = Some("ALLOW-FROM http://localhost:8000")
+      frameOptions = Some("ALLOW-FROM https://www.theguardian.com/")
     ))
   )
 
