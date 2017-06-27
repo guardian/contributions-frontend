@@ -121,7 +121,8 @@ export default class Form extends Component {
                 <div class="contributions-inline-epic__input-wrapper">
                     <AmountInput
                         setAmount={this.setAmountFrom(Input).bind(this)}
-                        amount={this.getInputAmountValue()} />
+                        amount={this.getInputAmountValue()}
+                        symbol={this.formData.symbol} />
                 </div>
 
                 <ContributeButton

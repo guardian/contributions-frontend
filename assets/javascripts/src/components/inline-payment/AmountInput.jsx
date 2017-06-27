@@ -2,12 +2,16 @@ import { h, Component } from 'preact';
 /** @jsx h */
 
 const AmountInput = props => (
-    <input
-        value={props.amount}
-        type="number"
-        placeholder="Other amount"
-        class="input-text contributions-inline-epic__input--amount"
-        onInput={e => props.setAmount(e.target.value)}/>
+    <div class="input-text contributions-inline-epic__input--amount">
+        <span class="symbol">{props.symbol}</span>
+
+        <input
+            value={props.amount}
+            type="number"
+            class="input-text input-text--inner"
+            placeholder="Other amount"
+            onInput={e => props.setAmount(e.target.value)} />
+    </div>
 );
 
 export default AmountInput;
