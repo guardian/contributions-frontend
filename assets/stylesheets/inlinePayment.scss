@@ -2,10 +2,6 @@
 // epic iframe
 // =============================================================================
 
-
-//@import 'mixins';
-//@import 'functions';
-
 @import 'vars';
 @import 'bower_components/guss-colours/_colours.scss';
 @import 'bower_components/pasteup-palette/src/_palette';
@@ -16,6 +12,7 @@
 @import 'components/forms';
 
 $guss-colours: $pasteup-palette;
+$wide: 550px;
 
 body {
     margin: 0;
@@ -60,6 +57,13 @@ body {
     }
 }
 
+.contribute-controls {
+    @include mq($wide) {
+        padding-top: 5px;
+        display: flex;
+    }
+}
+
 .contributions__highlight {
     background-color: #ffe399;
     padding: 4px 2px;
@@ -73,23 +77,31 @@ body {
 
 .contributions-inline-epic__button--amount {
     @include button();
+    height: 32px;
     font-family: $f-data;
     flex: 1;
     text-align: center;
-    margin-right: 5px;
+    margin-right: 10px;
 
-    &:last-of-type {
-        margin-right: 0;
+    @include mq($until: $wide) {
+        &:last-of-type {
+            margin-right: 0;
+        }
     }
 
     &:focus {
-        background-color: hotpink;
+        background-color: #333;
     }
 }
 
 .contributions-inline-epic__input-wrapper {
     display: flex;
     margin-top: 10px;
+
+    @include mq($wide) {
+        margin-top: 0;
+        margin-right: 10px;
+    }
 }
 
 .contributions-inline-epic__input--amount {
@@ -102,11 +114,27 @@ body {
 
 .input-text--inner {
     flex: 1;
-    width: auto;
     margin-bottom: 0;
     text-align: center;
 }
 
 #contribution-button {
     flex: 1;
+    border: none;
+    background: none;
+    width: 100%;
+    padding: 0;
+}
+
+#inline-form {
+    border-top: 1px solid #dedede;
+}
+
+.terms-conditions {
+    @include fs-textSans(2);
+    color: #787878;
+
+    a {
+        color: #005689;
+    }
 }

@@ -2,7 +2,7 @@ import { h } from 'preact';
 /** @jsx h */
 
 const TermsAndConditions = props => (
-    <div>
+    <div class="terms-conditions">
         By proceeding, you are agreeing to our <a href="https://www.theguardian.com/info/2016/apr/04/contribution-terms-and-conditions" target="_blank">Terms & Conditions</a> and <a href="https://www.theguardian.com/help/privacy-policy" target="_blank">Privacy Policy</a>.
         The ultimate owner of the Guardian is The Scott Trust Limited.
         Contributions are not eligible for Gift Aid in the UK nor a tax-deduction elsewhere.

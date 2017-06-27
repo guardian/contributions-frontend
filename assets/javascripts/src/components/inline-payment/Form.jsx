@@ -109,26 +109,30 @@ export default class Form extends Component {
     render(props, state) {
         return (
             <form>
-                <div class="contributions-inline-epic__button-wrapper">
-                    {this.formData.amounts.map(amount =>
-                        <AmountButton
-                            amount={amount}
-                            symbol={this.formData.symbol}
-                            setAmount={this.setAmountFrom(Button).bind(this, amount)} />
-                    )}
-                </div>
+                <div>Give to the Guardian in less than a minute with a one-off contribution.</div>
 
-                <div class="contributions-inline-epic__input-wrapper">
-                    <AmountInput
-                        setAmount={this.setAmountFrom(Input).bind(this)}
-                        amount={this.getInputAmountValue()}
-                        symbol={this.formData.symbol} />
-                </div>
+                <div class="contribute-controls">
+                    <div class="contributions-inline-epic__button-wrapper">
+                        {this.formData.amounts.map(amount =>
+                            <AmountButton
+                                amount={amount}
+                                symbol={this.formData.symbol}
+                                setAmount={this.setAmountFrom(Button).bind(this, amount)} />
+                        )}
+                    </div>
 
-                <ContributeButton
-                    amount={state.selectedAmount.value}
-                    sendPaypalRequest={this.sendPaypalRequest.bind(this)}
-                    executePaypalPayment={this.executePaypalPayment.bind(this)} />
+                    <div class="contributions-inline-epic__input-wrapper">
+                        <AmountInput
+                            setAmount={this.setAmountFrom(Input).bind(this)}
+                            amount={this.getInputAmountValue()}
+                            symbol={this.formData.symbol} />
+                    </div>
+
+                    <ContributeButton
+                        amount={state.selectedAmount.value}
+                        sendPaypalRequest={this.sendPaypalRequest.bind(this)}
+                        executePaypalPayment={this.executePaypalPayment.bind(this)} />
+                </div>
 
                 { props.showErrorMessage && <ErrorMessage/> }
 
