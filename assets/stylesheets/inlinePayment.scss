@@ -19,6 +19,10 @@ body {
     padding: 0;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 .contributions__epic {
     border-top: 1px solid guss-colour(multimedia-main-2);
     background-color: guss-colour(comment-support-2);
@@ -71,17 +75,37 @@ body {
     margin-right: -2px;
 }
 
+.contributions-inline-epic__input-wrapper,
+.contributions-inline-epic__button--amount {
+    height: 32px;
+
+    @include mq($wide) {
+        height: 24px;
+    }
+}
+
 .contributions-inline-epic__button-wrapper {
     display: flex;
+
+    @include mq($wide) {
+        margin-top: 3px;
+    }
+
 }
 
 .contributions-inline-epic__button--amount {
     @include button();
-    height: 32px;
+
     font-family: $f-data;
     flex: 1;
     text-align: center;
     margin-right: 10px;
+    line-height: 14px;
+
+    @include mq($wide) {
+        margin-right: 5px;
+        width: 64px;
+    }
 
     @include mq($until: $wide) {
         &:last-of-type {
@@ -92,6 +116,10 @@ body {
     &:focus {
         background-color: #333;
     }
+
+    &.fade-out {
+        color: #dedede;
+    }
 }
 
 .contributions-inline-epic__input-wrapper {
@@ -99,8 +127,9 @@ body {
     margin-top: 10px;
 
     @include mq($wide) {
-        margin-top: 0;
-        margin-right: 10px;
+        margin-top: 3px;
+        margin-right: 5px;
+        width: 164px;
     }
 }
 
@@ -112,10 +141,24 @@ body {
     text-align: center;
 }
 
+.input-text {
+    @include mq($wide) {
+        margin-bottom: 0;
+    }
+}
+
 .input-text--inner {
+    @include fs-textSans(4);
+    background: none;
+    font-weight: bold;
     flex: 1;
     margin-bottom: 0;
     text-align: center;
+}
+
+.currency-symbol {
+    @include fs-textSans(4);
+    line-height: 16px;
 }
 
 #contribution-button {
@@ -127,7 +170,7 @@ body {
 }
 
 #inline-form {
-    border-top: 1px solid #dedede;
+    border-top: 1px solid #bdbdbd;
 }
 
 .terms-conditions {

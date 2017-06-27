@@ -113,12 +113,13 @@ export default class Form extends Component {
 
                 <div class="contribute-controls">
                     <div class="contributions-inline-epic__button-wrapper">
-                        {this.formData.amounts.map(amount =>
-                            <AmountButton
+                        {this.formData.amounts.map(amount => {
+                            return <AmountButton
                                 amount={amount}
                                 symbol={this.formData.symbol}
-                                setAmount={this.setAmountFrom(Button).bind(this, amount)} />
-                        )}
+                                setAmount={this.setAmountFrom(Button).bind(this, amount)}
+                                dim={!!this.getInputAmountValue()}/>
+                        })}
                     </div>
 
                     <div class="contributions-inline-epic__input-wrapper">

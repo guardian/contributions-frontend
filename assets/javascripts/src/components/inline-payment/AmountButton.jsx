@@ -3,7 +3,7 @@ import { h } from 'preact';
 
 const AmountButton = props => (
     <button type="button"
-            class="contributions-inline-epic__button--amount"
+            class={`contributions-inline-epic__button--amount ${props.dim && 'fade-out'}`}
             onClick={props.setAmount}>
         {props.symbol}{props.amount}
     </button>
