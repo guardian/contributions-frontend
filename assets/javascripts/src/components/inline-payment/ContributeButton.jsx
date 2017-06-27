@@ -6,7 +6,6 @@ export default class ContributeButton {
     render() {
         return <div class="paypal-button-wrapper">
             <button type="button" id="contribution-button"></button>
-            <div class="error-message">{this.props.children}</div>
         </div>;
     }
 

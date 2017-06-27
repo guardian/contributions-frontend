@@ -2,7 +2,7 @@ import { h } from 'preact';
 /** @jsx h */
 
 const ErrorMessage = props => (
-    <div>
+    <div class="error-message">
         We were not able to process your payment. Please try again.
     </div>
 );
