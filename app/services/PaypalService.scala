@@ -184,7 +184,7 @@ class PaypalService(
         country = Option(payerInfo.getCountryCode),
         ophanPageviewId = ophanPageviewId,
         ophanBrowserId = ophanBrowserId,
-        abTests = Json.toJson(testAllocations),
+        abTests = testAllocations,
         cmp = cmp,
         intCmp = intCmp,
         refererPageviewId =refererPageviewId,

@@ -52,7 +52,7 @@ class StripeService(
       country = Some(charge.source.country),
       ophanPageviewId = Some(ophanPageviewId),
       ophanBrowserId = ophanBrowserId,
-      abTests = Json.toJson(testAllocations),
+      abTests = testAllocations,
       cmp = cmp,
       intCmp = intCmp,
       refererPageviewId = refererPageviewId,

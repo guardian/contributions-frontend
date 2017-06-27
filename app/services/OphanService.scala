@@ -1,26 +1,25 @@
 package services
 
+import java.net.URLEncoder
+
 import abtests.Allocation
-import com.gu.memsub.util.WebServiceHelper
 import com.gu.monitoring.ServiceMetrics
 import com.gu.okhttp.RequestRunners
 import enumeratum.{EnumEntry, Enum}
 import models.{ContributorRow, ContributionMetaData, PaymentProvider}
-import okhttp3.Request
-import play.api.libs.json.{Json, JsValue}
+import okhttp3.{HttpUrl, Request}
+import play.api.libs.json.{Json}
 import com.gu.okhttp.RequestRunners._
-import services.Ophan.{OphanSuccess, OphanError, OphanResponse}
+import services.Ophan.{OphanError, OphanSuccess, OphanResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import cats._
-import cats.data._
 import cats.implicits._
 
 object Ophan {
 
   sealed trait OphanResponse
 
-  case class OphanSuccess(response: Option[String]) extends OphanResponse
+  case class OphanSuccess(response: String) extends OphanResponse
 
   case class OphanError(`type`: String, message: String, code: String = "", decline_code: String = "") extends Throwable with OphanResponse {
     override def getMessage: String = s"message: $message; type: ${`type`}; code: $code; decline_code: $decline_code"
@@ -77,7 +76,7 @@ case class OphanAcquisitionEvent(
    amountInGBP: Option[Double],
    paymentProvider: Option[PaymentProvider],
    campaignCode: Option[Set[String]],
-   abTests: JsValue,
+   abTests: Set[Allocation],
    countryCode: Option[String],
    referrerPageViewId: Option[String],
    referrerUrl: Option[String]
@@ -95,7 +94,7 @@ case class OphanAcquisitionEvent(
       this.amountInGBP.map(amountInGBP => "amountInGBP" -> amountInGBP.toString) ++
       this.paymentProvider.map(paymentProvider => "paymentProvider" -> paymentProvider.toString.toUpperCase) ++
       this.campaignCode.map(campaignCode => "campaignCode" -> campaignCode.mkString) ++
-      Seq("abTests" -> Json.stringify(abTests)) ++
+      Seq("abTests" -> OphanAcquisitionEvent.abTestToOphanJson(this.abTests)) ++
       this.countryCode.map(countryCode => "countryCode" -> countryCode.toString) ++
       this.referrerPageViewId.map(referrerPageViewId => "referrerPageViewId" -> referrerPageViewId.toString) ++
       this.referrerUrl.map(referrerUrl => "referrerUrl" -> referrerUrl)
@@ -132,24 +131,62 @@ object OphanAcquisitionEvent {
       )
     }
   }
+
+  /**
+    *
+    * @param abTest: at Set of ab test Allocations
+    * @return String: A JSON string in the format
+    *    {"<testName>": {"variantName": "<testVariant>"}, "<testName2>": {"variantName": "<testVariant2>"}}
+    */
+
+  def abTestToOphanJson(abTest: Set[Allocation]): String = {
+    val data = abTest
+      .map(_.toOphanJson)
+      .reduce(_ ++ _)
+
+    Json.stringify(data)
+  }
 }
 
-class OphanService(client: LoggingHttpClient[Future], browserId: String, visitId: String )(implicit ec: ExecutionContext) extends WebServiceHelper[OphanSuccess, OphanError] {
-  val wsUrl = "http://ophan.theguardian.com"
+class OphanService(client: LoggingHttpClient[Future])(implicit ec: ExecutionContext) {
+  val wsUrl = "https://contribute.thegulocal.com/testophan"
   val httpClient: LoggingHttpClient[Future] = client
+  val endpoint = "a.gif"
 
-  override def wsPreExecute(req: Request.Builder): Request.Builder =
-    req.addHeader("Cookie", s"bwid=${browserId}; vsid=${visitId};")
+  def endpointUrl(endpoint: String, params: Seq[(String, String)] = Seq.empty): HttpUrl = {
+    val withSegments = endpoint.split("/").foldLeft(urlBuilder) { case (url, segment) =>
+      url.addEncodedPathSegment(segment)
+    }
+    params.foldLeft(withSegments) { case (url, (k, v)) =>
+      val encodedkey = URLEncoder.encode(k, "UTF-8")
+      val encodedvalue = URLEncoder.encode(v, "UTF-8")
+      url.addEncodedQueryParameter(encodedkey, encodedvalue)
+    }.build()
+  }
+
+  def urlBuilder = HttpUrl.parse(wsUrl).newBuilder()
 
   def submitEvent(eventData: OphanAcquisitionEvent): Future[OphanResponse] = {
-    get[OphanSuccess]("a.gif", eventData.toParams:_*)
+    val url = endpointUrl(endpoint, Seq(eventData.toParams: _*))
+
+    def request = new Request.Builder().url(url)
+      .addHeader("Cookie", s"bwid=${eventData.browserId}; vsid=${eventData.visitId};")
+      .build()
+
+    for (response <- httpClient(request).run(s"${request.method} $wsUrl")) yield {
+      if (response.isSuccessful) {
+        OphanSuccess(response.body().string())
+      } else {
+        OphanError(`type`= "Error", message = s"Ophan request failed ${response.body}", code = response.code().toString)
+      }
+    }
   }
 }
 
 //TODO: Ophan in dev ?
 object OphanService {
   val metrics: ServiceMetrics = new ServiceMetrics("PROD", "ophan", "tracker")
-  def ophanService(browserId: String, visitId: String) = new OphanService(RequestRunners.loggingRunner(metrics), browserId, visitId)
+  def ophanService = new OphanService(RequestRunners.loggingRunner(metrics))
 }
 
 

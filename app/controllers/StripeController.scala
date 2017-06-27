@@ -38,7 +38,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
 
     val stripe = paymentServices.stripeServiceFor(request)
     val idUser = IdentityId.fromRequest(request) orElse form.idUser
-    val ophanService = OphanService.ophanService(browserId = form.ophanBrowserId.getOrElse(""), visitId = "")
+    val ophanService = OphanService.ophanService
 
     val countryGroup = form.currency match {
       case USD => US
