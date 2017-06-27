@@ -162,11 +162,14 @@ body {
     }
 }
 
-#contribution-button {
+.paypal-button-wrapper {
     flex: 1;
+}
+
+#contribution-button {
+    width: 100%;
     border: none;
     background: none;
-    width: 100%;
     padding: 0;
 }
 
@@ -174,11 +177,32 @@ body {
     border-top: 1px solid #bdbdbd;
 }
 
+.error-message {
+    @include fs-textSans(3);
+    
+    @include mq($wide) {
+        @include fs-textSans(2);
+    }
+
+    color: #d61d00;
+    padding: 5px;
+    margin-top: -20px;
+}
+
+a {
+    color: #005689;
+}
+
+.thank-you__heading {
+    @include fs-header(2);
+    margin-top: 5px;
+}
+
 .terms-conditions {
     @include fs-textSans(2);
     color: #787878;
+}
 
-    a {
-        color: #005689;
-    }
+p:last-of-type {
+    margin-bottom: 0;
 }

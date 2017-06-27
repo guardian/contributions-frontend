@@ -134,10 +134,12 @@ export default class Form extends Component {
                     <ContributeButton
                         amount={state.selectedAmount.value}
                         sendPaypalRequest={this.sendPaypalRequest.bind(this)}
-                        executePaypalPayment={this.executePaypalPayment.bind(this)} />
+                        executePaypalPayment={this.executePaypalPayment.bind(this)}>
+                        { props.showErrorMessage && <ErrorMessage/> }
+                    </ContributeButton>
                 </div>
 
-                { props.showErrorMessage && <ErrorMessage/> }
+
 
                 <TermsAndConditions campaignCode={props.pageContext.intCmp}/>
             </form>
