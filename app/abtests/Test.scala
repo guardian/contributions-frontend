@@ -3,7 +3,7 @@ package abtests
 import actions.CommonActions.ABTestRequest
 import com.github.slugify.Slugify
 import play.api.db.Database
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.AnyContent
 import play.api.mvc.{Cookie, Request}
 
@@ -65,7 +65,11 @@ case class Variant(name: String) {
   val slug = Test.slugify(name)
 }
 
-case class Allocation(test: Test, variant: Variant)
+case class Allocation(test: Test, variant: Variant) {
+  val toOphanJson: JsObject = {
+    Json.obj(this.test.name -> Json.obj("variantName" -> this.variant.name))
+  }
+}
 
 object Allocation {
   def force(request: Request[_], tests: Set[Test]): Option[Allocation] = for {
