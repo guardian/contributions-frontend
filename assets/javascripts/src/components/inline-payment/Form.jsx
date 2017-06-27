@@ -75,6 +75,8 @@ export default class Form extends Component {
     }
 
     sendPaypalRequest() {
+        if (!this.state.selectedAmount.value) return;
+
         this.props.onPaymentSubmitted();
 
         const authRequestData = {

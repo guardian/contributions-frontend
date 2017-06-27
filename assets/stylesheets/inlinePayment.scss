@@ -124,7 +124,7 @@ body {
 
 .contributions-inline-epic__input-wrapper {
     display: flex;
-    margin-top: 10px;
+    margin: 10px 0;
 
     @include mq($wide) {
         margin-top: 3px;
@@ -142,9 +142,7 @@ body {
 }
 
 .input-text {
-    @include mq($wide) {
-        margin-bottom: 0;
-    }
+    margin-bottom: 0;
 }
 
 .input-text--inner {
@@ -158,7 +156,10 @@ body {
 
 .currency-symbol {
     @include fs-textSans(4);
-    line-height: 16px;
+
+    @include mq($wide) {
+        line-height: 16px;
+    }
 }
 
 #contribution-button {
