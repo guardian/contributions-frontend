@@ -16,7 +16,9 @@ case class ContributionMetaData(
   intCmp: Option[String],
   refererPageviewId: Option[String],
   refererUrl: Option[String],
-  platform: Option[String]
+  platform: Option[String],
+  ophanVisitId: Option[String]
 ) {
   val abTestAsJson = Json.toJson(this.abTests)
 }
+

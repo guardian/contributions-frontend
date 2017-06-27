@@ -81,7 +81,8 @@ class PaypalService(
     refererPageviewId: Option[String],
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
-    ophanBrowserId: Option[String]
+    ophanBrowserId: Option[String],
+    ophanVisitId: Option[String]
   )(implicit tags: LoggingTags): EitherT[Future, String, Uri] = {
 
     val paymentToCreate = {
@@ -93,7 +94,8 @@ class PaypalService(
           ophanPageviewId.map(value => s"pvid=$value"),
           ophanBrowserId.map(value => s"bid=$value"),
           refererPageviewId.map(value => s"refererPageviewId=$value"),
-          refererUrl.map(value => s"refererUrl=$value")
+          refererUrl.map(value => s"refererUrl=$value"),
+          ophanVisitId.map(value => s"ophanVisitId=$value")
         ).flatten match {
           case Nil => ""
           case params => params.mkString("?", "&", "")
@@ -160,7 +162,8 @@ class PaypalService(
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId],
-    platform: Option[String]
+    platform: Option[String],
+    ophanVisitId: Option[String]
   )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     def tryToEitherT[A](block: => A): EitherT[Future, String, A] = {
@@ -189,7 +192,8 @@ class PaypalService(
         intCmp = intCmp,
         refererPageviewId =refererPageviewId,
         refererUrl = refererUrl,
-        platform = platform
+        platform = platform,
+        ophanVisitId = ophanVisitId
       )
 
       val postCode = {

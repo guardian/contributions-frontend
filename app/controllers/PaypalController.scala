@@ -1,7 +1,6 @@
 package controllers
 
 import actions.CommonActions._
-import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.show._
 import cookies.ContribTimestampCookieAttributes
@@ -23,9 +22,6 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
 import play.filters.csrf.CSRFCheck
-import utils.AppError
-import utils.PaypalPaymentError
-import utils.StoreMetaDataError
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,15 +39,13 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     refererPageviewId: Option[String],
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
-    ophanBrowserId: Option[String]
+    ophanBrowserId: Option[String],
+    ophanVisitId: Option[String]
   ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
 
     val paypalService = paymentServices.paypalServiceFor(request)
 
-    def storeMetaData(payment: Payment): EitherT[Future, AppError, (Payment, SavedContributionData)] = {
-      val idUser = IdentityId.fromRequest(request)
-
-
+    def storeMetaData(payment: Payment) =
       paypalService.storeMetaData(
         paymentId = paymentId,
         testAllocations = request.testAllocations,
@@ -61,30 +55,19 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         refererUrl = refererUrl,
         ophanPageviewId = ophanPageviewId,
         ophanBrowserId = ophanBrowserId,
-        idUser = idUser,
-        platform = request.platform)
-        .leftMap[AppError](StoreMetaDataError) // not necessary if storeMetaData() returns a custom error type
-        .map(data => (payment, data))
-    }
+        idUser = IdentityId.fromRequest(request),
+        platform = request.platform,
+        ophanVisitId = ophanVisitId
+      )
 
-    def notOkResult(error: AppError): Result = error match {
-      case PaypalPaymentError(message) =>
-        handleError(countryGroup, s"Error executing PayPal payment: $message")
-      case _ =>
-        val thanksUrl = routes.Contributions.thanks(countryGroup).url
-        redirectWithCampaignCodes(thanksUrl)
-    }
+    def notOkResult(message: String): Result =
+      handleError(countryGroup, s"Error executing PayPal payment: $message")
 
-    def okResult(data: (Payment, SavedContributionData)): Result = {
-      val (payment, savedData) = data
-
+    def okResult(payment: Payment): Result = {
       val redirectUrl = routes.Contributions.postPayment(countryGroup).url
-
       val amount = paypalService.paymentAmount(payment)
-
-      val session = List(
-        "email" -> savedData.contributor.email
-      ) ++ amount.map("amount" -> _.show)
+      val email = payment.getPayer.getPayerInfo.getEmail
+      val session = List("email" -> email) ++ amount.map("amount" -> _.show)
 
       redirectWithCampaignCodes(redirectUrl)
         .addingToSession(session :_ *)
@@ -92,8 +75,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     }
 
     paypalService.executePayment(paymentId, payerId)
-      .leftMap[AppError](PaypalPaymentError) // not necessary if executePayment() returns a custom error type
-      .flatMap(payment => storeMetaData(payment))
+      .map { payment => storeMetaData(payment); payment }
       .fold(notOkResult, okResult)
   }
 
@@ -105,7 +87,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     refererPageviewId: Option[String],
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
-    ophanBrowserId: Option[String]
+    ophanBrowserId: Option[String],
+    ophanVisitId: Option[String]
   )
 
   object AuthRequest {
@@ -117,7 +100,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         (__ \ "refererPageviewId").readNullable[String] and
         (__ \ "refererUrl").readNullable[String] and
         (__ \ "ophanPageviewId").readNullable[String] and
-        (__ \ "ophanBrowserId").readNullable[String]
+        (__ \ "ophanBrowserId").readNullable[String] and
+        (__ \ "ophanVisitId").readNullable[String]
       ) (AuthRequest.apply _)
   }
 
@@ -152,7 +136,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         refererPageviewId = authRequest.refererPageviewId,
         refererUrl = authRequest.refererUrl,
         ophanPageviewId = authRequest.ophanPageviewId,
-        ophanBrowserId = authRequest.ophanBrowserId
+        ophanBrowserId = authRequest.ophanBrowserId,
+        ophanVisitId = authRequest.ophanVisitId
       )
       authResponse.value map {
         case Right(url) => Ok(Json.toJson(AuthResponse(url)))

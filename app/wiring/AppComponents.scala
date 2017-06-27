@@ -12,13 +12,13 @@ import controllers._
 import data.ContributionData
 import filters.CheckCacheHeadersFilter
 import models.PaymentMode
-import play.api.Mode
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services.{OphanService, EmailService, IdentityService, PaymentServices}
 import router.Routes
+import configuration.Config
 
 //Sometimes intellij deletes this -> (import router.Routes)
 
@@ -59,13 +59,12 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     actorSystem = actorSystem
   )
 
-  val stage = config.getString("stage")
-  val ophanMetrics: ServiceMetrics = new ServiceMetrics(stage, "ophan", "tracker")
+  val ophanMetrics: ServiceMetrics = new ServiceMetrics(Config.stage, "ophan", "tracker")
 
   lazy val identityService = new IdentityService(wsClient, idConfig)
   lazy val emailService = wire[EmailService]
-  lazy val ophanService = new OphanService(RequestRunners.loggingRunner(ophanMetrics), environment)
 
+  lazy val ophanService = new OphanService(RequestRunners.loggingRunner(ophanMetrics), environment)
   lazy val giraffeController = wire[Contributions]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]

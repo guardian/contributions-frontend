@@ -42,7 +42,8 @@ class StripeService(
     ophanPageviewId: String,
     ophanBrowserId: Option[String],
     idUser: Option[IdentityId],
-    platform: Option[String]
+    platform: Option[String],
+    ophanVisitId: Option[String]
   )(implicit tags: LoggingTags): StripeMetaData = {
 
     val metadata = ContributionMetaData(
@@ -57,8 +58,10 @@ class StripeService(
       intCmp = intCmp,
       refererPageviewId = refererPageviewId,
       refererUrl = refererUrl,
-      platform = platform
+      platform = platform,
+      ophanVisitId = ophanVisitId
     )
+
     val contributor = Contributor(
       email = charge.receipt_email,
       contributorId = Some(ContributorId.random),
@@ -78,20 +81,21 @@ class StripeService(
       name = name,
       cmp = cmp
     )
-    StripeMetaData(metadata, contributor, contributorRow)
 
+    StripeMetaData(metadata, contributor, contributorRow)
   }
 
-  def storeMetaData(charge: Charge,
-                    created: DateTime,
-                    name: String,
-                    cmp: Option[String],
-                    metadata: ContributionMetaData,
-                    contributor: Contributor,
-                    contributorRow: ContributorRow,
-                    idUser: Option[IdentityId],
-                    marketing: Boolean)
-                   (implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
+  def storeMetaData(
+    charge: Charge,
+    created: DateTime,
+    name: String,
+    cmp: Option[String],
+    metadata: ContributionMetaData,
+    contributor: Contributor,
+    contributorRow: ContributorRow,
+    idUser: Option[IdentityId],
+    marketing: Boolean)
+    (implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     // Fire and forget: we don't want to stop the user flow
     idUser.map { id =>

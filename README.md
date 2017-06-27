@@ -102,7 +102,7 @@ This will start:
  - grunt watch to compile assets such as css
  - the webpack dev server on the port 9111, proxying calls to the play app for everything but js
 
-Making a request to [http://localhost:9111](http://localhost:9111) should give you the homepage.
+Making a request to [https://localhost:9111](https://localhost:9111) should give you the homepage.
 
 To make the site reachable as [https://contribute.thegulocal.com](https://contribute.thegulocal.com) (necessary for register/sign-in functionality) you then need to make sure NGINX is configured and running as described in [`/nginx/README.md`](./nginx/README.md).
 
