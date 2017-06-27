@@ -27,7 +27,7 @@ import utils.MaxAmount
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(implicit ec: ExecutionContext)
+class StripeController(paymentServices: PaymentServices, stripeConfig: Config, ophanService: OphanService)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
 
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
@@ -38,7 +38,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config)(i
 
     val stripe = paymentServices.stripeServiceFor(request)
     val idUser = IdentityId.fromRequest(request) orElse form.idUser
-    val ophanService = OphanService.ophanService
 
     val countryGroup = form.currency match {
       case USD => US

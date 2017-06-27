@@ -3,15 +3,13 @@ package services
 import java.net.URLEncoder
 
 import abtests.Allocation
-import com.gu.monitoring.ServiceMetrics
-import com.gu.okhttp.RequestRunners
 import enumeratum.{EnumEntry, Enum}
 import models.{ContributorRow, ContributionMetaData, PaymentProvider}
 import okhttp3.{HttpUrl, Request}
+import play.api.{Mode, Environment}
 import play.api.libs.json.{Json}
 import com.gu.okhttp.RequestRunners._
 import services.Ophan.{OphanError, OphanSuccess, OphanResponse}
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 
@@ -148,8 +146,8 @@ object OphanAcquisitionEvent {
   }
 }
 
-class OphanService(client: LoggingHttpClient[Future])(implicit ec: ExecutionContext) {
-  val wsUrl = "https://contribute.thegulocal.com/testophan"
+class OphanService (client: LoggingHttpClient[Future], environment: Environment)(implicit ec: ExecutionContext) {
+  val wsUrl = "https://ophan.theguardian.com"
   val httpClient: LoggingHttpClient[Future] = client
   val endpoint = "a.gif"
 
@@ -167,26 +165,27 @@ class OphanService(client: LoggingHttpClient[Future])(implicit ec: ExecutionCont
   def urlBuilder = HttpUrl.parse(wsUrl).newBuilder()
 
   def submitEvent(eventData: OphanAcquisitionEvent): Future[OphanResponse] = {
+
     val url = endpointUrl(endpoint, Seq(eventData.toParams: _*))
 
     def request = new Request.Builder().url(url)
       .addHeader("Cookie", s"bwid=${eventData.browserId}; vsid=${eventData.visitId};")
       .build()
 
-    for (response <- httpClient(request).run(s"${request.method} $wsUrl")) yield {
+    def callOphan = for (response <- httpClient(request).run(s"${request.method} $wsUrl")) yield {
       if (response.isSuccessful) {
         OphanSuccess(response.body().string())
       } else {
-        OphanError(`type`= "Error", message = s"Ophan request failed ${response.body}", code = response.code().toString)
+        OphanError(`type` = "Error", message = s"Ophan request failed ${response.body}", code = response.code().toString)
       }
     }
-  }
-}
 
-//TODO: Ophan in dev ?
-object OphanService {
-  val metrics: ServiceMetrics = new ServiceMetrics("PROD", "ophan", "tracker")
-  def ophanService = new OphanService(RequestRunners.loggingRunner(metrics))
+    if(environment.mode == Mode.Prod) {
+      callOphan
+    } else {
+      Future.successful(OphanSuccess("Did not call Ophan, running in DEV mode"))
+    }
+  }
 }
 
 
