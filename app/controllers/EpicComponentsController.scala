@@ -10,6 +10,6 @@ import scala.concurrent.duration._
 class EpicComponentsController extends Controller {
 
   def inlinePayment: Action[AnyContent] = Action { implicit request =>
-    Cached(7.days.toSeconds.toInt)(Ok(views.html.epicComponents.inlinePayment()))
+    Cached(30.days.toSeconds.toInt)(Ok(views.html.epicComponents.inlinePayment()))
   }
 }
