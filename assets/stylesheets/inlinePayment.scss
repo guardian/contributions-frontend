@@ -175,11 +175,12 @@ body {
 
 #inline-form {
     border-top: 1px solid #bdbdbd;
+    margin-top: 10px;
 }
 
 .error-message {
     @include fs-textSans(3);
-    
+
     @include mq($wide) {
         @include fs-textSans(2);
     }
