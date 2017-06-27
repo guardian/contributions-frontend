@@ -1,14 +1,20 @@
 package services
 
 import abtests.{Variant, Percentage, Test, Allocation}
+import com.gu.monitoring.ServiceMetrics
+import com.gu.okhttp.RequestRunners
 import models.PaymentProvider
 import org.scalatest.{MustMatchers, WordSpec}
+import play.api.Environment
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class OphanServiceSpec extends WordSpec with MustMatchers {
+class OphanServiceSpec(environment: Environment) extends WordSpec with MustMatchers {
 
   val browserId = "browserId"
   val visitId = "visitId"
-  val ophanService = OphanService.ophanService
+  val ophanMetrics: ServiceMetrics = new ServiceMetrics("test", "ophan", "tracker")
+
+  val ophanService = new OphanService(RequestRunners.loggingRunner(ophanMetrics), environment)
 
   "Extract Ab test" must {
     "create expected output from data" in {
