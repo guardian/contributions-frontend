@@ -2,8 +2,8 @@ import { h, Component } from 'preact';
 /** @jsx h */
 
 const AmountInput = props => (
-    <div class="input-text contributions-inline-epic__input--amount">
-        <span class="symbol">{props.symbol}</span>
+    <div class={`input-text contributions-inline-epic__input--amount ${!!props.amount && 'has-amount'}`}>
+        <span class="currency-symbol">{props.symbol}</span>
 
         <input
             value={props.amount}
