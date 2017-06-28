@@ -67,7 +67,7 @@ case class Variant(name: String) {
 
 case class Allocation(test: Test, variant: Variant) {
   val toOphanJson: JsObject = {
-    Json.obj(this.test.name -> Json.obj("variantName" -> this.variant.name))
+    Json.obj(test.name -> Json.obj("variantName" -> variant.name))
   }
 }
 

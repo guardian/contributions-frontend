@@ -23,9 +23,6 @@ object Ophan {
     override def getMessage: String = s"message: $message; type: ${`type`}; code: $code; decline_code: $decline_code"
   }
 
-  implicit val ophanSuccessReads = Json.reads[OphanSuccess]
-  implicit val ophanErrorReads = Json.reads[OphanError]
-
 }
 
 
@@ -50,16 +47,11 @@ object PaymentFrequency extends Enum[PaymentFrequency] {
   }
 }
 
-
-
 trait Product {
   val stringValue = "CONTRIBUTION"
 }
 
 case object Contribution extends Product
-
-
-case class AbTestInfo(tests: Map[String, Allocation])
 
 case class TestData(variantName: String, complete: Boolean, campaignCodes: Option[Set[String]])
 

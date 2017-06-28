@@ -19,6 +19,6 @@ case class ContributionMetaData(
   platform: Option[String],
   ophanVisitId: Option[String]
 ) {
-  val abTestAsJson = Json.toJson(this.abTests)
+  val abTestAsJson = Json.toJson(abTests)
 }
 

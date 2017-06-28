@@ -102,10 +102,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
       )
     }
 
-    def storeMetaData(metadata: stripe.StripeMetaData, charge: Charge): EitherT[Future, String, SavedContributionData] = {
+    def storeMetaData(metadata: stripe.StripeMetaData): EitherT[Future, String, SavedContributionData] = {
       stripe.storeMetaData(
-        charge = charge,
-        created = new DateTime(charge.created * 1000L),
+        created = metadata.contributionMetadata.created,
         name = form.name,
         cmp = form.cmp,
         metadata = metadata.contributionMetadata,
@@ -123,7 +122,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
 
     createCharge.map { charge =>
       val metadata = createMetaData(charge)
-      storeMetaData(metadata, charge) // fire and forget. If it fails we don't want to stop the user
+      storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
       recordToOphan(metadata) // again, fire and forget.
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)

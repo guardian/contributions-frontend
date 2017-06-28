@@ -86,7 +86,6 @@ class StripeService(
   }
 
   def storeMetaData(
-    charge: Charge,
     created: DateTime,
     name: String,
     cmp: Option[String],
