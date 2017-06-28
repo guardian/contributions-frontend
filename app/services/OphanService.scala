@@ -73,12 +73,12 @@ case class OphanAcquisitionEvent(
 ) {
   def toParams: Seq[(String, String)] = {
     Seq(
-      "viewId" -> this.viewId,
-      "browserId" -> this.browserId,
-      "product" -> this.product.stringValue,
-      "currency" -> this.currency,
-      "paymentFrequency" -> this.paymentFrequency.stringValue,
-      "amount" -> this.amount.toString
+      "viewId" -> viewId,
+      "browserId" -> browserId,
+      "product" -> product.stringValue,
+      "currency" -> currency,
+      "paymentFrequency" -> paymentFrequency.stringValue,
+      "amount" -> amount.toString
     ) ++
     List(
       "visitId" -> visitId.map(_.toString),
