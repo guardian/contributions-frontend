@@ -80,14 +80,16 @@ case class OphanAcquisitionEvent(
       "paymentFrequency" -> this.paymentFrequency.stringValue,
       "amount" -> this.amount.toString
     ) ++
-      this.visitId.map(visitId => "visitId" -> this.visitId.toString) ++
-      this.amountInGBP.map(amountInGBP => "amountInGBP" -> amountInGBP.toString) ++
-      this.paymentProvider.map(paymentProvider => "paymentProvider" -> paymentProvider.toString.toUpperCase) ++
-      this.campaignCode.map(campaignCode => "campaignCode" -> campaignCode.mkString) ++
-      Seq("abTests" -> OphanAcquisitionEvent.abTestToOphanJson(this.abTests)) ++
-      this.countryCode.map(countryCode => "countryCode" -> countryCode.toString) ++
-      this.referrerPageViewId.map(referrerPageViewId => "referrerPageViewId" -> referrerPageViewId.toString) ++
-      this.referrerUrl.map(referrerUrl => "referrerUrl" -> referrerUrl)
+    List(
+      "visitId" -> visitId.map(_.toString),
+      "amountInGBP" -> amountInGBP.map(_.toString),
+      "paymentProvider" -> paymentProvider.map(_.toString.toUpperCase),
+      "campaignCode" -> campaignCode.map(_.mkString),
+      "abTests" -> Some(OphanAcquisitionEvent.abTestToOphanJson(abTests)),
+      "countryCode" -> countryCode.map(_.toString),
+      "referrerPageViewId" -> referrerPageViewId.map(_.toString),
+      "referrerUrl" -> referrerUrl.map(_.toString)
+    ).collect{ case (k, Some(v)) => k -> v  }
   }
 }
 

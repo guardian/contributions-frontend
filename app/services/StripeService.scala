@@ -97,7 +97,7 @@ class StripeService(
     (implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     // Fire and forget: we don't want to stop the user flow
-    idUser.map { id =>
+    idUser.foreach { id =>
       identityService.updateMarketingPreferences(id, marketing)
     }
     emailService.thank(contributorRow)
