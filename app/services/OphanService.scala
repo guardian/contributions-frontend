@@ -110,7 +110,7 @@ object OphanAcquisitionEvent {
         currency = contributorRow.currency,
         paymentFrequency = PaymentFrequency.OneOff,
         amount = contributorRow.amount.toDouble,
-        visitId = None,
+        visitId = contributionMetaData.ophanVisitId,
         amountInGBP = convertedAmount,
         paymentProvider = Some(paymentProvider),
         campaignCode = campaignCodes,
