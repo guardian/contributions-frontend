@@ -12,7 +12,12 @@ const defaultContext = {
     intCmp: 'pay_in_epic_no_page_context',
     refererPageviewId: null,
     refererUrl: null,
-    ophanBrowserId: null
+    ophanBrowserId: null,
+    formData:  {
+        amounts: [25, 50, 100, 250],
+        symbol: '£',
+        countryGroup: 'uk'
+    }
 };
 
 const renderForm = (pageContext: PageContext) => render(
