@@ -11,34 +11,6 @@ import TermsAndConditions from './TermsAndConditions';
 const Button = 1;
 const Input = 2;
 
-
-const formDataByRegion = {
-    'GB': {
-        amounts: [25, 50, 100, 250],
-        symbol: '£',
-        countryGroup: 'uk'
-    },
-
-    'EU': {
-        amounts: [25, 50, 100, 250],
-        symbol: '€',
-        countryGroup: 'eu',
-    },
-
-    'US': {
-        amounts: [25, 50, 100, 250],
-        symbol: '$',
-        countryGroup: 'us',
-    },
-
-    'AU': {
-        amounts: [50, 100, 250, 500],
-        symbol: '$',
-        countryGroup: 'au'
-    }
-};
-
-
 export default class Form extends Component {
     constructor(props: {
         pageContext: PageContext,
@@ -55,7 +27,7 @@ export default class Form extends Component {
             }
         };
 
-        this.formData = formDataByRegion[props.pageContext.region] || formDataByRegion.GB;
+        this.formData = props.pageContext.formData
     }
 
     setAmountFrom(component) {
@@ -115,9 +87,10 @@ export default class Form extends Component {
 
                 <div class="contribute-controls">
                     <div class="contributions-inline-epic__button-wrapper">
-                        {this.formData.amounts.map(amount => {
+                        {this.formData.amounts.map((amount, i) => {
                             return <AmountButton
                                 amount={amount}
+                                focusOnMount={i === 1}
                                 symbol={this.formData.symbol}
                                 setAmount={this.setAmountFrom(Button).bind(this, amount)}
                                 dim={!!this.getInputAmountValue()}/>

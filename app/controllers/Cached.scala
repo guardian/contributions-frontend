@@ -34,7 +34,6 @@ object Cached {
       "Date" -> HTTPDateFormat.format(now)
     )
   }
-
 }
 
 object NoCache {
