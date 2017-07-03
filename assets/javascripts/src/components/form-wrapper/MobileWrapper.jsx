@@ -40,6 +40,7 @@ export default class MobileWrapper extends React.Component {
                         mobile={true}
                         clearPaymentFlags={this.props.clearPaymentFlags}
                         stripeCheckout={this.props.stripeCheckout}
+                        disableStripe={this.props.disableStripe}
                     />
 
                     {!this.props.processing  && p== PAGES.CONTRIBUTION && <LegalNotice countryGroup={this.props.countryGroup}/>}

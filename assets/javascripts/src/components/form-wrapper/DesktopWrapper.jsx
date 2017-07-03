@@ -32,6 +32,7 @@ export default class DesktopWrapper extends React.Component {
                             mobile={false}
                             clearPaymentFlags={this.props.clearPaymentFlags}
                             stripeCheckout={this.props.stripeCheckout}
+                            disableStripe={this.props.disableStripe}
                         />
                     </div>
 

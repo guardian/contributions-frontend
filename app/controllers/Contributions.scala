@@ -17,6 +17,8 @@ import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
 
+import scala.util.Try
+
 class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
 
   val social: Set[Social] = Set(
@@ -37,7 +39,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
 
   def redirectToUk = (NoCacheAction andThen MobileSupportAction) { implicit request => redirectWithQueryParams(routes.Contributions.contribute(UK).url) }
 
-  private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) = redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight"))
+  private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) =
+    redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight", "disableStripe"))
 
   def postPayment(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val pageInfo = PageInfo(
@@ -60,6 +63,9 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       val intCmp = request.getQueryString("INTCMP")
       val refererPageviewId = request.getQueryString("REFPVID")
       val refererUrl = request.headers.get("referer")
+
+      val disableStripe = request.getQueryString("disableStripe")
+        .flatMap(value => Try(value.toBoolean).toOption).getOrElse(false)
 
       val pageInfo = PageInfo(
         title = "Support the Guardian | Contribute today",
@@ -85,7 +91,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
         creditCardExpiryYears,
         errorMessage,
         CSRF.getToken.map(_.value),
-        request.isAllocated(Test.landingPageTest, "with-copy")
+        request.isAllocated(Test.landingPageTest, "with-copy"),
+        disableStripe
       ))
     }
   }

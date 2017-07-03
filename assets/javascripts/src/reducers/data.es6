@@ -21,7 +21,8 @@ const initialState = {
     stripe: {
         handler: null,
         token: null,
-    }
+    },
+    disableStripe: false
 };
 
 /**
