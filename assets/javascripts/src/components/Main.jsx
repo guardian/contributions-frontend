@@ -40,7 +40,8 @@ function mapStateToProps(state) {
         cardPay: state.page.cardPay,
         paymentError: state.page.paymentError,
         amounts: abTests.amounts(state.data.abTests),
-        countryGroup: state.data.countryGroup
+        countryGroup: state.data.countryGroup,
+        disableStripe: state.data.disableStripe
     };
 }
 

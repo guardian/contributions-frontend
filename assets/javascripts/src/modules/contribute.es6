@@ -86,7 +86,8 @@ function appDataFrom(container) {
         intCmpCode: container.getAttribute('data-int-cmp-code'),
         refererPageviewId: container.getAttribute('data-referrer-pageview-id'),
         refererUrl: container.getAttribute('data-referrer-url'),
-        csrfToken: container.getAttribute('data-csrf-token')
+        csrfToken: container.getAttribute('data-csrf-token'),
+        disableStripe: container.getAttribute('data-disable-stripe') === 'true'
     };
 }
 

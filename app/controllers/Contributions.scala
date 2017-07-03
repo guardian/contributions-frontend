@@ -17,6 +17,8 @@ import utils.MaxAmount
 import utils.RequestCountry._
 import views.support._
 
+import scala.util.Try
+
 class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
 
   val social: Set[Social] = Set(
@@ -61,6 +63,9 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       val refererPageviewId = request.getQueryString("REFPVID")
       val refererUrl = request.headers.get("referer")
 
+      val disableStripe = request.getQueryString("disableStripe")
+        .flatMap(value => Try(value.toBoolean).toOption).getOrElse(false)
+
       val pageInfo = PageInfo(
         title = "Support the Guardian | Contribute today",
         url = request.path,
@@ -85,7 +90,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
         creditCardExpiryYears,
         errorMessage,
         CSRF.getToken.map(_.value),
-        request.isAllocated(Test.landingPageTest, "with-copy")
+        request.isAllocated(Test.landingPageTest, "with-copy"),
+        disableStripe
       ))
     }
   }

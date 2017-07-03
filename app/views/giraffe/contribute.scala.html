@@ -17,7 +17,8 @@
     creditCardExpiryYears: List[Int],
     errorMessage: Option[String],
     csrfToken: Option[String],
-    inLandingPageTest: Boolean
+    inLandingPageTest: Boolean,
+    disableStripe: Boolean
 )
 
 @defining { (block: Html) =>
@@ -50,6 +51,7 @@
             @for(refUrl <- refererUrl) {
                 data-referrer-url="@refUrl"
                 }
+        data-disable-stripe="@disableStripe"
         >
         </section>
 
