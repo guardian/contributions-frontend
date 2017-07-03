@@ -25,7 +25,9 @@ class StripeService(
 )(implicit ec: ExecutionContext)
   extends MembershipStripeService(apiConfig = apiConfig, RequestRunners.loggingRunner(metrics)) {
 
-  def storeMetaData(
+  case class StripeMetaData(contributionMetadata: ContributionMetaData, contributor: Contributor, contributorRow: ContributorRow)
+
+  def createMetaData(
     contributionId: ContributionId,
     charge: Charge,
     created: DateTime,
@@ -42,20 +44,7 @@ class StripeService(
     idUser: Option[IdentityId],
     platform: Option[String],
     ophanVisitId: Option[String]
-  )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
-
-    // Fire and forget: we don't want to stop the user flow
-    idUser.map { id =>
-      identityService.updateMarketingPreferences(id, marketing)
-    }
-    emailService.thank(ContributorRow(
-      email = charge.receipt_email,
-      created = created,
-      amount = BigDecimal(charge.amount, 2),
-      currency = charge.currency.toUpperCase,
-      name = name,
-      cmp = cmp
-    ))
+  )(implicit tags: LoggingTags): StripeMetaData = {
 
     val metadata = ContributionMetaData(
       contributionId = contributionId,
@@ -64,7 +53,7 @@ class StripeService(
       country = Some(charge.source.country),
       ophanPageviewId = Some(ophanPageviewId),
       ophanBrowserId = ophanBrowserId,
-      abTests = Json.toJson(testAllocations),
+      abTests = testAllocations,
       cmp = cmp,
       intCmp = intCmp,
       refererPageviewId = refererPageviewId,
@@ -72,6 +61,7 @@ class StripeService(
       platform = platform,
       ophanVisitId = ophanVisitId
     )
+
     val contributor = Contributor(
       email = charge.receipt_email,
       contributorId = Some(ContributorId.random),
@@ -82,6 +72,35 @@ class StripeService(
       postCode = postCode,
       marketingOptIn = Some(marketing)
     )
+
+    val contributorRow = ContributorRow(
+      email = charge.receipt_email,
+      created = created,
+      amount = BigDecimal(charge.amount, 2),
+      currency = charge.currency.toUpperCase,
+      name = name,
+      cmp = cmp
+    )
+
+    StripeMetaData(metadata, contributor, contributorRow)
+  }
+
+  def storeMetaData(
+    created: DateTime,
+    name: String,
+    cmp: Option[String],
+    metadata: ContributionMetaData,
+    contributor: Contributor,
+    contributorRow: ContributorRow,
+    idUser: Option[IdentityId],
+    marketing: Boolean)
+    (implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
+
+    // Fire and forget: we don't want to stop the user flow
+    idUser.foreach { id =>
+      identityService.updateMarketingPreferences(id, marketing)
+    }
+    emailService.thank(contributorRow)
 
     for {
       savedMetadata <- contributionData.insertPaymentMetaData(metadata)

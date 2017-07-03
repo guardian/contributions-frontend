@@ -4,6 +4,8 @@ import com.github.nscala_time.time.Imports._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.identity.play.AccessCredentials.{Cookies, Token}
 import com.gu.identity.testing.usernames.TestUsernames
+import com.gu.monitoring.ServiceMetrics
+import com.gu.okhttp.RequestRunners
 import com.softwaremill.macwire._
 import com.typesafe.config.ConfigFactory
 import controllers._
@@ -14,8 +16,9 @@ import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
-import services.{EmailService, IdentityService, PaymentServices}
+import services.{OphanService, EmailService, IdentityService, PaymentServices}
 import router.Routes
+import configuration.Config
 
 //Sometimes intellij deletes this -> (import router.Routes)
 
@@ -55,14 +58,18 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     contributionDataPerMode = contributionDataPerMode,
     actorSystem = actorSystem
   )
+
+  val ophanMetrics: ServiceMetrics = new ServiceMetrics(Config.stage, "ophan", "tracker")
+
   lazy val identityService = new IdentityService(wsClient, idConfig)
   lazy val emailService = wire[EmailService]
 
+  lazy val ophanService = new OphanService(RequestRunners.loggingRunner(ophanMetrics), environment)
   lazy val giraffeController = wire[Contributions]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
   lazy val paypalController = wire[PaypalController]
-  lazy val stripeController = new StripeController(paymentServices, stripeConfig)
+  lazy val stripeController = new StripeController(paymentServices, stripeConfig, ophanService)
   lazy val userController = wire[UserController]
 
   override lazy val httpErrorHandler =

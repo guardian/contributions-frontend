@@ -86,7 +86,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
           ${pmd.country},
           ${pmd.ophanPageviewId},
           ${pmd.ophanBrowserId},
-          ${pmd.abTests},
+          ${pmd.abTestAsJson},
           ${pmd.cmp},
           ${pmd.intCmp},
           ${pmd.refererUrl},
