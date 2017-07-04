@@ -65,7 +65,7 @@ class OphanServiceSpec(environment: Environment) extends WordSpec with MustMatch
         visitId = Some("visit"),
         amountInGBP = Some(10.12),
         paymentProvider = Some(PaymentProvider.Stripe),
-        campaignCode = Some(Set("woot")),
+        campaignCode = Some(Set("woot","poot")),
         abTests = Set(allocation),
         countryCode = Some("US"),
         referrerPageViewId = Some("refpivd"),
@@ -74,7 +74,7 @@ class OphanServiceSpec(environment: Environment) extends WordSpec with MustMatch
 
       val params = ophanEvent.toParams
       val url = ophanService.endpointUrl("a.gif", Seq(params:_*)).toString
-      url mustBe """https://contribute.thegulocal.com/testophan/a.gif?viewId=123&browserId=browserId&product=CONTRIBUTION&currency=GBP&paymentFrequency=ONE_OFF&amount=10.12&visitId=Some%28visit%29&amountInGBP=10.12&paymentProvider=STRIPE&campaignCode=woot&abTests=%7B%22test%22%3A%7B%22variantName%22%3A%22control%22%7D%7D&countryCode=US&referrerPageViewId=refpivd&referrerUrl=refurl"""
+      url mustBe """https://contribute.thegulocal.com/testophan/a.gif?viewId=123&browserId=browserId&product=CONTRIBUTION&currency=GBP&paymentFrequency=ONE_OFF&amount=10.12&visitId=Some%28visit%29&amountInGBP=10.12&paymentProvider=STRIPE&campaignCode=woot,poot&abTests=%7B%22test%22%3A%7B%22variantName%22%3A%22control%22%7D%7D&countryCode=US&referrerPageViewId=refpivd&referrerUrl=refurl"""
 
     }
   }
