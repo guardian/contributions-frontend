@@ -176,9 +176,6 @@
         ConnectionDrainingPolicy:
           Enabled: true
           Timeout: 60
-        LBCookieStickinessPolicy:
-          - CookieExpirationPeriod: 1800
-            PolicyName: CookieBasedPolicy
     LoadBalancerSecurityGroup:
       Type: AWS::EC2::SecurityGroup
       Properties:
