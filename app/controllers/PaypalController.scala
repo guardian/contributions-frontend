@@ -62,14 +62,12 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         ophanVisitId = ophanVisitId
       )
 
-    def redirectUrl(error: Option[PaymentError]) =
-      routes.Contributions.contribute(countryGroup, Some(PaypalError)).url
-
     def notOkResult(message: String): Result = {
       error(s"Error executing PayPal payment: $message")
       render {
         case Accepts.Json() => BadRequest(JsNull)
-        case Accepts.Html() => Redirect(redirectUrl(Some(PaypalError)), SEE_OTHER)
+        case Accepts.Html() =>
+          Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
       }
     }
 
@@ -80,7 +78,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
           val amount = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email) ++ amount.map("amount" -> _.show)
-          redirectWithCampaignCodes(redirectUrl(error = None)).addingToSession(session: _ *)
+          redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
       }
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
