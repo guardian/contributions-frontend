@@ -199,7 +199,7 @@ module.exports = function (grunt) {
             options: {
                 preserveSourceMaps: true,
                 assetMap: isDev ? false : 'conf/assets.map',
-                hashLength: 8,
+                hashLength: 16,
                 algorithm: 'md5',
                 srcBasePath: 'public/',
                 destBasePath: 'public/',
