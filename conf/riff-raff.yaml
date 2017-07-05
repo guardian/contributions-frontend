@@ -16,6 +16,14 @@ deployments:
         Recipe: xenial-membership
         AmigoStage: PROD
     dependencies: [cfn]
+
+  contributions-frontend-static:
+    type: aws-s3
+    parameters:
+      bucket: contributions-static
+      cacheControl: public, max-age=315360000
+      prefixStack: false
+
   contributions-frontend:
     type: autoscaling
-    dependencies: [cfn, contributions-frontend-ami]
+    dependencies: [cfn, contributions-frontend-ami, contributions-frontend-static]

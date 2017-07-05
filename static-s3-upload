@@ -1,0 +1,32 @@
+#!/bin/bash
+
+################################################################################
+# Upload the public folder to S3
+################################################################################
+
+set +x
+echo "##teamcity[progressStart 'asset publish']"
+set -x
+
+set +u
+
+if [[ -z $BUILD_NUMBER ]]; then
+  BUILD_NUMBER=0
+fi
+
+if [[ -z $RIFF_RAFF_ARTIFACT_BUCKET ]]; then
+  RIFF_RAFF_ARTIFACT_BUCKET=riffraff-artifact
+fi
+
+set -u
+
+aws s3 cp \
+    --acl bucket-owner-full-control \
+    --region=eu-west-1 \
+    --recursive public/ \
+    --profile membership \
+    s3://$RIFF_RAFF_ARTIFACT_BUCKET/contributions-frontend/$BUILD_NUMBER/contributions-frontend-static
+
+set +x
+echo "##teamcity[progressFinish 'asset publish']"
+set -x
