@@ -63,7 +63,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       )
 
     def redirectUrl(error: Option[PaymentError]) =
-      routes.Contributions.contribute(countryGroup, Some(PaypalError)).url
+      routes.Contributions.contribute(countryGroup, error).url
 
     def notOkResult(message: String): Result = {
       error(s"Error executing PayPal payment: $message")
