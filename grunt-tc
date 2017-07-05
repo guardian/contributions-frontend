@@ -12,7 +12,6 @@ set -o errexit
 # Files will now be found in the public folder
 ################################################################################
 
-npm cache clean
 npm install
 
 ./node_modules/.bin/grunt "$@"
