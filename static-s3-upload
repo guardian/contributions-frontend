@@ -24,7 +24,6 @@ aws s3 cp \
     --acl bucket-owner-full-control \
     --region=eu-west-1 \
     --recursive public/ \
-    --profile membership \
     s3://$RIFF_RAFF_ARTIFACT_BUCKET/contributions-frontend/$BUILD_NUMBER/contributions-frontend-static
 
 set +x
