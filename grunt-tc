@@ -9,7 +9,7 @@ set -o errexit
 
 ################################################################################
 # Build the static asset files for the project
-# Files will now be found in Public folder
+# Files will now be found in the public folder
 ################################################################################
 
 npm cache clean
