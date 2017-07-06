@@ -9,9 +9,7 @@ import com.gu.i18n.{CountryGroup, Currency}
 import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
 import models._
-import monitoring.TagAwareLogger
-import monitoring.LoggingTags
-import monitoring.LoggingTagsProvider
+import monitoring.{ContributionMetrics, LoggingTags, LoggingTagsProvider}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.PaymentServices
@@ -21,16 +19,14 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
-import play.api.http.Writeable
 import play.filters.csrf.CSRFCheck
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck)(implicit ec: ExecutionContext)
-  extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
+  extends Controller with Redirect with LoggingTagsProvider with ContributionMetrics {
   import ContribTimestampCookieAttributes._
-  val cloudwatch = new monitoring.ContributionMetrics
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -49,7 +45,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     val paypalService = paymentServices.paypalServiceFor(request)
     val platform = request.platform.getOrElse("unknown")
     info(s"Attempting paypal payment for id: ${request.id} from platform: $platform")
-    cloudwatch.putPaypalPaymentAttempt
+    putPaypalPaymentAttempt()
 
     def storeMetaData(payment: Payment) =
       paypalService.storeMetaData(
@@ -68,7 +64,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
     def notOkResult(message: String): Result = {
       error(s"Error executing PayPal payment: $message")
-      cloudwatch.putPaypalPaymentFailure(message)
+      putPaypalPaymentFailure(message)
       render {
         case Accepts.Json() => BadRequest(JsNull)
         case Accepts.Html() =>
@@ -86,7 +82,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
           redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
       }
       info(s"Paypal payment successful. Payment id: ${payment.getId}")
-      cloudwatch.putPaypalPaymentSuccess
+      putPaypalPaymentSuccess()
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
@@ -177,7 +173,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
   def authorize = checkToken {
     NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
       info(s"Attempting to obtain paypal auth url.")
-      cloudwatch.putPaypalAuthAttempt
+      putPaypalAuthAttempt()
       val authRequest = request.body
       val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
       val paypalService = paymentServices.paypalServiceFor(request)
@@ -197,12 +193,12 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       payment.subflatMap(AuthResponse.fromPayment).fold(
         err => {
           error(s"Error getting PayPal auth url: $err")
-          cloudwatch.putPaypalAuthFailure
+          putPaypalAuthFailure()
           InternalServerError("Error getting PayPal auth url")
         },
         authResponse => {
           info(s"Paypal payment auth url successfully obtained.")
-          cloudwatch.putPaypalAuthSuccess
+          putPaypalAuthSuccess()
           Ok(Json.toJson(authResponse))
         }
       )
@@ -212,7 +208,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
   def hook = NoCacheAction.async(parse.tolerantText) { implicit request =>
     val bodyText = request.body
     val bodyJson = Json.parse(request.body)
-    cloudwatch.putPaypalHookAttempt
+    putPaypalHookAttempt()
 
     val paypalService = paymentServices.paypalServiceFor(request)
     val validHook = paypalService.validateEvent(request.headers.toSimpleMap, bodyText)
@@ -221,15 +217,15 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       bodyJson.validate[PaypalHook] match {
         case JsSuccess(paypalHook, _) if validHook =>
           info(s"Received paymentHook: ${paypalHook.paymentId}")
-          cloudwatch.putPaypalHookSuccess
+          putPaypalHookSuccess()
           block(paypalHook)
         case JsError(err) =>
           error(s"Unable to parse Json, parsing errors: $err")
-          cloudwatch.putPaypalHookParseError
+          putPaypalHookParseError()
           Future.successful(InternalServerError("Unable to parse json payload"))
         case _ =>
           error(s"A webhook request wasn't valid: $request, headers: ${request.headers.toSimpleMap},body: $bodyText")
-          cloudwatch.putPaypalHookFailure
+          putPaypalHookFailure()
           Future.successful(Forbidden("Request isn't signed by Paypal"))
       }
     }

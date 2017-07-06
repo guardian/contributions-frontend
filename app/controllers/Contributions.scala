@@ -9,7 +9,7 @@ import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
 import models.ContributionAmount
-import monitoring.TagAwareLogger
+import monitoring.{ContributionMetrics, TagAwareLogger}
 import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
@@ -19,7 +19,7 @@ import views.support._
 
 import scala.util.Try
 
-class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect {
+class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect with ContributionMetrics {
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),
@@ -51,6 +51,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       description = Some("By making a contribution, you’ll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
+    info(s"Paypal post-payment page displayed for request: ${request.id}")
+    putPaypalPostPaymentPage()
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
 
@@ -106,6 +108,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       .map(mobileRedirectUrl)
       .filter(_ => request.isIos)
 
+    info(s"thank you page displayed for paypal payment id: ${request.id}")
+    putThankYouPage()
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,
       url = request.path,

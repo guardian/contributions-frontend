@@ -29,15 +29,14 @@ import utils.MaxAmount
 import scala.concurrent.{ExecutionContext, Future}
 
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config, ophanService: OphanService)(implicit ec: ExecutionContext)
-  extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
+  extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider with ContributionMetrics {
 
-  val cloudwatch = new ContributionMetrics
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
   def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
     .async(BodyParsers.jsonOrMultipart(ContributionRequest.contributionForm)) { implicit request =>
     val platform = request.platform.getOrElse("unknown")
     info(s"A contribution Stripe payment is being attempted with request id: ${request.id.toString}.\n\t Request is from ${platform}.")
-    cloudwatch.putStripePaymentAttempt(platform)
+    putStripePaymentAttempt(platform)
     val form = request.body
 
     val stripe = paymentServices.stripeServiceFor(request)
@@ -76,6 +75,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
     val contributionAmount = ContributionAmount(BigDecimal(amount, 2), form.currency)
 
     def thankYouUri = if (request.isAndroid) {
+      putStripeAppThankYou(platform)
       mobileRedirectUrl(contributionAmount)
     } else {
       routes.Contributions.thanks(countryGroup).url
@@ -130,17 +130,17 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
       recordToOphan(metadata) // again, fire and forget.
       Ok({info(s"Stripe payment successful for request id: ${request.id.toString}, \n\t from platform: $platform")
-        cloudwatch.putStripePaymentSuccess(platform)
+        putStripePaymentSuccess(platform)
         Json.obj("redirect" -> thankYouUri)})
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
         .setCookie[ContribTimestampCookieAttributes](Instant.ofEpochSecond(charge.created).toString)
     }.recover {
       case e: Stripe.Error => {warn(s"Payment failed for request id ${request.id.toString}, \n\t from platform: $platform, \n\t with code: ${e.code}, \n\t decline code: ${e.decline_code}, \n\t and error message: ${e.message}.")
-        cloudwatch.putStripePaymentFailure(platform, e.code)
+        putStripePaymentFailure(platform, e.code)
         BadRequest(Json.toJson(e))}
       case e: _ => {logger.warn(s"Payment failed for request id ${request.id.toString}.\n\t for unknown reason. \n\t Failure message: \n\t ${e.getMessage} \n\t Localised message \n\t ${e.getLocalizedMessage} \n\t Cause: ${e.getCause}")
-        cloudwatch.putStripePaymentFailure(platform, "unknown")
+        putStripePaymentFailure(platform, "unknown")
         BadRequest(Json.toJson(e))}
       }
     }
@@ -155,7 +155,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
         stripeHookJson.validate[StripeHook] match {
           case JsError(err) =>
             error(s"Unable to parse the stripe hook: $err")
-            cloudwatch.putStripeHookParseError
+            putStripeHookParseError()
             Future.successful(BadRequest("Invalid Json"))
           case JsSuccess(stripeHook, _) =>
             info(s"Processing a stripe hook ${stripeHook.eventId}")
@@ -168,10 +168,10 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
         stripeService.processPaymentHook(stripeHook)
           .value.map {
           case Right(_) =>
-            cloudwatch.putStripeHookSuccess
+            putStripeHookSuccess()
             Ok
           case Left(_) =>
-            cloudwatch.putStripeHookFailure
+            putStripeHookFailure()
             InternalServerError
         }
       }

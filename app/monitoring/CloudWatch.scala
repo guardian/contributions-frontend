@@ -12,10 +12,8 @@ import monitoring.CloudWatch.cloudwatch
 trait CloudWatch extends TagAwareLogger {
   val stage: String
   val application : String
-  //val service: String
   lazy val stageDimension: Dimension = new Dimension().withName("Stage").withValue(stage)
-  //lazy val servicesDimension = new Dimension().withName("Services").withValue(service)
-  def mandatoryDimensions:Seq[Dimension] = Seq(stageDimension/*, servicesDimension*/)
+  def mandatoryDimensions:Seq[Dimension] = Seq(stageDimension)
 
   trait LoggingAsyncHandler extends AsyncHandler[PutMetricDataRequest, PutMetricDataResult]
   {
