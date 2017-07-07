@@ -9,7 +9,7 @@ import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
 import models.ContributionAmount
-import monitoring.{ContributionMetrics, TagAwareLogger}
+import monitoring.{ContributionMetrics, LoggingTags, LoggingTagsProvider, TagAwareLogger}
 import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
@@ -19,7 +19,7 @@ import views.support._
 
 import scala.util.Try
 
-class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect with ContributionMetrics {
+class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) extends Controller with Redirect with LoggingTagsProvider with ContributionMetrics {
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),

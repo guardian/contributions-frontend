@@ -139,9 +139,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
       case e: Stripe.Error => {warn(s"Payment failed for request id ${request.id.toString}, \n\t from platform: $platform, \n\t with code: ${e.code}, \n\t decline code: ${e.decline_code}, \n\t and error message: ${e.message}.")
         putStripePaymentFailure(platform, e.code)
         BadRequest(Json.toJson(e))}
-      case e: _ => {logger.warn(s"Payment failed for request id ${request.id.toString}.\n\t for unknown reason. \n\t Failure message: \n\t ${e.getMessage} \n\t Localised message \n\t ${e.getLocalizedMessage} \n\t Cause: ${e.getCause}")
-        putStripePaymentFailure(platform, "unknown")
-        BadRequest(Json.toJson(e))}
       }
     }
 
