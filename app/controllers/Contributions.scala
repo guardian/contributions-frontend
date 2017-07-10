@@ -9,7 +9,7 @@ import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
 import models.ContributionAmount
-import monitoring.{ContributionMetrics, LoggingTags, LoggingTagsProvider, TagAwareLogger}
+import monitoring.{ContributionMetrics, LoggingTagsProvider}
 import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
@@ -52,7 +52,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
     info(s"Paypal post-payment page displayed for request: ${request.id}")
-    putPaypalPostPaymentPage()
+    logPaypalPostPaymentPage()
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
 
@@ -109,7 +109,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
       .filter(_ => request.isIos)
 
     info(s"thank you page displayed for paypal payment id: ${request.id}")
-    putThankYouPage()
+    logThankYouPage()
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,
       url = request.path,
@@ -122,7 +122,9 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken) ex
 object CreditCardExpiryYears {
   def apply(currentYear: Int, offset: Int): List[Int] = {
     val currentYearShortened = currentYear % 100
-    val subsequentYears = (currentYearShortened to currentYearShortened + offset - 2) map { _ + 1}
+    val subsequentYears = (currentYearShortened to currentYearShortened + offset - 2) map {
+      _ + 1
+    }
     currentYearShortened :: subsequentYears.toList
   }
 }

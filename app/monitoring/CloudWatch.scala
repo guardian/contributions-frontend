@@ -10,28 +10,15 @@ import com.gu.aws.CredentialsProvider
 import monitoring.CloudWatch.cloudwatch
 
 trait CloudWatch extends TagAwareLogger {
-  val stage: String
-  val application : String
   lazy val stageDimension: Dimension = new Dimension().withName("Stage").withValue(stage)
-  def mandatoryDimensions:Seq[Dimension] = Seq(stageDimension)
+  val stage: String
+  val application: String
 
-  trait LoggingAsyncHandler extends AsyncHandler[PutMetricDataRequest, PutMetricDataResult]
-  {
-    def onError(exception: Exception)
-    {
-      logger.info(s"CloudWatch PutMetricDataRequest error: ${exception.getMessage}}")
-    }
-    def onSuccess(request: PutMetricDataRequest, result: PutMetricDataResult )
-    {
-      logger.trace("CloudWatch PutMetricDataRequest - success")
-      CloudWatchHealth.hasPushedMetricSuccessfully = true
-    }
+  def put(name: String, count: Double, responseMethod: String): Unit = {
+    put(name, count, new Dimension().withName("ResponseMethod").withValue(responseMethod))
   }
 
-  object LoggingAsyncHandler extends LoggingAsyncHandler
-
-
-  def put(name : String, count: Double, extraDimensions: Dimension*): Future[PutMetricDataResult] = {
+  def put(name: String, count: Double, extraDimensions: Dimension*): Future[PutMetricDataResult] = {
     val metric =
       new MetricDatum()
         .withValue(count)
@@ -45,9 +32,21 @@ trait CloudWatch extends TagAwareLogger {
     cloudwatch.putMetricDataAsync(request, LoggingAsyncHandler)
   }
 
-  def put(name: String, count: Double, responseMethod: String) {
-    put(name, count, new Dimension().withName("ResponseMethod").withValue(responseMethod))
+  def mandatoryDimensions: Seq[Dimension] = Seq(stageDimension)
+
+  trait LoggingAsyncHandler extends AsyncHandler[PutMetricDataRequest, PutMetricDataResult] {
+    def onError(exception: Exception): Unit = {
+      logger.info(s"CloudWatch PutMetricDataRequest error: ${exception.getMessage}}")
+    }
+
+    def onSuccess(request: PutMetricDataRequest, result: PutMetricDataResult): Unit = {
+      logger.trace("CloudWatch PutMetricDataRequest - success")
+      CloudWatchHealth.hasPushedMetricSuccessfully = true
+    }
   }
+
+  object LoggingAsyncHandler extends LoggingAsyncHandler
+
 }
 
 object CloudWatch {
