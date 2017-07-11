@@ -2,7 +2,7 @@ package views.support
 
 import com.gu.i18n._
 import com.gu.i18n.Currency.{all => allCurrencies}
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json._
 
 object CountryGroupImplicits {
   implicit class JsonCurrency(c: Currency) {
@@ -22,6 +22,13 @@ object CountryGroupImplicits {
     )
   }
 
+  implicit val countryGroupReads = new Reads[CountryGroup] {
+    override def reads(json: JsValue): JsResult[CountryGroup] = json match {
+      case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid CountryGroup id"))
+      case _ => JsError("invalid value for country group")
+    }
+  }
+
   implicit val countryGroupFormat: Writes[CountryGroup] = new Writes[CountryGroup] {
     override def writes(cg: CountryGroup): JsValue = Json.obj(
       "name" -> cg.name,
@@ -30,4 +37,5 @@ object CountryGroupImplicits {
       "postalCode" -> cg.postalCode.name
     )
   }
+
 }

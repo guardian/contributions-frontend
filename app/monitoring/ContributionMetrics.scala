@@ -1,12 +1,33 @@
 package monitoring
 
+import com.amazonaws.services.cloudwatch.model.{Dimension, MetricDatum, PutMetricDataRequest}
 import configuration.Config
 import play.api.libs.json.Json
 
-trait ContributionMetrics extends CloudWatch {
+trait ContributionMetrics extends TagAwareLogger {
 
   val stage: String = Config.stage
   val application = "contributions" // This sets the namespace for Custom Metrics in AWS (see CloudWatch)
+
+  val stageDimension: Dimension = new Dimension().withName("Stage").withValue(stage)
+
+  def put(name: String, count: Double): Unit = {
+    val metric =
+      new MetricDatum()
+        .withValue(count)
+        .withMetricName(name)
+        .withUnit("Count")
+        .withDimensions(stageDimension)
+
+    val request = new PutMetricDataRequest().
+      withNamespace(application).withMetricData(metric)
+
+    CloudWatch.cloudwatch.putMetricDataAsync(request, CloudWatch.LoggingAsyncHandler)
+  }
+
+  def put(metricName: String): Unit = {
+    put(metricName, 1)
+  }
 
   def logStripePaymentAttempt(platform: String): Unit = {
     put(s"contribution-stripe-payment-attempt-from-$platform")
@@ -86,8 +107,5 @@ trait ContributionMetrics extends CloudWatch {
     put(s"contribution-thank-you-page")
   }
 
-  private def put(metricName: String) {
-    put(metricName, 1)
-  }
 
 }

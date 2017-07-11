@@ -51,7 +51,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
     val paypalService = paymentServices.paypalServiceFor(request)
     val platform = request.platform.getOrElse("unknown")
-    info(s"Attempting paypal payment for id: ${request.id} from platform: $platform")
+    info(s"Attempting to execute paypal payment for id: ${request.id} from platform: $platform")
     logPaypalPaymentAttempt()
 
     def storeMetaData(payment: Payment) =
@@ -100,7 +100,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
   def authorize = checkToken {
     NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
-      info(s"Attempting to obtain paypal auth url.")
+      info(s"attempting to create Paypal payment for request id: ${request.id}")
       logPaypalAuthAttempt()
       val authRequest = request.body
       val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
@@ -120,12 +120,12 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
 
       payment.subflatMap(AuthResponse.fromPayment).fold(
         err => {
-          error(s"Error getting PayPal auth url: $err")
+          error(s"Error getting PayPal auth response for request id: ${request.id}: $err")
           logPaypalAuthFailure()
-          InternalServerError("Error getting PayPal auth url")
+          InternalServerError("Error getting PayPal auth response")
         },
         authResponse => {
-          info(s"Paypal payment auth url successfully obtained.")
+          info(s"Paypal payment auth response successfully obtained for request id: ${request.id}.")
           logPaypalAuthSuccess()
           Ok(Json.toJson(authResponse))
         }
@@ -172,14 +172,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     override def writes(uri: Uri): JsValue = JsString(uri.toString)
   }
 
-  implicit val AuthResponseWrites = Json.writes[AuthResponse]
 
-  implicit val CountryGroupReads = new Reads[CountryGroup] {
-    override def reads(json: JsValue): JsResult[CountryGroup] = json match {
-      case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid CountryGroup id"))
-      case _ => JsError("invalid value for country group")
-    }
-  }
 
   def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async(parse.form(metadataUpdateForm)) { implicit request =>
     val paypalService = paymentServices.paypalServiceFor(request)
@@ -224,6 +217,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       * See: https://www.w3.org/TR/referrer-policy/#strip-url
       *
       */
+
+
     def withSafeRefererUrl(
                             countryGroup: CountryGroup,
                             amount: BigDecimal,
@@ -240,6 +235,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId)
     }
 
+    import views.support.CountryGroupImplicits.countryGroupReads
 
     implicit val authRequestReads: Reads[AuthRequest] = (
       (__ \ "countryGroup").read[CountryGroup] and
@@ -259,6 +255,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     import cats.syntax.either._
 
     import scala.collection.JavaConverters._
+
+    implicit val authResponseWrites: Writes[PaypalController.this.AuthResponse] = Json.writes[AuthResponse]
 
     def fromPayment(payment: Payment): Either[String, AuthResponse] = Either.fromOption(for {
       links <- Option(payment.getLinks)
