@@ -46,35 +46,35 @@ trait ContributionMetrics extends TagAwareLogger {
   }
 
   def logStripeHookSuccess(): Unit = {
-    put(s"contribution-stripe-hook-success")
+    put("contribution-stripe-hook-success")
   }
 
   def logStripeHookParseError(): Unit = {
-    put(s"contribution-stripe-hook-parse-error")
+    put("contribution-stripe-hook-parse-error")
   }
 
   def logStripeHookFailure(): Unit = {
-    put(s"contribution-stripe-hook-failure")
+    put("contribution-stripe-hook-failure")
   }
 
   def logPaypalAuthAttempt(): Unit = {
-    put(s"contribution-paypal-authorisation-attempt")
+    put("contribution-paypal-authorisation-attempt")
   }
 
   def logPaypalAuthSuccess(): Unit = {
-    put(s"contribution-paypal-authorisation-success")
+    put("contribution-paypal-authorisation-success")
   }
 
   def logPaypalAuthFailure(): Unit = {
-    put(s"contribution-paypal-authorisation-failure")
+    put("contribution-paypal-authorisation-failure")
   }
 
   def logPaypalPaymentAttempt(): Unit = {
-    put(s"contribution-paypal-payment-attempt")
+    put("contribution-paypal-payment-attempt")
   }
 
   def logPaypalPaymentSuccess(): Unit = {
-    put(s"contribution-paypal-payment-success")
+    put("contribution-paypal-payment-success")
   }
 
   def logPaypalPaymentFailure(message: String): Unit = {
@@ -84,27 +84,27 @@ trait ContributionMetrics extends TagAwareLogger {
   }
 
   def logPaypalHookAttempt(): Unit = {
-    put(s"contribution-paypal-hook-success")
+    put("contribution-paypal-hook-success")
   }
 
   def logPaypalHookSuccess(): Unit = {
-    put(s"contribution-paypal-hook-success")
+    put("contribution-paypal-hook-success")
   }
 
   def logPaypalHookParseError(): Unit = {
-    put(s"contribution-paypal-hook-parse-error")
+    put("contribution-paypal-hook-parse-error")
   }
 
   def logPaypalHookFailure(): Unit = {
-    put(s"contribution-paypal-hook-failure")
+    put("contribution-paypal-hook-failure")
   }
 
   def logPaypalPostPaymentPage(): Unit = {
-    put(s"contribution-paypal-post-payment-page")
+    put("contribution-paypal-post-payment-page")
   }
 
   def logThankYouPage(): Unit = {
-    put(s"contribution-thank-you-page")
+    put("contribution-thank-you-page")
   }
 
 
