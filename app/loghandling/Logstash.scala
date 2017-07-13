@@ -16,11 +16,10 @@ case class LogStashConf(enabled: Boolean,
 object Logstash extends StrictLogging {
 
   def customFields(playConfig: Config.type) = Map(
-    "stack" -> "unknownStack",// all TODO
     "app" -> playConfig.appName,
     "stage" -> playConfig.stage,
-    "build" -> "unknownBuild",
-    "revision" -> "unknownRevision",
+    "build" -> app.BuildInfo.buildNumber,
+    "revision" -> app.BuildInfo.buildNumber,
     "ec2_instance" -> Option(EC2MetadataUtils.getInstanceId).getOrElse("Not running on ec2")
   )
 
