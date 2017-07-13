@@ -40,6 +40,9 @@
     EmailSqsQueueArn:
       Description: The ARN of the email SQS queue
       Type: String
+    LoggingPolicy:
+      Description: Policy needed to access the kinesis stream
+      Type: String
   Mappings:
     StageVariables:
       CODE:
@@ -148,6 +151,8 @@
                 - Effect: Allow
                   Action: s3:GetObject
                   Resource: arn:aws:s3:::github-public-keys/Membership-and-Subscriptions/*
+          ManagedPolicyArns:
+                - !Ref 'LoggingPolicy'
     ContributionsAppInstanceProfile:
       Type: AWS::IAM::InstanceProfile
       Properties:
