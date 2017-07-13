@@ -81,6 +81,9 @@ trait TagAwareLogger extends LazyLogging {
   def info(msg: String)(implicit tags: LoggingTags): Unit =
     withTags(logger.info(msg))
 
+  def warn(msg: String)(implicit tags: LoggingTags): Unit =
+    withTags(logger.warn(msg))
+
   def error(msg: String, t: Throwable)(implicit tags: LoggingTags): Unit =
     withTags(logger.error(msg, t))
 

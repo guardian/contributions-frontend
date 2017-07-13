@@ -49,6 +49,7 @@ val sqs = "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.36"
 val slugify = "com.github.slugify" % "slugify" % "2.1.7"
 val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
 val guava = "com.google.guava" % "guava" % "21.0"
+val awsCloudwatch = "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.95"
 
 libraryDependencies ++= Seq(
     cache,
@@ -70,7 +71,8 @@ libraryDependencies ++= Seq(
     sqs,
     slugify,
     scalaCheck,
-    guava
+    guava,
+    awsCloudwatch
 )
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 

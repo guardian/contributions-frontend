@@ -16,9 +16,10 @@ import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
-import services.{OphanService, EmailService, IdentityService, PaymentServices}
+import services.{EmailService, IdentityService, OphanService, PaymentServices}
 import router.Routes
 import configuration.Config
+import monitoring.{CloudWatch, CloudWatchMetrics}
 
 //Sometimes intellij deletes this -> (import router.Routes)
 
@@ -49,6 +50,9 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     PaymentMode.values.map(mode => mode -> contributionDataFor(mode)).toMap
   }
 
+  lazy val cloudWatchClient = CloudWatch.build()
+  lazy val cloudWatchMetrics = new CloudWatchMetrics(cloudWatchClient)
+
   lazy val paymentServices = new PaymentServices(
     config = config,
     authProvider = identityAuthProvider,
@@ -69,7 +73,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
   lazy val paypalController = wire[PaypalController]
-  lazy val stripeController = new StripeController(paymentServices, stripeConfig, ophanService)
+  lazy val stripeController = new StripeController(paymentServices, stripeConfig, ophanService, cloudWatchMetrics)
   lazy val userController = wire[UserController]
   lazy val epicComponentsController = wire[EpicComponentsController]
 
