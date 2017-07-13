@@ -49,6 +49,11 @@ val sqs = "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.36"
 val slugify = "com.github.slugify" % "slugify" % "2.1.7"
 val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
 val guava = "com.google.guava" % "guava" % "21.0"
+val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
+val dispatch = "net.databinder.dispatch" %% "dispatch-core" % "0.11.3"
+val kinesisLogback = "com.gu" % "kinesis-logback-appender" % "1.4.0"
+val logstash = "net.logstash.logback" % "logstash-logback-encoder" % "4.9"
+val dataFormat = "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % "2.8.7"
 
 libraryDependencies ++= Seq(
     cache,
@@ -70,7 +75,12 @@ libraryDependencies ++= Seq(
     sqs,
     slugify,
     scalaCheck,
-    guava
+    guava,
+    scalaLogging,
+    dispatch,
+    kinesisLogback,
+    logstash,
+    dataFormat
 )
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
