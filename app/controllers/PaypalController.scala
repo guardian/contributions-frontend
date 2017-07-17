@@ -46,7 +46,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
     val paypalService = paymentServices.paypalServiceFor(request)
     val platform = request.platform.getOrElse("unknown")
 
-    info(s"Attempting paypal payment for id: ${request.id} from platform $platform")
+    info(s"Attempting paypal payment for id: ${request.id}")
     cloudWatchMetrics.logPaypalPaymentAttempt()
 
     def storeMetaData(payment: Payment) =
@@ -83,7 +83,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
           val session = List("email" -> email) ++ amount.map("amount" -> _.show)
           redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
       }
-      info(s"Paypal payment successful. Request id: ${request.id}, Payment id: ${payment.getId}")
+      info(s"Paypal payment successful. Request id: ${request.id}.")
       cloudWatchMetrics.logPaypalPaymentSuccess()
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }

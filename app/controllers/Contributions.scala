@@ -112,7 +112,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       .map(mobileRedirectUrl)
       .filter(_ => request.isIos)
 
-    info(s"Thank you page displayed for paypal payment id: ${request.id}")
+    info(s"Thank you page displayed. Request id: ${request.id}")
     cloudWatchMetrics.logThankYouPage()
 
     Ok(views.html.giraffe.thankyou(PageInfo(
