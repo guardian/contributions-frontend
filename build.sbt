@@ -43,12 +43,13 @@ val macwire = "com.softwaremill.macwire" %% "macros" % "2.2.2" % Provided
 val anormLib = "com.typesafe.play" %% "anorm" % "2.5.2"
 val postgresql = "org.postgresql" % "postgresql" % "9.4.1209"
 val identityCookie =  "com.gu.identity" %% "identity-cookie" % "3.51"
-val scalaTest = "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
+val scalaTest = "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test
 val enumeratum = "com.beachape" %% "enumeratum" % "1.4.15"
 val sqs = "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.36"
 val slugify = "com.github.slugify" % "slugify" % "2.1.7"
 val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
 val guava = "com.google.guava" % "guava" % "21.0"
+val mockito = "org.mockito" % "mockito-all" % "1.9.5" % Test
 val awsCloudwatch = "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.95"
 
 libraryDependencies ++= Seq(
@@ -72,7 +73,8 @@ libraryDependencies ++= Seq(
     slugify,
     scalaCheck,
     guava,
-    awsCloudwatch
+    awsCloudwatch,
+    mockito
 )
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
