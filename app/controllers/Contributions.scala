@@ -105,6 +105,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
   def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val charge = request.session.get("charge_id")
+    val paymentMethod = request.session.get("payment_method").getOrElse("unknown")
     val title = "Thank you!"
 
     val iosRedirectUrl = request.session.get("amount")
@@ -112,8 +113,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       .map(mobileRedirectUrl)
       .filter(_ => request.isIos)
 
-    info(s"Thank you page displayed. Request id: ${request.id}")
-    cloudWatchMetrics.logThankYouPage()
+    info(s"Thank you page displayed. Request id: ${request.id}. Payment method used was: $paymentMethod")
+    cloudWatchMetrics.logThankYouPageDisplayed(paymentMethod)
 
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,

@@ -80,7 +80,8 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
         case Accepts.Html() =>
           val amount = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
-          val session = List("email" -> email) ++ amount.map("amount" -> _.show)
+          val paymentMethod = "paypal"
+          val session = List("email" -> email) ++ amount.map("amount" -> _.show)  ++ List("payment_method" -> paymentMethod)
           redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
       }
       info(s"Paypal payment successful. Request id: ${request.id}.")

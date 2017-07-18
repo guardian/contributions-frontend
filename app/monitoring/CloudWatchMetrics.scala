@@ -40,8 +40,8 @@ class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwar
   def logPaypalPostPaymentPage(): Unit = {
     put("contribution-paypal-post-payment-page")
   }
-  def logThankYouPage(): Unit = {
-    put("contribution-thank-you-page")
+  def logThankYouPageDisplayed(paymentMethod: String): Unit = {
+    put(s"contribution-thank-you-page-displayed-$paymentMethod")
   }
 
 
@@ -51,6 +51,10 @@ class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwar
 
   def logStripePaymentSuccess(platform: String): Unit = {
     put(s"contribution-stripe-payment-success-from-$platform")
+  }
+  
+  def logStripeSuccessRedirected(platform: String): Unit = {
+    put(s"contribution-stripe-payment-success-redirected-to-$platform")
   }
 
   def logStripePaymentFailure(platform: String): Unit = {

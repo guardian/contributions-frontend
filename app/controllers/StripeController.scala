@@ -74,6 +74,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
     val contributionAmount = ContributionAmount(BigDecimal(amount, 2), form.currency)
 
     def thankYouUri = if (request.isAndroid) {
+      info(s"Payment successful for request ${request.id} - redirected to external platform for thank you page. platform is: $platform.")
+      cloudWatchMetrics.logStripeSuccessRedirected(platform)
       mobileRedirectUrl(contributionAmount)
     } else {
       routes.Contributions.thanks(countryGroup).url
@@ -131,6 +133,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
+        .addingToSession("payment_method" -> "Stripe")
         .setCookie[ContribTimestampCookieAttributes](Instant.ofEpochSecond(charge.created).toString)
     }.recover {
       case e: Stripe.Error => {
