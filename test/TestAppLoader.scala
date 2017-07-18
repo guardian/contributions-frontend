@@ -5,10 +5,13 @@ import play.core.DefaultWebCommands
 import services.EmailService
 import wiring.AppComponents
 
+import scala.concurrent.ExecutionContext
+
 trait TestComponents extends MockitoSugar {
   self: AppComponents =>
 
   override lazy val emailService: EmailService = mock[EmailService]
+  override val jdbcExecutionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
 }
 
 trait TestApplicationFactory extends FakeApplicationFactory {
