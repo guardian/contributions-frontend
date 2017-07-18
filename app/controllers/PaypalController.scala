@@ -78,7 +78,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       val response = render {
         case Accepts.Json() => Ok(JsNull)
         case Accepts.Html() =>
-          val amount = paypalService.paymentAmount(payment)
+          val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email) ++ amount.map("amount" -> _.show)
           redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
