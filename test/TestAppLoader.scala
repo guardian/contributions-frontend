@@ -2,6 +2,7 @@ import cats.data.EitherT
 import com.gu.i18n.GBP
 import com.gu.identity.cookie.IdentityKeys
 import com.gu.identity.play.AuthenticatedIdUser.Provider
+import com.gu.monitoring.ServiceMetrics
 import com.paypal.api.payments.Payment
 import com.typesafe.config.Config
 import models.{ContributionAmount, PaymentMode}
@@ -36,6 +37,8 @@ trait TestComponents extends MockitoSugar {
   override lazy val identityService: IdentityService = mock[IdentityService]
   override lazy val identityKeys: IdentityKeys = mock[IdentityKeys]
   override lazy val identityAuthProvider: Provider = mock[Provider]
+
+  override lazy val ophanMetrics: ServiceMetrics = mock[ServiceMetrics]
 
   override lazy val emailService: EmailService = mock[EmailService]
   override val jdbcExecutionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
