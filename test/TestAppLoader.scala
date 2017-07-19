@@ -1,15 +1,19 @@
 import cats.data.EitherT
 import com.gu.i18n.GBP
+import com.gu.identity.cookie.IdentityKeys
+import com.gu.identity.play.AuthenticatedIdUser.Provider
 import com.paypal.api.payments.Payment
-import models.ContributionAmount
+import com.typesafe.config.Config
+import models.{ContributionAmount, PaymentMode}
 import monitoring.{CloudWatchMetrics, LoggingTags}
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.FakeApplicationFactory
+import data.ContributionData
 import play.api._
 import play.api.mvc.Request
 import play.core.DefaultWebCommands
-import services.{EmailService, PaymentServices, PaypalService}
+import services.{EmailService, IdentityService, PaymentServices, PaypalService}
 import wiring.AppComponents
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -22,10 +26,27 @@ trait TestComponents extends MockitoSugar {
   val mockPaypalPayment: Payment = Mockito.mock[Payment](classOf[Payment], Mockito.RETURNS_DEEP_STUBS)
   val mockContributionAmount: ContributionAmount = ContributionAmount(10, GBP)
 
+  override lazy val config: Config = mock[Config]
+
+  override lazy val contributionDataPerMode: Map[PaymentMode, ContributionData] = Map(
+    PaymentMode.Testing -> mock[ContributionData],
+    PaymentMode.Default -> mock[ContributionData]
+  )
+
+  override lazy val identityService: IdentityService = mock[IdentityService]
+  override lazy val identityKeys: IdentityKeys = mock[IdentityKeys]
+  override lazy val identityAuthProvider: Provider = mock[Provider]
+
   override lazy val emailService: EmailService = mock[EmailService]
   override val jdbcExecutionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
   override lazy val cloudWatchMetrics: CloudWatchMetrics = mock[CloudWatchMetrics]
   override lazy val paymentServices: PaymentServices = mock[PaymentServices]
+
+  Mockito.when(config.getConfig(Matchers.anyString))
+    .thenReturn(config)
+
+  Mockito.when(config.getString(Matchers.anyString))
+    .thenReturn("")
 
   Mockito.when(paymentServices.paypalServiceFor(Matchers.any[Request[_]]))
     .thenReturn(mockPaypalService)
