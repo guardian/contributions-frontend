@@ -63,7 +63,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     actorSystem = actorSystem
   )
 
-  val ophanMetrics: ServiceMetrics = new ServiceMetrics(Config.stage, "ophan", "tracker")
+  lazy val ophanMetrics: ServiceMetrics = new ServiceMetrics(Config.stage, "ophan", "tracker")
 
   lazy val identityService = new IdentityService(wsClient, idConfig)
   lazy val emailService = wire[EmailService]
