@@ -53,7 +53,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
     info(s"Paypal post-payment page displayed for request: ${request.id}")
-    cloudWatchMetrics.logPaypalPostPaymentPage()
+    cloudWatchMetrics.logPostPaymentPageDisplayed()
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
 

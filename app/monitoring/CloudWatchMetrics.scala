@@ -2,8 +2,11 @@ package monitoring
 
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsync
 import com.amazonaws.services.cloudwatch.model.{Dimension, MetricDatum, PutMetricDataRequest}
+import com.gu.zuora.soap.models.Commands.PaymentMethod
 import configuration.Config
 import play.api.libs.json.Json
+
+import scala.tools.nsc.backend.Platform
 
 
 /**
@@ -16,13 +19,15 @@ class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwar
 
   val stageDimension: Dimension = new Dimension().withName("Stage").withValue(stage)
 
-  def put(name: String, count: Double): Unit = {
+  def put(name: String, paymentMethod: String = "unknown", platform: String = "web", count: Double = 1): Unit = {
+    val platformDimension = new Dimension().withName("platform").withValue(platform)
+    val paymentMethodDimension = new Dimension().withName("paymentMethod").withValue(paymentMethod)
     val metric =
       new MetricDatum()
         .withValue(count)
         .withMetricName(name)
         .withUnit("Count")
-        .withDimensions(stageDimension)
+        .withDimensions(stageDimension, platformDimension, paymentMethodDimension)
 
     val request = new PutMetricDataRequest().
       withNamespace(application).withMetricData(metric)
@@ -30,100 +35,69 @@ class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwar
     cloudWatchClient.putMetricDataAsync(request, CloudWatch.LoggingAsyncHandler)
   }
 
-  def put(metricName: String): Unit = {
-    put(metricName, 1)
-  }
 
   def logHomePage(): Unit = {
-    put("contribution-home-page")
-  }
-  def logPaypalPostPaymentPage(): Unit = {
-    put("contribution-paypal-post-payment-page")
-  }
-  def logThankYouPageDisplayed(paymentMethod: String): Unit = {
-    put(s"contribution-thank-you-page-displayed-$paymentMethod")
+    put("home-page-displayed")
   }
 
-
-  def logStripePaymentAttempt(platform: String): Unit = {
-    put(s"contribution-stripe-payment-attempt-from-$platform")
+  def logPaymentAuthAttempt(paymentMethod: String = "paypal", platform: String = "web"): Unit = {
+    put("payment-authorisation-attempt", paymentMethod, platform)
   }
 
-  def logStripePaymentSuccess(platform: String): Unit = {
-    put(s"contribution-stripe-payment-success-from-$platform")
-  }
-  
-  def logStripeSuccessRedirected(platform: String): Unit = {
-    put(s"contribution-stripe-payment-success-redirected-to-$platform")
+  def logPaymentAuthSuccess(paymentMethod: String = "paypal", platform: String = "web"): Unit = {
+    put("payment-authorisation-success", paymentMethod, platform)
   }
 
-  def logStripePaymentFailure(platform: String): Unit = {
-    put(s"contribution-stripe-payment-failure-from-$platform")
+  def logPaymentAuthFailure(paymentMethod: String = "paypal", platform: String = "web"): Unit = {
+    put("payment-authorisation-failure", paymentMethod, platform)
   }
 
-  def logStripeHookParsed(): Unit = {
-    put("contribution-stripe-hook-parsed")
+  def logPaymentAttempt(paymentMethod: String, platform: String = "web"): Unit = {
+    put("payment-attempt", paymentMethod, platform)
   }
 
-  def logStripeHookParseError(): Unit = {
-    put("contribution-stripe-hook-parse-error")
+  def logPaymentSuccess(paymentMethod: String, platform: String = "web"): Unit = {
+    put("payment-success",paymentMethod, platform)
   }
 
-  def logStripeHookProcessed(): Unit = {
-    put("contribution-stripe-hook-processed")
+  def logPaymentSuccessRedirected(paymentMethod: String = "stripe", platform: String): Unit = {
+    put("payment-success-redirected-to-other-platform", paymentMethod, platform)
   }
 
-  def logStripeHookProcessError(): Unit = {
-    put("contribution-stripe-hook-processing-error")
+  def logPaymentFailure(paymentMethod: String, platform: String = "web"): Unit = {
+    put("payment-failure", paymentMethod, platform)
   }
 
-
-  def logPaypalAuthAttempt(): Unit = {
-    put("contribution-paypal-authorisation-attempt")
+  def logHookAttempt(paymentMethod: String, platform: String = "web"): Unit = {
+    put("payment-hook-attempt", paymentMethod, platform)
   }
 
-  def logPaypalAuthSuccess(): Unit = {
-    put("contribution-paypal-authorisation-success")
+  def logHookParsed(paymentMethod: String, platform: String = "web"): Unit = {
+    put("payment-hook-parsed", paymentMethod, platform)
   }
 
-  def logPaypalAuthFailure(): Unit = {
-    put("contribution-paypal-authorisation-failure")
+  def logHookInvalidRequest(paymentMethod: String, platform: String = "web"): Unit = {
+    put("contribution-paypal-hook-invalid-request", paymentMethod, platform)
   }
 
-  def logPaypalPaymentAttempt(): Unit = {
-    put("contribution-paypal-payment-attempt")
+  def logHookParseError(paymentMethod: String, platform: String = "web"): Unit = {
+    put("payment-hook-parse-error", paymentMethod, platform)
   }
 
-  def logPaypalPaymentSuccess(): Unit = {
-    put("contribution-paypal-payment-success")
+  def logHookProcessed(paymentMethod: String, platform: String = "web"): Unit = {
+    put("payment-hook-processed", paymentMethod, platform)
   }
 
-  def logPaypalPaymentFailure(): Unit = {
-    put("contribution-paypal-payment-failed-error")
+  def logHookProcessError(paymentMethod: String, platform: String = "web"): Unit = {
+    put("payment-hook-processing-error", paymentMethod, platform)
   }
 
-  def logPaypalHookAttempt(): Unit = {
-    put("contribution-paypal-hook-attempt")
+  def logPostPaymentPageDisplayed(): Unit = {
+    put("post-payment-page-displayed")
   }
 
-  def logPaypalHookParsed(): Unit = {
-    put("contribution-paypal-hook-parsed")
-  }
-
-  def logPaypalHookProcessed(): Unit = {
-    put("contribution-paypal-hook-processed")
-  }
-
-  def logPaypalHookParseError(): Unit = {
-    put("contribution-paypal-hook-parse-error")
-  }
-
-  def logPaypalHookProcessError(): Unit = {
-    put("contribution-paypal-hook-processing-error")
-  }
-
-  def logPaypalHookInvalidRequest(): Unit = {
-    put("contribution-paypal-hook-invalid-request")
+  def logThankYouPageDisplayed(paymentMethod: String, platform: String = "web"): Unit = {
+    put("thank-you-page-displayed", paymentMethod, platform)
   }
 
 }
