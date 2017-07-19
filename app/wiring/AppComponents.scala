@@ -41,7 +41,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val identityAuthProvider =
     Cookies.authProvider(identityKeys).withDisplayNameProvider(Token.authProvider(identityKeys, "membership"))
 
-  val contributionDataPerMode: Map[PaymentMode, ContributionData] = {
+  lazy val contributionDataPerMode: Map[PaymentMode, ContributionData] = {
     val dbConfig = config.getConfig("dbConf")
     def contributionDataFor(mode: PaymentMode) = {
       val modeKey = dbConfig.getString(mode.entryName.toLowerCase)
