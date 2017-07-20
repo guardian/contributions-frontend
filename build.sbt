@@ -51,6 +51,8 @@ val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
 val guava = "com.google.guava" % "guava" % "21.0"
 val mockito = "org.mockito" % "mockito-all" % "1.9.5" % Test
 val awsCloudwatch = "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.95"
+val seleniumManager = "io.github.bonigarcia" % "webdrivermanager" % "1.7.1" % "test"
+
 
 libraryDependencies ++= Seq(
     cache,
@@ -74,7 +76,8 @@ libraryDependencies ++= Seq(
     scalaCheck,
     guava,
     awsCloudwatch,
-    mockito
+    mockito,
+    seleniumManager
 )
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
