@@ -12,10 +12,8 @@ import models.PaymentProvider
 class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwareLogger {
   import CloudWatchMetrics.DimensionValue
 
-  val stage: String = Config.stage
-  val application = "contributions" // This sets the namespace for Custom Metrics in AWS (see CloudWatch)
+  val application = s"contributions-${Config.stage}" // This sets the namespace for Custom Metrics in AWS (see CloudWatch)
 
-  val stageDimension: Dimension = new Dimension().withName("stage").withValue(stage)
 
   private def put(name: String, paymentProvider: String, platform: String): Unit = {
     val platformDimension = new Dimension().withName("platform").withValue(platform)
@@ -26,7 +24,7 @@ class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwar
         .withValue(1d)
         .withMetricName(name)
         .withUnit("Count")
-        .withDimensions(stageDimension, platformDimension, paymentProviderDimension)
+        .withDimensions(platformDimension, paymentProviderDimension)
 
     val request = new PutMetricDataRequest().withNamespace(application).withMetricData(metric)
 
