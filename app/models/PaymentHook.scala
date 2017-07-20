@@ -14,6 +14,8 @@ object PaymentProvider extends Enum[PaymentProvider] {
 
   case object Paypal extends PaymentProvider
   case object Stripe extends PaymentProvider
+
+  val sessionKey = "payment_provider"
 }
 
 sealed trait PaymentStatus extends EnumEntry

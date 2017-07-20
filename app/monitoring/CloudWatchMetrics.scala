@@ -4,6 +4,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsync
 import com.amazonaws.services.cloudwatch.model.{Dimension, MetricDatum, PutMetricDataRequest}
 import com.gu.zuora.soap.models.Commands.PaymentMethod
 import configuration.Config
+import models.PaymentProvider
 import play.api.libs.json.Json
 
 import scala.tools.nsc.backend.Platform
@@ -19,85 +20,90 @@ class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwar
 
   val stageDimension: Dimension = new Dimension().withName("Stage").withValue(stage)
 
-  def put(name: String, paymentMethod: String = "unknown", platform: String = "web", count: Double = 1): Unit = {
+  def put(name: String, paymentProvider: Option[PaymentProvider], platform: String): Unit = {
     val platformDimension = new Dimension().withName("platform").withValue(platform)
-    val paymentMethodDimension = new Dimension().withName("paymentMethod").withValue(paymentMethod)
+
     val metric =
       new MetricDatum()
-        .withValue(count)
+        .withValue(1d)
         .withMetricName(name)
         .withUnit("Count")
-        .withDimensions(stageDimension, platformDimension, paymentMethodDimension)
+        .withDimensions(stageDimension, platformDimension)
 
-    val request = new PutMetricDataRequest().
-      withNamespace(application).withMetricData(metric)
+
+    paymentProvider.foreach { provider =>
+      val paymentMethodDimension = new Dimension().withName("paymentMethod").withValue(provider.entryName)
+      metric.setDimensions(java.util.Arrays.asList(paymentMethodDimension))
+    }
+
+    val request = new PutMetricDataRequest().withNamespace(application).withMetricData(metric)
 
     cloudWatchClient.putMetricDataAsync(request, CloudWatch.LoggingAsyncHandler)
   }
 
 
-  def logHomePage(): Unit = {
-    put("home-page-displayed")
+  def logHomePage(platform: String): Unit = {
+    put("home-page-displayed", None, platform)
   }
 
-  def logPaymentAuthAttempt(paymentMethod: String = "paypal", platform: String = "web"): Unit = {
-    put("payment-authorisation-attempt", paymentMethod, platform)
+  def logPaymentAuthAttempt(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-authorisation-attempt", Some(paymentProvider), platform)
   }
 
-  def logPaymentAuthSuccess(paymentMethod: String = "paypal", platform: String = "web"): Unit = {
-    put("payment-authorisation-success", paymentMethod, platform)
+  def logPaymentAuthSuccess(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-authorisation-success", Some(paymentProvider), platform)
   }
 
-  def logPaymentAuthFailure(paymentMethod: String = "paypal", platform: String = "web"): Unit = {
-    put("payment-authorisation-failure", paymentMethod, platform)
+  def logPaymentAuthFailure(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-authorisation-failure", Some(paymentProvider), platform)
   }
 
-  def logPaymentAttempt(paymentMethod: String, platform: String = "web"): Unit = {
-    put("payment-attempt", paymentMethod, platform)
+  def logPaymentAttempt(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-attempt", Some(paymentProvider), platform)
   }
 
-  def logPaymentSuccess(paymentMethod: String, platform: String = "web"): Unit = {
-    put("payment-success",paymentMethod, platform)
+  def logPaymentSuccess(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-success",Some(paymentProvider), platform)
   }
 
-  def logPaymentSuccessRedirected(paymentMethod: String = "stripe", platform: String): Unit = {
-    put("payment-success-redirected-to-other-platform", paymentMethod, platform)
+  def logPaymentSuccessRedirected(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-success-redirected-to-other-platform", Some(paymentProvider), platform)
   }
 
-  def logPaymentFailure(paymentMethod: String, platform: String = "web"): Unit = {
-    put("payment-failure", paymentMethod, platform)
+  def logPaymentFailure(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-failure", Some(paymentProvider), platform)
   }
 
-  def logHookAttempt(paymentMethod: String, platform: String = "web"): Unit = {
-    put("payment-hook-attempt", paymentMethod, platform)
+  def logHookAttempt(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-attempt", Some(paymentProvider), platform)
   }
 
-  def logHookParsed(paymentMethod: String, platform: String = "web"): Unit = {
-    put("payment-hook-parsed", paymentMethod, platform)
+  def logHookParsed(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-parsed", Some(paymentProvider), platform)
   }
 
-  def logHookInvalidRequest(paymentMethod: String, platform: String = "web"): Unit = {
-    put("contribution-paypal-hook-invalid-request", paymentMethod, platform)
+  def logHookInvalidRequest(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("contribution-paypal-hook-invalid-request", Some(paymentProvider), platform)
   }
 
-  def logHookParseError(paymentMethod: String, platform: String = "web"): Unit = {
-    put("payment-hook-parse-error", paymentMethod, platform)
+  def logHookParseError(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-parse-error", Some(paymentProvider), platform)
   }
 
-  def logHookProcessed(paymentMethod: String, platform: String = "web"): Unit = {
-    put("payment-hook-processed", paymentMethod, platform)
+  def logHookProcessed(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-processed", Some(paymentProvider), platform)
   }
 
-  def logHookProcessError(paymentMethod: String, platform: String = "web"): Unit = {
-    put("payment-hook-processing-error", paymentMethod, platform)
+  def logHookProcessError(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-processing-error", Some(paymentProvider), platform)
   }
 
-  def logPostPaymentPageDisplayed(): Unit = {
-    put("post-payment-page-displayed")
+  def logPostPaymentPageDisplayed(paymentProvider: Option[PaymentProvider], platform: String): Unit = {
+    put("post-payment-page-displayed", paymentProvider, platform)
   }
 
-  def logThankYouPageDisplayed(paymentMethod: String, platform: String = "web"): Unit = {
-    put("thank-you-page-displayed", paymentMethod, platform)
+  def logThankYouPageDisplayed(paymentProvider: Option[PaymentProvider], platform: String): Unit = {
+    put("thank-you-page-displayed", paymentProvider, platform)
   }
 
 }

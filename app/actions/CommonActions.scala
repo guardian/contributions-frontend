@@ -3,6 +3,7 @@ package actions
 import abtests.Test
 import abtests.Variant
 import controllers.{Cached, NoCache}
+import models.PaymentProvider
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,9 +53,9 @@ object CommonActions {
   }
 
   implicit class MobileSupportRequest[A](val request: Request[A]) extends AnyVal {
-    def platform: Option[String] = request.getQueryString("platform") orElse request.session.get("platform")
-    def isAndroid: Boolean = platform.contains("android")
-    def isIos: Boolean = platform.contains("ios")
+    def platform: String = request.getQueryString("platform").orElse(request.session.get("platform")).getOrElse("web")
+    def isAndroid: Boolean = platform == "android"
+    def isIos: Boolean = platform == "ios"
     def isMobile: Boolean = isAndroid || isIos
   }
 
@@ -69,5 +70,10 @@ object CommonActions {
         }
       }
     }
+  }
+
+  implicit class PaymentProviderSupportRequest[A](val request: Request[A]) extends AnyVal {
+    def paymentProvider: Option[PaymentProvider] =
+      request.session.get(PaymentProvider.sessionKey).flatMap(PaymentProvider.withNameOption)
   }
 }
