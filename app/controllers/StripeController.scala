@@ -33,7 +33,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
   def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
     .async(BodyParsers.jsonOrMultipart(ContributionRequest.contributionForm)) { implicit request =>
-    info(s"A Stripe payment is being attempted with request id: ${request.id}. \n\t Request is from platform: ${request.platform}.")
+    info(s"A Stripe payment is being attempted with request id: ${request.id}, from platform: ${request.platform}.")
     cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Stripe, request.platform)
 
     val form = request.body
@@ -125,7 +125,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
     }
 
     createCharge.map { charge =>
-      info(s"Stripe payment successful for request id: ${request.id} \n\t from platform ${request.platform}")
+      info(s"Stripe payment successful for request id: ${request.id}, from platform ${request.platform}")
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       val metadata = createMetaData(charge)
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
@@ -158,7 +158,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
             cloudWatchMetrics.logHookParseError(PaymentProvider.Stripe, request.platform)
             Future.successful(BadRequest("Invalid Json"))
           case JsSuccess(stripeHook, _) =>
-            info(s"Processing a stripe hook for request id: ${request.id}, from platform: ${request.platform}.\n\t Stripe Hook id is: ${stripeHook.eventId}")
+            info(s"Processing a stripe hook for request id: ${request.id}, from platform: ${request.platform}. Stripe Hook id is: ${stripeHook.eventId}")
             cloudWatchMetrics.logHookParsed(PaymentProvider.Stripe, request.platform)
             block(stripeHook)
         }
