@@ -1,11 +1,9 @@
 package fixtures
 
 import play.api._
-
 import org.scalatestplus.play.FakeApplicationFactory
 import play.api.routing.Router
 import play.core.DefaultWebCommands
-
 
 trait TestApplicationFactory extends FakeApplicationFactory {
 
