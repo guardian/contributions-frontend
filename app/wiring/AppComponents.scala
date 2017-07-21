@@ -41,7 +41,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val identityAuthProvider =
     Cookies.authProvider(identityKeys).withDisplayNameProvider(Token.authProvider(identityKeys, "membership"))
 
-  lazy val contributionDataPerMode: Map[PaymentMode, ContributionData] = {
+  val contributionDataPerMode: Map[PaymentMode, ContributionData] = {
     val dbConfig = config.getConfig("dbConf")
     def contributionDataFor(mode: PaymentMode) = {
       val modeKey = dbConfig.getString(mode.entryName.toLowerCase)
@@ -63,7 +63,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
     actorSystem = actorSystem
   )
 
-  lazy val ophanMetrics: ServiceMetrics = new ServiceMetrics(Config.stage, "ophan", "tracker")
+  val ophanMetrics: ServiceMetrics = new ServiceMetrics(Config.stage, "ophan", "tracker")
 
   lazy val identityService = new IdentityService(wsClient, idConfig)
   lazy val emailService = wire[EmailService]
