@@ -25,7 +25,7 @@ import play.filters.csrf.CSRFCheck
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
+class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
   import ContribTimestampCookieAttributes._
 
