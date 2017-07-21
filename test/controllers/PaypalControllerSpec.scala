@@ -15,7 +15,7 @@ import play.api.test._
 import play.filters.csrf.CSRFCheck
 import services.{PaymentServices, PaypalService}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait PaypalControllerMocks extends MockitoSugar {
   val mockPaymentServices: PaymentServices = mock[PaymentServices]
@@ -50,8 +50,9 @@ class PaypalControllerSpec extends PlaySpec
   with TestApplicationFactory
   with BaseOneAppPerSuite {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
   import cats.instances.future._
+
+  implicit val executionContext: ExecutionContext = app.actorSystem.dispatcher
 
   val controller: PaypalController = new PaypalController(mockPaymentServices, mockCsrfCheck, mockCloudwatchMetrics)
   val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/").withHeaders(("Accept", "text/html"))
@@ -76,7 +77,7 @@ class PaypalControllerSpec extends PlaySpec
       Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
         .thenReturn(EitherT.right[Future, String, Payment](Future.successful(mockPaypalPayment)))
 
-      val result: Future[Result] = executePayment.apply(fakeRequest)
+      val result: Future[Result] = executePayment(fakeRequest)
 
       status(result).mustBe(303)
       redirectLocation(result).mustBe(Some("/uk/post-payment"))
@@ -86,7 +87,7 @@ class PaypalControllerSpec extends PlaySpec
       Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
         .thenReturn(EitherT.left[Future, String, Payment](Future.successful("Error")))
 
-      val result: Future[Result] = executePayment.apply(fakeRequest)
+      val result: Future[Result] = executePayment(fakeRequest)
 
       status(result).mustBe(303)
       redirectLocation(result).mustBe(Some("/uk?error_code=PaypalError"))
