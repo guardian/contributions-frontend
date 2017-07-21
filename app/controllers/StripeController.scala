@@ -101,7 +101,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
         ophanPageviewId = form.ophanPageviewId,
         ophanBrowserId = form.ophanBrowserId,
         idUser = idUser,
-        platform = form.platform orElse Some(request.platform),
+        platform = Some(request.platform),
         ophanVisitId = form.ophanVisitId
       )
     }

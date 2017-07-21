@@ -2,6 +2,7 @@ package actions
 
 import abtests.Test
 import abtests.Variant
+import controllers.forms.ContributionRequest
 import controllers.{Cached, NoCache}
 import models.PaymentProvider
 import play.api.mvc._
@@ -53,7 +54,14 @@ object CommonActions {
   }
 
   implicit class MobileSupportRequest[A](val request: Request[A]) extends AnyVal {
-    def platform: String = request.getQueryString("platform").orElse(request.session.get("platform")).getOrElse("web")
+
+    private def _platform = request.getQueryString("platform").orElse(request.session.get("platform")).getOrElse("web")
+
+    def platform: String = request.body match {
+      case body: ContributionRequest => body.platform.getOrElse(_platform)
+      case _ => _platform
+    }
+
     def isAndroid: Boolean = platform == "android"
     def isIos: Boolean = platform == "ios"
     def isMobile: Boolean = isAndroid || isIos
@@ -61,14 +69,7 @@ object CommonActions {
 
   object MobileSupportAction extends ActionBuilder[Request] {
     override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      implicit val r = request
-      val platform = request.getQueryString("platform") orElse request.session.get("platform")
-      block(request).map { result =>
-        platform match {
-          case Some(value) => result.addingToSession("platform" -> value)
-          case None => result
-        }
-      }
+      block(request).map(_.addingToSession("platform" -> request.platform)(request))
     }
   }
 
