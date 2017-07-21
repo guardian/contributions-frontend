@@ -29,6 +29,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class StripeController(paymentServices: PaymentServices, stripeConfig: Config, ophanService: OphanService, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
 
+  def payOptions = CachedAction { request =>
+    NoContent.withHeaders(("Vary" -> "Origin") :: corsHeaders(request): _*)
+  }
+
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
   def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
     .async(BodyParsers.jsonOrMultipart(ContributionRequest.contributionForm)) { implicit request =>
@@ -132,12 +136,26 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
         .setCookie[ContribTimestampCookieAttributes](Instant.ofEpochSecond(charge.created).toString)
+        .withHeaders(corsHeaders(request): _*)
     }.recover {
       case e: Stripe.Error => {
         warn(s"Payment failed for request id: ${request.id}, from platform: $platform, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
         cloudWatchMetrics.logStripePaymentFailure(platform)
-        BadRequest(Json.toJson(e))
+        BadRequest(Json.toJson(e)).withHeaders(corsHeaders(request): _*)
       }
+    }
+  }
+
+  private val allowedOrigins = stripeConfig.getStringList("cors.allowedOrigins")
+
+  private def corsHeaders(request: Request[_]) = {
+    val origin = request.headers.get("origin")
+    val allowedOrigin = origin.filter(allowedOrigins.contains)
+    allowedOrigin.toList.flatMap { origin =>
+      List(
+        "Access-Control-Allow-Origin" -> origin,
+        "Access-Control-Allow-Headers" -> "Origin, Content-Type, Accept"
+      )
     }
   }
 
