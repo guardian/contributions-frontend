@@ -25,7 +25,7 @@ import play.filters.csrf.CSRFCheck
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
+class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
   import ContribTimestampCookieAttributes._
 
@@ -77,7 +77,7 @@ class PaypalController(ws: WSClient, paymentServices: PaymentServices, checkToke
       val response = render {
         case Accepts.Json() => Ok(JsNull)
         case Accepts.Html() =>
-          val amount = paypalService.paymentAmount(payment)
+          val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
           redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
