@@ -3,123 +3,109 @@ package monitoring
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsync
 import com.amazonaws.services.cloudwatch.model.{Dimension, MetricDatum, PutMetricDataRequest}
 import configuration.Config
-import play.api.libs.json.Json
+import models.PaymentProvider
 
 
 /**
   * Created by mmcnamara on 12/07/2017.
   */
 class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwareLogger {
+  import CloudWatchMetrics.DimensionValue
 
-  val stage: String = Config.stage
-  val application = "contributions" // This sets the namespace for Custom Metrics in AWS (see CloudWatch)
+  val application = s"contributions-${Config.stage}" // This sets the namespace for Custom Metrics in AWS (see CloudWatch)
 
-  val stageDimension: Dimension = new Dimension().withName("Stage").withValue(stage)
 
-  def put(name: String, count: Double): Unit = {
+  private def put(name: String, paymentProvider: String, platform: String): Unit = {
+    val platformDimension = new Dimension().withName("platform").withValue(platform)
+    val paymentProviderDimension = new Dimension().withName("payment-provider").withValue(paymentProvider)
+
     val metric =
       new MetricDatum()
-        .withValue(count)
+        .withValue(1d)
         .withMetricName(name)
         .withUnit("Count")
-        .withDimensions(stageDimension)
+        .withDimensions(platformDimension, paymentProviderDimension)
 
-    val request = new PutMetricDataRequest().
-      withNamespace(application).withMetricData(metric)
+    val request = new PutMetricDataRequest().withNamespace(application).withMetricData(metric)
 
     cloudWatchClient.putMetricDataAsync(request, CloudWatch.LoggingAsyncHandler)
   }
 
-  def put(metricName: String): Unit = {
-    put(metricName, 1)
+  private def put(name: String, paymentProvider: PaymentProvider, platform: String): Unit = {
+    put(name, paymentProvider.entryName, platform)
   }
 
-  def logHomePage(): Unit = {
-    put("contribution-home-page")
-  }
-  def logPaypalPostPaymentPage(): Unit = {
-    put("contribution-paypal-post-payment-page")
-  }
-  def logThankYouPage(): Unit = {
-    put("contribution-thank-you-page")
+  def logHomePage(platform: String): Unit = {
+    put("home-page-displayed", DimensionValue.notApplicable, platform)
   }
 
-
-  def logStripePaymentAttempt(platform: String): Unit = {
-    put(s"contribution-stripe-payment-attempt-from-$platform")
+  def logPaymentAuthAttempt(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-authorisation-attempt", paymentProvider.entryName, platform)
   }
 
-  def logStripePaymentSuccess(platform: String): Unit = {
-    put(s"contribution-stripe-payment-success-from-$platform")
+  def logPaymentAuthSuccess(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-authorisation-success", paymentProvider, platform)
   }
 
-  def logStripePaymentFailure(platform: String): Unit = {
-    put(s"contribution-stripe-payment-failure-from-$platform")
+  def logPaymentAuthFailure(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-authorisation-failure", paymentProvider, platform)
   }
 
-  def logStripeHookParsed(): Unit = {
-    put("contribution-stripe-hook-parsed")
+  def logPaymentAttempt(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-attempt", paymentProvider, platform)
   }
 
-  def logStripeHookParseError(): Unit = {
-    put("contribution-stripe-hook-parse-error")
+  def logPaymentSuccess(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-success", paymentProvider, platform)
   }
 
-  def logStripeHookProcessed(): Unit = {
-    put("contribution-stripe-hook-processed")
+  def logPaymentSuccessRedirected(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-success-redirected-to-other-platform", paymentProvider, platform)
   }
 
-  def logStripeHookProcessError(): Unit = {
-    put("contribution-stripe-hook-processing-error")
+  def logPaymentFailure(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-failure", paymentProvider, platform)
   }
 
-
-  def logPaypalAuthAttempt(): Unit = {
-    put("contribution-paypal-authorisation-attempt")
+  def logHookAttempt(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-attempt", paymentProvider, platform)
   }
 
-  def logPaypalAuthSuccess(): Unit = {
-    put("contribution-paypal-authorisation-success")
+  def logHookParsed(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-parsed", paymentProvider, platform)
   }
 
-  def logPaypalAuthFailure(): Unit = {
-    put("contribution-paypal-authorisation-failure")
+  def logHookInvalidRequest(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("contribution-paypal-hook-invalid-request", paymentProvider, platform)
   }
 
-  def logPaypalPaymentAttempt(): Unit = {
-    put("contribution-paypal-payment-attempt")
+  def logHookParseError(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-parse-error", paymentProvider, platform)
   }
 
-  def logPaypalPaymentSuccess(): Unit = {
-    put("contribution-paypal-payment-success")
+  def logHookProcessed(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-processed", paymentProvider, platform)
   }
 
-  def logPaypalPaymentFailure(): Unit = {
-    put("contribution-paypal-payment-failed-error")
+  def logHookProcessError(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-hook-processing-error", paymentProvider, platform)
   }
 
-  def logPaypalHookAttempt(): Unit = {
-    put("contribution-paypal-hook-attempt")
+  def logPostPaymentPageDisplayed(paymentProvider: Option[PaymentProvider], platform: String): Unit = {
+    put("post-payment-page-displayed", paymentProvider.map(_.entryName).getOrElse(DimensionValue.unknown), platform)
   }
 
-  def logPaypalHookParsed(): Unit = {
-    put("contribution-paypal-hook-parsed")
+  def logThankYouPageDisplayed(paymentProvider: Option[PaymentProvider], platform: String): Unit = {
+    put("thank-you-page-displayed", paymentProvider.map(_.entryName).getOrElse(DimensionValue.unknown), platform)
   }
 
-  def logPaypalHookProcessed(): Unit = {
-    put("contribution-paypal-hook-processed")
-  }
+}
 
-  def logPaypalHookParseError(): Unit = {
-    put("contribution-paypal-hook-parse-error")
-  }
 
-  def logPaypalHookProcessError(): Unit = {
-    put("contribution-paypal-hook-processing-error")
-  }
+object CloudWatchMetrics {
 
-  def logPaypalHookInvalidRequest(): Unit = {
-    put("contribution-paypal-hook-invalid-request")
+  object DimensionValue {
+    val unknown = "unknown"
+    val notApplicable = "na"
   }
-
 }

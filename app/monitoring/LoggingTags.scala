@@ -5,6 +5,7 @@ import org.slf4j.MDC
 import play.api.mvc.RequestHeader
 import utils.Hasher
 import utils.SHA256Hasher
+import scala.collection.immutable.IndexedSeq
 
 // Tags to be included in a log statement using Mapped Diagnostic Context (MDC).
 // A MDC can be used to e.g. supplement log messages with additional contextual information,
@@ -27,7 +28,7 @@ sealed trait LoggingTag extends enumeratum.EnumEntry { self =>
 
 object LoggingTag extends enumeratum.Enum[LoggingTag] {
 
-  override def values: Seq[LoggingTag] = findValues
+  override def values: IndexedSeq[LoggingTag] = findValues
 
   def names: Seq[String] = values.map(_.name)
 

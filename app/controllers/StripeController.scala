@@ -11,6 +11,7 @@ import com.gu.i18n.{AUD, EUR, USD}
 import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
+import com.gu.zuora.soap.models.Queries.PaymentMethod
 import com.typesafe.config.Config
 import controllers.forms.ContributionRequest
 import cookies.ContribTimestampCookieAttributes
@@ -36,9 +37,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
   def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
     .async(BodyParsers.jsonOrMultipart(ContributionRequest.contributionForm)) { implicit request =>
-    val platform = request.platform.getOrElse("unknown")
-    info(s"A Stripe payment is being attempted with request id: ${request.id}. \n\t Request is from platform: $platform.")
-    cloudWatchMetrics.logStripePaymentAttempt(platform)
+    info(s"A Stripe payment is being attempted with request id: ${request.id}, from platform: ${request.platform}.")
+    cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Stripe, request.platform)
 
     val form = request.body
 
@@ -78,6 +78,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
     val contributionAmount = ContributionAmount(BigDecimal(amount, 2), form.currency)
 
     def thankYouUri = if (request.isAndroid) {
+      info(s"Payment successful for request ${request.id} - redirected to external platform for thank you page. platform is: ${request.platform}.")
+      cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
       mobileRedirectUrl(contributionAmount)
     } else {
       routes.Contributions.thanks(countryGroup).url
@@ -103,7 +105,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
         ophanPageviewId = form.ophanPageviewId,
         ophanBrowserId = form.ophanBrowserId,
         idUser = idUser,
-        platform = form.platform orElse request.platform,
+        platform = Some(request.platform),
         ophanVisitId = form.ophanVisitId
       )
     }
@@ -127,20 +129,21 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
     }
 
     createCharge.map { charge =>
-      info(s"Stripe payment successful for request id: ${request.id} \n\t from platform $platform")
-      cloudWatchMetrics.logStripePaymentSuccess(platform)
+      info(s"Stripe payment successful for request id: ${request.id}, from platform ${request.platform}")
+      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       val metadata = createMetaData(charge)
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
       recordToOphan(metadata) // again, fire and forget.
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
+        .addingToSession(PaymentProvider.sessionKey -> PaymentProvider.Stripe.entryName)
         .setCookie[ContribTimestampCookieAttributes](Instant.ofEpochSecond(charge.created).toString)
         .withHeaders(corsHeaders(request): _*)
     }.recover {
       case e: Stripe.Error => {
-        warn(s"Payment failed for request id: ${request.id}, from platform: $platform, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
-        cloudWatchMetrics.logStripePaymentFailure(platform)
+        warn(s"Payment failed for request id: ${request.id}, from platform: ${request.platform}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
+        cloudWatchMetrics.logPaymentFailure(PaymentProvider.Stripe, request.platform)
         BadRequest(Json.toJson(e)).withHeaders(corsHeaders(request): _*)
       }
     }
@@ -164,15 +167,17 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
   def hook = SharedSecretAction(webhookKey) {
     NoCacheAction.async(parse.json) { implicit request =>
 
+      cloudWatchMetrics.logHookAttempt(PaymentProvider.Stripe, request.platform)
+
       def withParsedStripeHook(stripeHookJson: JsValue)(block: StripeHook => Future[Result]): Future[Result] = {
         stripeHookJson.validate[StripeHook] match {
           case JsError(err) =>
-            error(s"Unable to parse the stripe hook for request id: ${request.id}. \n\tFailed with message: $err")
-            cloudWatchMetrics.logStripeHookParseError()
+            error(s"Unable to parse the stripe hook for request id: ${request.id}, from platform: ${request.platform}. \n\tFailed with message: $err")
+            cloudWatchMetrics.logHookParseError(PaymentProvider.Stripe, request.platform)
             Future.successful(BadRequest("Invalid Json"))
           case JsSuccess(stripeHook, _) =>
-            info(s"Processing a stripe hook for request id: ${request.id}.\n\t Stripe Hook id is: ${stripeHook.eventId}")
-            cloudWatchMetrics.logStripeHookParsed()
+            info(s"Processing a stripe hook for request id: ${request.id}, from platform: ${request.platform}. Stripe Hook id is: ${stripeHook.eventId}")
+            cloudWatchMetrics.logHookParsed(PaymentProvider.Stripe, request.platform)
             block(stripeHook)
         }
       }
@@ -182,13 +187,13 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
         stripeService.processPaymentHook(stripeHook)
           .value.map {
           case Right(_) => {
-            info(s"Stripe hook: ${stripeHook.paymentId} processed successfully for request id: ${request.id}.")
-            cloudWatchMetrics.logStripeHookProcessed()
+            info(s"Stripe hook: ${stripeHook.paymentId} processed successfully for request id: ${request.id}, from platform ${request.platform}.")
+            cloudWatchMetrics.logHookProcessed(PaymentProvider.Stripe, request.platform)
             Ok
           }
           case Left(err) => {
-            error(s"Stripe hook: ${stripeHook.paymentId} processing error. Request id: ${request.id} \n\t error: $err")
-            cloudWatchMetrics.logStripeHookProcessError()
+            error(s"Stripe hook: ${stripeHook.paymentId} processing error for request id: ${request.id}, from platform: ${request.platform} \n\t error: $err")
+            cloudWatchMetrics.logHookProcessError(PaymentProvider.Stripe, request.platform)
             InternalServerError
           }
         }

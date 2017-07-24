@@ -8,7 +8,7 @@ import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
-import models.ContributionAmount
+import models.{ContributionAmount, PaymentProvider}
 import monitoring.{CloudWatchMetrics, LoggingTagsProvider, TagAwareLogger}
 import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
@@ -52,8 +52,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       description = Some("By making a contribution, you’ll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
-    info(s"Paypal post-payment page displayed for request: ${request.id}")
-    cloudWatchMetrics.logPaypalPostPaymentPage()
+    info(s"Paypal post-payment page displayed for request: ${request.id}, platform: ${request.platform}.")
+    cloudWatchMetrics.logPostPaymentPageDisplayed(request.paymentProvider, request.platform)
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
 
@@ -82,8 +82,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       val maxAmountInLocalCurrency = MaxAmount.forCurrency(countryGroup.currency)
       val creditCardExpiryYears = CreditCardExpiryYears(LocalDate.now.getYear, 10)
 
-      info(s"Home page displayed for request id: ${request.id}")
-      cloudWatchMetrics.logHomePage()
+      info(s"Home page displayed for request id: ${request.id}, platform: ${request.platform}.")
+      cloudWatchMetrics.logHomePage(request.platform)
 
       Ok(views.html.giraffe.contribute(
         pageInfo,
@@ -112,8 +112,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       .map(mobileRedirectUrl)
       .filter(_ => request.isIos)
 
-    info(s"Thank you page displayed. Request id: ${request.id}")
-    cloudWatchMetrics.logThankYouPage()
+    info(s"Thank you page displayed. Request id: ${request.id}, platform: ${request.platform}. Payment method used was: ${request.paymentProvider.getOrElse("unknown")}.")
+    cloudWatchMetrics.logThankYouPageDisplayed(request.paymentProvider, request.platform)
 
     Ok(views.html.giraffe.thankyou(PageInfo(
       title = title,
