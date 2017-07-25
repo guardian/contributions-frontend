@@ -174,7 +174,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
   private val authorizeBodyParser = {
     import BodyParsers._
     parse.json[AuthRequest].logFailure { implicit header =>
-      error("unable to parse body to an auth request")
+      error("Unable to parse body to an auth request")
     }
   }
 
@@ -266,7 +266,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
   private val updateMetadataBodyParser = {
     import BodyParsers._
     parse.form(metadataUpdateForm).logFailure { implicit header =>
-      error("unable to parse body to a meta data update form")
+      error("Unable to parse body to a meta data update form")
     }
   }
 
