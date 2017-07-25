@@ -37,7 +37,7 @@ trait PaypalControllerMocks extends MockitoSugar {
     .thenReturn(Some(mockContributionAmount))
 
   Mockito.when(mockPaypalPayment.getCreateTime)
-    .thenReturn("")
+    .thenReturn("createTime")
 
   Mockito.when(mockPaypalPayment.getPayer.getPayerInfo.getEmail)
     .thenReturn("a@b.com")
@@ -157,8 +157,10 @@ class PaypalControllerSpec extends PlaySpec
       "set a cookie with value equal to the time the user contributed" in {
 
         val contributionCookieName = "gu.contributions.contrib-timestamp"
-        Helpers.cookies(okAcceptsJsonResult).get(contributionCookieName) mustBe defined
-        Helpers.cookies(okAcceptsHtmlResult).get(contributionCookieName) mustBe defined
+
+        // Create time value was mocked earlier
+        Helpers.cookies(okAcceptsJsonResult).get(contributionCookieName).map(_.value) must contain("createTime")
+        Helpers.cookies(okAcceptsHtmlResult).get(contributionCookieName).map(_.value) must contain("createTime")
       }
     }
 
