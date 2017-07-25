@@ -1,7 +1,8 @@
 package acceptance
 
-import acceptance.util.{Browser, Dependencies}
+import acceptance.util.{Browser, Dependencies, Driver}
 import fixtures.TestApplicationFactory
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatestplus.play.{BaseOneServerPerSuite, OneBrowserPerSuite, PlaySpec}
 
 
@@ -9,10 +10,13 @@ import org.scalatestplus.play.{BaseOneServerPerSuite, OneBrowserPerSuite, PlaySp
 class StripeCheckoutSpec extends PlaySpec
   with TestApplicationFactory
   with BaseOneServerPerSuite
-  with OneBrowserPerSuite
   with Browser
-  {
+  with BeforeAndAfter
+  with BeforeAndAfterAll {
 
+  before { Driver.reset() }
+
+  override protected def afterAll(): Unit = Driver.quit()
 
   private def checkDependenciesAreAvailable = {
     assume(Dependencies.Contributions.isAvailable,
@@ -23,13 +27,12 @@ class StripeCheckoutSpec extends PlaySpec
   val contributionAmount = pages.ContributionAmount
   val yourDetails = pages.YourDetails
 
-
   "The OneBrowserPerTest trait" must {
     "allow end to end card payment" in {
       checkDependenciesAreAvailable
       go to contributionAmount
-      pageTitle mustBe "Support the Guardian | Contribute today"
-      contributionAmount.clickDebitCard
+      contributionAmount.selectAmountButton(0)
+      contributionAmount.payWithCard
       assert(yourDetails.pageHasLoaded)
     }
   }

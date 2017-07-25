@@ -8,12 +8,9 @@ import scala.concurrent.Await
 import scala.util.Try
 import scala.concurrent.duration._
 
-import configuration.Config
-
-
 object Dependencies {
   object Contributions extends Availability {
-    val url = Config.contributeUrl
+    val url = Config.baseUrl
   }
 
   trait Availability {
