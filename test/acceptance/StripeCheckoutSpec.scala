@@ -1,6 +1,6 @@
-package test
+package acceptance
 
-import acceptance.util.Dependencies
+import acceptance.util.{Browser, Dependencies}
 import fixtures.TestApplicationFactory
 import org.scalatestplus.play.{BaseOneServerPerSuite, OneBrowserPerSuite, PlaySpec}
 
@@ -10,7 +10,8 @@ class StripeCheckoutSpec extends PlaySpec
   with TestApplicationFactory
   with BaseOneServerPerSuite
   with OneBrowserPerSuite
-  with ManagedWebDriverFactory  {
+  with Browser
+  {
 
 
   private def checkDependenciesAreAvailable = {
@@ -19,12 +20,17 @@ class StripeCheckoutSpec extends PlaySpec
         "\nPlease run contributions-frontend server before running tests.")
   }
 
+  val contributionAmount = pages.ContributionAmount
+  val yourDetails = pages.YourDetails
+
 
   "The OneBrowserPerTest trait" must {
-    "provide a web driver" in {
+    "allow end to end card payment" in {
       checkDependenciesAreAvailable
-      go to Dependencies.Contributions.url
-      println(pageTitle)
+      go to contributionAmount
+      pageTitle mustBe "Support the Guardian | Contribute today"
+      contributionAmount.clickDebitCard
+      assert(yourDetails.pageHasLoaded)
     }
   }
 
