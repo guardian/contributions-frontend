@@ -13,12 +13,8 @@ object BodyParsers {
   implicit class BodyParserOps[A](val bodyParser: BodyParser[A]) extends AnyVal {
     def logFailure(f: RequestHeader => Unit)(implicit ec: ExecutionContext): BodyParser[A] = new BodyParser[A] {
       import cats.syntax.either._
-      override def apply(header: RequestHeader): Accumulator[ByteString, Either[Result, A]] = {
-        bodyParser(header).map(_.leftMap { result =>
-          f(header)
-          result
-        })
-      }
+      override def apply(header: RequestHeader): Accumulator[ByteString, Either[Result, A]] =
+        bodyParser(header).map(_.leftMap { result => f(header); result })
     }
   }
 
