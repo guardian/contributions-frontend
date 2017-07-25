@@ -1,15 +1,17 @@
 package acceptance.util
 
-import org.openqa.selenium.WebDriver
 import org.openqa.selenium.support.ui.{ExpectedCondition, ExpectedConditions, WebDriverWait}
 import org.scalatest.selenium.WebBrowser
-import org.scalatest.selenium.WebBrowser.{Query, click}
-import test.ManagedWebDriverFactory
 
 import scala.util.Try
 
+import collection.JavaConverters._
 
-trait Browser extends WebBrowser with ManagedWebDriverFactory{
+
+trait Browser extends WebBrowser {
+
+  implicit val driver = Driver()
+
   def pageHasElement(q: Query): Boolean =
     waitUntil(ExpectedConditions.visibilityOfElementLocated(q.by))
 
@@ -17,10 +19,19 @@ trait Browser extends WebBrowser with ManagedWebDriverFactory{
     if (pageHasElement(q))
       click.on(q)
     else
-      throw new Exception (s"Could not find query string")
+      throw new Exception (s"Could not find query string ${q.queryString}")
   }
 
-  private def waitUntil[T](pred: ExpectedCondition[T])(implicit webDriver: WebDriver): Boolean =
-    Try(new WebDriverWait(webDriver, Config.waitTimeout).until(pred)).isSuccess
+  def clickOnNth(q: Query, n: Int): Unit = {
+    if (pageHasElement(q)) {
+      val element = driver.findElements(q.by).asScala.toList.lift(n)
+
+      if (element.nonEmpty) element.foreach(_.click)
+      else throw new Exception(s"Could not find ${n}th element for query ${q.queryString}")
+    }
+  }
+
+  private def waitUntil[T](pred: ExpectedCondition[T]): Boolean =
+    Try(new WebDriverWait(driver, Config.waitTimeout).until(pred)).isSuccess
 
 }
