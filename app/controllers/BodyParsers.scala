@@ -1,12 +1,26 @@
 package controllers
 
+import akka.util.ByteString
 import play.api.data.Form
+import play.api.libs.streams.Accumulator
 import play.api.mvc.BodyParsers.parse
-import play.api.mvc.{BodyParser, Results}
+import play.api.mvc.{BodyParser, RequestHeader, Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object BodyParsers {
+
+  implicit class BodyParserOps[A](val bodyParser: BodyParser[A]) extends AnyVal {
+    def logFailure(f: RequestHeader => Unit)(implicit ec: ExecutionContext): BodyParser[A] = new BodyParser[A] {
+      import cats.syntax.either._
+      override def apply(header: RequestHeader): Accumulator[ByteString, Either[Result, A]] = {
+        bodyParser(header).map(_.leftMap { result =>
+          f(header)
+          result
+        })
+      }
+    }
+  }
 
   // this applies the constraints of a form on a JSON payload
   def jsonFormBodyParser[A](form: Form[A])(implicit ec: ExecutionContext): BodyParser[A] = BodyParser { requestHeader =>

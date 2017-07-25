@@ -11,7 +11,6 @@ import com.gu.i18n.{AUD, EUR, USD}
 import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
-import com.gu.zuora.soap.models.Queries.PaymentMethod
 import com.typesafe.config.Config
 import controllers.forms.ContributionRequest
 import cookies.ContribTimestampCookieAttributes
@@ -34,9 +33,15 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
     NoContent.withHeaders(("Vary" -> "Origin") :: corsHeaders(request): _*)
   }
 
+  private val payBodyParser = {
+    import BodyParsers._
+    jsonOrMultipart(ContributionRequest.contributionForm).logFailure { implicit header =>
+      error("Unable to parse contribution request")
+    }
+  }
+
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
-  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
-    .async(BodyParsers.jsonOrMultipart(ContributionRequest.contributionForm)) { implicit request =>
+  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async(payBodyParser) { implicit request =>
     info(s"A Stripe payment is being attempted with request id: ${request.id}, from platform: ${request.platform}.")
     cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Stripe, request.platform)
 

@@ -171,8 +171,15 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
 
   private def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = amount min MaxAmount.forCurrency(currency)
 
+  private val authorizeBodyParser = {
+    import BodyParsers._
+    parse.json[AuthRequest].logFailure { implicit header =>
+      error("unable to parse body to an auth request")
+    }
+  }
+
   def authorize = checkToken {
-    NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
+    NoCacheAction.async(authorizeBodyParser) { implicit request =>
       info(s"Attempting to obtain paypal auth response. Request id: ${request.id}. Platform: ${request.platform}.")
       cloudWatchMetrics.logPaymentAuthAttempt(PaymentProvider.Paypal, request.platform)
       val authRequest = request.body
@@ -256,7 +263,17 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
     )(MetadataUpdate.apply)(MetadataUpdate.unapply)
   )
 
-  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async(parse.form(metadataUpdateForm)) { implicit request =>
+  private val updateMetadataBodyParser = {
+    import BodyParsers._
+    parse.form(metadataUpdateForm).logFailure { implicit header =>
+      error("unable to parse body to a meta data update form")
+    }
+  }
+
+  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async(updateMetadataBodyParser) { implicit request =>
+
+    info(s"Updating meta data - request id: ${request.id}, platform: ${request.platform}")
+
     val paypalService = paymentServices.paypalServiceFor(request)
     val marketingOptIn = request.body.marketingOptIn
     val idUser = IdentityId.fromRequest(request)
