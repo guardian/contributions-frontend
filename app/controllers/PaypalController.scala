@@ -1,6 +1,7 @@
 package controllers
 
 import actions.CommonActions._
+import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.show._
 import cookies.ContribTimestampCookieAttributes
@@ -10,16 +11,14 @@ import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
 import models._
 import monitoring._
-import play.api.libs.ws.WSClient
 import play.api.mvc._
-import services.PaymentServices
+import services.{PaymentServices, PaypalService}
 import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.data.Forms._
-import play.api.http.Writeable
 import play.filters.csrf.CSRFCheck
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,7 +26,6 @@ import scala.util.Try
 
 class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
-  import ContribTimestampCookieAttributes._
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -41,12 +39,13 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     ophanVisitId: Option[String]
-  ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
-
-    val paypalService = paymentServices.paypalServiceFor(request)
+  ): Action[AnyContent] = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
 
     info(s"Attempting paypal payment for id: ${request.id}")
     cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Paypal, request.platform)
+
+    val paypalService = paymentServices.paypalServiceFor(request)
+    val utils = new PaypalController.ExecutePaymentUtils(paypalService, countryGroup, cloudWatchMetrics)
 
     def storeMetaData(payment: Payment) =
       paypalService.storeMetaData(
@@ -63,33 +62,9 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
         ophanVisitId = ophanVisitId
       )
 
-    def notOkResult(message: String): Result = {
-      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: $message")
-      cloudWatchMetrics.logPaymentFailure(PaymentProvider.Paypal, request.platform)
-      render {
-        case Accepts.Json() => BadRequest(JsNull)
-        case Accepts.Html() =>
-          Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
-      }
-    }
-
-    def okResult(payment: Payment): Result = {
-      val response = render {
-        case Accepts.Json() => Ok(JsNull)
-        case Accepts.Html() =>
-          val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
-          val email = payment.getPayer.getPayerInfo.getEmail
-          val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
-          redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
-      }
-      info(s"Paypal payment from platform: ${request.platform} is successful. Request id: ${request.id}.")
-      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
-      response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
-    }
-
-    paypalService.executePayment(paymentId, payerId)
+    utils.executePayment(paymentId, payerId)
       .map { payment => storeMetaData(payment); payment }
-      .fold(notOkResult, okResult)
+      .fold(utils.notOkResult, utils.okResult)
   }
 
   case class AuthRequest private (
@@ -272,6 +247,41 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
 
     contributor.map { _ =>
       Redirect(url, SEE_OTHER)
+    }
+  }
+}
+
+object PaypalController {
+
+  // Class holding methods used to implement the execute payment endpoint.
+  // Factored out here to facilitate unit testing.
+  class ExecutePaymentUtils(paypalService: PaypalService, countryGroup: CountryGroup, cloudWatchMetrics: CloudWatchMetrics)
+    extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
+
+    def executePayment(paymentId: String, payerId: String)(implicit request: ABTestRequest[AnyContent]): EitherT[Future, String, Payment] =
+      paypalService.executePayment(paymentId, payerId)
+
+    def notOkResult(message: String)(implicit request: ABTestRequest[AnyContent]): Result = {
+      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: $message")
+      cloudWatchMetrics.logPaymentFailure(PaymentProvider.Paypal, request.platform)
+      render {
+        case Accepts.Json() => BadRequest(JsNull)
+        case Accepts.Html() => Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
+      }
+    }
+
+    def okResult(payment: Payment)(implicit request: ABTestRequest[AnyContent]): Result = {
+      val response = render {
+        case Accepts.Json() => Ok(JsNull)
+        case Accepts.Html() =>
+          val amount = paypalService.paymentAmount(payment)
+          val email = payment.getPayer.getPayerInfo.getEmail
+          val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
+          redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
+      }
+      info(s"Paypal payment from platform: ${request.platform} is successful. Request id: ${request.id}.")
+      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
+      response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
   }
 }
