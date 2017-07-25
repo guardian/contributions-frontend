@@ -2,7 +2,8 @@ package controllers
 
 import actions.CommonActions.ABTestRequest
 import cats.data.EitherT
-import com.gu.i18n.{CountryGroup, GBP}
+import com.gu.i18n._
+import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
 import fixtures.TestApplicationFactory
 import models.ContributionAmount
@@ -11,7 +12,7 @@ import org.mockito.{Matchers, Mockito}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play._
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.JsNull
+import play.api.libs.json.{JsNull, JsObject, JsString}
 import play.api.mvc._
 import play.api.test._
 import play.filters.csrf.CSRFCheck
@@ -52,6 +53,7 @@ class PaypalControllerSpec extends PlaySpec
   with TestApplicationFactory
   with BaseOneAppPerSuite {
 
+  import PaypalController._
   import PaypalControllerSpec._
   import cats.instances.future._
 
@@ -97,12 +99,73 @@ class PaypalControllerSpec extends PlaySpec
     }
   }
 
-  val executePaymentUtils = new PaypalController.ExecutePaymentUtils(
-    mockPaypalService, CountryGroup.UK, mockCloudwatchMetrics)
-
   // All the methods in Play's Helper object accept a future of a result, instead of a result.
   // This implicit conversion allows the methods to be applied to a result.
   implicit def asFuture[A](a: A): Future[A] = Future.successful(a)
+
+  val authorizePaymentUtils = new AuthorizePaymentUtils(mockCloudwatchMetrics)
+
+  "The authorize endpoint" when {
+
+    "deciding how much to create the payment" should {
+
+      "cap the amount at 16,000 for Australia" in {
+
+        authorizePaymentUtils.capAmount(16000, AUD) mustEqual 16000
+        authorizePaymentUtils.capAmount(16001, AUD) mustEqual 16000
+      }
+
+      "cap the amount at 2000 for any other country" in {
+
+        authorizePaymentUtils.capAmount(2000, GBP) mustEqual 2000
+        authorizePaymentUtils.capAmount(2001, GBP) mustEqual 2000
+
+        authorizePaymentUtils.capAmount(2000, USD) mustEqual 2000
+        authorizePaymentUtils.capAmount(2001, USD) mustEqual 2000
+      }
+    }
+
+    "getting the auth response from a payment" should {
+
+      "return the auth response if the approval url and payment id is defined" in {
+
+      }
+
+      "return an error message otherwise" in {
+
+        val payment = mock[Payment]
+        val result = authorizePaymentUtils.authResponseFromPayment(payment)
+
+        result mustEqual Left("Unable to parse payment")
+      }
+    }
+
+    "there is an error authorizing the payment" should {
+
+      "return an internal server error" in {
+
+        implicit val request = FakeRequest()
+        val result = authorizePaymentUtils.notOkResult("error message describing what went wrong")
+
+        Helpers.status(result) mustEqual INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "the payment has been authorized successfully" should {
+
+      "return an OK response the body containing auth response serialized as JSON" in {
+
+        implicit val request = FakeRequest()
+        val authResponse = AuthResponse(Uri.parse("https://www.approvalUrl.com"), "paymentId")
+        val result = authorizePaymentUtils.okResult(authResponse)
+
+        Helpers.status(result) mustEqual OK
+        Helpers.contentAsString(result) mustEqual """{"approvalUrl":"https://www.approvalUrl.com","paymentId":"paymentId"}"""
+      }
+    }
+  }
+
+  val executePaymentUtils = new ExecutePaymentUtils(mockPaypalService, CountryGroup.UK, mockCloudwatchMetrics)
 
   "The execute endpoint" when {
 

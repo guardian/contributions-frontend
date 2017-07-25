@@ -26,6 +26,7 @@ import scala.util.Try
 
 class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
+  import PaypalController._
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -67,92 +68,18 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
       .fold(utils.notOkResult, utils.okResult)
   }
 
-  case class AuthRequest private (
-    countryGroup: CountryGroup,
-    amount: BigDecimal,
-    cmp: Option[String],
-    intCmp: Option[String],
-    refererPageviewId: Option[String],
-    refererUrl: Option[String],
-    ophanPageviewId: Option[String],
-    ophanBrowserId: Option[String],
-    ophanVisitId: Option[String]
-  )
-
-  object AuthRequest {
-    /**
-      * We need to ensure there's no fragment in the URL here, as PayPal appends some query parameters to the end of it,
-      * which will be removed by the browser (due to the URL stripping rules) in its requests.
-      *
-      * See: https://www.w3.org/TR/referrer-policy/#strip-url
-      *
-      */
-    def withSafeRefererUrl(
-                            countryGroup: CountryGroup,
-                            amount: BigDecimal,
-                            cmp: Option[String],
-                            intCmp: Option[String],
-                            refererPageviewId: Option[String],
-                            refererUrl: Option[String],
-                            ophanPageviewId: Option[String],
-                            ophanBrowserId: Option[String],
-                            ophanVisitId: Option[String]
-                          ): AuthRequest = {
-      val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
-
-      new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId)
-    }
-
-
-    implicit val authRequestReads: Reads[AuthRequest] = (
-      (__ \ "countryGroup").read[CountryGroup] and
-        (__ \ "amount").read(min[BigDecimal](1)) and
-        (__ \ "cmp").readNullable[String] and
-        (__ \ "intCmp").readNullable[String] and
-        (__ \ "refererPageviewId").readNullable[String] and
-        (__ \ "refererUrl").readNullable[String] and
-        (__ \ "ophanPageviewId").readNullable[String] and
-        (__ \ "ophanBrowserId").readNullable[String] and
-        (__ \ "ophanVisitId").readNullable[String]
-      ) (AuthRequest.withSafeRefererUrl _)
-  }
-
-  case class AuthResponse(approvalUrl: Uri, paymentId: String)
-
-  object AuthResponse {
-    import cats.syntax.either._
-    import scala.collection.JavaConverters._
-
-    def fromPayment(payment: Payment): Either[String, AuthResponse] = Either.fromOption(for {
-        links <- Option(payment.getLinks)
-        approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
-        approvalUrl <- Option(approvalLinks.getHref)
-        paymentId <- Option(payment.getId)
-      } yield AuthResponse(Uri.parse(approvalUrl), paymentId), "Unable to parse payment")
-  }
-
-  implicit val UriWrites = new Writes[Uri] {
-    override def writes(uri: Uri): JsValue = JsString(uri.toString)
-  }
-
-  implicit val AuthResponseWrites = Json.writes[AuthResponse]
-
-  implicit val CountryGroupReads = new Reads[CountryGroup] {
-    override def reads(json: JsValue): JsResult[CountryGroup] = json match {
-      case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid CountryGroup id"))
-      case _ => JsError("invalid value for country group")
-    }
-  }
-
-  private def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = amount min MaxAmount.forCurrency(currency)
-
-  def authorize = checkToken {
+  def authorize: Action[AuthRequest] = checkToken {
     NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
+
       info(s"Attempting to obtain paypal auth response. Request id: ${request.id}. Platform: ${request.platform}.")
       cloudWatchMetrics.logPaymentAuthAttempt(PaymentProvider.Paypal, request.platform)
+
+      val utils = new AuthorizePaymentUtils(cloudWatchMetrics)
+
       val authRequest = request.body
-      val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
+      val amount = utils.capAmount(authRequest.amount, authRequest.countryGroup.currency)
       val paypalService = paymentServices.paypalServiceFor(request)
+
       val payment = paypalService.getPayment(
         amount = amount,
         countryGroup = authRequest.countryGroup,
@@ -166,18 +93,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
         ophanVisitId = authRequest.ophanVisitId
       )
 
-      payment.subflatMap(AuthResponse.fromPayment).fold(
-        err => {
-          error(s"Error getting PayPal auth response for request id: ${request.id}, platform: ${request.platform}.\n\t error message: $err")
-          cloudWatchMetrics.logPaymentAuthFailure(PaymentProvider.Paypal, request.platform)
-          InternalServerError("Error getting PayPal auth url")
-        },
-        authResponse => {
-          info(s"Paypal payment auth response successfully obtained for request id: ${request.id}, platform: ${request.platform}.")
-          cloudWatchMetrics.logPaymentAuthSuccess(PaymentProvider.Paypal, request.platform)
-          Ok(Json.toJson(authResponse))
-        }
-      )
+      payment.subflatMap(utils.authResponseFromPayment).fold(utils.notOkResult, utils.okResult)
     }
   }
 
@@ -253,17 +169,119 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
 
 object PaypalController {
 
-  // Class holding methods used to implement the execute payment endpoint.
+  case class AuthRequest private (
+      countryGroup: CountryGroup,
+      amount: BigDecimal,
+      cmp: Option[String],
+      intCmp: Option[String],
+      refererPageviewId: Option[String],
+      refererUrl: Option[String],
+      ophanPageviewId: Option[String],
+      ophanBrowserId: Option[String],
+      ophanVisitId: Option[String]
+  )
+
+  object AuthRequest {
+
+    /**
+      * We need to ensure there's no fragment in the URL here, as PayPal appends some query parameters to the end of it,
+      * which will be removed by the browser (due to the URL stripping rules) in its requests.
+      *
+      * See: https://www.w3.org/TR/referrer-policy/#strip-url
+      */
+    def withSafeRefererUrl(
+        countryGroup: CountryGroup,
+        amount: BigDecimal,
+        cmp: Option[String],
+        intCmp: Option[String],
+        refererPageviewId: Option[String],
+        refererUrl: Option[String],
+        ophanPageviewId: Option[String],
+        ophanBrowserId: Option[String],
+        ophanVisitId: Option[String]
+    ): AuthRequest = {
+      val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
+      new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId)
+    }
+
+    private implicit val countryGroupReads = new Reads[CountryGroup] {
+      override def reads(json: JsValue): JsResult[CountryGroup] = json match {
+        case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid CountryGroup id"))
+        case _ => JsError("invalid value for country group")
+      }
+    }
+
+    implicit val authRequestReads: Reads[AuthRequest] = (
+      (__ \ "countryGroup").read[CountryGroup] and
+      (__ \ "amount").read(min[BigDecimal](1)) and
+      (__ \ "cmp").readNullable[String] and
+      (__ \ "intCmp").readNullable[String] and
+      (__ \ "refererPageviewId").readNullable[String] and
+      (__ \ "refererUrl").readNullable[String] and
+      (__ \ "ophanPageviewId").readNullable[String] and
+      (__ \ "ophanBrowserId").readNullable[String] and
+      (__ \ "ophanVisitId").readNullable[String]
+    ) (AuthRequest.withSafeRefererUrl _)
+  }
+
+  case class AuthResponse(approvalUrl: Uri, paymentId: String)
+
+  object AuthResponse {
+    import cats.syntax.either._
+    import scala.collection.JavaConverters._
+
+    def fromPayment(payment: Payment): Either[String, AuthResponse] = Either.fromOption(for {
+      links <- Option(payment.getLinks)
+      approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
+      approvalUrl <- Option(approvalLinks.getHref)
+      paymentId <- Option(payment.getId)
+    } yield AuthResponse(Uri.parse(approvalUrl), paymentId), "Unable to parse payment")
+
+    private implicit val uriWrites = new Writes[Uri] {
+      override def writes(uri: Uri): JsValue = JsString(uri.toString)
+    }
+
+    implicit val authResponseWrites: Writes[AuthResponse] = Json.writes[AuthResponse]
+  }
+
+  // Mixin to classes providing methods used in Paypal Controller routes
+  trait PaypalControllerUtils extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider
+
+  // Class containing methods used to implement the authorize payment endpoint.
+  // Factored out here to facilitate unit testing.
+  class AuthorizePaymentUtils(cloudWatchMetrics: CloudWatchMetrics) extends PaypalControllerUtils {
+
+    def capAmount(amount: BigDecimal, currency: Currency): BigDecimal =
+      amount.min(MaxAmount.forCurrency(currency))
+
+    def authResponseFromPayment(payment: Payment): Either[String, AuthResponse] =
+      AuthResponse.fromPayment(payment)
+
+    def notOkResult(errorMessage: String)(implicit request: Request[_]): Result = {
+      error(s"Error getting PayPal auth response for request id: ${request.id}, platform: ${request.platform}.\n\t error message: $errorMessage")
+      cloudWatchMetrics.logPaymentAuthFailure(PaymentProvider.Paypal, request.platform)
+      InternalServerError("Error getting PayPal auth url")
+    }
+
+    def okResult(authResponse: AuthResponse)(implicit request: Request[_]): Result = {
+      info(s"Paypal payment auth response successfully obtained for request id: ${request.id}, platform: ${request.platform}.")
+      cloudWatchMetrics.logPaymentAuthSuccess(PaymentProvider.Paypal, request.platform)
+      Ok(Json.toJson(authResponse))
+    }
+  }
+
+  // Class containing methods used to implement the execute payment endpoint.
   // Factored out here to facilitate unit testing.
   class ExecutePaymentUtils(paypalService: PaypalService, countryGroup: CountryGroup, cloudWatchMetrics: CloudWatchMetrics)
-    extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
+    extends PaypalControllerUtils {
 
     def executePayment(paymentId: String, payerId: String)(implicit request: ABTestRequest[AnyContent]): EitherT[Future, String, Payment] =
       paypalService.executePayment(paymentId, payerId)
 
-    def notOkResult(message: String)(implicit request: ABTestRequest[AnyContent]): Result = {
-      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: $message")
+    def notOkResult(errorMessage: String)(implicit request: ABTestRequest[AnyContent]): Result = {
+      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: $errorMessage")
       cloudWatchMetrics.logPaymentFailure(PaymentProvider.Paypal, request.platform)
+
       render {
         case Accepts.Json() => BadRequest(JsNull)
         case Accepts.Html() => Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
@@ -271,6 +289,9 @@ object PaypalController {
     }
 
     def okResult(payment: Payment)(implicit request: ABTestRequest[AnyContent]): Result = {
+      info(s"Paypal payment from platform: ${request.platform} is successful. Request id: ${request.id}.")
+      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
+
       val response = render {
         case Accepts.Json() => Ok(JsNull)
         case Accepts.Html() =>
@@ -279,8 +300,7 @@ object PaypalController {
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
           redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
       }
-      info(s"Paypal payment from platform: ${request.platform} is successful. Request id: ${request.id}.")
-      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
+
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
   }
