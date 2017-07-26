@@ -1,18 +1,25 @@
 package controllers
 
+import java.time.LocalDate
+
 import actions.CommonActions.ABTestRequest
 import cats.data.EitherT
 import com.gu.i18n._
 import com.netaporter.uri.Uri
-import com.paypal.api.payments.Payment
+import com.paypal.api.payments.{Links, Payment}
+import controllers.PaypalController.{AuthorizePaymentUtils, ExecutePaymentUtils, UpdateMetaDataUtils}
+import controllers.PaypalController.AuthorizePaymentUtils.AuthResponse
+import controllers.PaypalController.UpdateMetaDataUtils.MetadataUpdate
 import fixtures.TestApplicationFactory
-import models.ContributionAmount
+import models.{ContributionAmount, Contributor, IdentityId}
 import monitoring.{CloudWatchMetrics, LoggingTags}
 import org.mockito.{Matchers, Mockito}
+import org.scalatest.EitherValues
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play._
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.{JsNull, JsObject, JsString}
+import play.api.libs.json.JsNull
 import play.api.mvc._
 import play.api.test._
 import play.filters.csrf.CSRFCheck
@@ -20,7 +27,7 @@ import services.{PaymentServices, PaypalService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait PaypalControllerMocks extends MockitoSugar {
+trait PaypalControllerMocks extends MockitoSugar with EitherValues {
   val mockPaymentServices: PaymentServices = mock[PaymentServices]
 
   val mockPaypalService: PaypalService = mock[PaypalService]
@@ -45,6 +52,7 @@ trait PaypalControllerMocks extends MockitoSugar {
 }
 
 class PaypalControllerSpec extends PlaySpec
+  with ScalaFutures
   with PaypalControllerMocks
   with HeaderNames
   with Status
@@ -53,7 +61,6 @@ class PaypalControllerSpec extends PlaySpec
   with TestApplicationFactory
   with BaseOneAppPerSuite {
 
-  import PaypalController._
   import PaypalControllerSpec._
   import cats.instances.future._
 
@@ -101,7 +108,7 @@ class PaypalControllerSpec extends PlaySpec
 
   // All the methods in Play's Helper object accept a future of a result, instead of a result.
   // This implicit conversion allows the methods to be applied to a result.
-  implicit def asFuture[A](a: A): Future[A] = Future.successful(a)
+  implicit def asFuture(result: Result): Future[Result] = Future.successful(result)
 
   val authorizePaymentUtils = new AuthorizePaymentUtils(mockCloudwatchMetrics)
 
@@ -129,6 +136,21 @@ class PaypalControllerSpec extends PlaySpec
 
       "return the auth response if the approval url and payment id is defined" in {
 
+        val links = mock[Links]
+        val approvalUrl = "https://www.approvalUrl.com"
+
+        Mockito.when(links.getRel).thenReturn("APPROVAL_URL")
+        Mockito.when(links.getHref).thenReturn(approvalUrl)
+
+        val payment = mock[Payment]
+        val paymentId = "paymentId"
+
+        Mockito.when(payment.getLinks).thenReturn(java.util.Arrays.asList(links))
+        Mockito.when(payment.getId).thenReturn(paymentId)
+
+        val result = authorizePaymentUtils.authResponseFromPayment(payment)
+
+        result.right.value mustEqual AuthResponse(Uri.parse(approvalUrl), paymentId)
       }
 
       "return an error message otherwise" in {
@@ -136,7 +158,7 @@ class PaypalControllerSpec extends PlaySpec
         val payment = mock[Payment]
         val result = authorizePaymentUtils.authResponseFromPayment(payment)
 
-        result mustEqual Left("Unable to parse payment")
+        result.left.value mustEqual "Unable to parse payment"
       }
     }
 
@@ -191,7 +213,7 @@ class PaypalControllerSpec extends PlaySpec
     }
 
     // These results are factored out as they're used in multiple places.
-    // Error thrown if they're vals (global crypto instance requires a running application)
+    // defs as error thrown if they're vals (global crypto instance requires a running application)
 
     def okAcceptsJsonResult = {
       implicit val abTestRequest = abTestRequestAcceptingJson
@@ -242,6 +264,71 @@ class PaypalControllerSpec extends PlaySpec
       }
     }
   }
+
+  val updateMetaDataUtils = new UpdateMetaDataUtils(mockPaypalService)
+
+  "The update meta data endpoint" when {
+
+    "the email is included in the Play session cookie" should {
+
+      "update the marketing opt-in with the boolean value sent in the form" in {
+
+        implicit val request = marketingOptInRequest(optIn = true).withSession("email" -> "a@b.com")
+
+        val contributor: Contributor = mock[Contributor]
+
+        val methodCall = mockPaypalService.updateMarketingOptIn(
+          Matchers.anyString, Matchers.anyBoolean, Matchers.any[Option[IdentityId]])(Matchers.any[LoggingTags])
+
+        Mockito.when(methodCall).thenReturn(EitherT.pure[Future, String, Contributor](contributor))
+
+        whenReady(updateMetaDataUtils.updateMarketingOptIn()) { result =>
+          result mustEqual true
+        }
+      }
+    }
+
+    "the email is not included in the Play session cookie" should {
+
+      "not update the marketing opt-in" in {
+
+        implicit val request = marketingOptInRequest(optIn = true)
+
+        whenReady(updateMetaDataUtils.updateMarketingOptIn()) { result =>
+          result mustEqual false
+        }
+      }
+    }
+
+    "an attempt has been made to update the marketing opt-in" should {
+
+      "redirect to mobile if the contribution amount is available and the request is from Android" in {
+
+        implicit val request = marketingOptInRequest(optIn = true)
+          .withSession("platform" -> "android", "amount" -> "10.00USD")
+
+        updateMetaDataUtils.redirectUrl(CountryGroup.UK) mustEqual
+          s"x-gu://contribution?date=${LocalDate.now().toString}&amount=10.00USD"
+      }
+
+      "redirect to the thank-you page otherwise" in {
+
+        // Value for implicit request argument provided explicitly to prevent multiple implicits being in scope.
+
+        val optInRequest = marketingOptInRequest(optIn = true)
+
+        updateMetaDataUtils.redirectUrl(CountryGroup.UK)(optInRequest) mustEqual "/uk/thank-you"
+
+        updateMetaDataUtils.redirectUrl(CountryGroup.UK) {
+          optInRequest.withSession("platform" -> "android")
+        } mustEqual "/uk/thank-you"
+
+        updateMetaDataUtils.redirectUrl(CountryGroup.UK) {
+          optInRequest.withSession("platform" -> "ios", "amount" -> "10.00USD")
+        } mustEqual "/uk/thank-you"
+      }
+    }
+  }
 }
 
 object PaypalControllerSpec {
@@ -254,4 +341,7 @@ object PaypalControllerSpec {
   val abTestRequestAcceptingJson: ABTestRequest[AnyContent] = abTestRequestWithAccepts("application/json")
 
   val abTestRequestAcceptingHtml: ABTestRequest[AnyContent] = abTestRequestWithAccepts("text/html")
+
+  def marketingOptInRequest(optIn: Boolean): FakeRequest[MetadataUpdate] =
+    FakeRequest().withBody(MetadataUpdate(optIn))
 }

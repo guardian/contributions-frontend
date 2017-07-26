@@ -27,6 +27,8 @@ import scala.util.Try
 class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
   import PaypalController._
+  import UpdateMetaDataUtils._
+  import AuthorizePaymentUtils._
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -139,117 +141,26 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
       }
     }
   }
-  case class MetadataUpdate(marketingOptIn: Boolean)
 
-  val metadataUpdateForm: Form[MetadataUpdate] = Form(
-    mapping(
-      "marketingOptIn"->boolean
-    )(MetadataUpdate.apply)(MetadataUpdate.unapply)
-  )
+  def updateMetadata(countryGroup: CountryGroup): Action[MetadataUpdate] = NoCacheAction(parse.form(metadataUpdateForm)) { implicit request =>
 
-  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async(parse.form(metadataUpdateForm)) { implicit request =>
     val paypalService = paymentServices.paypalServiceFor(request)
-    val marketingOptIn = request.body.marketingOptIn
-    val idUser = IdentityId.fromRequest(request)
-    val contributor = request.session.data.get("email") match {
-      case Some(email) => paypalService.updateMarketingOptIn(email, marketingOptIn, idUser).value
-      case None => Future.successful(error("email not found in session while trying to update marketing opt in"))
-    }
+    val utils = new UpdateMetaDataUtils(paypalService)
 
-    val url = request.session.get("amount").flatMap(ContributionAmount.apply)
-      .filter(_ => request.isAndroid)
-      .map(mobileRedirectUrl)
-      .getOrElse(routes.Contributions.thanks(countryGroup).url)
-
-    contributor.map { _ =>
-      Redirect(url, SEE_OTHER)
-    }
+    utils.updateMarketingOptIn()
+    Redirect(utils.redirectUrl(countryGroup), SEE_OTHER)
   }
 }
 
 object PaypalController {
 
-  case class AuthRequest private (
-      countryGroup: CountryGroup,
-      amount: BigDecimal,
-      cmp: Option[String],
-      intCmp: Option[String],
-      refererPageviewId: Option[String],
-      refererUrl: Option[String],
-      ophanPageviewId: Option[String],
-      ophanBrowserId: Option[String],
-      ophanVisitId: Option[String]
-  )
-
-  object AuthRequest {
-
-    /**
-      * We need to ensure there's no fragment in the URL here, as PayPal appends some query parameters to the end of it,
-      * which will be removed by the browser (due to the URL stripping rules) in its requests.
-      *
-      * See: https://www.w3.org/TR/referrer-policy/#strip-url
-      */
-    def withSafeRefererUrl(
-        countryGroup: CountryGroup,
-        amount: BigDecimal,
-        cmp: Option[String],
-        intCmp: Option[String],
-        refererPageviewId: Option[String],
-        refererUrl: Option[String],
-        ophanPageviewId: Option[String],
-        ophanBrowserId: Option[String],
-        ophanVisitId: Option[String]
-    ): AuthRequest = {
-      val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
-      new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId)
-    }
-
-    private implicit val countryGroupReads = new Reads[CountryGroup] {
-      override def reads(json: JsValue): JsResult[CountryGroup] = json match {
-        case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid CountryGroup id"))
-        case _ => JsError("invalid value for country group")
-      }
-    }
-
-    implicit val authRequestReads: Reads[AuthRequest] = (
-      (__ \ "countryGroup").read[CountryGroup] and
-      (__ \ "amount").read(min[BigDecimal](1)) and
-      (__ \ "cmp").readNullable[String] and
-      (__ \ "intCmp").readNullable[String] and
-      (__ \ "refererPageviewId").readNullable[String] and
-      (__ \ "refererUrl").readNullable[String] and
-      (__ \ "ophanPageviewId").readNullable[String] and
-      (__ \ "ophanBrowserId").readNullable[String] and
-      (__ \ "ophanVisitId").readNullable[String]
-    ) (AuthRequest.withSafeRefererUrl _)
-  }
-
-  case class AuthResponse(approvalUrl: Uri, paymentId: String)
-
-  object AuthResponse {
-    import cats.syntax.either._
-    import scala.collection.JavaConverters._
-
-    def fromPayment(payment: Payment): Either[String, AuthResponse] = Either.fromOption(for {
-      links <- Option(payment.getLinks)
-      approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
-      approvalUrl <- Option(approvalLinks.getHref)
-      paymentId <- Option(payment.getId)
-    } yield AuthResponse(Uri.parse(approvalUrl), paymentId), "Unable to parse payment")
-
-    private implicit val uriWrites = new Writes[Uri] {
-      override def writes(uri: Uri): JsValue = JsString(uri.toString)
-    }
-
-    implicit val authResponseWrites: Writes[AuthResponse] = Json.writes[AuthResponse]
-  }
-
-  // Mixin to classes providing methods used in Paypal Controller routes
+  // Mixed in to utility classes providing methods used in Paypal Controller actions
   trait PaypalControllerUtils extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider
 
   // Class containing methods used to implement the authorize payment endpoint.
   // Factored out here to facilitate unit testing.
   class AuthorizePaymentUtils(cloudWatchMetrics: CloudWatchMetrics) extends PaypalControllerUtils {
+    import AuthorizePaymentUtils._
 
     def capAmount(amount: BigDecimal, currency: Currency): BigDecimal =
       amount.min(MaxAmount.forCurrency(currency))
@@ -267,6 +178,84 @@ object PaypalController {
       info(s"Paypal payment auth response successfully obtained for request id: ${request.id}, platform: ${request.platform}.")
       cloudWatchMetrics.logPaymentAuthSuccess(PaymentProvider.Paypal, request.platform)
       Ok(Json.toJson(authResponse))
+    }
+  }
+
+  object AuthorizePaymentUtils {
+
+    case class AuthRequest private (
+        countryGroup: CountryGroup,
+        amount: BigDecimal,
+        cmp: Option[String],
+        intCmp: Option[String],
+        refererPageviewId: Option[String],
+        refererUrl: Option[String],
+        ophanPageviewId: Option[String],
+        ophanBrowserId: Option[String],
+        ophanVisitId: Option[String]
+    )
+
+    object AuthRequest {
+
+      /**
+        * We need to ensure there's no fragment in the URL here, as PayPal appends some query parameters to the end of it,
+        * which will be removed by the browser (due to the URL stripping rules) in its requests.
+        *
+        * See: https://www.w3.org/TR/referrer-policy/#strip-url
+        */
+      def withSafeRefererUrl(
+                              countryGroup: CountryGroup,
+                              amount: BigDecimal,
+                              cmp: Option[String],
+                              intCmp: Option[String],
+                              refererPageviewId: Option[String],
+                              refererUrl: Option[String],
+                              ophanPageviewId: Option[String],
+                              ophanBrowserId: Option[String],
+                              ophanVisitId: Option[String]
+                            ): AuthRequest = {
+        val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
+        new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId)
+      }
+
+      private implicit val countryGroupReads = new Reads[CountryGroup] {
+        override def reads(json: JsValue): JsResult[CountryGroup] = json match {
+          case JsString(id) => CountryGroup.byId(id).map(JsSuccess(_)).getOrElse(JsError("invalid CountryGroup id"))
+          case _ => JsError("invalid value for country group")
+        }
+      }
+
+      implicit val authRequestReads: Reads[AuthRequest] = (
+        (__ \ "countryGroup").read[CountryGroup] and
+          (__ \ "amount").read(min[BigDecimal](1)) and
+          (__ \ "cmp").readNullable[String] and
+          (__ \ "intCmp").readNullable[String] and
+          (__ \ "refererPageviewId").readNullable[String] and
+          (__ \ "refererUrl").readNullable[String] and
+          (__ \ "ophanPageviewId").readNullable[String] and
+          (__ \ "ophanBrowserId").readNullable[String] and
+          (__ \ "ophanVisitId").readNullable[String]
+        ) (AuthRequest.withSafeRefererUrl _)
+    }
+
+    case class AuthResponse(approvalUrl: Uri, paymentId: String)
+
+    object AuthResponse {
+      import cats.syntax.either._
+      import scala.collection.JavaConverters._
+
+      def fromPayment(payment: Payment): Either[String, AuthResponse] = Either.fromOption(for {
+        links <- Option(payment.getLinks)
+        approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
+        approvalUrl <- Option(approvalLinks.getHref)
+        paymentId <- Option(payment.getId)
+      } yield AuthResponse(Uri.parse(approvalUrl), paymentId), "Unable to parse payment")
+
+      private implicit val uriWrites = new Writes[Uri] {
+        override def writes(uri: Uri): JsValue = JsString(uri.toString)
+      }
+
+      implicit val authResponseWrites: Writes[AuthResponse] = Json.writes[AuthResponse]
     }
   }
 
@@ -303,5 +292,40 @@ object PaypalController {
 
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
+  }
+
+  class UpdateMetaDataUtils(paypalService: PaypalService) extends PaypalControllerUtils {
+    import UpdateMetaDataUtils._
+
+    def updateMarketingOptIn()(implicit ec: ExecutionContext, request: Request[MetadataUpdate]): Future[Boolean] = {
+
+      def onError = {
+        error("email not found in session while trying to update marketing opt in")
+        Future.successful(false)
+      }
+
+      def onSuccess(email: String): Future[Boolean] =
+        paypalService.updateMarketingOptIn(email, request.body.marketingOptIn, IdentityId.fromRequest(request))
+          .fold(_ => false, _ => true)
+
+      request.session.data.get("email").fold(onError)(onSuccess)
+    }
+
+    def redirectUrl(countryGroup: CountryGroup)(implicit request: Request[MetadataUpdate]): String =
+      request.session.get("amount").flatMap(ContributionAmount.apply)
+        .filter(_ => request.isAndroid)
+        .map(mobileRedirectUrl)
+        .getOrElse(routes.Contributions.thanks(countryGroup).url)
+  }
+
+  object UpdateMetaDataUtils {
+
+    case class MetadataUpdate(marketingOptIn: Boolean)
+
+    val metadataUpdateForm: Form[MetadataUpdate] = Form(
+      mapping(
+        "marketingOptIn"->boolean
+      )(MetadataUpdate.apply)(MetadataUpdate.unapply)
+    )
   }
 }
