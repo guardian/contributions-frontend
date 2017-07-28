@@ -66,7 +66,14 @@ class PaymentServices(
     PaymentMode.values.map(mode => mode -> paypalServiceFor(mode)).toMap
   }
 
-  private def isTestUser(request: RequestHeader): Boolean = authProvider(request).flatMap(_.displayName).exists(testUsernames.isValid)
+  private def isTestUser(request: RequestHeader): Boolean = {
+    val testUserName = for {
+      user <- authProvider(request)
+      displayName <- user.displayName
+      firstName <- displayName.split(' ').headOption
+    } yield firstName
+    testUserName.exists(testUsernames.isValid)
+  }
 
   private def modeFor(request: RequestHeader): PaymentMode = if (isTestUser(request)) Testing else Default
 
