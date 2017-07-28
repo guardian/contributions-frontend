@@ -42,7 +42,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
 
     val form = request.body
 
-    val stripe = paymentServices.stripeServiceFor(request)
+    val stripe = paymentServices.stripeServiceFor(form.name)
     val idUser = IdentityId.fromRequest(request) orElse form.idUser
 
     val countryGroup = form.currency match {
