@@ -8,11 +8,11 @@ import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.paypal.api.payments.Payment
 import configuration.{CorsConfig, SupportConfig}
-import controllers.httpmodels.{AuthRequest, AuthResponse}
+import controllers.httpmodels.{AuthRequest, AuthResponse, CaptureRequest}
 import models._
 import monitoring._
 import play.api.mvc._
-import services.{PaymentServices, PaypalApiConfig}
+import services.{PaymentServices, PaypalService}
 import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
@@ -40,6 +40,29 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         "Access-Control-Allow-Credentials" -> "true"
       )
     }
+  }
+
+  def capturePayment = (NoCacheAction andThen ABTestAction).async(parse.json[CaptureRequest]) { implicit request =>
+    val captureBody = request.body
+    val paypalService: PaypalService = paymentServices.paypalServiceFor(request)
+
+    paypalService.capturePayment(captureBody.paymentId)
+      .flatMap { payment =>
+        paypalService.storeMetaData(
+          paymentId = payment.getId,
+          testAllocations = request.testAllocations,
+          cmp = captureBody.cmp,
+          intCmp = captureBody.intCmp,
+          refererPageviewId = captureBody.refererPageviewId,
+          refererUrl = captureBody.refererUrl,
+          ophanPageviewId = captureBody.ophanPageviewId,
+          ophanBrowserId = captureBody.ophanBrowserId,
+          idUser = captureBody.idUser,
+          platform = Some(captureBody.platform),
+          ophanVisitId = None
+        )
+      }
+      .fold({_ => InternalServerError}, {_ => Ok})
   }
 
   def executePayment(

@@ -141,6 +141,23 @@ class PaypalService(
 
   }
 
+  def capturePayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
+    val payment = Payment.get(apiContext, paymentId)
+    val authorization = payment.getTransactions.get(0).getRelatedResources.get(0).getAuthorization
+    val amount = payment.getTransactions.get(0).getAmount
+    val amountToSend = new Amount()
+    amountToSend.setCurrency(amount.getCurrency)
+    amountToSend.setTotal(amount.getTotal)
+    val capture = new Capture()
+    capture.setAmount(amountToSend)
+
+    asyncExecute(authorization.capture(apiContext, capture)) transform {
+      case Right(c) if c.getState.toUpperCase != "COMPLETED" => Left(s"payment returned with state: ${c.getState}")
+      case Right(_) => Right(payment)
+      case Left(error) => Left(error)
+    }
+  }
+
   def storeMetaData(
     paymentId: String,
     testAllocations: Set[Allocation],
