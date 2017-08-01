@@ -45,7 +45,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
 
     val paypalService = paymentServices.paypalServiceFor(request)
 
-    info(s"Attempting paypal payment for id: ${request.id}")
+    info(s"Attempting paypal payment for id: ${request.sessionIdFragment}")
     cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Paypal, request.platform)
 
     def storeMetaData(payment: Payment) =
@@ -64,7 +64,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
       )
 
     def notOkResult(message: String): Result = {
-      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: $message")
+      error(s"Error executing PayPal payment for session id: ${request.sessionIdFragment} \n\t error message: $message")
       cloudWatchMetrics.logPaymentFailure(PaymentProvider.Paypal, request.platform)
       render {
         case Accepts.Json() => BadRequest(JsNull)
@@ -82,7 +82,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
           redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
       }
-      info(s"Paypal payment from platform: ${request.platform} is successful. Request id: ${request.id}.")
+      info(s"Paypal payment from platform: ${request.platform} is successful. Session id: ${request.sessionIdFragment}.")
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
@@ -173,7 +173,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
 
   def authorize = checkToken {
     NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
-      info(s"Attempting to obtain paypal auth response. Request id: ${request.id}. Platform: ${request.platform}.")
+      info(s"Attempting to obtain paypal auth response. Session id: ${request.sessionIdFragment}. Platform: ${request.platform}.")
       cloudWatchMetrics.logPaymentAuthAttempt(PaymentProvider.Paypal, request.platform)
       val authRequest = request.body
       val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
@@ -193,12 +193,12 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
 
       payment.subflatMap(AuthResponse.fromPayment).fold(
         err => {
-          error(s"Error getting PayPal auth response for request id: ${request.id}, platform: ${request.platform}.\n\t error message: $err")
+          error(s"Error getting PayPal auth response for session id: ${request.sessionIdFragment}, platform: ${request.platform}.\n\t error message: $err")
           cloudWatchMetrics.logPaymentAuthFailure(PaymentProvider.Paypal, request.platform)
           InternalServerError("Error getting PayPal auth url")
         },
         authResponse => {
-          info(s"Paypal payment auth response successfully obtained for request id: ${request.id}, platform: ${request.platform}.")
+          info(s"Paypal payment auth response successfully obtained for session id: ${request.sessionIdFragment}, platform: ${request.platform}.")
           cloudWatchMetrics.logPaymentAuthSuccess(PaymentProvider.Paypal, request.platform)
           Ok(Json.toJson(authResponse))
         }
@@ -210,7 +210,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
     val bodyText = request.body
     val bodyJson = Json.parse(request.body)
 
-    info(s"Paypal hook attempt made for request id: ${request.id}, Platform: ${request.platform}")
+    info(s"Paypal hook attempt made for session id: ${request.sessionIdFragment}, Platform: ${request.platform}")
     cloudWatchMetrics.logHookAttempt(PaymentProvider.Paypal, request.platform)
 
     val paypalService = paymentServices.paypalServiceFor(request)
@@ -219,15 +219,15 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
     def withParsedPaypalHook(paypalHookJson: JsValue)(block: PaypalHook => Future[Result]): Future[Result] = {
       bodyJson.validate[PaypalHook] match {
         case JsSuccess(paypalHook, _) if validHook =>
-          info(s"Received and parsed paymentHook: ${paypalHook.paymentId} for request id: ${request.id}, platform: ${request.platform}.")
+          info(s"Received and parsed paymentHook: ${paypalHook.paymentId} for session id: ${request.sessionIdFragment}, platform: ${request.platform}.")
           cloudWatchMetrics.logHookParsed(PaymentProvider.Paypal, request.platform)
           block(paypalHook)
         case JsError(err) =>
-          error(s"Unable to parse Json for request id: ${request.id}, platform: ${request.platform}.\n\t parsing errors: $err")
+          error(s"Unable to parse Json for session id: ${request.sessionIdFragment}, platform: ${request.sessionIdFragment}.\n\t parsing errors: $err")
           cloudWatchMetrics.logHookParseError(PaymentProvider.Paypal, request.platform)
           Future.successful(InternalServerError("Unable to parse json payload"))
         case _ =>
-          error(s"A paypal webhook request wasn't valid. Request id: ${request.id}. Platform: ${request.platform}.\n\tRequest is: $request, headers: ${request.headers.toSimpleMap},body: $bodyText")
+          error(s"A paypal webhook request wasn't valid. Session id: ${request.sessionIdFragment}. Platform: ${request.platform}.\n\tRequest is: $request, headers: ${request.headers.toSimpleMap},body: $bodyText")
           cloudWatchMetrics.logHookInvalidRequest(PaymentProvider.Paypal, request.platform)
           Future.successful(Forbidden("Request isn't signed by Paypal"))
       }
@@ -236,12 +236,12 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
     withParsedPaypalHook(bodyJson) { paypalHook =>
       paypalService.processPaymentHook(paypalHook).value.map {
         case Right(_) => {
-          info(s"Paypal hook: ${paypalHook.paymentId} processed successfully for request id: ${request.id}, platform: ${request.platform}.")
+          info(s"Paypal hook: ${paypalHook.paymentId} processed successfully for session id: ${request.sessionIdFragment}, platform: ${request.platform}.")
           cloudWatchMetrics.logHookProcessed(PaymentProvider.Paypal, request.platform)
           Ok
         }
         case Left(err) => {
-          error(s"Paypal hook: ${paypalHook.paymentId} processing error. Request id: ${request.id}, platform: ${request.platform}. \n\t error: $err")
+          error(s"Paypal hook: ${paypalHook.paymentId} processing error. Session id: ${request.sessionIdFragment}, platform: ${request.platform}. \n\t error: $err")
           cloudWatchMetrics.logHookProcessError(PaymentProvider.Paypal, request.platform)
           InternalServerError
         }
