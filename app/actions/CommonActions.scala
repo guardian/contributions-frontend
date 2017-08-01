@@ -56,14 +56,14 @@ object CommonActions {
   implicit class MobileSupportRequest[A](val request: Request[A]) extends AnyVal {
 
     private def _platform = request.getQueryString("platform").orElse(request.session.get("platform")).getOrElse("web")
-    private def _sessionId = request.cookies.get("PLAY_SESSION").map(_.value).getOrElse("unknown")
+    private def _sessionId = request.cookies.get("gu.contributions.csrf-token").map(_.value).getOrElse("Unknown")
 
     def platform: String = request.body match {
       case body: ContributionRequest => body.platform.getOrElse(_platform)
       case _ => _platform
     }
 
-    def sessionId: String = _sessionId
+    def sessionIdFragment: String = _sessionId.takeRight(8)
 
     def isAndroid: Boolean = platform == "android"
     def isIos: Boolean = platform == "ios"
