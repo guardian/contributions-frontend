@@ -24,7 +24,7 @@ object Config {
 
   val paypalEmail = conf.getString("paypal.TEST.email")
   val paypalPassword = conf.getString("paypal.TEST.password")
-
+  
   def debug() { conf.root().render() }
 
   def printSummary(): Unit = {
