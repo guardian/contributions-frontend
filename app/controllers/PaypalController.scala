@@ -62,7 +62,10 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           ophanVisitId = None
         )
       }
-      .fold({_ => InternalServerError}, {_ => Ok})
+      .fold(error => {
+        logger.error(s"Unable to capture the payment: $error")
+        InternalServerError(error)
+      }, {_ => Ok})
   }
 
   def executePayment(
