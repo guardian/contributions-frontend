@@ -51,8 +51,11 @@ val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
 val guava = "com.google.guava" % "guava" % "21.0"
 val mockito = "org.mockito" % "mockito-all" % "1.9.5" % Test
 val awsCloudwatch = "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.95"
+val selenium = "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % "test"
+val seleniumHtmlUnitDriver ="org.seleniumhq.selenium" % "htmlunit-driver" % "2.23" % "test"
 val seleniumManager = "io.github.bonigarcia" % "webdrivermanager" % "1.7.1" % "test"
-
+val identityPlayAuth = "com.gu.identity" %% "identity-play-auth" % "0.22"
+val acceptanceTestDependencies = Seq(memsubCommonPlayAuth, scalaTest, selenium, seleniumHtmlUnitDriver, seleniumManager)
 
 libraryDependencies ++= Seq(
     cache,
@@ -77,15 +80,28 @@ libraryDependencies ++= Seq(
     guava,
     awsCloudwatch,
     mockito,
-    seleniumManager
+    selenium,
+    seleniumManager,
+    seleniumHtmlUnitDriver,
+    identityPlayAuth
 )
-dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
+libraryDependencies ++= acceptanceTestDependencies
+dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 resolvers += "old-github-maven-repo" at "http://guardian.github.io/maven/repo-releases/"
 
 addCommandAlias("devrun", "run 9112")
+
+addCommandAlias("acceptance-test", "testOnly acceptance.StripeCheckoutSpec")
+
+test in assembly := {} // skip tests during assembly
+
+javaOptions in Test += "-Dconfig.file=test/acceptance/conf/acceptance-test.conf"
+
+testOptions in Test += Tests.Argument("-oD") // display execution times in Scalatest output
+
 
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 serverLoading in Debian := Systemd

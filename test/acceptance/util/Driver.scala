@@ -1,5 +1,8 @@
 package acceptance.util
 
+import java.net.URL
+
+import acceptance.util.Driver.instantiateRemoteBrowser
 import io.github.bonigarcia.wdm.ChromeDriverManager
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.{Cookie, WebDriver}
@@ -27,17 +30,20 @@ object Driver {
   def addCookie(name: String, value: String) = manage().addCookie(new Cookie(name, value))
 
   private lazy val driver: WebDriver =
+    if (Config.webDriverRemoteUrl.isEmpty)
       instantiateLocalBrowser()
+    else
+      instantiateRemoteBrowser()
 
   private def instantiateLocalBrowser(): WebDriver = {
     ChromeDriverManager.getInstance().setup()
     new ChromeDriver()
   }
 
-//  private def instantiateRemoteBrowser(): WebDriver = {
-//    val caps = DesiredCapabilities.chrome()
-//    caps.setCapability("platform", "Windows 8.1")
-//    caps.setCapability("name", "membership-frontend")
-//    new RemoteWebDriver(new URL(Config.webDriverRemoteUrl), caps)
-//  }
+  private def instantiateRemoteBrowser(): WebDriver = {
+    val caps = DesiredCapabilities.chrome()
+    caps.setCapability("platform", "Windows 8.1")
+    caps.setCapability("name", "contributions-frontend")
+    new RemoteWebDriver(new URL(Config.webDriverRemoteUrl), caps)
+  }
 }
