@@ -1,8 +1,8 @@
 package acceptance
 
-import acceptance.util.{Browser, Dependencies, Driver}
+import acceptance.util._
 import fixtures.TestApplicationFactory
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FeatureSpec, FeatureSpecLike}
 import org.scalatestplus.play.{BaseOneServerPerSuite, OneBrowserPerSuite, PlaySpec}
 
 
@@ -15,6 +15,11 @@ class StripeCheckoutSpec extends PlaySpec
   with BeforeAndAfterAll {
 
   before { Driver.reset() }
+
+  override def beforeAll() {
+    Screencast.storeId()
+    Config.printSummary()
+  }
 
   override protected def afterAll(): Unit = Driver.quit()
 
