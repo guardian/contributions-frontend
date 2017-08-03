@@ -7,7 +7,6 @@ import cats.data.EitherT
 import cats.implicits._
 import com.gu.i18n
 import com.gu.i18n.CountryGroup
-import com.netaporter.uri.Uri
 import com.paypal.api.payments._
 import com.paypal.base.Constants
 import com.paypal.base.rest.APIContext
@@ -17,7 +16,6 @@ import models._
 import monitoring.TagAwareLogger
 import monitoring.LoggingTags
 import org.joda.time.DateTime
-import play.api.libs.json.Json
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -141,19 +139,47 @@ class PaypalService(
 
   }
 
-  def capturePayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
-    val payment = Payment.get(apiContext, paymentId)
-    val authorization = payment.getTransactions.get(0).getRelatedResources.get(0).getAuthorization
-    val amount = payment.getTransactions.get(0).getAmount
-    val amountToSend = new Amount()
-    amountToSend.setCurrency(amount.getCurrency)
-    amountToSend.setTotal(amount.getTotal)
-    val capture = new Capture()
-    capture.setAmount(amountToSend)
+  def tryToEitherT[A](action: String)(block: => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = {
+    EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
+      val message = s"Unable to $action"
+      error(message, t)
+      message
+    })
+  }
 
-    asyncExecute(authorization.capture(apiContext, capture)) transform {
+  def capturePayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, String, Capture] = {
+    def patchCustomId(payment: Payment, transaction: Transaction): EitherT[Future, String, Unit] = {
+      if (Option(transaction.getCustom).isDefined) {
+        EitherT.pure(())
+      } else {
+        val patch = new Patch("replace", "/transactions/0/custom")
+        patch.setValue(UUID.randomUUID())
+        asyncExecute(payment.update(apiContext, List(patch).asJava))
+      }
+    }
+
+    def capture(transaction: Transaction): Capture = {
+      val amount = transaction.getAmount
+      val amountToSend = new Amount()
+      amountToSend.setCurrency(amount.getCurrency)
+      amountToSend.setTotal(amount.getTotal)
+      val capture = new Capture()
+      capture.setAmount(amountToSend)
+      capture.setIsFinalCapture(true)
+      capture
+    }
+
+    val result = for {
+      payment <- asyncExecute(Payment.get(apiContext, paymentId))
+      transaction <- tryToEitherT("get payment transaction")(payment.getTransactions.asScala.head)
+      authorisation <- tryToEitherT("get transaction auth")(transaction.getRelatedResources.asScala.head.getAuthorization)
+      _ <- patchCustomId(payment, transaction) // side effect
+      r <- asyncExecute(authorisation.capture(apiContext, capture(transaction)))
+    } yield r
+
+    result transform {
       case Right(c) if c.getState.toUpperCase != "COMPLETED" => Left(s"payment returned with state: ${c.getState}")
-      case Right(_) => Right(payment)
+      case Right(c) => Right(c)
       case Left(error) => Left(error)
     }
   }
@@ -172,19 +198,12 @@ class PaypalService(
     ophanVisitId: Option[String]
   )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
-    def tryToEitherT[A](block: => A): EitherT[Future, String, A] = {
-      EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
-        error("Unable to store contribution metadata", t)
-        "Unable to store contribution metadata"
-      })
-    }
-
     val contributionDataToSave = for {
       payment <- asyncExecute(Payment.get(apiContext, paymentId))
-      transaction <- tryToEitherT(payment.getTransactions.asScala.head)
-      contributionId <- tryToEitherT(UUID.fromString(transaction.getCustom))
-      created <- tryToEitherT(new DateTime(payment.getCreateTime))
-      payerInfo <- tryToEitherT(payment.getPayer.getPayerInfo)
+      transaction <- tryToEitherT("get transaction")(payment.getTransactions.asScala.head)
+      contributionId <- tryToEitherT("get custom field")(UUID.fromString(transaction.getCustom))
+      created <- tryToEitherT("get payment date")(new DateTime(payment.getCreateTime))
+      payerInfo <- tryToEitherT("get PayerInfo")(payment.getPayer.getPayerInfo)
     } yield {
       val metadata = ContributionMetaData(
         contributionId = ContributionId(contributionId),
