@@ -29,7 +29,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
     val paypalService: PaypalService = paymentServices.paypalServiceFor(request)
 
     paypalService.capturePayment(captureBody.paymentId)
-      .flatMap { payment =>
+      .map { payment =>
         paypalService.storeMetaData(
           paymentId = payment.getId,
           testAllocations = request.testAllocations,
@@ -42,7 +42,10 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
           idUser = captureBody.idUser,
           platform = Some(captureBody.platform),
           ophanVisitId = None
-        )
+        ).leftMap { error =>
+          logger.error(s"Unable to store the metadata while capturing the payment. Continuing anyway. Error: $error")
+        }
+        payment
       }
       .fold(error => {
         logger.error(s"Unable to capture the payment: $error")
