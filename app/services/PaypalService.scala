@@ -53,17 +53,30 @@ class PaypalService(
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = EitherT(Future {
-    val result = Try(block)
-    Either.fromTry(result).leftMap {
+  private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = {
+
+    def detailToString(details: ErrorDetails): String =
+      s"""
+       |field: ${details.getField}
+       |issue: ${details.getIssue}
+       |""".stripMargin
+
+    def exceptionToPaypalError(exception: Throwable): PaypalApiError = exception match {
       case paypalException: PayPalRESTException =>
         error("Error while calling Paypal API", paypalException)
-        PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), paypalException.getMessage)
+        val details = paypalException.getDetails.getDetails.asScala
+          .map(detailToString)
+          .mkString(";\n")
+        PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), details)
       case exception: Exception =>
         error("Error while calling PayPal API", exception)
         PaypalApiError(exception.getMessage)
     }
-  })
+
+    EitherT(Future {
+      Either.fromTry(Try(block)).leftMap(exceptionToPaypalError)
+    })
+  }
 
   private def fullName(payerInfo: PayerInfo): Option[String] = {
     val firstName = Option(payerInfo.getFirstName)
