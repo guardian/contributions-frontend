@@ -64,7 +64,9 @@ class PaypalService(
     def exceptionToPaypalError(exception: Throwable): PaypalApiError = exception match {
       case paypalException: PayPalRESTException =>
         error("Error while calling Paypal API", paypalException)
-        val details = paypalException.getDetails.getDetails.asScala
+        val details = Option(paypalException.getDetails)
+          .flatMap(d => Option(d.getDetails))
+          .map(_.asScala).getOrElse(Nil)
           .map(detailToString)
           .mkString(";\n")
         PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), details)
