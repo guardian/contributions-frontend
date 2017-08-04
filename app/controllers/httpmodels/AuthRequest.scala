@@ -4,6 +4,7 @@ import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
 import play.api.libs.functional.syntax._
+import models.PaypalApiError
 import play.api.libs.json.Reads.min
 import play.api.libs.json._
 import utils.JsonUtils._
@@ -70,12 +71,12 @@ object AuthResponse {
 
   import scala.collection.JavaConverters._
 
-  def fromPayment(payment: Payment): Either[String, AuthResponse] = Either.fromOption(for {
+  def fromPayment(payment: Payment): Either[PaypalApiError, AuthResponse] = Either.fromOption(for {
     links <- Option(payment.getLinks)
     approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
     approvalUrl <- Option(approvalLinks.getHref)
     paymentId <- Option(payment.getId)
-  } yield AuthResponse(Uri.parse(approvalUrl), paymentId), "Unable to parse payment")
+  } yield AuthResponse(Uri.parse(approvalUrl), paymentId), PaypalApiError("Unable to parse payment"))
 
   implicit val uriWrites = new Writes[Uri] {
     override def writes(uri: Uri): JsValue = JsString(uri.toString)

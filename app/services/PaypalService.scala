@@ -9,7 +9,7 @@ import com.gu.i18n
 import com.gu.i18n.CountryGroup
 import com.paypal.api.payments._
 import com.paypal.base.Constants
-import com.paypal.base.rest.APIContext
+import com.paypal.base.rest.{APIContext, PayPalRESTException}
 import com.typesafe.config.Config
 import data.ContributionData
 import models._
@@ -54,11 +54,15 @@ class PaypalService(
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = EitherT(Future {
+  private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = EitherT(Future {
     val result = Try(block)
-    Either.fromTry(result).leftMap { exception =>
-      error("Error while calling PayPal API", exception)
-      exception.getMessage
+    Either.fromTry(result).leftMap {
+      case paypalException: PayPalRESTException =>
+        error("Error while calling Paypal API", paypalException)
+        PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), paypalException.getMessage)
+      case exception: Exception =>
+        error("Error while calling PayPal API", exception)
+        PaypalApiError(exception.getMessage)
     }
   })
 
@@ -83,7 +87,7 @@ class PaypalService(
     ophanBrowserId: Option[String],
     ophanVisitId: Option[String],
     supportRedirect: Option[Boolean] = Some(false)
-  )(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
+  )(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
 
     val paymentToCreate = {
 
@@ -128,27 +132,28 @@ class PaypalService(
     }
   }
 
-  def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
+  def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
-      case Right(p) if p.getState.toUpperCase != "APPROVED" => Left(s"payment returned with state: ${payment.getState}")
+      case Right(p) if p.getState.toUpperCase != "APPROVED" =>
+        Left(PaypalApiError(s"payment returned with state: ${payment.getState}"))
       case Right(p) => Right(p)
       case Left(error) => Left(error)
     }
 
   }
 
-  def tryToEitherT[A](action: String)(block: => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = {
+  def tryToEitherT[A](action: String)(block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = {
     EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
       val message = s"Unable to $action"
       error(message, t)
-      message
+      PaypalApiError(message)
     })
   }
 
-  def capturePayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, String, Capture] = {
-    def patchCustomId(payment: Payment, transaction: Transaction): EitherT[Future, String, Unit] = {
+  def capturePayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Capture] = {
+    def patchCustomId(payment: Payment, transaction: Transaction): EitherT[Future, PaypalApiError, Unit] = {
       if (Option(transaction.getCustom).isDefined) {
         EitherT.pure(())
       } else {
@@ -178,7 +183,7 @@ class PaypalService(
     } yield r
 
     result transform {
-      case Right(c) if c.getState.toUpperCase != "COMPLETED" => Left(s"payment returned with state: ${c.getState}")
+      case Right(c) if c.getState.toUpperCase != "COMPLETED" => Left(PaypalApiError(s"payment returned with state: ${c.getState}"))
       case Right(c) => Right(c)
       case Left(error) => Left(error)
     }
@@ -261,7 +266,7 @@ class PaypalService(
     }
 
     for {
-      data <- contributionDataToSave
+      data <- contributionDataToSave.leftMap(_.message)
       (contributor, contributionMetaData, contributorRow) = data
       contributionMetaData <- contributionData.insertPaymentMetaData(contributionMetaData)
       contributor <- contributionData.saveContributor(contributor)

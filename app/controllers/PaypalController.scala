@@ -60,14 +60,14 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           idUser = captureBody.idUser,
           platform = Some(captureBody.platform),
           ophanVisitId = None
-        ).leftMap { error =>
-          logger.error(s"Unable to store the metadata while capturing the payment. Continuing anyway. Error: $error")
+        ).leftMap { errorMessage =>
+          error(s"Unable to store the metadata while capturing the payment. Continuing anyway. Error: $errorMessage")
         }
         payment
       }
       .fold(error => {
         logger.error(s"Unable to capture the payment: $error")
-        InternalServerError(error)
+        InternalServerError(error.message)
       }, {_ => Ok})
   }
 
@@ -106,8 +106,8 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         ophanVisitId = ophanVisitId
       )
 
-    def notOkResult(message: String): Result = {
-      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: $message")
+    def notOkResult(paypalError: PaypalApiError): Result = {
+      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: ${paypalError.message}")
       cloudWatchMetrics.logPaymentFailure(PaymentProvider.Paypal, request.platform)
       render {
         case Accepts.Json() => BadRequest(JsNull)
