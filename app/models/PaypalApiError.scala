@@ -1,12 +1,13 @@
 package models
 
 import com.paypal.api.payments.Error
-import enumeratum.{Enum, EnumEntry}
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import play.api.libs.json.{JsValue, Json, Writes}
 
 
 sealed trait PaypalErrorType extends EnumEntry
 
-object PaypalErrorType extends Enum[PaypalErrorType] {
+object PaypalErrorType extends Enum[PaypalErrorType] with PlayJsonEnum[PaypalErrorType] {
   val values = findValues
 
   case object NotFound extends PaypalErrorType
@@ -25,4 +26,12 @@ case class PaypalApiError(
 
 object PaypalApiError {
   def apply(message: String): PaypalApiError = PaypalApiError(PaypalErrorType.Other, message)
+
+  // defining the Writes manually, otherwise Play-Json gets offended by the overloaded "apply" just above
+  implicit val jf: Writes[PaypalApiError] = new Writes[PaypalApiError] {
+    override def writes(o: PaypalApiError): JsValue = Json.obj(
+      "errorType" -> o.errorType,
+      "message" -> o.message
+    )
+  }
 }
