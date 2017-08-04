@@ -54,6 +54,7 @@ val postgresql = "org.postgresql" % "postgresql" % "9.4.1209"
 val identityCookie =  "com.gu.identity" %% "identity-cookie" % "3.51"
 val scalaTest = "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0"
 val enumeratum = "com.beachape" %% "enumeratum" % "1.5.12"
+val enumeratumJson = "com.beachape" %% "enumeratum-play-json" % "1.5.12"
 val sqs = "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.36"
 val slugify = "com.github.slugify" % "slugify" % "2.1.7"
 val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
@@ -81,6 +82,7 @@ libraryDependencies ++= Seq(
     postgresql,
     identityCookie,
     enumeratum,
+    enumeratumJson,
     sqs,
     slugify,
     scalaCheck,

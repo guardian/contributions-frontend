@@ -67,7 +67,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
       }
       .fold(error => {
         logger.error(s"Unable to capture the payment: $error")
-        InternalServerError(error.message)
+        InternalServerError(Json.toJson(error))
       }, {_ => Ok})
   }
 
