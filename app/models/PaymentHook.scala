@@ -30,8 +30,11 @@ object PaymentStatus extends Enum[PaymentStatus] {
   val paypalReads = new Reads[PaymentStatus] {
     override def reads(json: JsValue): JsResult[PaymentStatus] = json match {
       case JsString("PAYMENT.SALE.COMPLETED") => JsSuccess(Paid)
+      case JsString("PAYMENT.CAPTURE.COMPLETED") => JsSuccess(Paid)
       case JsString("PAYMENT.SALE.DENIED") => JsSuccess(Failed)
+      case JsString("PAYMENT.CAPTURE.DENIED") => JsSuccess(Failed)
       case JsString("PAYMENT.SALE.REFUNDED") => JsSuccess(Refunded)
+      case JsString("PAYMENT.CAPTURE.REFUNDED") => JsSuccess(Refunded)
       case JsString(wrongStatus) => JsError(s"Unexpected paypal status: $wrongStatus")
       case _ => JsError("Unknown paypal status type, a JsString was expected")
     }
