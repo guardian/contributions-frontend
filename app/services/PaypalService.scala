@@ -167,7 +167,7 @@ class PaypalService(
       if (Option(transaction.getCustom).isDefined) {
         EitherT.pure(())
       } else {
-        val patch = new Patch("replace", "/transactions/0/custom")
+        val patch = new Patch("add", "/transactions/0/custom")
         patch.setValue(UUID.randomUUID())
         asyncExecute(payment.update(apiContext, List(patch).asJava))
       }
