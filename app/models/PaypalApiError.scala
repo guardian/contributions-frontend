@@ -11,10 +11,12 @@ object PaypalErrorType extends Enum[PaypalErrorType] with PlayJsonEnum[PaypalErr
   val values = findValues
 
   case object NotFound extends PaypalErrorType
+  case object PaymentAlreadyDone extends PaypalErrorType
   case object Other extends PaypalErrorType
 
   def fromPaypalError(error: Error): PaypalErrorType = error.getName match {
     case "INVALID_RESOURCE_ID" => NotFound
+    case "PAYMENT_ALREADY_DONE" => PaymentAlreadyDone
     case _ => Other
   }
 }
