@@ -2,8 +2,8 @@ package acceptance
 
 import acceptance.util._
 import fixtures.TestApplicationFactory
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FeatureSpec, FeatureSpecLike}
-import org.scalatestplus.play.{BaseOneServerPerSuite, OneBrowserPerSuite, PlaySpec}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
+import org.scalatestplus.play.{BaseOneServerPerSuite, PlaySpec}
 
 
 
@@ -40,8 +40,8 @@ class CheckoutAcceptanceTest extends PlaySpec
   val thankYou = pages.ThankYou
   val postPayment = pages.PostPayment
 
-  "The OneBrowserPerTest trait" must {
-    "allow end to end card payment" in {
+  "The contributions site" must {
+    "allow card payments" in {
       checkDependenciesAreAvailable
       go to contributionAmount
       contributionAmount.selectAmountButton(0)
@@ -56,7 +56,7 @@ class CheckoutAcceptanceTest extends PlaySpec
       assert(thankYou.pageHasLoaded)
     }
 
-    "allow end to end paypal payment" in {
+    "allow PayPal payments" in {
       checkDependenciesAreAvailable
       go to contributionAmount
       contributionAmount.selectAmountButton(0)

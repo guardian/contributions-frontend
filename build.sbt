@@ -10,20 +10,28 @@ packageDescription := """lorem ipsum donor sit amet"""
 
 def env(key: String, default: String): String = Option(System.getenv(key)).getOrElse(default)
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala, BuildInfoPlugin, RiffRaffArtifact, JDebPackaging).settings(
-    buildInfoKeys := Seq[BuildInfoKey](
-        name,
-        BuildInfoKey.constant("buildNumber", env("BUILD_NUMBER", "DEV")),
-        BuildInfoKey.constant("buildTime", System.currentTimeMillis),
-        BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse(try {
-            "git rev-parse HEAD".!!.trim
-        } catch {
-            case e: Exception => "unknown"
-        }))
-    ),
-    buildInfoPackage := "app",
-    buildInfoOptions += BuildInfoOption.ToMap
-)
+def isAcceptanceTest(name: String): Boolean = name.contains("Acceptance")
+
+lazy val AcceptanceTest = config("acceptance").extend(Test)
+
+lazy val root = (project in file("."))
+    .enablePlugins(PlayScala, BuildInfoPlugin, RiffRaffArtifact, JDebPackaging)
+    .configs(AcceptanceTest)
+    .settings(
+        inConfig(AcceptanceTest)(Defaults.testTasks),
+
+        buildInfoKeys := Seq[BuildInfoKey](
+            name,
+            BuildInfoKey.constant("buildNumber", env("BUILD_NUMBER", "DEV")),
+            BuildInfoKey.constant("buildTime", System.currentTimeMillis),
+            BuildInfoKey.constant("gitCommitId", Option(System.getenv("BUILD_VCS_NUMBER")) getOrElse(try {
+                "git rev-parse HEAD".!!.trim
+            } catch {
+                case e: Exception => "unknown"
+            }))),
+        buildInfoPackage := "app",
+        buildInfoOptions += BuildInfoOption.ToMap
+    )
 
 PlayKeys.playRunHooks += AssetsWatch(baseDirectory.value)
 
@@ -33,6 +41,7 @@ publishArtifact in (Compile, packageDoc) := false
 
 play.sbt.routes.RoutesKeys.routesImport ++= Seq("controllers.Binders._", "com.gu.i18n.CountryGroup", "controllers.PaymentError")
 scalaVersion := "2.11.8"
+
 val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
 val cats = "org.typelevel" %% "cats" % "0.8.1"
 val membershipCommon = "com.gu" %% "membership-common" % "0.306"
@@ -43,19 +52,17 @@ val macwire = "com.softwaremill.macwire" %% "macros" % "2.2.2" % Provided
 val anormLib = "com.typesafe.play" %% "anorm" % "2.5.2"
 val postgresql = "org.postgresql" % "postgresql" % "9.4.1209"
 val identityCookie =  "com.gu.identity" %% "identity-cookie" % "3.51"
-val scalaTest = "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test
+val scalaTest = "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0"
 val enumeratum = "com.beachape" %% "enumeratum" % "1.5.12"
 val sqs = "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.36"
 val slugify = "com.github.slugify" % "slugify" % "2.1.7"
-val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
+val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
 val guava = "com.google.guava" % "guava" % "21.0"
 val mockito = "org.mockito" % "mockito-all" % "1.9.5" % Test
 val awsCloudwatch = "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.95"
-val selenium = "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % "test"
-val seleniumHtmlUnitDriver ="org.seleniumhq.selenium" % "htmlunit-driver" % "2.23" % "test"
-val seleniumManager = "io.github.bonigarcia" % "webdrivermanager" % "1.7.1" % "test"
-val identityPlayAuth = "com.gu.identity" %% "identity-play-auth" % "0.22"
-val acceptanceTestDependencies = Seq(memsubCommonPlayAuth, scalaTest, selenium, seleniumHtmlUnitDriver, seleniumManager)
+val selenium = "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % Test
+val seleniumManager = "io.github.bonigarcia" % "webdrivermanager" % "1.7.1" % Test
+val seleniumHtmlUnitDriver = "org.seleniumhq.selenium" % "htmlunit-driver" % "2.23" % Test
 
 libraryDependencies ++= Seq(
     cache,
@@ -80,13 +87,12 @@ libraryDependencies ++= Seq(
     guava,
     awsCloudwatch,
     mockito,
+    scalaTest,
     selenium,
     seleniumManager,
-    seleniumHtmlUnitDriver,
-    identityPlayAuth
+    seleniumHtmlUnitDriver
 )
 
-libraryDependencies ++= acceptanceTestDependencies
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
@@ -94,14 +100,15 @@ resolvers += "old-github-maven-repo" at "http://guardian.github.io/maven/repo-re
 
 addCommandAlias("devrun", "run 9112")
 
-addCommandAlias("acceptance-test", "testOnly acceptance.StripeCheckoutSpec")
-
 test in assembly := {} // skip tests during assembly
 
-javaOptions in Test += "-Dconfig.file=test/acceptance/conf/acceptance-test.conf"
 
-testOptions in Test += Tests.Argument("-oD") // display execution times in Scalatest output
+testOptions := Seq(Tests.Argument("-oD")) // display full stack traces on test error
+testOptions in Test := Seq(Tests.Filter(name => !isAcceptanceTest(name)))
+testOptions in AcceptanceTest := Seq(Tests.Filter(isAcceptanceTest))
 
+javaOptions in Test += "-Dconfig.file=test/resources/application.conf"
+javaOptions in AcceptanceTest += "-Dconfig.file=test/resources/application.conf"
 
 import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
 serverLoading in Debian := Systemd
