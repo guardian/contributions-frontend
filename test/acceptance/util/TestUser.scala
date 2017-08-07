@@ -7,18 +7,12 @@ import scala.concurrent.duration._
 import com.gu.identity.testing.usernames.TestUsernames
 
 
-class TestUser {
+trait TestUserGenerator {
   private val testUsers = TestUsernames(
     com.gu.identity.testing.usernames.Encoder.withSecret(Config.testUsersSecret),
     recency = Imports.Duration.standardDays(2)
     //recency = ofDays(2)
   )
 
-  private def addTestUserCookies(testUsername: String) = {
-    Driver.addCookie("ANALYTICS_OFF_KEY", "true")
-    Driver.addCookie("pre-signin-test-user", testUsername)
-  }
-
-  val username = testUsers.generate()
-  addTestUserCookies(username)
+  def addTestUserCookie: Unit = Driver.addCookie("_test_username", testUsers.generate())
 }

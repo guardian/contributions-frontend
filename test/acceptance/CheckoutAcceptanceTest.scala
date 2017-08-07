@@ -7,14 +7,18 @@ import org.scalatestplus.play.{BaseOneServerPerSuite, OneBrowserPerSuite, PlaySp
 
 
 
-class StripeCheckoutSpec extends PlaySpec
+class CheckoutAcceptanceTest extends PlaySpec
   with TestApplicationFactory
   with BaseOneServerPerSuite
   with Browser
+  with TestUserGenerator
   with BeforeAndAfter
   with BeforeAndAfterAll {
 
-  before { Driver.reset() }
+  before {
+    Driver.reset()
+    addTestUserCookie
+  }
 
   override def beforeAll() {
     Screencast.storeId()
