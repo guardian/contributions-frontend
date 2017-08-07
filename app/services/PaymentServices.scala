@@ -66,11 +66,13 @@ class PaymentServices(
     PaymentMode.values.map(mode => mode -> paypalServiceFor(mode)).toMap
   }
 
+  private def isTestUser(request: RequestHeader): Boolean =
+    request.cookies.get("_test_username").map(_.value)
+      .orElse(authProvider(request).flatMap(_.displayName))
+      .exists(testUsernames.isValid)
+
   private def isTestUser(displayName: String): Boolean =
     displayName.split(' ').headOption.exists(testUsernames.isValid)
-
-  private def isTestUser(request: RequestHeader): Boolean =
-    authProvider(request).flatMap(_.displayName).exists(isTestUser)
 
   private def modeFor(displayName: String): PaymentMode = if (isTestUser(displayName)) Testing else Default
 
