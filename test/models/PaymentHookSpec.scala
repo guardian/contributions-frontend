@@ -9,7 +9,9 @@ import models.PaymentMode.Testing
 
 class PaymentHookSpec extends WordSpec with MustMatchers {
 
+
   "A Payment hook" must {
+    val contributionId = ContributionId("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf")
     "be able to parse paypal's json" in {
 
       val json = Json.parse(paypalJson)
@@ -17,7 +19,7 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
 
       jsResult mustBe a [JsSuccess[_]]
       jsResult.get mustEqual PaypalHook(
-        contributionId = ContributionId("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf"),
+        contributionId = Some(contributionId),
         paymentId = "PAY-9D679537LH910742AK6VPPZI",
         created = new DateTime("2016-08-10T09:49:14Z"),
         currency = "GBP",
@@ -28,11 +30,11 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
     "be able to parse paypal's json and convert it to a payment hook" in {
 
       val json = Json.parse(paypalJson)
-      val jsResult = PaypalHook.reader.reads(json).map(hook => PaymentHook.fromPaypal(hook))
+      val jsResult = PaypalHook.reader.reads(json).map(hook => PaymentHook.fromPaypal(hook, contributionId))
 
       jsResult mustBe a [JsSuccess[_]]
       jsResult.get mustEqual PaymentHook(
-        contributionId = ContributionId("2e97dfb8-8b6c-4689-87de-84d2bb8b59bf"),
+        contributionId = contributionId,
         paymentId = "PAY-9D679537LH910742AK6VPPZI",
         provider = Paypal,
         created = new DateTime("2016-08-10T09:49:14Z"),

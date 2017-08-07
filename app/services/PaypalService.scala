@@ -3,7 +3,7 @@ package services
 import java.util.UUID
 
 import abtests.Allocation
-import cats.data.EitherT
+import cats.data.{EitherT, OptionT}
 import cats.implicits._
 import com.gu.i18n
 import com.gu.i18n.CountryGroup
@@ -318,7 +318,15 @@ class PaypalService(
   }
 
   def processPaymentHook(paypalHook: PaypalHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
-    contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
+
+    def contributionIdFromPaypal(paymentId: String): ContributionId = {
+      val payment = Payment.get(apiContext, paypalHook.paymentId)
+      val transaction = payment.getTransactions.asScala.head
+      ContributionId(UUID.fromString(transaction.getCustom))
+    }
+
+    val contributionId = paypalHook.contributionId.getOrElse(contributionIdFromPaypal(paypalHook.paymentId))
+    contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook, contributionId))
   }
 
   def paymentAmount(payment: Payment): Option[ContributionAmount] = for {
