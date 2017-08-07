@@ -11,8 +11,6 @@ object Config {
   val waitTimeout: Int = conf.getInt("waitTimeout")
   val baseUrl = conf.getString("contribute.url")
 
-  val identityFrontendUrl = conf.getString("identity.webapp.url")
-
   val testUsersSecret = conf.getString("identity.test.users.secret")
 
   val webDriverRemoteUrl = Try(conf.getString("webDriverRemoteUrl")) match {

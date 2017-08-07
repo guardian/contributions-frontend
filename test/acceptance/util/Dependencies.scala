@@ -19,10 +19,6 @@ object Dependencies {
     val url = Config.baseUrl
   }
 
-  object IdentityFrontend extends Availability {
-    val url = s"${Config.identityFrontendUrl}/signin"
-  }
-
   trait Availability {
     val url: String
     def isAvailable: Boolean = {
