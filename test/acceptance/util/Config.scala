@@ -24,7 +24,7 @@ object Config {
 
   val paypalEmail = conf.getString("paypal.TEST.email")
   val paypalPassword = conf.getString("paypal.TEST.password")
-  
+
   def debug() { conf.root().render() }
 
   def printSummary(): Unit = {
@@ -32,7 +32,6 @@ object Config {
     logger.info("=============================")
     logger.info(s"Stage: ${conf.getString("stage")}")
     logger.info(s"Contributions Frontend: ${baseUrl}")
-    logger.info(s"Identity Frontend: ${identityFrontendUrl}")
     logger.info(s"Screencast = https://saucelabs.com/tests/${Driver.sessionId}")
   }
 }
