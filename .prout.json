@@ -1,11 +1,18 @@
 {
-    "checkpoints": {
-        "PROD": {
-            "url": "https://contribute.theguardian.com/uk",
-            "overdue": "14M"
+  "checkpoints": {
+    "PROD": {
+      "url": "https://contribute.theguardian.com/uk",
+      "overdue": "14M",
+      "afterSeen": {
+        "travis": {
+          "config": {
+            "script": "sbt ++$TRAVIS_SCALA_VERSION acceptance:test"
+          }
         }
-    },
-    "sentry": {
-        "projects": ["contributions", "contributions-js"]
+      }
     }
+  },
+  "sentry": {
+    "projects": ["contributions", "contributions-js"]
+  }
 }
