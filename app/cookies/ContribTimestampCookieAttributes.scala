@@ -15,7 +15,7 @@ trait ContribTimestampCookieAttributes extends CookieAttributes {
    * If in production, the guardian domain is used, so that the cookie will be accessible from
    * e.g. theguardian.com, contribute.theguardian.com
    */
-  override val domain: Option[String] = if (Config.stageProd) Some(Config.guardianDomain) else Config.domain
+  override val domain: Option[String] = if (Config.stageProd) Some(Config.guardianDomain) else Config.domain.map(_.stripPrefix("contribute"))
 }
 
 object ContribTimestampCookieAttributes {
