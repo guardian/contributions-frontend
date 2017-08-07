@@ -157,7 +157,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
     allowedOrigin.toList.flatMap { origin =>
       List(
         "Access-Control-Allow-Origin" -> origin,
-        "Access-Control-Allow-Headers" -> "Origin, Content-Type, Accept"
+        "Access-Control-Allow-Headers" -> "Origin, Content-Type, Accept",
+        "Access-Control-Allow-Credentials" -> "true"
       )
     }
   }
