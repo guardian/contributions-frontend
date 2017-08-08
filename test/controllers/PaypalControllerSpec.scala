@@ -63,7 +63,7 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
 
   val controller: PaypalController = new PaypalController(mockPaymentServices, mockCsrfCheck, mockCloudwatchMetrics)
 
-  def storeMetaDataCalled(times: Int): Unit = {
+  def numberOfCallsToStoreMetaDataMustBe(times: Int): Unit = {
     def captor[A <: AnyRef](implicit classTag: ClassTag[A]): A =
       ArgumentCaptor.forClass[A](classTag.runtimeClass.asInstanceOf[Class[A]]).capture()
 
@@ -122,7 +122,7 @@ class PaypalControllerSpec extends PlaySpec
       status(result).mustBe(303)
       redirectLocation(result).mustBe(Some("/uk/post-payment"))
 
-      fixture.storeMetaDataCalled(1)
+      fixture.numberOfCallsToStoreMetaDataMustBe(1)
     }
 
     "generate correct redirect URL for unsuccessful PayPal payments" in {
@@ -136,7 +136,7 @@ class PaypalControllerSpec extends PlaySpec
       status(result).mustBe(303)
       redirectLocation(result).mustBe(Some("/uk?error_code=PaypalError"))
 
-      fixture.storeMetaDataCalled(0)
+      fixture.numberOfCallsToStoreMetaDataMustBe(0)
     }
   }
 }
