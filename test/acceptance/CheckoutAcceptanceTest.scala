@@ -5,8 +5,6 @@ import fixtures.TestApplicationFactory
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatestplus.play.{BaseOneServerPerSuite, PlaySpec}
 
-
-
 class CheckoutAcceptanceTest extends PlaySpec
   with TestApplicationFactory
   with BaseOneServerPerSuite
@@ -63,8 +61,9 @@ class CheckoutAcceptanceTest extends PlaySpec
       go to contributionAmount
       contributionAmount.selectAmountButton(0)
       contributionAmount.payWithPaypal
-      assert(paypalCheckout.canLogin)
+
       paypalCheckout.switchToPayPal
+      assert(paypalCheckout.canLogin)
       paypalCheckout.fillIn
       paypalCheckout.logIn
       assert(paypalCheckout.payPalHasPaymentSummary)

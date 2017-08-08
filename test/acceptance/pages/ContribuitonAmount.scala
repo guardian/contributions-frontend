@@ -79,7 +79,9 @@ object PaypalCheckout extends Page
   val container = name("injectedUl")
 
 
-  def canLogin: Boolean = pageHasElement(emailInput) && pageHasElement(passwordInput)
+  def canLogin: Boolean = {
+    pageHasElement(emailInput) && pageHasElement(passwordInput)
+  }
 
   def fillIn() = {
     setValueSlowly(emailInput, Config.paypalEmail)
