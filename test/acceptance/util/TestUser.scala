@@ -10,5 +10,10 @@ trait TestUserGenerator {
     recency = Imports.Duration.standardDays(2)
   )
 
-  def addTestUserCookie: Unit = Driver.addCookie("_test_username", testUsers.generate())
+  def addTestUserCookie: String = {
+    val username = testUsers.generate()
+
+    Driver.addCookie("_test_username", username)
+    username
+  }
 }

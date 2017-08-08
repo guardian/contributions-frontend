@@ -39,13 +39,13 @@ class CheckoutAcceptanceTest extends PlaySpec
   "The contributions site" must {
     "allow card payments" in {
       checkDependenciesAreAvailable
-      addTestUserCookie
+      val username = addTestUserCookie
 
       go to contributionAmount
       contributionAmount.selectAmountButton(0)
       contributionAmount.payWithCard
       assert(yourDetails.pageHasLoaded)
-      yourDetails.fillInDetails()
+      yourDetails.fillInDetails(username)
       yourDetails.pay
       assert(stripeCheckout.pageHasLoaded)
       stripeCheckout.switchToStripe
