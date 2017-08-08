@@ -1,11 +1,11 @@
-package controllers.forms
+package controllers.httpmodels
 
 import com.gu.i18n.CountryGroup
 import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
+import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads.min
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import utils.JsonUtils._
 
 import scala.util.Try
@@ -64,6 +64,7 @@ case class AuthResponse(approvalUrl: Uri, paymentId: String)
 
 object AuthResponse {
   import cats.syntax.either._
+
   import scala.collection.JavaConverters._
 
   def fromPayment(payment: Payment): Either[String, AuthResponse] = Either.fromOption(for {

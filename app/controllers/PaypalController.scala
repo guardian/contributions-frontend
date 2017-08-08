@@ -7,7 +7,7 @@ import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.paypal.api.payments.Payment
-import controllers.forms.{AuthRequest, AuthResponse}
+import controllers.httpmodels.{AuthRequest, AuthResponse}
 import models._
 import monitoring._
 import play.api.mvc._
