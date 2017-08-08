@@ -17,12 +17,10 @@ class CheckoutAcceptanceTest extends PlaySpec
 
   before {
     Driver.reset()
-    addTestUserCookie
   }
 
   override def beforeAll() {
     Screencast.storeId()
-    Config.printSummary()
   }
 
   override protected def afterAll(): Unit = Driver.quit()
@@ -43,6 +41,8 @@ class CheckoutAcceptanceTest extends PlaySpec
   "The contributions site" must {
     "allow card payments" in {
       checkDependenciesAreAvailable
+      addTestUserCookie
+
       go to contributionAmount
       contributionAmount.selectAmountButton(0)
       contributionAmount.payWithCard
@@ -58,6 +58,8 @@ class CheckoutAcceptanceTest extends PlaySpec
 
     "allow PayPal payments" in {
       checkDependenciesAreAvailable
+      addTestUserCookie
+
       go to contributionAmount
       contributionAmount.selectAmountButton(0)
       contributionAmount.payWithPaypal
