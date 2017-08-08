@@ -118,9 +118,15 @@ npm test
 ```
 
 #### Scala tests
-
+To run the unit tests: 
 ```
 sbt test
+```
+
+#### Selenium tests
+To run the Selenium tests:
+```
+sbt acceptance:test
 ```
 
 ## Deployment
