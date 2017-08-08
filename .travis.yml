@@ -11,6 +11,4 @@ cache:
 before_cache:
     - find $HOME/.sbt -name "*.lock" -type f -delete -print
     - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete -print
-# We don't really care about what travis does at this point,
-# as the acceptance tests (which we do care about) are triggered by Prout.
-script: sbt ++$TRAVIS_SCALA_VERSION test
+script: sbt ++$TRAVIS_SCALA_VERSION acceptance:test
