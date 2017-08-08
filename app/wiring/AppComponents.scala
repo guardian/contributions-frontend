@@ -18,7 +18,7 @@ import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services.{EmailService, IdentityService, OphanService, PaymentServices}
 import router.Routes
-import configuration.Config
+import configuration.{Config, CorsConfig, SupportConfig}
 import monitoring.{CloudWatch, CloudWatchMetrics}
 
 //Sometimes intellij deletes this -> (import router.Routes)
@@ -30,6 +30,8 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
 
   lazy val config = ConfigFactory.load()
   lazy val stripeConfig = config.getConfig("stripe")
+  lazy val corsConfig = CorsConfig.from(config.getConfig("cors"))
+  lazy val supportConfig = SupportConfig.from(config.getConfig("support-frontend"))
   private val idConfig = config.getConfig("identity")
 
   lazy val identityKeys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
@@ -73,7 +75,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
   lazy val paypalController = wire[PaypalController]
-  lazy val stripeController = new StripeController(paymentServices, stripeConfig, ophanService, cloudWatchMetrics)
+  lazy val stripeController = new StripeController(paymentServices, stripeConfig, corsConfig, ophanService, cloudWatchMetrics)
   lazy val userController = wire[UserController]
   lazy val epicComponentsController = wire[EpicComponentsController]
 
