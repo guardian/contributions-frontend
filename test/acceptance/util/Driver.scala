@@ -2,7 +2,6 @@ package acceptance.util
 
 import java.net.URL
 
-import acceptance.util.Driver.instantiateRemoteBrowser
 import io.github.bonigarcia.wdm.ChromeDriverManager
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.{Cookie, WebDriver}

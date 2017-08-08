@@ -63,7 +63,7 @@ class CheckoutAcceptanceTest extends PlaySpec
       go to contributionAmount
       contributionAmount.selectAmountButton(0)
       contributionAmount.payWithPaypal
-      assert(paypalCheckout.payPalCheckoutHasLoaded)
+      assert(paypalCheckout.canLogin)
       paypalCheckout.switchToPayPal
       paypalCheckout.fillIn
       paypalCheckout.logIn
