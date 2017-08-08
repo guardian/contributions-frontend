@@ -24,12 +24,4 @@ object Config {
   val paypalPassword = conf.getString("paypal.TEST.password")
 
   def debug() { conf.root().render() }
-
-  def printSummary(): Unit = {
-    logger.info("Acceptance Test Configuration")
-    logger.info("=============================")
-    logger.info(s"Stage: ${conf.getString("stage")}")
-    logger.info(s"Contributions Frontend: ${baseUrl}")
-    logger.info(s"Screencast = https://saucelabs.com/tests/${Driver.sessionId}")
-  }
 }
