@@ -162,8 +162,6 @@
             InstancePort: 9000
             Protocol: HTTPS
             SSLCertificateId: !Ref ELBSSLCertificate
-            PolicyNames:
-              - CookieBasedPolicy
         SecurityGroups:
           - !Ref LoadBalancerSecurityGroup
         Subnets: !Ref Subnets
@@ -176,9 +174,6 @@
         ConnectionDrainingPolicy:
           Enabled: true
           Timeout: 60
-        LBCookieStickinessPolicy:
-          - CookieExpirationPeriod: 1800
-            PolicyName: CookieBasedPolicy
     LoadBalancerSecurityGroup:
       Type: AWS::EC2::SecurityGroup
       Properties:
