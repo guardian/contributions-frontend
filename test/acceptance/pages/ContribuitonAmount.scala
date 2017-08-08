@@ -33,8 +33,8 @@ object YourDetails extends Page
   val email = id("email")
   val postcode = id("postcode")
 
-  def fillInDetails() = {
-    setValue(fullName, "Mx Testy McTestio")
+  def fillInDetails(name: String) = {
+    setValue(fullName, name)
     setValue(email, "test123@gu.vom")
     setValue(postcode, "TES T10")
   }
