@@ -4,6 +4,7 @@ import abtests.Allocation
 import cats.data.EitherT
 import com.gu.i18n.{CountryGroup, GBP}
 import com.paypal.api.payments.Payment
+import configuration.{CorsConfig, SupportConfig}
 import fixtures.TestApplicationFactory
 import models.{ContributionAmount, IdentityId, SavedContributionData}
 import monitoring.{CloudWatchMetrics, LoggingTags}
@@ -34,6 +35,10 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
 
   val mockCloudwatchMetrics: CloudWatchMetrics = mock[CloudWatchMetrics]
 
+  val mockCorsConfig = mock[CorsConfig]
+
+  val supportConfig = SupportConfig("https://support.thegulocal.com/thankyou")
+
   Mockito.when(mockPaymentServices.paypalServiceFor(Matchers.any[Request[_]]))
     .thenReturn(mockPaypalService)
 
@@ -61,7 +66,7 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
   )(Matchers.any[LoggingTags]))
     .thenReturn(EitherT.pure[Future, String, SavedContributionData](mock[SavedContributionData]))
 
-  val controller: PaypalController = new PaypalController(mockPaymentServices, mockCsrfCheck, mockCloudwatchMetrics)
+  val controller: PaypalController = new PaypalController(mockPaymentServices, mockCorsConfig, supportConfig, mockCsrfCheck, mockCloudwatchMetrics)
 
   def numberOfCallsToStoreMetaDataMustBe(times: Int): Unit = {
     def captor[A <: AnyRef](implicit classTag: ClassTag[A]): A =
@@ -106,10 +111,38 @@ class PaypalControllerSpec extends PlaySpec
     refererUrl = None,
     ophanBrowserId = None,
     ophanPageviewId = None,
-    ophanVisitId = None
+    ophanVisitId = None,
+    supportRedirect = None
+  )
+
+  def executeSupportPayment(controller: PaypalController): Action[AnyContent] = controller.executePayment(
+    countryGroup = CountryGroup.UK,
+    paymentId = "test",
+    token = "test",
+    payerId = "test",
+    cmp = None,
+    intCmp = None,
+    refererPageviewId = None,
+    refererUrl = None,
+    ophanBrowserId = None,
+    ophanPageviewId = None,
+    ophanVisitId = None,
+    supportRedirect = Some(true)
   )
 
   "Paypal Controller" should {
+
+    "generate correct redirect URL for support's successful PayPal payments" in {
+      val fixture = new PaypalControllerFixture {
+        Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
+          .thenReturn(EitherT.right[Future, String, Payment](Future.successful(mockPaypalPayment)))
+      }
+
+      val result: Future[Result] = executeSupportPayment(fixture.controller)(fakeRequest)
+
+      status(result).mustBe(303)
+      redirectLocation(result).mustBe(Some("https://support.thegulocal.com/thankyou"))
+    }
 
     "generate correct redirect URL for successful PayPal payments" in {
       val fixture = new PaypalControllerFixture {

@@ -19,6 +19,7 @@ import monitoring.LoggingTags
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
@@ -82,7 +83,8 @@ class PaypalService(
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
-    ophanVisitId: Option[String]
+    ophanVisitId: Option[String],
+    supportRedirect: Option[Boolean] = Some(false)
   )(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
 
     val paymentToCreate = {
@@ -95,7 +97,8 @@ class PaypalService(
           ophanBrowserId.map(value => s"bid=$value"),
           refererPageviewId.map(value => s"refererPageviewId=$value"),
           refererUrl.map(value => s"refererUrl=$value"),
-          ophanVisitId.map(value => s"ophanVisitId=$value")
+          ophanVisitId.map(value => s"ophanVisitId=$value"),
+          supportRedirect.map(value => s"supportRedirect=$value")
         ).flatten match {
           case Nil => ""
           case params => params.mkString("?", "&", "")

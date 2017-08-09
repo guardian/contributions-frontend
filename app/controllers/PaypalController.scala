@@ -7,11 +7,12 @@ import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.paypal.api.payments.Payment
+import configuration.{CorsConfig, SupportConfig}
 import controllers.httpmodels.{AuthRequest, AuthResponse}
 import models._
 import monitoring._
 import play.api.mvc._
-import services.PaymentServices
+import services.{PaymentServices, PaypalApiConfig}
 import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
@@ -20,9 +21,26 @@ import play.filters.csrf.CSRFCheck
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
+class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig, supportConfig: SupportConfig,
+  checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
   import ContribTimestampCookieAttributes._
+
+  def authorizeOptions = CachedAction { request =>
+    NoContent.withHeaders(("Vary" -> "Origin") :: corsHeaders(request): _*)
+  }
+
+  private def corsHeaders(request: Request[_]) = {
+    val origin = request.headers.get("origin")
+    val allowedOrigin = origin.filter(corsConfig.allowedOrigins.contains)
+    allowedOrigin.toList.flatMap { origin =>
+      List(
+        "Access-Control-Allow-Origin" -> origin,
+        "Access-Control-Allow-Headers" -> "Origin, Content-Type, Accept",
+        "Access-Control-Allow-Credentials" -> "true"
+      )
+    }
+  }
 
   def executePayment(
     countryGroup: CountryGroup,
@@ -35,7 +53,8 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
-    ophanVisitId: Option[String]
+    ophanVisitId: Option[String],
+    supportRedirect: Option[Boolean]
   ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
 
     val paypalService = paymentServices.paypalServiceFor(request)
@@ -75,7 +94,12 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
           val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
-          redirectWithCampaignCodes(routes.Contributions.postPayment(countryGroup).url).addingToSession(session: _ *)
+          val redirectUrl = if (supportRedirect.getOrElse(false)) {
+            supportConfig.thankYouURL
+          } else {
+            routes.Contributions.postPayment(countryGroup).url
+          }
+          redirectWithCampaignCodes(redirectUrl).addingToSession(session: _ *)
       }
       info(s"Paypal payment from platform: ${request.platform} is successful. Request id: ${request.id}.")
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
@@ -96,6 +120,7 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
       val authRequest = request.body
       val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
       val paypalService = paymentServices.paypalServiceFor(request)
+      val supportRedirect = authRequest.supportRedirect
       val payment = paypalService.getPayment(
         amount = amount,
         countryGroup = authRequest.countryGroup,
@@ -106,19 +131,20 @@ class PaypalController(paymentServices: PaymentServices, checkToken: CSRFCheck, 
         refererUrl = authRequest.refererUrl,
         ophanPageviewId = authRequest.ophanPageviewId,
         ophanBrowserId = authRequest.ophanBrowserId,
-        ophanVisitId = authRequest.ophanVisitId
+        ophanVisitId = authRequest.ophanVisitId,
+        supportRedirect = authRequest.supportRedirect
       )
 
       payment.subflatMap(AuthResponse.fromPayment).fold(
         err => {
           error(s"Error getting PayPal auth response for request id: ${request.id}, platform: ${request.platform}.\n\t error message: $err")
           cloudWatchMetrics.logPaymentAuthFailure(PaymentProvider.Paypal, request.platform)
-          InternalServerError("Error getting PayPal auth url")
+          InternalServerError("Error getting PayPal auth url").withHeaders(corsHeaders(request): _*)
         },
         authResponse => {
           info(s"Paypal payment auth response successfully obtained for request id: ${request.id}, platform: ${request.platform}.")
           cloudWatchMetrics.logPaymentAuthSuccess(PaymentProvider.Paypal, request.platform)
-          Ok(Json.toJson(authResponse))
+          Ok(Json.toJson(authResponse)).withHeaders(corsHeaders(request): _*)
         }
       )
     }

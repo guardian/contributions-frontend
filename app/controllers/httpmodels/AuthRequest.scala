@@ -20,7 +20,8 @@ case class AuthRequest private (
   refererUrl: Option[String],
   ophanPageviewId: Option[String],
   ophanBrowserId: Option[String],
-  ophanVisitId: Option[String]
+  ophanVisitId: Option[String],
+  supportRedirect: Option[Boolean]
 )
 
 object AuthRequest {
@@ -40,11 +41,12 @@ object AuthRequest {
     refererUrl: Option[String],
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
-    ophanVisitId: Option[String]
+    ophanVisitId: Option[String],
+    supportRedirect: Option[Boolean]
   ): AuthRequest = {
     val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
 
-    new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId)
+    new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId, supportRedirect)
   }
 
   implicit val authRequestReads: Reads[AuthRequest] = (
@@ -56,7 +58,8 @@ object AuthRequest {
       (__ \ "refererUrl").readNullable[String] and
       (__ \ "ophanPageviewId").readNullable[String] and
       (__ \ "ophanBrowserId").readNullable[String] and
-      (__ \ "ophanVisitId").readNullable[String]
+      (__ \ "ophanVisitId").readNullable[String] and
+      (__ \ "supportRedirect").readNullable[Boolean]
     ) (AuthRequest.withSafeRefererUrl _)
 }
 

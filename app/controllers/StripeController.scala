@@ -13,6 +13,7 @@ import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
 import com.gu.zuora.soap.models.Queries.PaymentMethod
 import com.typesafe.config.Config
+import configuration.CorsConfig
 import controllers.forms.ContributionRequest
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
@@ -27,7 +28,7 @@ import utils.MaxAmount
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StripeController(paymentServices: PaymentServices, stripeConfig: Config, ophanService: OphanService, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
+class StripeController(paymentServices: PaymentServices, stripeConfig: Config, corsConfig: CorsConfig, ophanService: OphanService, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
 
   def payOptions = CachedAction { request =>
@@ -149,11 +150,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, o
     }
   }
 
-  private val allowedOrigins = stripeConfig.getStringList("cors.allowedOrigins")
-
   private def corsHeaders(request: Request[_]) = {
     val origin = request.headers.get("origin")
-    val allowedOrigin = origin.filter(allowedOrigins.contains)
+    val allowedOrigin = origin.filter(corsConfig.allowedOrigins.contains)
     allowedOrigin.toList.flatMap { origin =>
       List(
         "Access-Control-Allow-Origin" -> origin,
