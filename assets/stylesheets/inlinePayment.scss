@@ -113,8 +113,9 @@ body {
         }
     }
 
-    &:focus {
+    &.selected {
         background-color: #333;
+        color: white;
     }
 
     &.fade-out {

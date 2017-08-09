@@ -91,6 +91,7 @@ export default class Form extends Component {
                             return <AmountButton
                                 amount={amount}
                                 focusOnMount={i === 1}
+                                isSelected={amount === state.selectedAmount.value}
                                 symbol={this.formData.symbol}
                                 setAmount={this.setAmountFrom(Button).bind(this, amount)}
                                 dim={!!this.getInputAmountValue()}/>
