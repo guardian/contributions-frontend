@@ -11,8 +11,8 @@ export default class ContributeButton {
 
     componentDidMount() {
         paypal.Button.render({
-            env: 'sandbox', // Or 'sandbox',
-            commit: true, // Show a 'Pay Now' button,
+            env: 'production', // change to 'sandbox' to allow payments in dev mode
+            commit: true,
             style: {
                 color: 'gold',
                 label: 'pay',
