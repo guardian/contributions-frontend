@@ -139,7 +139,7 @@ class PaypalControllerSpec extends PlaySpec
     "generate correct redirect URL for support's successful PayPal payments" in {
       val fixture = new PaypalControllerFixture {
         Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
-          .thenReturn(EitherT.right[Future, String, Payment](Future.successful(mockPaypalPayment)))
+          .thenReturn(EitherT.right[Future, PaypalApiError, Payment](Future.successful(mockPaypalPayment)))
       }
 
       val result: Future[Result] = executeSupportPayment(fixture.controller)(fakeRequest)
