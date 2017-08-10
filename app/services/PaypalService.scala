@@ -3,13 +3,13 @@ package services
 import java.util.UUID
 
 import abtests.Allocation
-import cats.data.{EitherT, OptionT}
+import cats.data.EitherT
 import cats.implicits._
 import com.gu.i18n
 import com.gu.i18n.CountryGroup
 import com.paypal.api.payments._
 import com.paypal.base.Constants
-import com.paypal.base.rest.{APIContext, PayPalRESTException}
+import com.paypal.base.rest.APIContext
 import com.typesafe.config.Config
 import data.ContributionData
 import models._
@@ -17,11 +17,11 @@ import monitoring.TagAwareLogger
 import monitoring.LoggingTags
 import org.joda.time.DateTime
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
+import scala.util.control.NonFatal
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
 
@@ -55,30 +55,11 @@ class PaypalService(
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
   private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = {
-
-    def detailToString(details: ErrorDetails): String =
-      s"""
-       |field: ${details.getField}
-       |issue: ${details.getIssue}
-       |""".stripMargin
-
-    def exceptionToPaypalError(exception: Throwable): PaypalApiError = exception match {
-      case paypalException: PayPalRESTException =>
-        error("Error while calling Paypal API", paypalException)
-        val details = Option(paypalException.getDetails)
-          .flatMap(d => Option(d.getDetails))
-          .map(_.asScala).getOrElse(Nil)
-          .map(detailToString)
-          .mkString(";\n")
-        PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), details)
-      case exception: Exception =>
-        error("Error while calling PayPal API", exception)
-        PaypalApiError(exception.getMessage)
+    Future(block).attemptT.leftMap {
+      case NonFatal(throwable) =>
+        error("Error while calling Paypal API", throwable)
+        PaypalApiError.fromThrowable(throwable)
     }
-
-    EitherT(Future {
-      Either.fromTry(Try(block)).leftMap(exceptionToPaypalError)
-    })
   }
 
   private def fullName(payerInfo: PayerInfo): Option[String] = {
