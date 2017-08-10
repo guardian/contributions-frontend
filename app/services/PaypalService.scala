@@ -138,12 +138,12 @@ class PaypalService(
     }
   }
 
-  def tryToEitherT[A](action: String)(block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = {
-    EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
+  def attempt[A](action: String)(block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = {
+    Future(block).attemptT.leftMap { t: Throwable =>
       val message = s"Unable to $action"
       error(message, t)
       PaypalApiError(message)
-    })
+    }
   }
 
   def capturePayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Capture] = {
@@ -161,8 +161,8 @@ class PaypalService(
 
     val result = for {
       payment <- asyncExecute(Payment.get(apiContext, paymentId))
-      transaction <- tryToEitherT("get payment transaction")(payment.getTransactions.asScala.head)
-      authorisation <- tryToEitherT("get transaction auth")(transaction.getRelatedResources.asScala.head.getAuthorization)
+      transaction <- attempt("get payment transaction")(payment.getTransactions.asScala.head)
+      authorisation <- attempt("get transaction auth")(transaction.getRelatedResources.asScala.head.getAuthorization)
       r <- asyncExecute(authorisation.capture(apiContext, capture(transaction)))
     } yield r
 
@@ -189,10 +189,10 @@ class PaypalService(
 
     val contributionDataToSave = for {
       payment <- asyncExecute(Payment.get(apiContext, paymentId))
-      transaction <- tryToEitherT("get transaction")(payment.getTransactions.asScala.head)
-      contributionId <- tryToEitherT("get custom field")(UUID.fromString(transaction.getCustom))
-      created <- tryToEitherT("get payment date")(new DateTime(payment.getCreateTime))
-      payerInfo <- tryToEitherT("get PayerInfo")(payment.getPayer.getPayerInfo)
+      transaction <- attempt("get transaction")(payment.getTransactions.asScala.head)
+      contributionId <- attempt("get custom field")(UUID.fromString(transaction.getCustom))
+      created <- attempt("get payment date")(new DateTime(payment.getCreateTime))
+      payerInfo <- attempt("get PayerInfo")(payment.getPayer.getPayerInfo)
     } yield {
       val metadata = ContributionMetaData(
         contributionId = ContributionId(contributionId),
