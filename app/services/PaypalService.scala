@@ -149,15 +149,6 @@ class PaypalService(
   }
 
   def capturePayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Capture] = {
-    def patchCustomId(payment: Payment, transaction: Transaction): EitherT[Future, PaypalApiError, Unit] = {
-      if (Option(transaction.getCustom).isDefined) {
-        EitherT.pure(())
-      } else {
-        val patch = new Patch("add", "/transactions/0/custom")
-        patch.setValue(UUID.randomUUID())
-        asyncExecute(payment.update(apiContext, List(patch).asJava))
-      }
-    }
 
     def capture(transaction: Transaction): Capture = {
       val amount = transaction.getAmount
@@ -174,7 +165,6 @@ class PaypalService(
       payment <- asyncExecute(Payment.get(apiContext, paymentId))
       transaction <- tryToEitherT("get payment transaction")(payment.getTransactions.asScala.head)
       authorisation <- tryToEitherT("get transaction auth")(transaction.getRelatedResources.asScala.head.getAuthorization)
-      _ <- patchCustomId(payment, transaction) // side effect
       r <- asyncExecute(authorisation.capture(apiContext, capture(transaction)))
     } yield r
 
