@@ -131,13 +131,11 @@ class PaypalService(
   def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
-    asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
-      case Right(p) if p.getState.toUpperCase != "APPROVED" =>
-        Left(PaypalApiError(s"payment returned with state: ${payment.getState}"))
-      case Right(p) => Right(p)
-      case Left(error) => Left(error)
+    asyncExecute(payment.execute(apiContext, paymentExecution)) flatMap { payment =>
+      if (payment.getState.toUpperCase != "APPROVED") {
+        EitherT.left(Future.successful(PaypalApiError(s"payment returned with state: ${payment.getState}")))
+      } else EitherT.pure(payment)
     }
-
   }
 
   def tryToEitherT[A](action: String)(block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = {
@@ -168,10 +166,10 @@ class PaypalService(
       r <- asyncExecute(authorisation.capture(apiContext, capture(transaction)))
     } yield r
 
-    result transform {
-      case Right(c) if c.getState.toUpperCase != "COMPLETED" => Left(PaypalApiError(s"payment returned with state: ${c.getState}"))
-      case Right(c) => Right(c)
-      case Left(error) => Left(error)
+    result flatMap { capture =>
+      if (capture.getState.toUpperCase != "COMPLETED") {
+        EitherT.left(Future.successful(PaypalApiError(s"payment returned with state: ${capture.getState}")))
+      } else EitherT.pure(capture)
     }
   }
 
