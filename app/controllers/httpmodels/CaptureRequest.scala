@@ -1,7 +1,7 @@
 package controllers.httpmodels
 
 import models.IdentityId
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, Reads}
 
 case class CaptureRequest (
   paymentId: String,
@@ -15,5 +15,5 @@ case class CaptureRequest (
   ophanBrowserId: Option[String])
 
 object CaptureRequest {
-  implicit val jf: Format[CaptureRequest] = Json.format[CaptureRequest]
+  implicit val captureRequestReads: Reads[CaptureRequest] = Json.reads[CaptureRequest]
 }

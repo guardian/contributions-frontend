@@ -48,5 +48,5 @@ object PaypalApiError {
       PaypalApiError.fromString(exception.getMessage)
   }
 
-  implicit val jf: Writes[PaypalApiError] = Json.writes[PaypalApiError]
+  implicit val paypalApiErrorWrite: Writes[PaypalApiError] = Json.writes[PaypalApiError]
 }
