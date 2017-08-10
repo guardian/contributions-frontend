@@ -131,10 +131,10 @@ class PaypalService(
   def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
-    asyncExecute(payment.execute(apiContext, paymentExecution)) flatMap { payment =>
+    asyncExecute(payment.execute(apiContext, paymentExecution)) subflatMap { payment =>
       if (payment.getState.toUpperCase != "APPROVED") {
-        EitherT.left(Future.successful(PaypalApiError.fromString(s"payment returned with state: ${payment.getState}")))
-      } else EitherT.pure(payment)
+        Left(PaypalApiError.fromString(s"payment returned with state: ${payment.getState}"))
+      } else Right(payment)
     }
   }
 
@@ -166,10 +166,10 @@ class PaypalService(
       r <- asyncExecute(authorisation.capture(apiContext, capture(transaction)))
     } yield r
 
-    result flatMap { capture =>
+    result subflatMap { capture =>
       if (capture.getState.toUpperCase != "COMPLETED") {
-        EitherT.left(Future.successful(PaypalApiError.fromString(s"payment returned with state: ${capture.getState}")))
-      } else EitherT.pure(capture)
+        Left(PaypalApiError.fromString(s"payment returned with state: ${capture.getState}"))
+      } else Right(capture)
     }
   }
 
