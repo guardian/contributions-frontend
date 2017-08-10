@@ -3,7 +3,7 @@ package models
 import com.paypal.api.payments.{Error, ErrorDetails}
 import com.paypal.base.rest.PayPalRESTException
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{Json, Writes}
 import scala.collection.JavaConverters._
 
 sealed trait PaypalErrorType extends EnumEntry
@@ -28,7 +28,7 @@ case class PaypalApiError(
 )
 
 object PaypalApiError {
-  def apply(message: String): PaypalApiError = PaypalApiError(PaypalErrorType.Other, message)
+  def fromString(message: String): PaypalApiError = PaypalApiError(PaypalErrorType.Other, message)
 
   private def detailToString(details: ErrorDetails): String =
     s"""
@@ -45,14 +45,8 @@ object PaypalApiError {
         .mkString(";\n")
       PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), details)
     case exception: Exception =>
-      PaypalApiError(exception.getMessage)
+      PaypalApiError.fromString(exception.getMessage)
   }
 
-  // defining the Writes manually, otherwise Play-Json gets offended by the overloaded "apply" just above
-  implicit val jf: Writes[PaypalApiError] = new Writes[PaypalApiError] {
-    override def writes(o: PaypalApiError): JsValue = Json.obj(
-      "errorType" -> o.errorType,
-      "message" -> o.message
-    )
-  }
+  implicit val jf: Writes[PaypalApiError] = Json.writes[PaypalApiError]
 }

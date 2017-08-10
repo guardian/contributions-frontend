@@ -76,7 +76,7 @@ object AuthResponse {
     approvalLinks <- links.asScala.find(_.getRel.equalsIgnoreCase("approval_url"))
     approvalUrl <- Option(approvalLinks.getHref)
     paymentId <- Option(payment.getId)
-  } yield AuthResponse(Uri.parse(approvalUrl), paymentId), PaypalApiError("Unable to parse payment"))
+  } yield AuthResponse(Uri.parse(approvalUrl), paymentId), PaypalApiError.fromString("Unable to parse payment"))
 
   implicit val uriWrites = new Writes[Uri] {
     override def writes(uri: Uri): JsValue = JsString(uri.toString)

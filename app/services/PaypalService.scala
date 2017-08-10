@@ -133,7 +133,7 @@ class PaypalService(
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
     asyncExecute(payment.execute(apiContext, paymentExecution)) flatMap { payment =>
       if (payment.getState.toUpperCase != "APPROVED") {
-        EitherT.left(Future.successful(PaypalApiError(s"payment returned with state: ${payment.getState}")))
+        EitherT.left(Future.successful(PaypalApiError.fromString(s"payment returned with state: ${payment.getState}")))
       } else EitherT.pure(payment)
     }
   }
@@ -142,7 +142,7 @@ class PaypalService(
     Future(block).attemptT.leftMap { t: Throwable =>
       val message = s"Unable to $action"
       error(message, t)
-      PaypalApiError(message)
+      PaypalApiError.fromString(message)
     }
   }
 
@@ -168,7 +168,7 @@ class PaypalService(
 
     result flatMap { capture =>
       if (capture.getState.toUpperCase != "COMPLETED") {
-        EitherT.left(Future.successful(PaypalApiError(s"payment returned with state: ${capture.getState}")))
+        EitherT.left(Future.successful(PaypalApiError.fromString(s"payment returned with state: ${capture.getState}")))
       } else EitherT.pure(capture)
     }
   }
