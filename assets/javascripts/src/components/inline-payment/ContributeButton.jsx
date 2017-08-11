@@ -5,7 +5,7 @@ import { h } from 'preact';
 export default class ContributeButton {
     render() {
         return <div class="paypal-button-wrapper">
-            <button type="button" id="contribution-button"></button>
+            <div id="contribution-button"></div>
         </div>;
     }
 
