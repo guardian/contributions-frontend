@@ -38,7 +38,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
 
   lazy val testUsernames = TestUsernames(
     com.gu.identity.testing.usernames.Encoder.withSecret(idConfig.getString("test.users.secret")),
-    recency = 2.days.standardDuration
+    recency = java.time.Duration.ofDays(2)
   )
   lazy val identityAuthProvider =
     Cookies.authProvider(identityKeys).withDisplayNameProvider(Token.authProvider(identityKeys, "membership"))
