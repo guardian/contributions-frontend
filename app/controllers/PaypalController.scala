@@ -8,11 +8,11 @@ import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.paypal.api.payments.Payment
 import configuration.{CorsConfig, SupportConfig}
-import controllers.httpmodels.{AuthRequest, AuthResponse}
+import controllers.httpmodels.{AuthRequest, AuthResponse, CaptureRequest}
 import models._
 import monitoring._
 import play.api.mvc._
-import services.{PaymentServices, PaypalApiConfig}
+import services.{PaymentServices, PaypalService}
 import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
@@ -40,6 +40,35 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         "Access-Control-Allow-Credentials" -> "true"
       )
     }
+  }
+
+  def capturePayment = (NoCacheAction andThen ABTestAction).async(parse.json[CaptureRequest]) { implicit request =>
+    val captureBody = request.body
+    val paypalService: PaypalService = paymentServices.paypalServiceFor(request)
+
+    paypalService.capturePayment(captureBody.paymentId)
+      .map { capture =>
+        paypalService.storeMetaData(
+          paymentId = capture.getParentPayment,
+          testAllocations = request.testAllocations,
+          cmp = captureBody.cmp,
+          intCmp = captureBody.intCmp,
+          refererPageviewId = captureBody.refererPageviewId,
+          refererUrl = captureBody.refererUrl,
+          ophanPageviewId = captureBody.ophanPageviewId,
+          ophanBrowserId = captureBody.ophanBrowserId,
+          idUser = captureBody.idUser,
+          platform = Some(captureBody.platform),
+          ophanVisitId = None
+        ).leftMap { errorMessage =>
+          error(s"Unable to store the metadata while capturing the payment. Continuing anyway. Error: $errorMessage")
+        }
+        capture
+      }
+      .fold(error => {
+        logger.error(s"Unable to capture the payment: $error")
+        InternalServerError(Json.toJson(error))
+      }, _ => Ok)
   }
 
   def executePayment(
@@ -77,8 +106,8 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         ophanVisitId = ophanVisitId
       )
 
-    def notOkResult(message: String): Result = {
-      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: $message")
+    def notOkResult(paypalError: PaypalApiError): Result = {
+      error(s"Error executing PayPal payment for request id: ${request.id} \n\t error message: ${paypalError.message}")
       cloudWatchMetrics.logPaymentFailure(PaymentProvider.Paypal, request.platform)
       render {
         case Accepts.Json() => BadRequest(JsNull)

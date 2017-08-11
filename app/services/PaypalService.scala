@@ -7,7 +7,6 @@ import cats.data.EitherT
 import cats.implicits._
 import com.gu.i18n
 import com.gu.i18n.CountryGroup
-import com.netaporter.uri.Uri
 import com.paypal.api.payments._
 import com.paypal.base.Constants
 import com.paypal.base.rest.APIContext
@@ -17,13 +16,12 @@ import models._
 import monitoring.TagAwareLogger
 import monitoring.LoggingTags
 import org.joda.time.DateTime
-import play.api.libs.json.Json
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
+import scala.util.control.NonFatal
 
 case class PaypalCredentials(clientId: String, clientSecret: String)
 
@@ -56,13 +54,13 @@ class PaypalService(
 
   def apiContext: APIContext = new APIContext(credentials.clientId, credentials.clientSecret, config.paypalMode)
 
-  private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = EitherT(Future {
-    val result = Try(block)
-    Either.fromTry(result).leftMap { exception =>
-      error("Error while calling PayPal API", exception)
-      exception.getMessage
+  private def asyncExecute[A](block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = {
+    Future(block).attemptT.leftMap {
+      case NonFatal(throwable) =>
+        error("Error while calling Paypal API", throwable)
+        PaypalApiError.fromThrowable(throwable)
     }
-  })
+  }
 
   private def fullName(payerInfo: PayerInfo): Option[String] = {
     val firstName = Option(payerInfo.getFirstName)
@@ -85,7 +83,7 @@ class PaypalService(
     ophanBrowserId: Option[String],
     ophanVisitId: Option[String],
     supportRedirect: Option[Boolean] = Some(false)
-  )(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
+  )(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
 
     val paymentToCreate = {
 
@@ -130,15 +128,49 @@ class PaypalService(
     }
   }
 
-  def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, String, Payment] = {
+  def executePayment(paymentId: String, payerId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
     val payment = new Payment().setId(paymentId)
     val paymentExecution = new PaymentExecution().setPayerId(payerId)
-    asyncExecute(payment.execute(apiContext, paymentExecution)) transform  {
-      case Right(p) if p.getState.toUpperCase != "APPROVED" => Left(s"payment returned with state: ${payment.getState}")
-      case Right(p) => Right(p)
-      case Left(error) => Left(error)
+    asyncExecute(payment.execute(apiContext, paymentExecution)) subflatMap { payment =>
+      if (payment.getState.toUpperCase != "APPROVED") {
+        Left(PaypalApiError.fromString(s"payment returned with state: ${payment.getState}"))
+      } else Right(payment)
+    }
+  }
+
+  def attempt[A](action: String)(block: => A)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, A] = {
+    Future(block).attemptT.leftMap { t: Throwable =>
+      val message = s"Unable to $action"
+      error(message, t)
+      PaypalApiError.fromString(message)
+    }
+  }
+
+  def capturePayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Capture] = {
+
+    def capture(transaction: Transaction): Capture = {
+      val amount = transaction.getAmount
+      val amountToSend = new Amount()
+      amountToSend.setCurrency(amount.getCurrency)
+      amountToSend.setTotal(amount.getTotal)
+      val capture = new Capture()
+      capture.setAmount(amountToSend)
+      capture.setIsFinalCapture(true)
+      capture
     }
 
+    val result = for {
+      payment <- asyncExecute(Payment.get(apiContext, paymentId))
+      transaction <- attempt("get payment transaction")(payment.getTransactions.asScala.head)
+      authorisation <- attempt("get transaction auth")(transaction.getRelatedResources.asScala.head.getAuthorization)
+      r <- asyncExecute(authorisation.capture(apiContext, capture(transaction)))
+    } yield r
+
+    result subflatMap { capture =>
+      if (capture.getState.toUpperCase != "COMPLETED") {
+        Left(PaypalApiError.fromString(s"payment returned with state: ${capture.getState}"))
+      } else Right(capture)
+    }
   }
 
   def storeMetaData(
@@ -155,19 +187,12 @@ class PaypalService(
     ophanVisitId: Option[String]
   )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
-    def tryToEitherT[A](block: => A): EitherT[Future, String, A] = {
-      EitherT.fromEither[Future](Either.catchNonFatal(block).leftMap { t: Throwable =>
-        error("Unable to store contribution metadata", t)
-        "Unable to store contribution metadata"
-      })
-    }
-
     val contributionDataToSave = for {
       payment <- asyncExecute(Payment.get(apiContext, paymentId))
-      transaction <- tryToEitherT(payment.getTransactions.asScala.head)
-      contributionId <- tryToEitherT(UUID.fromString(transaction.getCustom))
-      created <- tryToEitherT(new DateTime(payment.getCreateTime))
-      payerInfo <- tryToEitherT(payment.getPayer.getPayerInfo)
+      transaction <- attempt("get transaction")(payment.getTransactions.asScala.head)
+      contributionId <- attempt("get custom field")(UUID.fromString(transaction.getCustom))
+      created <- attempt("get payment date")(new DateTime(payment.getCreateTime))
+      payerInfo <- attempt("get PayerInfo")(payment.getPayer.getPayerInfo)
     } yield {
       val metadata = ContributionMetaData(
         contributionId = ContributionId(contributionId),
@@ -225,7 +250,7 @@ class PaypalService(
     }
 
     for {
-      data <- contributionDataToSave
+      data <- contributionDataToSave.leftMap(_.message)
       (contributor, contributionMetaData, contributorRow) = data
       contributionMetaData <- contributionData.insertPaymentMetaData(contributionMetaData)
       contributor <- contributionData.saveContributor(contributor)
@@ -262,7 +287,15 @@ class PaypalService(
   }
 
   def processPaymentHook(paypalHook: PaypalHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
-    contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook))
+
+    def contributionIdFromPaypal(paymentId: String): ContributionId = {
+      val payment = Payment.get(apiContext, paypalHook.paymentId)
+      val transaction = payment.getTransactions.asScala.head
+      ContributionId(UUID.fromString(transaction.getCustom))
+    }
+
+    val contributionId = paypalHook.contributionId.getOrElse(contributionIdFromPaypal(paypalHook.paymentId))
+    contributionData.insertPaymentHook(PaymentHook.fromPaypal(paypalHook, contributionId))
   }
 
   def paymentAmount(payment: Payment): Option[ContributionAmount] = for {

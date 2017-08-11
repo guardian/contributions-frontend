@@ -30,8 +30,11 @@ object PaymentStatus extends Enum[PaymentStatus] {
   val paypalReads = new Reads[PaymentStatus] {
     override def reads(json: JsValue): JsResult[PaymentStatus] = json match {
       case JsString("PAYMENT.SALE.COMPLETED") => JsSuccess(Paid)
+      case JsString("PAYMENT.CAPTURE.COMPLETED") => JsSuccess(Paid)
       case JsString("PAYMENT.SALE.DENIED") => JsSuccess(Failed)
+      case JsString("PAYMENT.CAPTURE.DENIED") => JsSuccess(Failed)
       case JsString("PAYMENT.SALE.REFUNDED") => JsSuccess(Refunded)
+      case JsString("PAYMENT.CAPTURE.REFUNDED") => JsSuccess(Refunded)
       case JsString(wrongStatus) => JsError(s"Unexpected paypal status: $wrongStatus")
       case _ => JsError("Unknown paypal status type, a JsString was expected")
     }
@@ -64,8 +67,8 @@ case class PaymentHook(
 )
 
 object PaymentHook {
-  def fromPaypal(paypalHook: PaypalHook): PaymentHook = PaymentHook(
-    contributionId = paypalHook.contributionId,
+  def fromPaypal(paypalHook: PaypalHook, contributionId: ContributionId): PaymentHook = PaymentHook(
+    contributionId = contributionId,
     paymentId = paypalHook.paymentId,
     provider = Paypal,
     created = paypalHook.created,
@@ -90,7 +93,7 @@ object PaymentHook {
 }
 
 case class PaypalHook(
-  contributionId: ContributionId,
+  contributionId: Option[ContributionId],
   paymentId: String,
   created: DateTime,
   currency: String,
@@ -103,7 +106,7 @@ object PaypalHook {
     override def reads(json: JsValue): JsResult[PaypalHook] = {
       for {
         resource <- (json \ "resource").validate[JsObject]
-        contributionId <- (resource \ "custom").validate[ContributionId]
+        contributionId <- (resource \ "custom").validateOpt[ContributionId]
         paymentId <- (resource \ "parent_payment").validate[String]
         created <- (resource \ "create_time").validate[String]
         currency <- (resource \ "amount" \ "currency").validate[String]

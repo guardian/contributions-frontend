@@ -1,12 +1,13 @@
 package controllers
 
 import abtests.Allocation
+import akka.stream.Materializer
 import cats.data.EitherT
 import com.gu.i18n.{CountryGroup, GBP}
-import com.paypal.api.payments.Payment
+import com.paypal.api.payments.{Capture, Payment}
 import configuration.{CorsConfig, SupportConfig}
 import fixtures.TestApplicationFactory
-import models.{ContributionAmount, IdentityId, SavedContributionData}
+import models.{ContributionAmount, IdentityId, PaypalApiError, SavedContributionData}
 import monitoring.{CloudWatchMetrics, LoggingTags}
 import org.mockito.{ArgumentCaptor, Matchers, Mockito}
 import org.scalatest.mockito.MockitoSugar
@@ -14,10 +15,12 @@ import org.scalatestplus.play._
 import play.api.http.{HeaderNames, Status}
 import play.api.mvc._
 import play.api.test._
+import play.api.test.Helpers._
 import play.filters.csrf.CSRFCheck
 import services.{PaymentServices, PaypalService}
 import cats.instances.future._
 import org.mockito.internal.verification.VerificationModeFactory
+import play.api.libs.json.Json
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -97,6 +100,7 @@ class PaypalControllerSpec extends PlaySpec
   with BaseOneAppPerSuite {
 
   implicit val executionContext: ExecutionContext = app.actorSystem.dispatcher
+  implicit val mat: Materializer = app.materializer
 
   val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/").withHeaders(("Accept", "text/html"))
 
@@ -135,7 +139,7 @@ class PaypalControllerSpec extends PlaySpec
     "generate correct redirect URL for support's successful PayPal payments" in {
       val fixture = new PaypalControllerFixture {
         Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
-          .thenReturn(EitherT.right[Future, String, Payment](Future.successful(mockPaypalPayment)))
+          .thenReturn(EitherT.right[Future, PaypalApiError, Payment](Future.successful(mockPaypalPayment)))
       }
 
       val result: Future[Result] = executeSupportPayment(fixture.controller)(fakeRequest)
@@ -147,7 +151,7 @@ class PaypalControllerSpec extends PlaySpec
     "generate correct redirect URL for successful PayPal payments" in {
       val fixture = new PaypalControllerFixture {
         Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
-          .thenReturn(EitherT.pure[Future, String, Payment](mockPaypalPayment))
+          .thenReturn(EitherT.pure[Future, PaypalApiError, Payment](mockPaypalPayment))
       }
 
       val result: Future[Result] = executePayment(fixture.controller)(fakeRequest)
@@ -161,7 +165,7 @@ class PaypalControllerSpec extends PlaySpec
     "generate correct redirect URL for unsuccessful PayPal payments" in {
       val fixture = new PaypalControllerFixture {
         Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
-          .thenReturn(EitherT.left[Future, String, Payment](Future.successful("Error")))
+          .thenReturn(EitherT.left[Future, PaypalApiError, Payment](Future.successful(PaypalApiError.fromString("Error"))))
       }
 
       val result: Future[Result] = executePayment(fixture.controller)(fakeRequest)
@@ -170,6 +174,56 @@ class PaypalControllerSpec extends PlaySpec
       redirectLocation(result).mustBe(Some("/uk?error_code=PaypalError"))
 
       fixture.numberOfCallsToStoreMetaDataMustBe(0)
+    }
+
+    val captureRequest = FakeRequest("POST", "/paypal/capture").withJsonBody(Json.parse(
+      """{
+            "paymentId": "PAY_u27dioc90iojdew",
+            "platform": "android",
+            "idUser": "abc123",
+            "intCmp": "SOME_CMP_CODE"
+           }
+        """.stripMargin))
+
+    "capture a payment made on mobile" in {
+      val fixture = new PaypalControllerFixture {
+        Mockito.when(mockPaypalService.capturePayment(Matchers.anyString)(Matchers.any[LoggingTags]))
+          .thenReturn(EitherT.pure[Future, PaypalApiError, Capture](mock[Capture]))
+      }
+
+      val result: Future[Result] = Helpers.call(fixture.controller.capturePayment, captureRequest)
+      status(result).mustBe(200)
+
+      fixture.numberOfCallsToStoreMetaDataMustBe(1)
+    }
+
+    "capture a payment even if storing the metadata failed" in {
+      val fixture = new PaypalControllerFixture {
+        Mockito.when(mockPaypalService.capturePayment(Matchers.anyString)(Matchers.any[LoggingTags]))
+          .thenReturn(EitherT.pure[Future, PaypalApiError, Capture](mock[Capture]))
+
+        Mockito.when(mockPaypalService.storeMetaData(
+          paymentId = Matchers.any[String],
+          testAllocations = Matchers.any[Set[Allocation]],
+          cmp = Matchers.any[Option[String]],
+          intCmp = Matchers.any[Option[String]],
+          refererPageviewId = Matchers.any[Option[String]],
+          refererUrl = Matchers.any[Option[String]],
+          ophanPageviewId = Matchers.any[Option[String]],
+          ophanBrowserId = Matchers.any[Option[String]],
+          idUser = Matchers.any[Option[IdentityId]],
+          platform = Matchers.any[Option[String]],
+          ophanVisitId = Matchers.any[Option[String]]
+        )(Matchers.any[LoggingTags]))
+          .thenReturn(EitherT.left[Future, String, SavedContributionData](Future.successful("Error")))
+      }
+
+
+
+      val result: Future[Result] = Helpers.call(fixture.controller.capturePayment, captureRequest)
+      status(result).mustBe(200)
+
+      fixture.numberOfCallsToStoreMetaDataMustBe(1)
     }
   }
 }
