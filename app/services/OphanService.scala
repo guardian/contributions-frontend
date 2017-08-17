@@ -3,15 +3,16 @@ package services
 import java.net.URLEncoder
 
 import abtests.Allocation
-import enumeratum.{EnumEntry, Enum}
-import models.{ContributorRow, ContributionMetaData, PaymentProvider}
-import okhttp3.{HttpUrl, Request}
-import play.api.{Mode, Environment}
-import play.api.libs.json.{Json}
-import com.gu.okhttp.RequestRunners._
-import services.Ophan.{OphanError, OphanSuccess, OphanResponse}
-import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
+import com.gu.okhttp.RequestRunners._
+import enumeratum.{Enum, EnumEntry}
+import models.{ContributionMetaData, ContributorRow, PaymentProvider}
+import okhttp3.{HttpUrl, Request}
+import play.api.libs.json.Json
+import play.api.{Environment, Mode}
+import services.Ophan.{OphanError, OphanResponse, OphanSuccess}
+
+import scala.concurrent.{ExecutionContext, Future}
 
 object Ophan {
 
@@ -45,6 +46,7 @@ object PaymentFrequency extends Enum[PaymentFrequency] {
   case object Annually extends PaymentFrequency {
     val stringValue = "ANNUALLY"
   }
+
 }
 
 trait Product {
@@ -56,21 +58,21 @@ case object Contribution extends Product
 case class TestData(variantName: String, complete: Boolean, campaignCodes: Option[Set[String]])
 
 case class OphanAcquisitionEvent(
-   viewId: String,
-   browserId: String,
-   product: Product,
-   paymentFrequency: PaymentFrequency,
-   currency: String,
-   amount: Double,
-   visitId: Option[String],
-   amountInGBP: Option[Double],
-   paymentProvider: Option[PaymentProvider],
-   campaignCode: Option[Set[String]],
-   abTests: Set[Allocation],
-   countryCode: Option[String],
-   referrerPageViewId: Option[String],
-   referrerUrl: Option[String]
-) {
+                                  viewId: String,
+                                  browserId: String,
+                                  product: Product,
+                                  paymentFrequency: PaymentFrequency,
+                                  currency: String,
+                                  amount: Double,
+                                  visitId: Option[String],
+                                  amountInGBP: Option[Double],
+                                  paymentProvider: Option[PaymentProvider],
+                                  campaignCode: Option[Set[String]],
+                                  abTests: Set[Allocation],
+                                  countryCode: Option[String],
+                                  referrerPageViewId: Option[String],
+                                  referrerUrl: Option[String]
+                                ) {
   def toParams: Seq[(String, String)] = {
     Seq(
       "viewId" -> viewId,
@@ -80,24 +82,26 @@ case class OphanAcquisitionEvent(
       "paymentFrequency" -> paymentFrequency.stringValue,
       "amount" -> amount.toString
     ) ++
-    List(
-      "visitId" -> visitId.map(_.toString),
-      "amountInGBP" -> amountInGBP.map(_.toString),
-      "paymentProvider" -> paymentProvider.map(_.toString.toUpperCase),
-      "campaignCode" -> campaignCode.map(_.mkString),
-      "abTests" -> Some(OphanAcquisitionEvent.abTestToOphanJson(abTests)),
-      "countryCode" -> countryCode.map(_.toString),
-      "referrerPageViewId" -> referrerPageViewId.map(_.toString),
-      "referrerUrl" -> referrerUrl.map(_.toString)
-    ).collect{ case (k, Some(v)) => k -> v  }
+      List(
+        "visitId" -> visitId.map(_.toString),
+        "amountInGBP" -> amountInGBP.map(_.toString),
+        "paymentProvider" -> paymentProvider.map(_.toString.toUpperCase),
+        "campaignCode" -> campaignCode.map(_.mkString),
+        "abTests" -> Some(OphanAcquisitionEvent.abTestToOphanJson(abTests)),
+        "countryCode" -> countryCode.map(_.toString),
+        "referrerPageViewId" -> referrerPageViewId.map(_.toString),
+        "referrerUrl" -> referrerUrl.map(_.toString)
+      ).collect { case (k, Some(v)) => k -> v }
   }
 }
 
 
-
 object OphanAcquisitionEvent {
 
-  def apply(contributionMetaData: ContributionMetaData, contributorRow: ContributorRow, convertedAmount: Option[Double], paymentProvider: PaymentProvider): Option[OphanAcquisitionEvent] = {
+  def apply(contributionMetaData: ContributionMetaData,
+            contributorRow: ContributorRow,
+            convertedAmount: Option[Double],
+            paymentProvider: PaymentProvider): Option[OphanAcquisitionEvent] = {
 
     val campaignCodes = List(contributionMetaData.cmp, contributionMetaData.intCmp).sequence[Option, String].map(_.toSet)
 
@@ -126,11 +130,10 @@ object OphanAcquisitionEvent {
 
   /**
     *
-    * @param abTest: at Set of ab test Allocations
+    * @param abTest : at Set of ab test Allocations
     * @return String: A JSON string in the format
-    *    {"<testName>": {"variantName": "<testVariant>"}, "<testName2>": {"variantName": "<testVariant2>"}}
+    *         {"<testName>": {"variantName": "<testVariant>"}, "<testName2>": {"variantName": "<testVariant2>"}}
     */
-
   def abTestToOphanJson(abTest: Set[Allocation]): String = {
     val data = abTest
       .map(_.toOphanJson)
@@ -140,23 +143,10 @@ object OphanAcquisitionEvent {
   }
 }
 
-class OphanService (client: LoggingHttpClient[Future], environment: Environment)(implicit ec: ExecutionContext) {
+class OphanService(client: LoggingHttpClient[Future], environment: Environment)(implicit ec: ExecutionContext) {
   val wsUrl = "https://ophan.theguardian.com"
   val httpClient: LoggingHttpClient[Future] = client
   val endpoint = "a.gif"
-
-  def endpointUrl(endpoint: String, params: Seq[(String, String)] = Seq.empty): HttpUrl = {
-    val withSegments = endpoint.split("/").foldLeft(urlBuilder) { case (url, segment) =>
-      url.addEncodedPathSegment(segment)
-    }
-    params.foldLeft(withSegments) { case (url, (k, v)) =>
-      val encodedkey = URLEncoder.encode(k, "UTF-8")
-      val encodedvalue = URLEncoder.encode(v, "UTF-8")
-      url.addEncodedQueryParameter(encodedkey, encodedvalue)
-    }.build()
-  }
-
-  def urlBuilder = HttpUrl.parse(wsUrl).newBuilder()
 
   def submitEvent(eventData: OphanAcquisitionEvent): Future[OphanResponse] = {
 
@@ -174,12 +164,25 @@ class OphanService (client: LoggingHttpClient[Future], environment: Environment)
       }
     }
 
-    if(environment.mode == Mode.Prod) {
+    if (environment.mode == Mode.Prod) {
       callOphan
     } else {
       Future.successful(OphanSuccess("Did not call Ophan, running in DEV mode"))
     }
   }
+
+  def endpointUrl(endpoint: String, params: Seq[(String, String)] = Seq.empty): HttpUrl = {
+    val withSegments = endpoint.split("/").foldLeft(urlBuilder) { case (url, segment) =>
+      url.addEncodedPathSegment(segment)
+    }
+    params.foldLeft(withSegments) { case (url, (k, v)) =>
+      val encodedkey = URLEncoder.encode(k, "UTF-8")
+      val encodedvalue = URLEncoder.encode(v, "UTF-8")
+      url.addEncodedQueryParameter(encodedkey, encodedvalue)
+    }.build()
+  }
+
+  def urlBuilder = HttpUrl.parse(wsUrl).newBuilder()
 }
 
 
