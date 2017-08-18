@@ -7,7 +7,7 @@ import actions.CommonActions._
 import cats.data.EitherT
 import cats.syntax.show._
 import com.gu.i18n.CountryGroup._
-import com.gu.i18n.{AUD, EUR, USD}
+import com.gu.i18n.{AUD, EUR, GBP, USD}
 import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
@@ -113,10 +113,10 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
 
     def storeMetaData(metadata: StripeMetaData): EitherT[Future, String, SavedContributionData] = {
       stripe.storeMetaData(
-        created = metadata.contributionMetadata.created,
+        created = metadata.contributionMetaData.created,
         name = form.name,
         cmp = form.cmp,
-        metadata = metadata.contributionMetadata,
+        metadata = metadata.contributionMetaData,
         contributor = metadata.contributor,
         contributorRow = metadata.contributorRow,
         idUser = idUser,
@@ -124,10 +124,15 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       )
     }
 
-    def recordToOphan(metadata: stripe.StripeMetaData): Option[Future[OphanResponse]] = {
-      val event = OphanAcquisitionEvent(metadata.contributionMetadata, metadata.contributorRow, None, PaymentProvider.Stripe)
-      event.map(ophanService.submitEvent)
+    def recordToOphan(metadata: StripeMetaData): Option[Future[OphanResponse]] = {
+      val amountInGBP: Option[Double] = {
+        if (contributionAmount.currency == GBP) Some(contributionAmount.amount.toDouble)
+        else None
+      }
+
+      OphanAcquisitionEvent.fromStripeMetaData(metadata, amountInGBP).map(ophanService.submitEvent)
     }
+
 
     createCharge.map { charge =>
       info(s"Stripe payment successful for request id: ${request.id}, from platform ${request.platform}")

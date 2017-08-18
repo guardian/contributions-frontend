@@ -98,32 +98,30 @@ case class OphanAcquisitionEvent(
 
 object OphanAcquisitionEvent {
 
-  def apply(contributionMetaData: ContributionMetaData,
-            contributorRow: ContributorRow,
-            convertedAmount: Option[Double],
-            paymentProvider: PaymentProvider): Option[OphanAcquisitionEvent] = {
+  def fromStripeMetaData(metaData: StripeMetaData, amountInGBP: Option[Double] = None): Option[OphanAcquisitionEvent] = {
 
-    val campaignCodes = List(contributionMetaData.cmp, contributionMetaData.intCmp).sequence[Option, String].map(_.toSet)
+    val campaignCodes: Option[Set[String]] =
+      List(metaData.contributionMetaData.cmp, metaData.contributionMetaData.intCmp).sequence[Option, String].map(_.toSet)
 
     for {
-      viewId <- contributionMetaData.ophanPageviewId
-      browserId <- contributionMetaData.ophanBrowserId
+      viewId <- metaData.contributionMetaData.ophanPageviewId
+      browserId <- metaData.contributionMetaData.ophanBrowserId
     } yield {
       OphanAcquisitionEvent(
         viewId = viewId,
         browserId = browserId,
         product = Contribution,
-        currency = contributorRow.currency,
+        currency = metaData.contributorRow.currency,
         paymentFrequency = PaymentFrequency.OneOff,
-        amount = contributorRow.amount.toDouble,
-        visitId = contributionMetaData.ophanVisitId,
-        amountInGBP = convertedAmount,
-        paymentProvider = Some(paymentProvider),
+        amount = metaData.contributorRow.amount.toDouble,
+        visitId = metaData.contributionMetaData.ophanVisitId,
+        amountInGBP = amountInGBP,
+        paymentProvider = Some(PaymentProvider.Stripe),
         campaignCode = campaignCodes,
-        abTests = contributionMetaData.abTests,
-        countryCode = contributionMetaData.country,
-        referrerPageViewId = contributionMetaData.refererPageviewId,
-        referrerUrl = contributionMetaData.refererUrl
+        abTests = metaData.contributionMetaData.abTests,
+        countryCode = metaData.contributionMetaData.country,
+        referrerPageViewId = metaData.contributionMetaData.refererPageviewId,
+        referrerUrl = metaData.contributionMetaData.refererUrl
       )
     }
   }
