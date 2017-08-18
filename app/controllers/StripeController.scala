@@ -23,7 +23,7 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.mvc._
 import services.Ophan.OphanResponse
-import services.{OphanAcquisitionEvent, OphanService, PaymentServices}
+import services.{OphanAcquisitionEvent, OphanService, PaymentServices, StripeMetaData}
 import utils.MaxAmount
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -90,7 +90,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       stripe.Charge.create(amount, form.currency, form.email, "Your contribution", form.token, metadata)
     }
 
-    def createMetaData(charge: Charge): stripe.StripeMetaData = {
+    def createMetaData(charge: Charge): StripeMetaData = {
       stripe.createMetaData(
         contributionId = contributionId,
         charge = charge,
@@ -111,7 +111,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       )
     }
 
-    def storeMetaData(metadata: stripe.StripeMetaData): EitherT[Future, String, SavedContributionData] = {
+    def storeMetaData(metadata: StripeMetaData): EitherT[Future, String, SavedContributionData] = {
       stripe.storeMetaData(
         created = metadata.contributionMetadata.created,
         name = form.name,

@@ -16,6 +16,8 @@ import play.api.libs.json.Json
 
 import scala.concurrent.{ExecutionContext, Future}
 
+case class StripeMetaData(contributionMetaData: ContributionMetaData, contributor: Contributor, contributorRow: ContributorRow)
+
 class StripeService(
   apiConfig: StripeApiConfig,
   metrics: ServiceMetrics,
@@ -24,8 +26,6 @@ class StripeService(
   emailService: EmailService
 )(implicit ec: ExecutionContext)
   extends MembershipStripeService(apiConfig = apiConfig, RequestRunners.loggingRunner(metrics)) {
-
-  case class StripeMetaData(contributionMetadata: ContributionMetaData, contributor: Contributor, contributorRow: ContributorRow)
 
   def createMetaData(
     contributionId: ContributionId,
