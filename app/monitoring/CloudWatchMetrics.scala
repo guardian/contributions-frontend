@@ -67,6 +67,10 @@ class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatchAsync) extends TagAwar
     put("payment-failure", paymentProvider, platform)
   }
 
+  def logUnhandledPaymentFailure(paymentProvider: PaymentProvider, platform: String): Unit = {
+    put("payment-failure", paymentProvider, platform)
+  }
+
   def logHookAttempt(paymentProvider: PaymentProvider, platform: String): Unit = {
     put("payment-hook-attempt", paymentProvider, platform)
   }

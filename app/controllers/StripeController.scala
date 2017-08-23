@@ -83,6 +83,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
       mobileRedirectUrl(contributionAmount)
     } else {
+      info(s"Stripe payment successful for request id: ${request.id}, from platform ${request.platform}")
+      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       routes.Contributions.thanks(countryGroup).url
     }
 
@@ -130,8 +132,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     }
 
     createCharge.map { charge =>
-      info(s"Stripe payment successful for request id: ${request.id}, from platform ${request.platform}")
-      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       val metadata = createMetaData(charge)
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
       recordToOphan(metadata) // again, fire and forget.
@@ -146,6 +146,11 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
         warn(s"Payment failed for request id: ${request.id}, from platform: ${request.platform}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
         cloudWatchMetrics.logPaymentFailure(PaymentProvider.Stripe, request.platform)
         BadRequest(Json.toJson(e)).withHeaders(corsHeaders(request): _*)
+      }
+      case _ => {
+        cloudWatchMetrics.logUnhandledPaymentFailure(PaymentProvider.Stripe, request.platform)
+        warn(s"Payment failed for unknown reason. Request id: ${request.id}, from platform: ${request.platform}")
+        BadRequest(Json.toJson("unknown error")).withHeaders(corsHeaders(request): _*)
       }
     }
   }
