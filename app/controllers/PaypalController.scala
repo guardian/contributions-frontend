@@ -46,29 +46,31 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     val captureBody = request.body
     val paypalService: PaypalService = paymentServices.paypalServiceFor(request)
 
-    paypalService.capturePayment(captureBody.paymentId)
-      .map { capture =>
-        paypalService.storeMetaData(
-          paymentId = capture.getParentPayment,
-          testAllocations = request.testAllocations,
-          cmp = captureBody.cmp,
-          intCmp = captureBody.intCmp,
-          refererPageviewId = captureBody.refererPageviewId,
-          refererUrl = captureBody.refererUrl,
-          ophanPageviewId = captureBody.ophanPageviewId,
-          ophanBrowserId = captureBody.ophanBrowserId,
-          idUser = captureBody.idUser,
-          platform = Some(captureBody.platform),
-          ophanVisitId = None
-        ).leftMap { errorMessage =>
-          error(s"Unable to store the metadata while capturing the payment. Continuing anyway. Error: $errorMessage")
-        }
-        capture
+    (for {
+      capture <- paypalService.capturePayment(captureBody.paymentId)
+      payment <- paypalService.getPayment(capture.getParentPayment)
+    } yield {
+      paypalService.storeMetaData(
+        payment = payment,
+        testAllocations = request.testAllocations,
+        cmp = captureBody.cmp,
+        intCmp = captureBody.intCmp,
+        refererPageviewId = captureBody.refererPageviewId,
+        refererUrl = captureBody.refererUrl,
+        ophanPageviewId = captureBody.ophanPageviewId,
+        ophanBrowserId = captureBody.ophanBrowserId,
+        idUser = captureBody.idUser,
+        platform = Some(captureBody.platform),
+        ophanVisitId = None
+      ).leftMap { errorMessage =>
+        error(s"Unable to store the metadata while capturing the payment. Continuing anyway. Error: $errorMessage")
       }
-      .fold(error => {
-        logger.error(s"Unable to capture the payment: $error")
-        InternalServerError(Json.toJson(error))
-      }, _ => Ok)
+
+      capture
+    }).fold(error => {
+      logger.error(s"Unable to capture the payment: $error")
+      InternalServerError(Json.toJson(error))
+    }, _ => Ok)
   }
 
   def executePayment(
@@ -93,7 +95,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
     def storeMetaData(payment: Payment) =
       paypalService.storeMetaData(
-        paymentId = paymentId,
+        payment = payment,
         testAllocations = request.testAllocations,
         cmp = cmp,
         intCmp = intCmp,
