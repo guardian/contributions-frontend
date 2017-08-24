@@ -79,12 +79,8 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     val contributionAmount = ContributionAmount(BigDecimal(amount, 2), form.currency)
 
     def thankYouUri = if (request.isAndroid) {
-      info(s"Payment successful for request ${request.id} - redirected to external platform for thank you page. platform is: ${request.platform}.")
-      cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
       mobileRedirectUrl(contributionAmount)
     } else {
-      info(s"Stripe payment successful for request id: ${request.id}, from platform ${request.platform}")
-      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       routes.Contributions.thanks(countryGroup).url
     }
 
@@ -131,10 +127,21 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       event.map(ophanService.submitEvent)
     }
 
+    def logPaymentSuccess: Unit = {
+      if (request.isAndroid) {
+        info(s"Payment successful for request ${request.id} - redirected to external platform for thank you page. platform is: ${request.platform}.")
+        cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
+      } else {
+        info(s"Stripe payment successful for request id: ${request.id}, from platform ${request.platform}")
+        cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
+      }
+    }
+
     createCharge.map { charge =>
       val metadata = createMetaData(charge)
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
       recordToOphan(metadata) // again, fire and forget.
+      logPaymentSuccess
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
