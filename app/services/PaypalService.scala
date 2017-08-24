@@ -71,6 +71,9 @@ class PaypalService(
     }
   }
 
+  def getPayment(paymentId: String)(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] =
+    asyncExecute(Payment.get(apiContext, paymentId))
+
   def getPayment(
     amount: BigDecimal,
     countryGroup: CountryGroup,
@@ -174,7 +177,7 @@ class PaypalService(
   }
 
   def storeMetaData(
-    paymentId: String,
+    payment: Payment,
     testAllocations: Set[Allocation],
     cmp: Option[String],
     intCmp: Option[String],
@@ -188,7 +191,6 @@ class PaypalService(
   )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
 
     val contributionDataToSave = for {
-      payment <- asyncExecute(Payment.get(apiContext, paymentId))
       transaction <- attempt("get transaction")(payment.getTransactions.asScala.head)
       contributionId <- attempt("get custom field")(UUID.fromString(transaction.getCustom))
       created <- attempt("get payment date")(new DateTime(payment.getCreateTime))

@@ -54,8 +54,11 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
   Mockito.when(mockPaypalPayment.getPayer.getPayerInfo.getEmail)
     .thenReturn("a@b.com")
 
+  Mockito.when(mockPaypalService.getPayment(Matchers.anyString)(Matchers.any[LoggingTags]))
+    .thenReturn(EitherT.pure[Future, PaypalApiError, Payment](mockPaypalPayment))
+
   Mockito.when(mockPaypalService.storeMetaData(
-    paymentId = Matchers.any[String],
+    payment = Matchers.any[Payment],
     testAllocations = Matchers.any[Set[Allocation]],
     cmp = Matchers.any[Option[String]],
     intCmp = Matchers.any[Option[String]],
@@ -76,7 +79,7 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
       ArgumentCaptor.forClass[A](classTag.runtimeClass.asInstanceOf[Class[A]]).capture()
 
     Mockito.verify(mockPaypalService, VerificationModeFactory.times(times)).storeMetaData(
-      captor[String],
+      captor[Payment],
       captor[Set[Allocation]],
       captor[Option[String]],
       captor[Option[String]],
@@ -203,7 +206,7 @@ class PaypalControllerSpec extends PlaySpec
           .thenReturn(EitherT.pure[Future, PaypalApiError, Capture](mock[Capture]))
 
         Mockito.when(mockPaypalService.storeMetaData(
-          paymentId = Matchers.any[String],
+          payment = Matchers.any[Payment],
           testAllocations = Matchers.any[Set[Allocation]],
           cmp = Matchers.any[Option[String]],
           intCmp = Matchers.any[Option[String]],
