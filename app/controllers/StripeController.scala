@@ -80,8 +80,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     val contributionAmount = ContributionAmount(BigDecimal(amount, 2), form.currency)
 
     def thankYouUri = if (request.isAndroid) {
-      info(s"Payment successful for play_session: ${request.sessionId} - redirected to external platform for thank you page. platform is: ${request.platform}.")
-      cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
       mobileRedirectUrl(contributionAmount)
     } else {
       routes.Contributions.thanks(countryGroup).url
@@ -130,12 +128,21 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       event.map(ophanService.submitEvent)
     }
 
+    def logPaymentSuccess: Unit = {
+      if (request.isAndroid) {
+        info(s"Stripe payment successful for play_session ${request.sessionId} - redirected to external platform for thank you page. platform is: ${request.platform}.")
+        cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
+      } else {
+        info(s"Stripe payment successful for play_session: ${request.sessionId}, from platform ${request.platform}")
+        cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
+      }
+    }
+
     createCharge.map { charge =>
-      info(s"Stripe payment successful for play_session: ${request.sessionId}, from platform ${request.platform}")
-      cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       val metadata = createMetaData(charge)
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
       recordToOphan(metadata) // again, fire and forget.
+      logPaymentSuccess
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
@@ -147,6 +154,11 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
         warn(s"Payment failed for play_session: ${request.sessionId}, from platform: ${request.platform}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
         cloudWatchMetrics.logPaymentFailure(PaymentProvider.Stripe, request.platform)
         BadRequest(Json.toJson(e)).withHeaders(corsHeaders(request): _*)
+      }
+      case _ => {
+        cloudWatchMetrics.logUnhandledPaymentFailure(PaymentProvider.Stripe, request.platform)
+        warn(s"Payment failed for unknown reason. Request id: ${request.id}, from platform: ${request.platform}")
+        BadRequest(Json.toJson("unknown error")).withHeaders(corsHeaders(request): _*)
       }
     }
   }
