@@ -63,12 +63,12 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         platform = Some(captureBody.platform),
         ophanVisitId = None
       ).leftMap { errorMessage =>
-        error(s"Unable to store the metadata while capturing the payment. Continuing anyway. play_session: ${request.sessionId} Error: $errorMessage")
+        error(s"Unable to store the metadata while capturing the payment. Continuing anyway. payment_session id: ${request.sessionId} Error: $errorMessage")
       }
 
       capture
     }).fold(error => {
-      logger.error(s"Unable to capture the payment for play_session: ${request.sessionId}. Error message is: $error")
+      logger.error(s"Unable to capture the payment for payment_session id: ${request.sessionId}. Error message is: $error")
       InternalServerError(Json.toJson(error))
     }, _ => Ok)
   }
@@ -90,7 +90,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
     val paypalService = paymentServices.paypalServiceFor(request)
 
-    info(s"Attempting paypal payment for play_session: ${request.sessionId}")
+    info(s"Attempting paypal payment for payment_session id: ${request.sessionId}")
     cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Paypal, request.platform)
 
     def storeMetaData(payment: Payment) =
@@ -109,7 +109,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
       )
 
     def notOkResult(paypalError: PaypalApiError): Result = {
-      error(s"Error executing PayPal payment for play_session: ${request.sessionId} \n\t error message: ${paypalError.message}")
+      error(s"Error executing PayPal payment for payment_session id: ${request.sessionId} \n\t error message: ${paypalError.message}")
       cloudWatchMetrics.logPaymentFailure(PaymentProvider.Paypal, request.platform)
       render {
         case Accepts.Json() => BadRequest(JsNull)
@@ -124,7 +124,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         case Accepts.Html() =>
           val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
-          val session = List("email" -> email, "payment_session" -> request.sessionId,PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
+          val session = List("email" -> email,PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
           val redirectUrl = if (supportRedirect.getOrElse(false)) {
             supportConfig.thankYouURL
           } else {
@@ -132,7 +132,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           }
           redirectWithCampaignCodes(redirectUrl).addingToSession(session: _ *)
       }
-      info(s"Paypal payment from platform: ${request.platform} is successful. Play_session: ${request.sessionId}.")
+      info(s"Paypal payment from platform: ${request.platform} is successful. Payment_session id: ${request.sessionId}.")
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
@@ -146,7 +146,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
   def authorize = checkToken {
     NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
-      info(s"Attempting to obtain paypal auth response. Play_session: ${request.sessionId}. Platform: ${request.platform}.")
+      info(s"Attempting to obtain paypal auth response. Payment_session id: ${request.sessionId}. Platform: ${request.platform}.")
       cloudWatchMetrics.logPaymentAuthAttempt(PaymentProvider.Paypal, request.platform)
       val authRequest = request.body
       val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)
@@ -168,12 +168,12 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
       payment.subflatMap(AuthResponse.fromPayment).fold(
         err => {
-          error(s"Error getting PayPal auth response for play_session: ${request.sessionId}, platform: ${request.platform}.\n\t error message: $err")
+          error(s"Error getting PayPal auth response for payment_session id: ${request.sessionId}, platform: ${request.platform}.\n\t error message: $err")
           cloudWatchMetrics.logPaymentAuthFailure(PaymentProvider.Paypal, request.platform)
           InternalServerError("Error getting PayPal auth url").withHeaders(corsHeaders(request): _*)
         },
         authResponse => {
-          info(s"Paypal payment auth response successfully obtained for play_session: ${request.sessionId}, platform: ${request.platform}.")
+          info(s"Paypal payment auth response successfully obtained for payment_session id: ${request.sessionId}, platform: ${request.platform}.")
           cloudWatchMetrics.logPaymentAuthSuccess(PaymentProvider.Paypal, request.platform)
           Ok(Json.toJson(authResponse)).withHeaders(corsHeaders(request): _*)
         }
