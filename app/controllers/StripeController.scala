@@ -3,6 +3,7 @@ package controllers
 import java.lang.Math._
 import java.time.Instant
 
+import actions.CommonActions
 import actions.CommonActions._
 import cats.data.EitherT
 import cats.syntax.show._
@@ -38,7 +39,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
   def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
     .async(BodyParsers.jsonOrMultipart(ContributionRequest.contributionForm)) { implicit request =>
-    info(s"A Stripe payment is being attempted with request id: ${request.id}, from platform: ${request.platform}.")
+    info(s"A Stripe payment is being attempted with play_session: ${request.sessionId}, from platform: ${request.platform}.")
     cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Stripe, request.platform)
 
     val form = request.body
@@ -79,7 +80,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     val contributionAmount = ContributionAmount(BigDecimal(amount, 2), form.currency)
 
     def thankYouUri = if (request.isAndroid) {
-      info(s"Payment successful for request ${request.id} - redirected to external platform for thank you page. platform is: ${request.platform}.")
+      info(s"Payment successful for play_session: ${request.sessionId} - redirected to external platform for thank you page. platform is: ${request.platform}.")
       cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
       mobileRedirectUrl(contributionAmount)
     } else {
@@ -130,7 +131,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     }
 
     createCharge.map { charge =>
-      info(s"Stripe payment successful for request id: ${request.id}, from platform ${request.platform}")
+      info(s"Stripe payment successful for play_session: ${request.sessionId}, from platform ${request.platform}")
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       val metadata = createMetaData(charge)
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
@@ -143,7 +144,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
         .withHeaders(corsHeaders(request): _*)
     }.recover {
       case e: Stripe.Error => {
-        warn(s"Payment failed for request id: ${request.id}, from platform: ${request.platform}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
+        warn(s"Payment failed for play_session: ${request.sessionId}, from platform: ${request.platform}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
         cloudWatchMetrics.logPaymentFailure(PaymentProvider.Stripe, request.platform)
         BadRequest(Json.toJson(e)).withHeaders(corsHeaders(request): _*)
       }
