@@ -62,27 +62,20 @@ object CommonActions {
       case _ => _platform
     }
 
-    def playId: Option[String] = {
+    def playSessionId: Option[String] = {
       for {
         playSessionCookie <- request.cookies.get("PLAY_SESSION")
         value <- Option(playSessionCookie.value)
       } yield {
-        value.take(value.indexOf("-"))
+        value.takeWhile( _ != '-')
       }
     }
 
-    def initialSessionId: String = {playId.getOrElse("")}
+    def initialSessionId: String = playSessionId.getOrElse("unknown_contributions_session")
 
     def sessionId: String = {
-      val payment_session = request.session.get("payment_session")
-      payment_session match {
-        case Some(id) =>
-          if(id.nonEmpty)
-            id
-          else
-            initialSessionId
-        case None => initialSessionId
-          }
+      val contributionSession = request.session.get("contributions_session")
+      contributionSession.getOrElse(initialSessionId)
     }
 
     def isAndroid: Boolean = platform == "android"
