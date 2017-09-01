@@ -74,8 +74,7 @@ object CommonActions {
     def initialSessionId: String = playSessionId.getOrElse("unknown_contributions_session")
 
     def sessionId: String = {
-      val contributionSession = request.session.get("contributions_session")
-      contributionSession.getOrElse(initialSessionId)
+      request.session.get("contributions_session").getOrElse(initialSessionId)
     }
 
     def isAndroid: Boolean = platform == "android"

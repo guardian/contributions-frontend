@@ -132,7 +132,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           }
           redirectWithCampaignCodes(redirectUrl).addingToSession(session: _ *)
       }
-      info(s"Paypal payment from platform: ${request.platform} is successful. Payment_session id: ${request.sessionId}.")
+      info(s"Paypal payment from platform: ${request.platform} is successful. Contributions session id: ${request.sessionId}.")
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
@@ -146,7 +146,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
   def authorize = checkToken {
     NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
-      info(s"Attempting to obtain paypal auth response. Payment_session id: ${request.sessionId}. Platform: ${request.platform}.")
+      info(s"Attempting to obtain paypal auth response. Contributions session id: ${request.sessionId}. Platform: ${request.platform}.")
       cloudWatchMetrics.logPaymentAuthAttempt(PaymentProvider.Paypal, request.platform)
       val authRequest = request.body
       val amount = capAmount(authRequest.amount, authRequest.countryGroup.currency)

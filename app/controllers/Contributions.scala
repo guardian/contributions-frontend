@@ -99,7 +99,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
         CSRF.getToken.map(_.value),
         request.isAllocated(Test.landingPageTest, "with-copy"),
         disableStripe
-      )).addingToSession("contributions session" -> request.sessionId)
+      )).addingToSession("contributions_session" -> request.sessionId)
     }
   }
 
