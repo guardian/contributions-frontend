@@ -39,7 +39,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
   def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
     .async(BodyParsers.jsonOrMultipart(ContributionRequest.contributionForm)) { implicit request =>
-    info(s"A Stripe payment is being attempted with contributions_session id: ${request.sessionId}, from platform: ${request.platform}.")
+    info(s"A Stripe payment is being attempted with contributions session id: ${request.sessionId}, from platform: ${request.platform}.")
     cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Stripe, request.platform)
 
     val form = request.body
@@ -130,10 +130,10 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
 
     def logPaymentSuccess: Unit = {
       if (request.isAndroid) {
-        info(s"Stripe payment successful for contributions_session id: ${request.sessionId} - redirected to external platform for thank you page. platform is: ${request.platform}.")
+        info(s"Stripe payment successful for contributions session id: ${request.sessionId} - redirected to external platform for thank you page. platform is: ${request.platform}.")
         cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
       } else {
-        info(s"Stripe payment successful for contributions_session id: ${request.sessionId}, from platform ${request.platform}")
+        info(s"Stripe payment successful for contributions session id: ${request.sessionId}, from platform ${request.platform}")
         cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       }
     }
@@ -151,13 +151,13 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
         .withHeaders(corsHeaders(request): _*)
     }.recover {
       case e: Stripe.Error => {
-        warn(s"Payment failed for contributions_session id: ${request.sessionId}, from platform: ${request.platform}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
+        warn(s"Payment failed for contributions session id: ${request.sessionId}, from platform: ${request.platform}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
         cloudWatchMetrics.logPaymentFailure(PaymentProvider.Stripe, request.platform)
         BadRequest(Json.toJson(e)).withHeaders(corsHeaders(request): _*)
       }
       case _ => {
         cloudWatchMetrics.logUnhandledPaymentFailure(PaymentProvider.Stripe, request.platform)
-        warn(s"Payment failed for unknown reason. contributions_session id: ${request.sessionId}, from platform: ${request.platform}")
+        warn(s"Payment failed for unknown reason. contributions session id: ${request.sessionId}, from platform: ${request.platform}")
         BadRequest(Json.toJson("unknown error")).withHeaders(corsHeaders(request): _*)
       }
     }
