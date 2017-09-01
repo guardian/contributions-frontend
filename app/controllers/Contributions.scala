@@ -14,7 +14,7 @@ import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
 import utils.MaxAmount
-import utils.RequestCountry._
+import utils.FastlyUtils._
 import views.support._
 
 import scala.util.Try
@@ -29,7 +29,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
   def contributeRedirect = (NoCacheAction andThen MobileSupportAction) { implicit request =>
 
-    val countryGroup = request.getFastlyCountry match {
+    val countryGroup = request.getFastlyCountryGroup match {
       case Some(Canada) | Some(NewZealand) | Some(RestOfTheWorld) => UK
       case Some(other) => other
       case None => UK

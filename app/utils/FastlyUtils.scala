@@ -3,10 +3,17 @@ package utils
 import com.gu.i18n.CountryGroup
 import play.api.mvc.Request
 
-object RequestCountry {
-  implicit class RequestWithFastlyCountry(r: Request[_]) {
-    def getFastlyCountry = r.headers.get("X-GU-GeoIP-Country-Code").flatMap(CountryGroup.byFastlyCountryCode)
+object FastlyUtils {
+
+  implicit class FastlyRequest(r: Request[_]) {
+
+    def getFastlyCountryCode: Option[String] = r.headers.get("X-GU-GeoIP-Country-Code")
+
+    def getFastlyCountryGroup: Option[CountryGroup] = getFastlyCountryCode.flatMap(CountryGroup.byFastlyCountryCode)
+
+    def getFastlyCountrySubdivisionCode: Option[String] = r.headers.get("GU-ISO-3166-2")
   }
+
   implicit class AuthenticatedRequestWithIdentity(r:/*Auth*/Request[_])
   {
     def getIdentityCountryGroup = CountryGroup.UK

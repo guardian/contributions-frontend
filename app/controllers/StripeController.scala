@@ -24,6 +24,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import services.Ophan.OphanResponse
 import services.{OphanAcquisitionEvent, OphanService, PaymentServices}
+import utils.FastlyUtils._
 import utils.MaxAmount
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -67,7 +68,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       "intcmp" -> form.intcmp.mkString,
       "refererPageviewId" -> form.refererPageviewId.mkString,
       "refererUrl" -> form.refererUrl.mkString,
-      "contributionId" -> contributionId.toString
+      "contributionId" -> contributionId.toString,
+      "countryCode" -> request.getFastlyCountryCode.getOrElse("unknown-country-code"),
+      "countrySubdivisionCode" -> request.getFastlyCountrySubdivisionCode.getOrElse("unknown-country-subdivision-code")
     ) ++ List(
       form.postcode.map("postcode" -> _),
       idUser.map("idUser" -> _.id)
