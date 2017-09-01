@@ -62,6 +62,21 @@ object CommonActions {
       case _ => _platform
     }
 
+    def playSessionId: Option[String] = {
+      for {
+        playSessionCookie <- request.cookies.get("PLAY_SESSION")
+        value <- Option(playSessionCookie.value)
+      } yield {
+        value.takeWhile( _ != '-')
+      }
+    }
+
+    def initialSessionId: String = playSessionId.getOrElse("unknown_contributions_session")
+
+    def sessionId: String = {
+      request.session.get("contributions_session").getOrElse(initialSessionId)
+    }
+
     def isAndroid: Boolean = platform == "android"
     def isIos: Boolean = platform == "ios"
     def isMobile: Boolean = isAndroid || isIos
