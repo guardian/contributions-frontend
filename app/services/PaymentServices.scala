@@ -67,7 +67,8 @@ class PaymentServices(
   }
 
   private def isTestUser(request: RequestHeader): Boolean =
-    request.cookies.get("_test_username").map(_.value)
+    request.getQueryString("_test_username")
+      .orElse(request.cookies.get("_test_username").map(_.value))
       .orElse(authProvider(request).flatMap(_.displayName))
       .exists(testUsernames.isValid)
 
