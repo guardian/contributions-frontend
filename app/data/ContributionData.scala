@@ -16,15 +16,15 @@ import scala.util.Try
 
 class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagAwareLogger {
 
-  def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = EitherT(Future {
+  def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A)(implicit tags: LoggingTags): EitherT[Future, Throwable, A] = EitherT(Future {
     val result = Try(db.withConnection(autocommit)(block))
     Either.fromTry(result).leftMap { exception =>
       error("Error encountered during the execution of the sql query", exception)
-      "Error encountered during the execution of the sql query"
+      exception
     }
   })
 
-  def insertPaymentHook(paymentHook: PaymentHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
+  def insertPaymentHook(paymentHook: PaymentHook)(implicit tags: LoggingTags): EitherT[Future, Throwable, PaymentHook] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO payment_hooks(
@@ -63,7 +63,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
     }
   }
 
-  def insertPaymentMetaData(pmd: ContributionMetaData)(implicit tags: LoggingTags): EitherT[Future, String, ContributionMetaData] = {
+  def insertPaymentMetaData(pmd: ContributionMetaData)(implicit tags: LoggingTags): EitherT[Future, Throwable, ContributionMetaData] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       val request = SQL"""
         INSERT INTO contribution_metadata(
@@ -111,7 +111,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
     }
   }
 
-  def saveContributor(contributor: Contributor)(implicit tags: LoggingTags): EitherT[Future, String, Contributor] = {
+  def saveContributor(contributor: Contributor)(implicit tags: LoggingTags): EitherT[Future, Throwable, Contributor] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       // Note that the contributor ID will only set on insert. it's not touched on update.
       val request = SQL"""

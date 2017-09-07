@@ -22,10 +22,9 @@ object PaypalErrorType extends Enum[PaypalErrorType] with PlayJsonEnum[PaypalErr
   }
 }
 
-case class PaypalApiError(
-  errorType: PaypalErrorType,
-  message: String
-)
+case class PaypalApiError(errorType: PaypalErrorType, message: String) extends Exception {
+  override def getMessage: String = s"PaypalApiError of type $errorType: $message"
+}
 
 object PaypalApiError {
   def fromString(message: String): PaypalApiError = PaypalApiError(PaypalErrorType.Other, message)
