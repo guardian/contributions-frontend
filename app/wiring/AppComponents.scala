@@ -1,5 +1,6 @@
 package wiring
 
+import akka.stream.Materializer
 import com.github.nscala_time.time.Imports._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.identity.play.AccessCredentials.{Cookies, Token}
@@ -16,7 +17,7 @@ import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
-import services.{EmailService, IdentityService, OphanService, PaymentServices}
+import services._
 import router.Routes
 import configuration.{Config, CorsConfig, SupportConfig}
 import monitoring.{CloudWatch, CloudWatchMetrics}
@@ -70,7 +71,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val identityService = new IdentityService(wsClient, idConfig)
   lazy val emailService = wire[EmailService]
 
-  lazy val ophanService = new OphanService(RequestRunners.loggingRunner(ophanMetrics), environment)
+  lazy val ophanService = new ContributionOphanService(environment)
   lazy val giraffeController = wire[Contributions]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]

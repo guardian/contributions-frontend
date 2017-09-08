@@ -12,7 +12,7 @@ import controllers.httpmodels.{AuthRequest, AuthResponse, CaptureRequest}
 import models._
 import monitoring._
 import play.api.mvc._
-import services.{PaymentServices, PaypalService}
+import services.{ContributionOphanService, PaymentServices, PaypalAcquisitionComponents, PaypalService}
 import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
@@ -22,7 +22,7 @@ import play.filters.csrf.CSRFCheck
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig, supportConfig: SupportConfig,
-  checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
+  checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics, ophanService: ContributionOphanService)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
   import ContribTimestampCookieAttributes._
 
@@ -146,8 +146,23 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
+    def queryStringFields =
+      PaypalAcquisitionComponents.Execute.QueryStringFields(
+        cmp = cmp,
+        intCmp = intCmp,
+        refererPageviewId = refererPageviewId,
+        refererUrl = refererUrl,
+        ophanPageviewId = ophanPageviewId,
+        ophanBrowserId = ophanBrowserId,
+        ophanVisitId = ophanVisitId
+      )
+
     paypalService.executePayment(paymentId, payerId)
-      .map { payment => storeMetaData(payment); payment }
+      .map { payment =>
+        storeMetaData(payment)
+        ophanService.submitAcquisition(PaypalAcquisitionComponents.Execute(payment, queryStringFields))
+        payment
+      }
       .fold(notOkResult, okResult)
   }
 

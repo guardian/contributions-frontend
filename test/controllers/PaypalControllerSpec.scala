@@ -17,7 +17,7 @@ import play.api.mvc._
 import play.api.test._
 import play.api.test.Helpers._
 import play.filters.csrf.CSRFCheck
-import services.{PaymentServices, PaypalService}
+import services.{ContributionOphanService, PaymentServices, PaypalService}
 import cats.instances.future._
 import org.mockito.internal.verification.VerificationModeFactory
 import play.api.libs.json.Json
@@ -39,6 +39,8 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
   val mockCloudwatchMetrics: CloudWatchMetrics = mock[CloudWatchMetrics]
 
   val mockCorsConfig = mock[CorsConfig]
+
+  val mockOphanService = mock[ContributionOphanService]
 
   val supportConfig = SupportConfig("https://support.thegulocal.com/thankyou")
 
@@ -72,7 +74,7 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
   )(Matchers.any[LoggingTags]))
     .thenReturn(EitherT.pure[Future, String, SavedContributionData](mock[SavedContributionData]))
 
-  val controller: PaypalController = new PaypalController(mockPaymentServices, mockCorsConfig, supportConfig, mockCsrfCheck, mockCloudwatchMetrics)
+  val controller: PaypalController = new PaypalController(mockPaymentServices, mockCorsConfig, supportConfig, mockCsrfCheck, mockCloudwatchMetrics, mockOphanService)
 
   def numberOfCallsToStoreMetaDataMustBe(times: Int): Unit = {
     def captor[A <: AnyRef](implicit classTag: ClassTag[A]): A =

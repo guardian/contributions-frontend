@@ -23,14 +23,13 @@ import monitoring.{CloudWatchMetrics, LoggingTagsProvider, TagAwareLogger}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.mvc._
-import services.Ophan.OphanResponse
-import services.{OphanAcquisitionEvent, OphanService, PaymentServices}
+import services.{ContributionOphanService, PaymentServices, StripeAcquisitionComponents}
 import utils.FastlyUtils._
 import utils.MaxAmount
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StripeController(paymentServices: PaymentServices, stripeConfig: Config, corsConfig: CorsConfig, ophanService: OphanService, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
+class StripeController(paymentServices: PaymentServices, stripeConfig: Config, corsConfig: CorsConfig, ophanService: ContributionOphanService, cloudWatchMetrics: CloudWatchMetrics)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
 
   def payOptions = CachedAction { request =>
@@ -126,11 +125,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       )
     }
 
-    def recordToOphan(metadata: stripe.StripeMetaData): Option[Future[OphanResponse]] = {
-      val event = OphanAcquisitionEvent(metadata.contributionMetadata, metadata.contributorRow, None, PaymentProvider.Stripe)
-      event.map(ophanService.submitEvent)
-    }
-
     def logPaymentSuccess: Unit = {
       if (request.isAndroid) {
         info(s"Stripe payment successful for contributions session id: ${request.sessionId} - redirected to external platform for thank you page. platform is: ${request.platform}.")
@@ -144,7 +138,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     createCharge.map { charge =>
       val metadata = createMetaData(charge)
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
-      recordToOphan(metadata) // again, fire and forget.
+      ophanService.submitAcquisition(StripeAcquisitionComponents(charge, request)) // again, fire and forget.
       logPaymentSuccess
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
