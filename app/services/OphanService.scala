@@ -48,7 +48,7 @@ object PaymentFrequency extends Enum[PaymentFrequency] {
 }
 
 trait Product {
-  val stringValue = "CONTRIBUTION"
+  val stringValue = "ONE_OFF_CONTRIBUTION"
 }
 
 case object Contribution extends Product
