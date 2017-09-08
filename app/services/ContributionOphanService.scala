@@ -7,7 +7,7 @@ import cats.data.EitherT
 import cats.syntax.either._
 import com.gu.acquisition.services.{OphanService, OphanServiceError}
 import com.gu.stripe.Stripe.Charge
-import com.paypal.api.payments.{Payment, Capture => PaypalCapture}
+import com.paypal.api.payments.Payment
 import controllers.forms.ContributionRequest
 import controllers.httpmodels.CaptureRequest
 import ophan.thrift.event.Acquisition
@@ -177,7 +177,7 @@ object PaypalAcquisitionComponents {
     }
   }
 
-  case class Capture(capture: PaypalCapture, request: ABTestRequest[CaptureRequest])
+  case class Capture(payment: Payment, request: ABTestRequest[CaptureRequest])
 
   object Capture {
 
@@ -197,18 +197,18 @@ object PaypalAcquisitionComponents {
         import components._
 
         for {
-          amount <- tryField("amount")(capture.getAmount.getTotal.toDouble)
+          amount <- tryField("amount")(payment.getPaymentInstruction.getAmount.getValue.toDouble)
         } yield {
           Acquisition(
             product = ophan.thrift.event.Product.Contribution,
             paymentFrequency = ophan.thrift.event.PaymentFrequency.OneOff,
-            currency = capture.getAmount.getCurrency,
+            currency = payment.getPaymentInstruction.getAmount.getCurrency,
             amount = amount,
             amountInGBP = None, // Calculated at the sinks of the Ophan stream
             paymentProvider = Some(ophan.thrift.event.PaymentProvider.Paypal),
             campaignCode = Some(Set(request.body.cmp, request.body.intCmp).flatten),
             abTests = Some(request.testAllocations.asAbTestInfo),
-            countryCode = None, // TODO: implement
+            countryCode = Some(payment.getPayer.getPayerInfo.getCountryCode),
             referrerPageViewId = request.body.refererPageviewId,
             referrerUrl = request.body.refererUrl,
             componentId = request.body.componentId,

@@ -46,31 +46,33 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     val captureBody = request.body
     val paypalService: PaypalService = paymentServices.paypalServiceFor(request)
 
-    def storeMetaData(paymentId: String) =
-      paypalService.getPayment(paymentId)
-        .leftMap(err => err.message)
-        .flatMap { payment =>
-          paypalService.storeMetaData(
-            payment = payment,
-            testAllocations = request.testAllocations,
-            cmp = captureBody.cmp,
-            intCmp = captureBody.intCmp,
-            refererPageviewId = captureBody.refererPageviewId,
-            refererUrl = captureBody.refererUrl,
-            ophanPageviewId = captureBody.ophanPageviewId,
-            ophanBrowserId = captureBody.ophanBrowserId,
-            idUser = captureBody.idUser,
-            platform = Some(captureBody.platform),
-            ophanVisitId = None
-          )
-        }
-        .leftMap { err =>
-          error(s"Unable to store the metadata while capturing the payment. Continuing anyway. contributions session id: ${request.sessionId} Error: $err")
-        }
+    def storeMetaData(payment: Payment) =
+      paypalService.storeMetaData(
+        payment = payment,
+        testAllocations = request.testAllocations,
+        cmp = captureBody.cmp,
+        intCmp = captureBody.intCmp,
+        refererPageviewId = captureBody.refererPageviewId,
+        refererUrl = captureBody.refererUrl,
+        ophanPageviewId = captureBody.ophanPageviewId,
+        ophanBrowserId = captureBody.ophanBrowserId,
+        idUser = captureBody.idUser,
+        platform = Some(captureBody.platform),
+        ophanVisitId = None
+      )
+      .leftMap { err =>
+        error(s"Unable to store the metadata while capturing the payment. Continuing anyway. contributions session id: ${request.sessionId} Error: $err")
+      }
 
     paypalService.capturePayment(captureBody.paymentId)
       .map { capture =>
-        storeMetaData(capture.getParentPayment)
+        // Executed for side-effects only
+        paypalService.getPayment(capture.getParentPayment)
+          .map { payment =>
+            storeMetaData(payment)
+            ophanService.submitAcquisition(PaypalAcquisitionComponents.Capture(payment, request))
+          }
+
         capture
       }
       .fold(
