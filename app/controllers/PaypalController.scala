@@ -46,31 +46,40 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     val captureBody = request.body
     val paypalService: PaypalService = paymentServices.paypalServiceFor(request)
 
-    (for {
-      capture <- paypalService.capturePayment(captureBody.paymentId)
-      payment <- paypalService.getPayment(capture.getParentPayment)
-    } yield {
-      paypalService.storeMetaData(
-        payment = payment,
-        testAllocations = request.testAllocations,
-        cmp = captureBody.cmp,
-        intCmp = captureBody.intCmp,
-        refererPageviewId = captureBody.refererPageviewId,
-        refererUrl = captureBody.refererUrl,
-        ophanPageviewId = captureBody.ophanPageviewId,
-        ophanBrowserId = captureBody.ophanBrowserId,
-        idUser = captureBody.idUser,
-        platform = Some(captureBody.platform),
-        ophanVisitId = None
-      ).leftMap { errorMessage =>
-        error(s"Unable to store the metadata while capturing the payment. Continuing anyway. contributions session id: ${request.sessionId} Error: $errorMessage")
-      }
+    def storeMetaData(paymentId: String) =
+      paypalService.getPayment(paymentId)
+        .leftMap(err => err.message)
+        .flatMap { payment =>
+          paypalService.storeMetaData(
+            payment = payment,
+            testAllocations = request.testAllocations,
+            cmp = captureBody.cmp,
+            intCmp = captureBody.intCmp,
+            refererPageviewId = captureBody.refererPageviewId,
+            refererUrl = captureBody.refererUrl,
+            ophanPageviewId = captureBody.ophanPageviewId,
+            ophanBrowserId = captureBody.ophanBrowserId,
+            idUser = captureBody.idUser,
+            platform = Some(captureBody.platform),
+            ophanVisitId = None
+          )
+        }
+        .leftMap { err =>
+          error(s"Unable to store the metadata while capturing the payment. Continuing anyway. contributions session id: ${request.sessionId} Error: $err")
+        }
 
-      capture
-    }).fold(error => {
-      logger.error(s"Unable to capture the payment for contributions session id: ${request.sessionId}. Error message is: $error")
-      InternalServerError(Json.toJson(error))
-    }, _ => Ok)
+    paypalService.capturePayment(captureBody.paymentId)
+      .map { capture =>
+        storeMetaData(capture.getParentPayment)
+        capture
+      }
+      .fold(
+        err => {
+          error(s"Unable to capture the payment for contributions session id: ${request.sessionId}. Error message is: $err")
+          InternalServerError(Json.toJson(err))
+        },
+        _ => Ok
+      )
   }
 
   def executePayment(
