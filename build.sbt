@@ -45,6 +45,7 @@ play.sbt.routes.RoutesKeys.routesImport ++= Seq(
     "com.gu.i18n.CountryGroup",
     "controllers.PaymentError",
     "ophan.thrift.componentEvent.ComponentType",
+    "ophan.thrift.event.AbTest",
     "ophan.thrift.event.AcquisitionSource"
 )
 

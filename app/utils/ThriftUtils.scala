@@ -78,25 +78,11 @@ object ThriftUtils {
 
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] =
         Either.fromOption(data.get(key), FormError(key, s"unable to find the key $key in the form"))
-        .flatMap(decodeFormValueOfKey(key))
-        .leftMap(err => Seq(err))
+          .flatMap(decodeFormValueOfKey(key))
+          .leftMap(err => Seq(err))
 
       override def unbind(key: String, value: A): Map[String, String] = Map(key -> F.encode(value))
     }
-
-    implicit def thriftEnumQueryStringBindable[A](implicit F: ThriftEnumFormatter[A]): QueryStringBindable[A] =
-      new QueryStringBindable[A] {
-        import cats.syntax.either._
-
-        override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, A]] =
-          for {
-            enums <- params.get(key)
-            enum <- enums.headOption
-          } yield F.decode(enum).leftMap(_.message)
-
-        // Implementation arbitrary - this method should never be used.
-        override def unbind(key: String, value: A): String = key + "=" + F.encode(value)
-      }
 
     implicit val abTestReads: Reads[AbTest] = {
       import play.api.libs.functional.syntax._
@@ -110,17 +96,29 @@ object ThriftUtils {
     }
 
     implicit val abTestFormatter: Formatter[AbTest] = new Formatter[AbTest] {
+      import cats.syntax.either._
 
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AbTest] = {
-        import cats.syntax.either._
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AbTest] =
         (for {
           json <- Either.fromOption(data.get(key), FormError(key, s"unable to find the key $key in the form"))
-          abTest <- Json.parse(json).validate[AbTest].asEither.leftMap(_ => FormError(key, s"json $json invalid"))
-        } yield abTest).leftMap(err => Seq(err))
-      }
+          a <- Json.parse(json).validate[AbTest].asEither.leftMap(_ => FormError(key, s"form value $json invalid"))
+        } yield a).leftMap(err => Seq(err))
 
-      // FIXME
       override def unbind(key: String, value: AbTest): Map[String, String] = ???
     }
+
+    implicit def formatterDerivedQueryStringBindable[A](implicit F: Formatter[A]): QueryStringBindable[A] =
+      new QueryStringBindable[A] {
+        import cats.syntax.either._
+
+        override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, A]] = {
+          val data = params.collect { case (k, values) if values.nonEmpty => (k, values.head) }
+          // Doc states that method should return None if the key doesn't exist.
+          // Doing an initial get and mapping over the resulting option ensures this.
+          data.get(key).map(_ => F.bind(key, data).leftMap(_ => "error!"))
+        }
+
+        override def unbind(key: String, value: A): String = ???
+      }
   }
 }

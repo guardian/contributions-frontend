@@ -12,7 +12,7 @@ import controllers.httpmodels.{AuthRequest, AuthResponse, CaptureRequest}
 import models._
 import monitoring._
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.AcquisitionSource
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.mvc._
 import services.{ContributionOphanService, PaymentServices, PaypalAcquisitionComponents, PaypalService}
 import play.api.data.Form
@@ -110,6 +110,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     componentId: Option[String],
     componentType: Option[ComponentType],
     source: Option[AcquisitionSource],
+    abTest: Option[AbTest],
     supportRedirect: Option[Boolean]
   ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
     val paypalService = paymentServices.paypalServiceFor(request)
@@ -173,6 +174,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         componentId = componentId,
         componentType = componentType,
         source = source,
+        abTest = abTest,
         testAllocations = request.testAllocations
       )
 
@@ -209,6 +211,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         componentId = authRequest.componentId,
         componentType = authRequest.componentType,
         source = authRequest.source,
+        abTest = authRequest.abTest,
         supportRedirect = authRequest.supportRedirect
       )
 

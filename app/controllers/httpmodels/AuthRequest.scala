@@ -6,7 +6,7 @@ import com.paypal.api.payments.Payment
 import play.api.libs.functional.syntax._
 import models.PaypalApiError
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.AcquisitionSource
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.libs.json.Reads.min
 import play.api.libs.json._
 import utils.JsonUtils._
@@ -27,7 +27,8 @@ case class AuthRequest private (
   supportRedirect: Option[Boolean],
   componentId: Option[String],
   componentType: Option[ComponentType],
-  source: Option[AcquisitionSource]
+  source: Option[AcquisitionSource],
+  abTest: Option[AbTest]
 )
 
 object AuthRequest {
@@ -53,7 +54,8 @@ object AuthRequest {
     supportRedirect: Option[Boolean],
     componentId: Option[String],
     componentType: Option[ComponentType],
-    source: Option[AcquisitionSource]
+    source: Option[AcquisitionSource],
+    abTest: Option[AbTest]
   ): AuthRequest = {
     val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
 
@@ -70,7 +72,8 @@ object AuthRequest {
       supportRedirect = supportRedirect,
       componentId = componentId,
       componentType = componentType,
-      source = source
+      source = source,
+      abTest = abTest
     )
   }
 
@@ -87,7 +90,8 @@ object AuthRequest {
       (__ \ "supportRedirect").readNullable[Boolean] and
       (__ \ "componentId").readNullable[String] and
       (__ \ "componentType").readNullable[ComponentType] and
-      (__ \ "source").readNullable[AcquisitionSource]
+      (__ \ "source").readNullable[AcquisitionSource] and
+      (__ \ "abTest").readNullable[AbTest]
     ) (AuthRequest.withSafeRefererUrl _)
 }
 

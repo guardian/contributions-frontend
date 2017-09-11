@@ -12,7 +12,7 @@ import com.paypal.api.payments.Payment
 import controllers.forms.ContributionRequest
 import controllers.httpmodels.CaptureRequest
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.{AbTestInfo, Acquisition, AcquisitionSource}
+import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition, AcquisitionSource}
 import play.api.{Environment, Mode}
 import services.ContributionOphanService.{AcquisitionSubmissionBuilder, AcquisitionSubmissionBuilderUtils, OphanIds}
 import simulacrum.typeclass
@@ -148,6 +148,7 @@ object PaypalAcquisitionComponents {
         componentId: Option[String],
         componentType: Option[ComponentType],
         source: Option[AcquisitionSource],
+        abTest: Option[AbTest],
         testAllocations: Set[Allocation]
     )
 
