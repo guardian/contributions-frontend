@@ -2,7 +2,7 @@ package controllers.httpmodels
 
 import models.IdentityId
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.AcquisitionSource
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.libs.json._
 
 case class CaptureRequest (
@@ -17,7 +17,8 @@ case class CaptureRequest (
   ophanBrowserId: Option[String],
   componentId: Option[String],
   componentType: Option[ComponentType],
-  source: Option[AcquisitionSource]
+  source: Option[AcquisitionSource],
+  abTest: Option[AbTest]
 )
 
 object CaptureRequest {

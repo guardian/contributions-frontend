@@ -205,7 +205,6 @@ object PaypalAcquisitionComponents {
       }
 
       override def buildAcquisition(components: Capture): Either[OphanServiceError, Acquisition] = {
-        import com.gu.acquisition.syntax._
         import components._
 
         for {
@@ -219,7 +218,7 @@ object PaypalAcquisitionComponents {
             amountInGBP = None, // Calculated at the sinks of the Ophan stream
             paymentProvider = Some(ophan.thrift.event.PaymentProvider.Paypal),
             campaignCode = Some(Set(request.body.cmp, request.body.intCmp).flatten),
-            abTests = Some(request.testAllocations.asAbTestInfo),
+            abTests = Some(abTestInfo(request.testAllocations, request.body.abTest)),
             countryCode = Some(payment.getPayer.getPayerInfo.getCountryCode),
             referrerPageViewId = request.body.refererPageviewId,
             referrerUrl = request.body.refererUrl,
