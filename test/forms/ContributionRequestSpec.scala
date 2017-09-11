@@ -26,7 +26,8 @@ class ContributionRequestSpec extends PlaySpec {
     ophanVisitId = None,
     componentId = None,
     componentType = None,
-    source = None
+    source = None,
+    abTest = None
   )
 
   val baseFormData: Map[String, String] =  {
@@ -46,7 +47,7 @@ class ContributionRequestSpec extends PlaySpec {
 
     "be able to parse data successfully if no optional fields are included" in {
 
-      baseContributionRequest mustEqual contributionForm.bind(baseFormData).get
+      baseContributionRequest mustEqual contributionForm.bind(baseFormData).value.value
     }
 
     "be able to parse data successfully when component information is included" in {
@@ -60,7 +61,7 @@ class ContributionRequestSpec extends PlaySpec {
         ("componentId" -> "componentId") +
         ("componentType" -> "ACQUISITIONS_EPIC")
 
-      request mustEqual contributionForm.bind(formData).get
+      request mustEqual contributionForm.bind(formData).value.value
     }
 
     "be able to parse data successfully when the acquisition source information is included" in {
@@ -69,7 +70,16 @@ class ContributionRequestSpec extends PlaySpec {
 
       val formData = baseFormData + ("source" -> "GUARDIAN_APPS")
 
-      request mustEqual contributionForm.bind(formData).get
+      request mustEqual contributionForm.bind(formData).value.value
+    }
+
+    "be able to parse data successfully when ab test information is included" in {
+
+      val request = baseContributionRequest.copy(abTest = Some(ophan.thrift.event.AbTest("name", "variant")))
+
+      val formData = baseFormData + ("abTest" -> """{"name": "name", "variant": "variant"}""")
+
+      request mustEqual contributionForm.bind(formData).value.value
     }
   }
 }

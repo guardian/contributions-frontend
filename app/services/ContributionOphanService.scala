@@ -12,9 +12,9 @@ import com.paypal.api.payments.Payment
 import controllers.forms.ContributionRequest
 import controllers.httpmodels.CaptureRequest
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.{Acquisition, AcquisitionSource}
+import ophan.thrift.event.{AbTestInfo, Acquisition, AcquisitionSource}
 import play.api.{Environment, Mode}
-import services.ContributionOphanService.{AcquisitionSubmissionBuilder, OphanIds}
+import services.ContributionOphanService.{AcquisitionSubmissionBuilder, AcquisitionSubmissionBuilderUtils, OphanIds}
 import simulacrum.typeclass
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -71,20 +71,24 @@ object ContributionOphanService {
         acquisition <- buildAcquisition(a)
       } yield AcquisitionSubmission(ophanIds, acquisition)
   }
-}
 
-/**
-  * Mixin to facilitate creating acquisition submission builders.
-  */
-trait OphanServiceErrorUtils {
+  /**
+    * Mixin to facilitate creating acquisition submission builders.
+    */
+  trait AcquisitionSubmissionBuilderUtils {
 
-  def tryField[A](name: String)(a: => A): Either[OphanServiceError, A] =
-    Either.catchNonFatal(a).leftMap { _ =>
-      OphanServiceError.Generic(new RuntimeException(s"unable to get value for field $name"))
+    def tryField[A](name: String)(a: => A): Either[OphanServiceError, A] =
+      Either.catchNonFatal(a).leftMap { _ =>
+        OphanServiceError.Generic(new RuntimeException(s"unable to get value for field $name"))
+      }
+
+    def abTestInfo(native: Set[Allocation], nonNative: Option[ophan.thrift.event.AbTest]): ophan.thrift.event.AbTestInfo = {
+      import com.gu.acquisition.syntax._
+      val abTestInfo = native.asAbTestInfo
+      nonNative.map(abTest => AbTestInfo(abTestInfo.tests + abTest)).getOrElse(abTestInfo)
     }
+  }
 }
-
-// TODO: pass through AB tests that the user was in upstream
 
 case class StripeAcquisitionComponents(charge: Charge, request: ABTestRequest[ContributionRequest])
 
@@ -92,10 +96,9 @@ object StripeAcquisitionComponents {
 
   implicit object stripeAcquisitionSubmissionBuilder
     extends AcquisitionSubmissionBuilder[StripeAcquisitionComponents]
-    with OphanServiceErrorUtils {
+    with AcquisitionSubmissionBuilderUtils {
 
     override def buildAcquisition(components: StripeAcquisitionComponents): Either[OphanServiceError, Acquisition] = {
-      import com.gu.acquisition.syntax._
       import components._
 
       Either.right(
@@ -107,7 +110,7 @@ object StripeAcquisitionComponents {
           amountInGBP = None, // Calculated at the sinks of the Ophan stream
           paymentProvider = Option(ophan.thrift.event.PaymentProvider.Stripe),
           campaignCode = Some(Set(request.body.intcmp, request.body.cmp).flatten),
-          abTests = Some(components.request.testAllocations.asAbTestInfo),
+          abTests = Some(abTestInfo(request.testAllocations, request.body.abTest)),
           countryCode = Some(charge.source.country),
           referrerPageViewId = request.body.refererPageviewId,
           referrerUrl = request.body.refererUrl,
@@ -149,7 +152,7 @@ object PaypalAcquisitionComponents {
     )
 
     implicit object paypalAcquisitionSubmissionBuilder
-      extends AcquisitionSubmissionBuilder[Execute] with OphanServiceErrorUtils {
+      extends AcquisitionSubmissionBuilder[Execute] with AcquisitionSubmissionBuilderUtils {
 
       def buildOphanIds(components: Execute): Either[OphanServiceError, OphanIds] = {
         import components._
@@ -191,7 +194,7 @@ object PaypalAcquisitionComponents {
   object Capture {
 
     implicit object paypalAcquisitionSubmissionBuilder
-      extends AcquisitionSubmissionBuilder[Capture] with OphanServiceErrorUtils {
+      extends AcquisitionSubmissionBuilder[Capture] with AcquisitionSubmissionBuilderUtils {
 
       override def buildOphanIds(components: Capture): Either[OphanServiceError, OphanIds] = {
         import components._

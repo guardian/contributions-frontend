@@ -2,10 +2,10 @@ package utils
 
 import com.twitter.scrooge.ThriftEnum
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.AcquisitionSource
+import ophan.thrift.event.{AbTest, AbTestInfo, AcquisitionSource}
 import play.api.data.FormError
 import play.api.data.format.Formatter
-import play.api.libs.json.{JsError, JsSuccess, Reads}
+import play.api.libs.json._
 import play.api.mvc.QueryStringBindable
 import simulacrum.typeclass
 
@@ -97,5 +97,30 @@ object ThriftUtils {
         // Implementation arbitrary - this method should never be used.
         override def unbind(key: String, value: A): String = key + "=" + F.encode(value)
       }
+
+    implicit val abTestReads: Reads[AbTest] = {
+      import play.api.libs.functional.syntax._
+      ((__ \ "name").read[String] and (__ \ "variant").read[String]) { (name, variant) =>
+        AbTest(name, variant)
+      }
+    }
+
+    implicit val abTestWrites: Writes[AbTest] = Writes { abTest =>
+      Json.obj("name" -> abTest.name, "variant" -> abTest.variant)
+    }
+
+    implicit val abTestFormatter: Formatter[AbTest] = new Formatter[AbTest] {
+
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AbTest] = {
+        import cats.syntax.either._
+        (for {
+          json <- Either.fromOption(data.get(key), FormError(key, s"unable to find the key $key in the form"))
+          abTest <- Json.parse(json).validate[AbTest].asEither.leftMap(_ => FormError(key, s"json $json invalid"))
+        } yield abTest).leftMap(err => Seq(err))
+      }
+
+      // FIXME
+      override def unbind(key: String, value: AbTest): Map[String, String] = ???
+    }
   }
 }

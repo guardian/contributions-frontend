@@ -3,7 +3,7 @@ package controllers.forms
 import com.gu.i18n.Currency
 import models.IdentityId
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.AcquisitionSource
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.data.{Form, FormError}
 import play.api.data.format.Formatter
 
@@ -28,7 +28,8 @@ case class ContributionRequest(
   ophanVisitId: Option[String],
   componentId: Option[String],
   componentType: Option[ComponentType],
-  source: Option[AcquisitionSource]
+  source: Option[AcquisitionSource],
+  abTest: Option[AbTest]
 )
 
 object ContributionRequest {
@@ -71,7 +72,8 @@ object ContributionRequest {
       "ophanVisitId" -> optional(text),
       "componentId" -> optional(text),
       "componentType" -> optional(of[ComponentType]),
-      "source" -> optional(of[AcquisitionSource])
+      "source" -> optional(of[AcquisitionSource]),
+      "abTest" -> optional(of[AbTest])
     )(ContributionRequest.apply)(ContributionRequest.unapply)
   )
 
