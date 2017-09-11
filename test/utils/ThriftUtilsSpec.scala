@@ -9,15 +9,18 @@ import play.api.libs.json.{JsString, JsValue, Reads}
 class ThriftUtilsSpec extends PlaySpec with EitherValues {
   import ThriftUtils.Implicits._
 
-  def formatCheck[A](enum: String, instance: A)(implicit F: ThriftEnumFormatter[A]): Unit =
+  def formatCheck[A](enum: String, instance: A)(implicit F: ThriftEnumFormatter[A]): Unit = {
+    import ThriftEnumFormatter.ops._
     F.decode(enum).right.value mustEqual instance
+    instance.encode mustEqual enum
+  }
 
   def jsonCheck[A : Reads](enum: String, instance: A): Unit =
     (JsString(enum): JsValue).validate[A].asEither.right.value mustEqual instance
 
   "A component type" should {
 
-    "be able to be decoded from a string representation" in {
+    "be able to be encoded/decoded to/from a string representation" in {
       import ophan.thrift.componentEvent.ComponentType._
 
       // Some common component types used by acquisitions

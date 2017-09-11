@@ -121,6 +121,9 @@ class PaypalControllerSpec extends PlaySpec
     ophanBrowserId = None,
     ophanPageviewId = None,
     ophanVisitId = None,
+    componentId = None,
+    componentType = None,
+    source = None,
     supportRedirect = None
   )
 
@@ -136,6 +139,9 @@ class PaypalControllerSpec extends PlaySpec
     ophanBrowserId = None,
     ophanPageviewId = None,
     ophanVisitId = None,
+    componentId = None,
+    componentType = None,
+    source = None,
     supportRedirect = Some(true)
   )
 

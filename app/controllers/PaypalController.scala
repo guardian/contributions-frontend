@@ -11,6 +11,8 @@ import configuration.{CorsConfig, SupportConfig}
 import controllers.httpmodels.{AuthRequest, AuthResponse, CaptureRequest}
 import models._
 import monitoring._
+import ophan.thrift.componentEvent.ComponentType
+import ophan.thrift.event.AcquisitionSource
 import play.api.mvc._
 import services.{ContributionOphanService, PaymentServices, PaypalAcquisitionComponents, PaypalService}
 import play.api.data.Form
@@ -61,17 +63,26 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         ophanVisitId = None
       )
       .leftMap { err =>
-        error(s"Unable to store the metadata while capturing the payment. Continuing anyway. contributions session id: ${request.sessionId} Error: $err")
+        error(
+          "Unable to store the metadata while capturing the payment. Continuing anyway." +
+          s"Contributions session id: ${request.sessionId} Error: $err"
+        )
       }
 
     paypalService.capturePayment(captureBody.paymentId)
       .map { capture =>
         // Executed for side-effects only
         paypalService.getPayment(capture.getParentPayment)
-          .map { payment =>
-            storeMetaData(payment)
-            ophanService.submitAcquisition(PaypalAcquisitionComponents.Capture(payment, request))
-          }
+          .fold(
+            err => error(
+              s"Unable to retrieve payment from capture due to a Paypal API error: $err " +
+              s"Payment not stored, nor sent to Ophan. Contributions session id: ${request.sessionId}"
+            ),
+            payment => {
+              storeMetaData(payment)
+              ophanService.submitAcquisition(PaypalAcquisitionComponents.Capture(payment, request))
+            }
+          )
 
         capture
       }
@@ -96,9 +107,11 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     ophanVisitId: Option[String],
+    componentId: Option[String],
+    componentType: Option[ComponentType],
+    source: Option[AcquisitionSource],
     supportRedirect: Option[Boolean]
   ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
-
     val paypalService = paymentServices.paypalServiceFor(request)
 
     info(s"Attempting paypal payment for contributions session id: ${request.sessionId}")
@@ -148,21 +161,25 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
-    def queryStringFields =
-      PaypalAcquisitionComponents.Execute.QueryStringFields(
+    def requestData =
+      PaypalAcquisitionComponents.Execute.RequestData(
         cmp = cmp,
         intCmp = intCmp,
         refererPageviewId = refererPageviewId,
         refererUrl = refererUrl,
         ophanPageviewId = ophanPageviewId,
         ophanBrowserId = ophanBrowserId,
-        ophanVisitId = ophanVisitId
+        ophanVisitId = ophanVisitId,
+        componentId = componentId,
+        componentType = componentType,
+        source = source,
+        testAllocations = request.testAllocations
       )
 
     paypalService.executePayment(paymentId, payerId)
       .map { payment =>
         storeMetaData(payment)
-        ophanService.submitAcquisition(PaypalAcquisitionComponents.Execute(payment, queryStringFields))
+        ophanService.submitAcquisition(PaypalAcquisitionComponents.Execute(payment, requestData))
         payment
       }
       .fold(notOkResult, okResult)
@@ -189,6 +206,9 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         ophanPageviewId = authRequest.ophanPageviewId,
         ophanBrowserId = authRequest.ophanBrowserId,
         ophanVisitId = authRequest.ophanVisitId,
+        componentId = authRequest.componentId,
+        componentType = authRequest.componentType,
+        source = authRequest.source,
         supportRedirect = authRequest.supportRedirect
       )
 

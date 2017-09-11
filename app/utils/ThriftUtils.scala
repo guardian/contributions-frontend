@@ -6,8 +6,10 @@ import ophan.thrift.event.AcquisitionSource
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.libs.json.{JsError, JsSuccess, Reads}
+import play.api.mvc.QueryStringBindable
 import simulacrum.typeclass
 
+import scala.collection.mutable
 import scala.reflect.ClassTag
 
 case class ThriftDecodeError private (message: String)
@@ -20,6 +22,9 @@ object ThriftDecodeError {
   }
 }
 
+/**
+  * Used to derive other type classes - reads, formatters and query string bindables.
+  */
 @typeclass trait ThriftEnumFormatter[A] {
 
   def decode(enum: String): Either[ThriftDecodeError, A]
@@ -35,7 +40,17 @@ object ThriftEnumFormatter {
     override def decode(enum: String): Either[ThriftDecodeError, A] =
       Either.fromOption(valueOf(enum.filter(_ != '_')), ThriftDecodeError[A](enum))
 
-    override def encode(a: A): String = a.name
+    override def encode(a: A): String = {
+      // The name method for a thrift enum returns a camel case string
+      // e.g. the component type AcquisitionsEpic would have name "AcquisitionsEpic"
+      // The corresponding encode() method would return "ACQUISITIONS_EPIC"
+      val builder = new mutable.StringBuilder()
+      for (c <- a.name) {
+        if (c.isUpper && builder.nonEmpty) builder += '_'
+        builder += c.toUpper
+      }
+      builder.result()
+    }
   }
 }
 
@@ -68,5 +83,19 @@ object ThriftUtils {
 
       override def unbind(key: String, value: A): Map[String, String] = Map(key -> F.encode(value))
     }
+
+    implicit def thriftEnumQueryStringBindable[A](implicit F: ThriftEnumFormatter[A]): QueryStringBindable[A] =
+      new QueryStringBindable[A] {
+        import cats.syntax.either._
+
+        override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, A]] =
+          for {
+            enums <- params.get(key)
+            enum <- enums.headOption
+          } yield F.decode(enum).leftMap(_.message)
+
+        // Implementation arbitrary - this method should never be used.
+        override def unbind(key: String, value: A): String = key + "=" + F.encode(value)
+      }
   }
 }
