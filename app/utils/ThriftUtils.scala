@@ -2,7 +2,7 @@ package utils
 
 import com.twitter.scrooge.ThriftEnum
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.{AbTest, AbTestInfo, AcquisitionSource}
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.libs.json._
@@ -104,7 +104,8 @@ object ThriftUtils {
           a <- Json.parse(json).validate[AbTest].asEither.leftMap(_ => FormError(key, s"form value $json invalid"))
         } yield a).leftMap(err => Seq(err))
 
-      override def unbind(key: String, value: AbTest): Map[String, String] = ???
+      override def unbind(key: String, value: AbTest): Map[String, String] =
+        Map("abTest" -> Json.toJson(value).toString)
     }
 
     implicit def formatterDerivedQueryStringBindable[A](implicit F: Formatter[A]): QueryStringBindable[A] =
@@ -118,7 +119,8 @@ object ThriftUtils {
           data.get(key).map(_ => F.bind(key, data).leftMap(_ => "error!"))
         }
 
-        override def unbind(key: String, value: A): String = ???
+        override def unbind(key: String, value: A): String =
+          F.unbind(key, value).headOption.map { case (k, v) => key + "=" + v }.getOrElse("")
       }
   }
 }

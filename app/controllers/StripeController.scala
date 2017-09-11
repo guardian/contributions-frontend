@@ -23,7 +23,7 @@ import monitoring.{CloudWatchMetrics, LoggingTagsProvider, TagAwareLogger}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.mvc._
-import services.{ContributionOphanService, PaymentServices, StripeAcquisitionComponents}
+import services.{ContributionOphanService, PaymentServices}
 import utils.FastlyUtils._
 import utils.MaxAmount
 

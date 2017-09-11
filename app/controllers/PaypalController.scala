@@ -14,7 +14,7 @@ import monitoring._
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.mvc._
-import services.{ContributionOphanService, PaymentServices, PaypalAcquisitionComponents, PaypalService}
+import services.{ContributionOphanService, PaymentServices, PaypalService}
 import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
