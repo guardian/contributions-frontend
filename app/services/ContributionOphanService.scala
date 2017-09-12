@@ -21,12 +21,25 @@ import scala.concurrent.{ExecutionContext, Future}
 class ContributionOphanService(env: Environment)(implicit system: ActorSystem, materializer: ActorMaterializer)
   extends TagAwareLogger {
 
+  private def logOphanServiceError(err: OphanServiceError)(implicit tags: LoggingTags): Unit =
+    if (env.mode == Mode.Prod) {
+      // The getMessage() method of a throwable instance is called if the throwable is included in a logging call.
+      // Said method is not currently implemented for the OphanServiceError class (returns null).
+      // This pattern matching ensures a meaningful message will be displayed.
+      err match {
+        case OphanServiceError.Generic(underlying) =>
+          error("Failed to submit acquisition event to Ophan", underlying)
+        case OphanServiceError.ResponseUnsuccessful(response) =>
+          error(s"Failed to submit acquisition event to Ophan - response with status ${response.status} returned")
+      }
+    }
+
   /**
     * A left-valued result is returned iff the app is in production mode and the event was not successfully sent.
     */
   // TODO: should an error be returned if not in production mode?
   def submitAcquisition[A : AcquisitionSubmissionBuilder](a: A)(
-    implicit ec: ExecutionContext, loggingTags: LoggingTags): EitherT[Future, OphanServiceError, Unit] = {
+    implicit ec: ExecutionContext, tags: LoggingTags): EitherT[Future, OphanServiceError, Unit] = {
 
     import cats.instances.future._
     import ContributionOphanService._
@@ -44,7 +57,7 @@ class ContributionOphanService(env: Environment)(implicit system: ActorSystem, m
       }
       .bimap(
         err => {
-          error("Failed to submit acquisition event to Ophan", err)
+          logOphanServiceError(err)
           err
         },
         result => {
