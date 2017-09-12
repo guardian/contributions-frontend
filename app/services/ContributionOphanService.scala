@@ -1,20 +1,16 @@
 package services
 
 import abtests.Allocation
-import actions.CommonActions.ABTestRequest
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import cats.data.EitherT
 import cats.syntax.EitherSyntax
 import cats.syntax.either._
 import com.gu.acquisition.services.{OphanService, OphanServiceError}
-import com.paypal.api.payments.Payment
-import controllers.httpmodels.CaptureRequest
 import monitoring.{LoggingTags, TagAwareLogger}
-import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition, AcquisitionSource}
+import ophan.thrift.event.{AbTestInfo, Acquisition}
 import play.api.{Environment, Mode}
-import services.ContributionOphanService.{AcquisitionSubmissionBuilder, AcquisitionSubmissionBuilderUtils, OphanIds}
+import services.ContributionOphanService.AcquisitionSubmissionBuilder
 import simulacrum.typeclass
 
 import scala.concurrent.{ExecutionContext, Future}
