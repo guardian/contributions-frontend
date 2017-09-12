@@ -9,6 +9,7 @@ import cats.syntax.either._
 import com.gu.acquisition.services.{OphanService, OphanServiceError}
 import monitoring.{LoggingTags, TagAwareLogger}
 import ophan.thrift.event.{AbTestInfo, Acquisition}
+import play.api.mvc.Request
 import play.api.{Environment, Mode}
 import services.ContributionOphanService.AcquisitionSubmissionBuilder
 import simulacrum.typeclass
@@ -20,17 +21,24 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class ContributionOphanService(env: Environment)(implicit system: ActorSystem, materializer: ActorMaterializer)
   extends TagAwareLogger {
+  import actions.CommonActions._
 
-  private def logOphanServiceError(err: OphanServiceError)(implicit tags: LoggingTags): Unit =
+  private def logOphanServiceError(err: OphanServiceError)(implicit tags: LoggingTags, request: Request[_]): Unit =
     if (env.mode == Mode.Prod) {
       // The getMessage() method of a throwable instance is called if the throwable is included in a logging call.
       // Said method is not currently implemented for the OphanServiceError class (returns null).
       // This pattern matching ensures a meaningful message will be displayed.
       err match {
         case OphanServiceError.Generic(underlying) =>
-          error("Failed to submit acquisition event to Ophan", underlying)
+          error(
+            s"Failed to submit acquisition event to Ophan. " +
+            s"Contributions session id ${request.sessionId}", underlying
+          )
         case OphanServiceError.ResponseUnsuccessful(response) =>
-          error(s"Failed to submit acquisition event to Ophan - response with status ${response.status} returned")
+          error(
+            s"Failed to submit acquisition event to Ophan - response with status ${response.status} returned. " +
+            s"Contributions session id ${request.sessionId}"
+          )
       }
     }
 
@@ -39,7 +47,7 @@ class ContributionOphanService(env: Environment)(implicit system: ActorSystem, m
     */
   // TODO: should an error be returned if not in production mode?
   def submitAcquisition[A : AcquisitionSubmissionBuilder](a: A)(
-    implicit ec: ExecutionContext, tags: LoggingTags): EitherT[Future, OphanServiceError, Unit] = {
+    implicit ec: ExecutionContext, tags: LoggingTags, request: Request[_]): EitherT[Future, OphanServiceError, Unit] = {
 
     import cats.instances.future._
     import ContributionOphanService._
@@ -61,7 +69,7 @@ class ContributionOphanService(env: Environment)(implicit system: ActorSystem, m
           err
         },
         result => {
-          info("Acquisition event sent to Ophan")
+          info(s"Acquisition event sent to Ophan. Contributions session id: ${request.sessionId}")
           result
         }
       )
