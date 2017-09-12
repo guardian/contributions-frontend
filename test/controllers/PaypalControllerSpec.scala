@@ -101,7 +101,9 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
     Mockito.verify(mockOphanService, VerificationModeFactory.times(times))
       .submitAcquisition[Any](Matchers.any[Any])(
         Matchers.any[AcquisitionSubmissionBuilder[Any]],
-        Matchers.any[ExecutionContext]
+        Matchers.any[ExecutionContext],
+        Matchers.any[LoggingTags],
+        Matchers.any[Request[_]]
       )
 }
 

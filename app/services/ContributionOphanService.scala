@@ -1,19 +1,17 @@
 package services
 
 import abtests.Allocation
-import actions.CommonActions.ABTestRequest
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import cats.data.EitherT
 import cats.syntax.EitherSyntax
 import cats.syntax.either._
 import com.gu.acquisition.services.{OphanService, OphanServiceError}
-import com.paypal.api.payments.Payment
-import controllers.httpmodels.CaptureRequest
-import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition, AcquisitionSource}
+import monitoring.{LoggingTags, TagAwareLogger}
+import ophan.thrift.event.{AbTestInfo, Acquisition}
+import play.api.mvc.Request
 import play.api.{Environment, Mode}
-import services.ContributionOphanService.{AcquisitionSubmissionBuilder, AcquisitionSubmissionBuilderUtils, OphanIds}
+import services.ContributionOphanService.AcquisitionSubmissionBuilder
 import simulacrum.typeclass
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,14 +19,36 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * Used to send contribution acquisitions to Ophan.
   */
-class ContributionOphanService(env: Environment)(implicit system: ActorSystem, materializer: ActorMaterializer) {
+class ContributionOphanService(env: Environment)(implicit system: ActorSystem, materializer: ActorMaterializer)
+  extends TagAwareLogger {
+  import actions.CommonActions._
+
+  private def logOphanServiceError(err: OphanServiceError)(implicit tags: LoggingTags, request: Request[_]): Unit =
+    if (env.mode == Mode.Prod) {
+      // The getMessage() method of a throwable instance is called if the throwable is included in a logging call.
+      // Said method is not currently implemented for the OphanServiceError class (returns null).
+      // This pattern matching ensures a meaningful message will be displayed.
+      err match {
+        case OphanServiceError.Generic(underlying) =>
+          error(
+            s"Failed to submit acquisition event to Ophan. " +
+            s"Contributions session id ${request.sessionId}", underlying
+          )
+        case OphanServiceError.ResponseUnsuccessful(response) =>
+          error(
+            s"Failed to submit acquisition event to Ophan - response with status ${response.status} returned. " +
+            s"Contributions session id ${request.sessionId}"
+          )
+      }
+    }
 
   /**
     * A left-valued result is returned iff the app is in production mode and the event was not successfully sent.
     */
   // TODO: should an error be returned if not in production mode?
-  // TODO: put in some logging if submission fails?
-  def submitAcquisition[A : AcquisitionSubmissionBuilder](a: A)(implicit ec: ExecutionContext): EitherT[Future, OphanServiceError, Unit] = {
+  def submitAcquisition[A : AcquisitionSubmissionBuilder](a: A)(
+    implicit ec: ExecutionContext, tags: LoggingTags, request: Request[_]): EitherT[Future, OphanServiceError, Unit] = {
+
     import cats.instances.future._
     import ContributionOphanService._
     import AcquisitionSubmissionBuilder.ops._
@@ -43,6 +63,16 @@ class ContributionOphanService(env: Environment)(implicit system: ActorSystem, m
         case _ =>
           EitherT.pure[Future, OphanServiceError, Unit](())
       }
+      .bimap(
+        err => {
+          logOphanServiceError(err)
+          err
+        },
+        result => {
+          info(s"Acquisition event sent to Ophan. Contributions session id: ${request.sessionId}")
+          result
+        }
+      )
   }
 }
 
