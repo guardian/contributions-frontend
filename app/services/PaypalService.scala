@@ -15,7 +15,10 @@ import data.ContributionData
 import models._
 import monitoring.TagAwareLogger
 import monitoring.LoggingTags
+import ophan.thrift.componentEvent.ComponentType
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import org.joda.time.DateTime
+import play.api.libs.json.Json
 
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
@@ -85,8 +88,14 @@ class PaypalService(
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     ophanVisitId: Option[String],
+    componentId: Option[String],
+    componentType: Option[ComponentType],
+    source: Option[AcquisitionSource],
+    abTest: Option[AbTest],
     supportRedirect: Option[Boolean] = Some(false)
   )(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
+    import utils.ThriftEnumFormatter.ops._
+    import utils.ThriftUtils.Implicits._
 
     val paymentToCreate = {
 
@@ -99,6 +108,10 @@ class PaypalService(
           refererPageviewId.map(value => s"refererPageviewId=$value"),
           refererUrl.map(value => s"refererUrl=$value"),
           ophanVisitId.map(value => s"ophanVisitId=$value"),
+          componentId.map(value => s"componentId=$value"),
+          componentType.map(value => s"componentType=${value.encode}"),
+          source.map(value => s"source=${value.encode}"),
+          abTest.map(value => s"abTest=${Json.toJson(value)}"),
           supportRedirect.map(value => s"supportRedirect=$value")
         ).flatten match {
           case Nil => ""

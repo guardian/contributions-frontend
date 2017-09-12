@@ -5,6 +5,8 @@ import com.netaporter.uri.Uri
 import com.paypal.api.payments.Payment
 import play.api.libs.functional.syntax._
 import models.PaypalApiError
+import ophan.thrift.componentEvent.ComponentType
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.libs.json.Reads.min
 import play.api.libs.json._
 import utils.JsonUtils._
@@ -22,10 +24,16 @@ case class AuthRequest private (
   ophanPageviewId: Option[String],
   ophanBrowserId: Option[String],
   ophanVisitId: Option[String],
-  supportRedirect: Option[Boolean]
+  supportRedirect: Option[Boolean],
+  componentId: Option[String],
+  componentType: Option[ComponentType],
+  source: Option[AcquisitionSource],
+  abTest: Option[AbTest]
 )
 
 object AuthRequest {
+  import utils.ThriftUtils.Implicits._
+
   /**
     * We need to ensure there's no fragment in the URL here, as PayPal appends some query parameters to the end of it,
     * which will be removed by the browser (due to the URL stripping rules) in its requests.
@@ -43,11 +51,30 @@ object AuthRequest {
     ophanPageviewId: Option[String],
     ophanBrowserId: Option[String],
     ophanVisitId: Option[String],
-    supportRedirect: Option[Boolean]
+    supportRedirect: Option[Boolean],
+    componentId: Option[String],
+    componentType: Option[ComponentType],
+    source: Option[AcquisitionSource],
+    abTest: Option[AbTest]
   ): AuthRequest = {
     val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
 
-    new AuthRequest(countryGroup, amount, cmp, intCmp, refererPageviewId, safeRefererUrl, ophanPageviewId, ophanBrowserId, ophanVisitId, supportRedirect)
+    new AuthRequest(
+      countryGroup = countryGroup,
+      amount = amount,
+      cmp = cmp,
+      intCmp = intCmp,
+      refererPageviewId = refererPageviewId,
+      refererUrl = safeRefererUrl,
+      ophanPageviewId = ophanPageviewId,
+      ophanBrowserId = ophanBrowserId,
+      ophanVisitId = ophanVisitId,
+      supportRedirect = supportRedirect,
+      componentId = componentId,
+      componentType = componentType,
+      source = source,
+      abTest = abTest
+    )
   }
 
   implicit val authRequestReads: Reads[AuthRequest] = (
@@ -60,7 +87,11 @@ object AuthRequest {
       (__ \ "ophanPageviewId").readNullable[String] and
       (__ \ "ophanBrowserId").readNullable[String] and
       (__ \ "ophanVisitId").readNullable[String] and
-      (__ \ "supportRedirect").readNullable[Boolean]
+      (__ \ "supportRedirect").readNullable[Boolean] and
+      (__ \ "componentId").readNullable[String] and
+      (__ \ "componentType").readNullable[ComponentType] and
+      (__ \ "source").readNullable[AcquisitionSource] and
+      (__ \ "abTest").readNullable[AbTest]
     ) (AuthRequest.withSafeRefererUrl _)
 }
 

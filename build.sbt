@@ -39,7 +39,16 @@ sources in (Compile,doc) := Seq.empty
 
 publishArtifact in (Compile, packageDoc) := false
 
-play.sbt.routes.RoutesKeys.routesImport ++= Seq("controllers.Binders._", "com.gu.i18n.CountryGroup", "controllers.PaymentError")
+play.sbt.routes.RoutesKeys.routesImport ++= Seq(
+    "controllers.Binders._",
+    "utils.ThriftUtils.Implicits._",
+    "com.gu.i18n.CountryGroup",
+    "controllers.PaymentError",
+    "ophan.thrift.componentEvent.ComponentType",
+    "ophan.thrift.event.AbTest",
+    "ophan.thrift.event.AcquisitionSource"
+)
+
 scalaVersion := "2.11.8"
 
 val scalaUri = "com.netaporter" %% "scala-uri" % "0.4.6"
@@ -64,6 +73,11 @@ val awsCloudwatch = "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.95"
 val selenium = "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % Test
 val seleniumManager = "io.github.bonigarcia" % "webdrivermanager" % "1.7.1" % Test
 val seleniumHtmlUnitDriver = "org.seleniumhq.selenium" % "htmlunit-driver" % "2.23" % Test
+val acquisitionEventProducer = "com.gu" %% "acquisition-event-producer" % "0.2.1"
+val simulacrum = "com.github.mpilquist" %% "simulacrum" % "0.10.0"
+
+// Used by simulacrum
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
 libraryDependencies ++= Seq(
     cache,
@@ -92,13 +106,16 @@ libraryDependencies ++= Seq(
     scalaTest,
     selenium,
     seleniumManager,
-    seleniumHtmlUnitDriver
+    seleniumHtmlUnitDriver,
+    acquisitionEventProducer,
+    simulacrum
 )
 
 dependencyOverrides += "com.typesafe.play" %% "play-json" % "2.4.6"
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 resolvers += "old-github-maven-repo" at "http://guardian.github.io/maven/repo-releases/"
+resolvers += Resolver.bintrayRepo("guardian", "ophan")
 
 addCommandAlias("devrun", "run 9112")
 

@@ -18,7 +18,7 @@ POST           /paypal/auth                     controllers.PaypalController.aut
 OPTIONS        /paypal/auth                     controllers.PaypalController.authorizeOptions
 
 POST           /paypal/capture                  controllers.PaypalController.capturePayment
-GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], refererPageviewId: Option[String], refererUrl: Option[String],pvid: Option[String], bid: Option[String], ophanVisitId: Option[String], supportRedirect: Option[Boolean])
+GET            /paypal/:countryGroup/execute    controllers.PaypalController.executePayment(countryGroup: CountryGroup, paymentId, token, PayerID, CMP: Option[String], INTCMP: Option[String], refererPageviewId: Option[String], refererUrl: Option[String],pvid: Option[String], bid: Option[String], ophanVisitId: Option[String], componentId: Option[String], componentType: Option[ComponentType], source: Option[AcquisitionSource], abTest: Option[AbTest], supportRedirect: Option[Boolean])
 POST           /paypal/hook                     controllers.PaypalController.hook
 POST           /:countryGroup/update-metadata   controllers.PaypalController.updateMetadata(countryGroup:CountryGroup)
 

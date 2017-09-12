@@ -1,7 +1,9 @@
 package controllers.httpmodels
 
 import models.IdentityId
-import play.api.libs.json.{Json, Reads}
+import ophan.thrift.componentEvent.ComponentType
+import ophan.thrift.event.{AbTest, AcquisitionSource}
+import play.api.libs.json._
 
 case class CaptureRequest (
   paymentId: String,
@@ -12,8 +14,15 @@ case class CaptureRequest (
   refererPageviewId: Option[String],
   refererUrl: Option[String],
   ophanPageviewId: Option[String],
-  ophanBrowserId: Option[String])
+  ophanBrowserId: Option[String],
+  componentId: Option[String],
+  componentType: Option[ComponentType],
+  source: Option[AcquisitionSource],
+  abTest: Option[AbTest]
+)
 
 object CaptureRequest {
+  import utils.ThriftUtils.Implicits._ // Ignore IntelliJ - this is used!
+
   implicit val captureRequestReads: Reads[CaptureRequest] = Json.reads[CaptureRequest]
 }

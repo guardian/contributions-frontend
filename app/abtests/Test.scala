@@ -2,6 +2,7 @@ package abtests
 
 import actions.CommonActions.ABTestRequest
 import com.github.slugify.Slugify
+import com.gu.acquisition.utils.AbTestConverter
 import play.api.db.Database
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.AnyContent
@@ -31,6 +32,7 @@ case class Test(name: String, audienceSize: Percentage, audienceOffset: Percenta
 }
 
 object Test {
+
   implicit class PercentageNum[A](x: A)(implicit num: Numeric[A]) {
     val percent = Percentage(num.toDouble(x))
   }
@@ -72,6 +74,7 @@ case class Allocation(test: Test, variant: Variant) {
 }
 
 object Allocation {
+
   def force(request: Request[_], tests: Set[Test]): Option[Allocation] = for {
     params <- request.getQueryString("ab")
     allocation = params.split('=')
@@ -89,4 +92,9 @@ object Allocation {
       "variantSlug" -> a.variant.slug
     )
   }
+
+  implicit val abTestConvertor: AbTestConverter[Allocation] =
+    AbTestConverter.instance { allocation =>
+      ophan.thrift.event.AbTest(allocation.test.slug, allocation.variant.name)
+    }
 }

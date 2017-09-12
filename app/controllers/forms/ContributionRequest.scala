@@ -2,6 +2,8 @@ package controllers.forms
 
 import com.gu.i18n.Currency
 import models.IdentityId
+import ophan.thrift.componentEvent.ComponentType
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.data.{Form, FormError}
 import play.api.data.format.Formatter
 
@@ -23,11 +25,17 @@ case class ContributionRequest(
   refererUrl: Option[String],
   idUser: Option[IdentityId],
   platform: Option[String],
-  ophanVisitId: Option[String]
+  ophanVisitId: Option[String],
+  componentId: Option[String],
+  componentType: Option[ComponentType],
+  source: Option[AcquisitionSource],
+  abTest: Option[AbTest]
 )
 
 object ContributionRequest {
   import play.api.data.Forms._
+  import utils.ThriftUtils.Implicits._
+
   implicit val currencyFormatter = new Formatter[Currency] {
     type Result = Either[Seq[FormError], Currency]
 
@@ -61,7 +69,11 @@ object ContributionRequest {
       "refererUrl" -> optional(text),
       "idUser" -> optional(of[IdentityId]),
       "platform" -> optional(text),
-      "ophanVisitId" -> optional(text)
+      "ophanVisitId" -> optional(text),
+      "componentId" -> optional(text),
+      "componentType" -> optional(of[ComponentType]),
+      "source" -> optional(of[AcquisitionSource]),
+      "abTest" -> optional(of[AbTest])
     )(ContributionRequest.apply)(ContributionRequest.unapply)
   )
 
