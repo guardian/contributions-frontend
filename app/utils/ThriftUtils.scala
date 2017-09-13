@@ -70,6 +70,8 @@ object ThriftUtils {
       }
     }
 
+    implicit def thriftEnumWrites[A](implicit F: ThriftEnumFormatter[A]): Writes[A] = ???
+
     implicit def thriftEnumFormatter[A](implicit F: ThriftEnumFormatter[A]): Formatter[A] = new Formatter[A] {
       import cats.syntax.either._
 

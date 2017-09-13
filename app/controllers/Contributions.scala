@@ -8,7 +8,7 @@ import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
-import models.models.ReferrerAcquisitionData
+import models.ReferrerAcquisitionData
 import models.{ContributionAmount, PaymentProvider}
 import monitoring.{CloudWatchMetrics, LoggingTagsProvider, TagAwareLogger}
 import play.api.mvc._
@@ -16,7 +16,6 @@ import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
 import utils.MaxAmount
 import utils.FastlyUtils._
-import utils.QueryStringBindableUtils.QueryParamsFormat
 import views.support._
 
 import scala.util.Try
@@ -44,8 +43,9 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
   def redirectToUk = (NoCacheAction andThen MobileSupportAction) { implicit request => redirectWithQueryParams(routes.Contributions.contribute(UK).url) }
 
   private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) =
-    redirectWithCampaignCodes(destinationUrl,
-      Set("mcopy", "skipAmount", "highlight", "disableStripe", QueryParamsFormat[ReferrerAcquisitionData].key)
+    redirectWithCampaignCodes(
+      destinationUrl,
+      Set("mcopy", "skipAmount", "highlight", "disableStripe", "acquisitionData")
     )
 
   def postPayment(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
@@ -62,21 +62,17 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
   }
 
-  private def acquisitionData(queryString: Map[String, Seq[String]], intCmp: Option[String], cmp: Option[String]) = {
-    val acquisitionData =
-      QueryParamsFormat[ReferrerAcquisitionData].decodeQueryString(queryString)
-        .getOrElse(ReferrerAcquisitionData.empty)
-    acquisitionData.copy(campaignCode = acquisitionData.campaignCode.orElse(intCmp).orElse(cmp))
-  }
-
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
     (NoCacheAction andThen MobileSupportAction andThen ABTestAction) { implicit request =>
 
       val errorMessage = error.map(_.message)
       val stripe = paymentServices.stripeServiceFor(request)
+
+      val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString).toOption
+
       val cmp = request.getQueryString("CMP")
-      val intCmp = request.getQueryString("INTCMP")
-      val refererPageviewId = request.getQueryString("REFPVID")
+      val intCmp = acquisitionData.flatMap(_.campaignCode).orElse(request.getQueryString("INTCMP"))
+      val refererPageviewId = acquisitionData.flatMap(_.referrerPageviewId).orElse(request.getQueryString("REFPVID"))
       val refererUrl = request.headers.get("referer")
 
       val disableStripe = request.getQueryString("disableStripe")
@@ -110,7 +106,11 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
         errorMessage,
         CSRF.getToken.map(_.value),
         request.isAllocated(Test.landingPageTest, "with-copy"),
-        disableStripe
+        disableStripe,
+        acquisitionData.flatMap(_.componentId),
+        acquisitionData.flatMap(_.componentType),
+        acquisitionData.flatMap(_.source),
+        acquisitionData.flatMap(_.abTest)
       )).addingToSession("contributions_session" -> request.sessionId)
     }
   }
