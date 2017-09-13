@@ -8,6 +8,7 @@ import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
+import models.models.ReferrerAcquisitionData
 import models.{ContributionAmount, PaymentProvider}
 import monitoring.{CloudWatchMetrics, LoggingTagsProvider, TagAwareLogger}
 import play.api.mvc._
@@ -15,12 +16,14 @@ import play.filters.csrf.{CSRF, CSRFAddToken}
 import services.PaymentServices
 import utils.MaxAmount
 import utils.FastlyUtils._
+import utils.QueryStringBindableUtils.QueryParamsFormat
 import views.support._
 
 import scala.util.Try
 
 class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cloudWatchMetrics: CloudWatchMetrics)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
+  import cats.syntax.either._
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),
@@ -41,7 +44,9 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
   def redirectToUk = (NoCacheAction andThen MobileSupportAction) { implicit request => redirectWithQueryParams(routes.Contributions.contribute(UK).url) }
 
   private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) =
-    redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight", "disableStripe"))
+    redirectWithCampaignCodes(destinationUrl,
+      Set("mcopy", "skipAmount", "highlight", "disableStripe", QueryParamsFormat[ReferrerAcquisitionData].key)
+    )
 
   def postPayment(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val pageInfo = PageInfo(
@@ -55,6 +60,13 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
     info(s"Paypal post-payment page displayed for contributions session id: ${request.sessionId}, platform: ${request.platform}.")
     cloudWatchMetrics.logPostPaymentPageDisplayed(request.paymentProvider, request.platform)
     Ok(views.html.giraffe.postPayment(pageInfo, countryGroup))
+  }
+
+  private def acquisitionData(queryString: Map[String, Seq[String]], intCmp: Option[String], cmp: Option[String]) = {
+    val acquisitionData =
+      QueryParamsFormat[ReferrerAcquisitionData].decodeQueryString(queryString)
+        .getOrElse(ReferrerAcquisitionData.empty)
+    acquisitionData.copy(campaignCode = acquisitionData.campaignCode.orElse(intCmp).orElse(cmp))
   }
 
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
