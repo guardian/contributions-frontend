@@ -22,7 +22,6 @@ import scala.util.Try
 
 class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cloudWatchMetrics: CloudWatchMetrics)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
-  import cats.syntax.either._
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),
@@ -43,10 +42,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
   def redirectToUk = (NoCacheAction andThen MobileSupportAction) { implicit request => redirectWithQueryParams(routes.Contributions.contribute(UK).url) }
 
   private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) =
-    redirectWithCampaignCodes(
-      destinationUrl,
-      Set("mcopy", "skipAmount", "highlight", "disableStripe", "acquisitionData")
-    )
+    redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight", "disableStripe", ReferrerAcquisitionData.queryStringKey))
 
   def postPayment(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val pageInfo = PageInfo(
@@ -68,7 +64,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       val errorMessage = error.map(_.message)
       val stripe = paymentServices.stripeServiceFor(request)
 
-      val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString).toOption
+      val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString)
 
       val cmp = request.getQueryString("CMP")
       val intCmp = acquisitionData.flatMap(_.campaignCode).orElse(request.getQueryString("INTCMP"))
