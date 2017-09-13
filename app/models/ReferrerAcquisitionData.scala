@@ -4,7 +4,8 @@ import java.net.URLDecoder
 
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource}
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{Json, Reads, Writes}
+import play.api.mvc.QueryStringBindable
 
 /**
   * Model for acquisition data passed by the referrer.
@@ -24,33 +25,20 @@ case class ReferrerAcquisitionData(
 )
 
 object ReferrerAcquisitionData {
-  import utils.ThriftUtils.Implicits._
+  import cats.syntax.either._
+  import utils.QueryStringBindableUtils._
+  import utils.ThriftUtils.Implicits._ // Ignore IntelliJ - this is used!
 
   val queryStringKey = "acquisitionData"
 
-  def fromQueryString(queryString: Map[String, Seq[String]]): Either[String, ReferrerAcquisitionData] = {
-    import cats.syntax.either._
+  implicit val acquisitionDataReads: Reads[ReferrerAcquisitionData] = Json.reads[ReferrerAcquisitionData]
 
-    for {
-
-      values <- Either.fromOption(
-        queryString.get(queryStringKey),
-        s"query string key $queryStringKey not found"
-      )
-
-      percentEncodedJson <- Either.fromOption(
-        values.headOption,
-        s"query string key $queryStringKey empty"
-      )
-
-      json <- Either.catchNonFatal(URLDecoder.decode(percentEncodedJson, "utf-8"))
-        .leftMap(_ => s"error decoding query string value $queryStringKey ")
-
-      data <- Json.parse(json).validate[ReferrerAcquisitionData].asEither
-        .leftMap(_ => "unable to decode acquisitions data")
-
-    } yield data
+  private val acquisitionDataQueryStringBindable: QueryStringBindable[ReferrerAcquisitionData] = {
+    implicit val acquisitionDataWrites: Writes[ReferrerAcquisitionData] = Json.writes[ReferrerAcquisitionData]
+    queryStringBindableInstanceFromFormat[ReferrerAcquisitionData]
   }
 
-  implicit val acquisitionDataReads: Reads[ReferrerAcquisitionData] = Json.reads[ReferrerAcquisitionData]
+  def fromQueryString(queryString: Map[String, Seq[String]]): Either[String, ReferrerAcquisitionData] =
+    acquisitionDataQueryStringBindable.bind(queryStringKey, queryString)
+      .getOrElse(Either.left(s"$queryStringKey not found in query string"))
 }

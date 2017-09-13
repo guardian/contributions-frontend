@@ -13,7 +13,6 @@ import simulacrum.typeclass
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
-import scala.util.Try
 
 case class ThriftDecodeError private (message: String)
 
@@ -61,6 +60,7 @@ object ThriftUtils {
 
   object Implicits {
     import cats.syntax.either._
+    import QueryStringBindableUtils._
 
     implicit val componentTypeThriftEnumFormatter: ThriftEnumFormatter[ComponentType] =
       ThriftEnumFormatter.fromScroogeValueOf(ComponentType.valueOf)
@@ -74,6 +74,10 @@ object ThriftUtils {
       json.validate[String].flatMap { raw =>
         F.decode(raw).fold(err => JsError(err.message), enum => JsSuccess(enum))
       }
+    }
+
+    implicit def thriftEnumWrites[A](implicit F: ThriftEnumFormatter[A]): Writes[A] = Writes { enum =>
+      JsString(F.encode(enum))
     }
 
     implicit val abTestReads: Reads[AbTest] = {
@@ -109,33 +113,10 @@ object ThriftUtils {
 
     // Query string bindable type classes
 
-    def queryStringBindableInstance[A](
-      decoder: String => Either[String, A],
-      encoder: A => String
-    ): QueryStringBindable[A] = new QueryStringBindable[A] {
-
-      // No need to URL decode since netty does this already (as written in the Play documentation)
-      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, A]] =
-        params.get(key).map { values =>
-          for {
-            encodedValue <- Either.fromOption(values.headOption, "no values")
-            decodedValue <- decoder(encodedValue)
-          } yield decodedValue
-        }
-
-      override def unbind(key: String, value: A): String =
-        Try(URLEncoder.encode(encoder(value), "utf-8")).toOption
-          .map(key + "=" + _)
-          .getOrElse("")
-    }
-
-    implicit def thriftEnumQueryStringBindable[A](implicit F: ThriftEnumFormatter[A]): QueryStringBindable[A] =
-      queryStringBindableInstance(F.decode(_).leftMap(_.message), F.encode)
+    implicit def thriftEnumQueryStringBindable[A : ClassTag](implicit F: ThriftEnumFormatter[A]): QueryStringBindable[A] =
+      queryStringBindableInstance(F.decode(_).toOption, F.encode)
 
     implicit val abTestQueryStringBindable: QueryStringBindable[AbTest] =
-      queryStringBindableInstance(
-        Json.parse(_).validate[AbTest].asEither.leftMap(_ => "invalid json"),
-        Json.toJson(_).toString
-      )
+      queryStringBindableInstanceFromFormat[AbTest]
   }
 }
