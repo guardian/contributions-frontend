@@ -60,11 +60,15 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
     (NoCacheAction andThen MobileSupportAction andThen ABTestAction) { implicit request =>
+      import cats.syntax.either._
 
       val errorMessage = error.map(_.message)
       val stripe = paymentServices.stripeServiceFor(request)
 
       val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString)
+        // When mobile starts sending acquisition data we will want to warn in all cases.
+        .leftMap(err => if (!request.isMobile) warn(err))
+        .toOption
 
       val cmp = request.getQueryString("CMP")
       val intCmp = acquisitionData.flatMap(_.campaignCode).orElse(request.getQueryString("INTCMP"))
