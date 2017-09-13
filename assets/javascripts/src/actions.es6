@@ -80,7 +80,11 @@ export function paypalRedirect(dispatch) {
         refererUrl: state.data.refererUrl,
         ophanPageviewId: state.data.ophan.pageviewId,
         ophanBrowserId: state.data.ophan.browserId,
-        ophanVisitId: state.data.ophan.visitId
+        ophanVisitId: state.data.ophan.visitId,
+        componentId: state.data.componentId,
+        componentType: state.data.componentType,
+        source: state.data.source,
+        abTest: state.data.referrerAbTest
     };
 
     const url = '/paypal/auth?csrfToken=' + state.data.csrfToken;
@@ -144,6 +148,10 @@ function paymentFormData(state, token) {
         intcmp: state.data.intCmpCode,
         refererPageviewId: state.data.refererPageviewId,
         refererUrl: state.data.refererUrl,
-        ophanVisitId: state.data.ophan.visitId
+        ophanVisitId: state.data.ophan.visitId,
+        componentId: state.data.componentId,
+        componentType: state.data.componentType,
+        source: state.data.source,
+        abTest: state.data.referrerAbTest
     };
 }
