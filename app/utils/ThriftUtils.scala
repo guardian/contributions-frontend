@@ -1,5 +1,7 @@
 package utils
 
+import java.net.URLEncoder
+
 import com.twitter.scrooge.ThriftEnum
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource}
@@ -11,6 +13,7 @@ import simulacrum.typeclass
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
+import scala.util.Try
 
 case class ThriftDecodeError private (message: String)
 
@@ -23,7 +26,7 @@ object ThriftDecodeError {
 }
 
 /**
-  * Used to derive other type classes - reads, formatters and query string bindables.
+  * Used to derive other type classes for Thrift enums - reads, formatters and query string bindables.
   */
 @typeclass trait ThriftEnumFormatter[A] {
 
@@ -57,6 +60,7 @@ object ThriftEnumFormatter {
 object ThriftUtils {
 
   object Implicits {
+    import cats.syntax.either._
 
     implicit val componentTypeThriftEnumFormatter: ThriftEnumFormatter[ComponentType] =
       ThriftEnumFormatter.fromScroogeValueOf(ComponentType.valueOf)
@@ -64,24 +68,12 @@ object ThriftUtils {
     implicit val acquisitionSourceThriftEnumFormatter: ThriftEnumFormatter[AcquisitionSource] =
       ThriftEnumFormatter.fromScroogeValueOf(AcquisitionSource.valueOf)
 
+    // Json typeclasses
+
     implicit def thriftEnumReads[A](implicit F: ThriftEnumFormatter[A]): Reads[A] = Reads { json =>
       json.validate[String].flatMap { raw =>
         F.decode(raw).fold(err => JsError(err.message), enum => JsSuccess(enum))
       }
-    }
-
-    implicit def thriftEnumFormatter[A](implicit F: ThriftEnumFormatter[A]): Formatter[A] = new Formatter[A] {
-      import cats.syntax.either._
-
-      private def decodeFormValueOfKey(key: String)(enum: String): Either[FormError, A] =
-        F.decode(enum).leftMap(err => FormError(key, err.message))
-
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] =
-        Either.fromOption(data.get(key), FormError(key, s"unable to find the key $key in the form"))
-          .flatMap(decodeFormValueOfKey(key))
-          .leftMap(err => Seq(err))
-
-      override def unbind(key: String, value: A): Map[String, String] = Map(key -> F.encode(value))
     }
 
     implicit val abTestReads: Reads[AbTest] = {
@@ -95,32 +87,55 @@ object ThriftUtils {
       Json.obj("name" -> abTest.name, "variant" -> abTest.variant)
     }
 
-    implicit val abTestFormatter: Formatter[AbTest] = new Formatter[AbTest] {
-      import cats.syntax.either._
+    // Formatter typeclasses
 
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AbTest] =
+    private def formatterInstance[A](decoder: String => Either[String, A]) = new Formatter[A] {
+
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] =
         (for {
-          json <- Either.fromOption(data.get(key), FormError(key, s"unable to find the key $key in the form"))
-          a <- Json.parse(json).validate[AbTest].asEither.leftMap(_ => FormError(key, s"form value $json invalid"))
-        } yield a).leftMap(err => Seq(err))
+          encodedValue <- Either.fromOption(data.get(key), s"unable to find the key $key in the form")
+          decodedValue <- decoder(encodedValue)
+        } yield decodedValue).leftMap(err => Seq(FormError(key, err)))
 
-      override def unbind(key: String, value: AbTest): Map[String, String] =
-        Map("abTest" -> Json.toJson(value).toString)
+      override def unbind(key: String, value: A): Map[String, String] = Map.empty
     }
 
-    implicit def formatterDerivedQueryStringBindable[A](implicit F: Formatter[A]): QueryStringBindable[A] =
-      new QueryStringBindable[A] {
-        import cats.syntax.either._
+    implicit def thriftEnumFormatter[A](implicit F: ThriftEnumFormatter[A]): Formatter[A] =
+      formatterInstance { value => F.decode(value).leftMap(err => err.message) }
 
-        override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, A]] = {
-          val data = params.collect { case (k, values) if values.nonEmpty => (k, values.head) }
-          // Doc states that method should return None if the key doesn't exist.
-          // Doing an initial get and mapping over the resulting option ensures this.
-          data.get(key).map(_ => F.bind(key, data).leftMap(_ => "error!"))
+    implicit val abTestFormatter: Formatter[AbTest] = formatterInstance { json =>
+      Json.parse(json).validate[AbTest].asEither.leftMap(_ => s"form value $json invalid")
+    }
+
+    // Query string bindable type classes
+
+    def queryStringBindableInstance[A](
+      decoder: String => Either[String, A],
+      encoder: A => String
+    ): QueryStringBindable[A] = new QueryStringBindable[A] {
+
+      // No need to URL decode since netty does this already (as written in the Play documentation)
+      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, A]] =
+        params.get(key).map { values =>
+          for {
+            encodedValue <- Either.fromOption(values.headOption, "no values")
+            decodedValue <- decoder(encodedValue)
+          } yield decodedValue
         }
 
-        override def unbind(key: String, value: A): String =
-          F.unbind(key, value).headOption.map { case (k, v) => key + "=" + v }.getOrElse("")
-      }
+      override def unbind(key: String, value: A): String =
+        Try(URLEncoder.encode(encoder(value), "utf-8")).toOption
+          .map(key + "=" + _)
+          .getOrElse("")
+    }
+
+    implicit def thriftEnumQueryStringBindable[A](implicit F: ThriftEnumFormatter[A]): QueryStringBindable[A] =
+      queryStringBindableInstance(F.decode(_).leftMap(_.message), F.encode)
+
+    implicit val abTestQueryStringBindable: QueryStringBindable[AbTest] =
+      queryStringBindableInstance(
+        Json.parse(_).validate[AbTest].asEither.leftMap(_ => "invalid json"),
+        Json.toJson(_).toString
+      )
   }
 }

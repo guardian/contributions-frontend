@@ -94,7 +94,7 @@ class PaypalService(
     abTest: Option[AbTest],
     supportRedirect: Option[Boolean] = Some(false)
   )(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
-    import utils.ThriftEnumFormatter.ops._
+    import utils.QueryStringBindableUtils.Syntax._
     import utils.ThriftUtils.Implicits._
 
     val paymentToCreate = {
@@ -108,10 +108,10 @@ class PaypalService(
           refererPageviewId.map(value => s"refererPageviewId=$value"),
           refererUrl.map(value => s"refererUrl=$value"),
           ophanVisitId.map(value => s"ophanVisitId=$value"),
-          componentId.map(value => s"componentId=$value"),
-          componentType.map(value => s"componentType=${value.encode}"),
-          source.map(value => s"source=${value.encode}"),
-          abTest.map(value => s"abTest=${Json.toJson(value)}"),
+          componentId.map(_.encodeQueryString("componentId")),
+          componentType.map(_.encodeQueryString("componentType")),
+          source.map(_.encodeQueryString("source")),
+          abTest.map(_.encodeQueryString("abTest")),
           supportRedirect.map(value => s"supportRedirect=$value")
         ).flatten match {
           case Nil => ""
