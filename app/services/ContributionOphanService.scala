@@ -6,7 +6,7 @@ import akka.stream.ActorMaterializer
 import cats.data.EitherT
 import cats.syntax.EitherSyntax
 import cats.syntax.either._
-import com.gu.acquisition.services.{OphanService, OphanServiceError}
+import com.gu.acquisition.services.OphanService
 import monitoring.{LoggingTags, TagAwareLogger}
 import ophan.thrift.event.{AbTestInfo, Acquisition}
 import play.api.mvc.Request
