@@ -76,7 +76,7 @@ class ProdContributionOphanService(implicit system: ActorSystem, materializer: A
 object ContributionOphanService {
 
   def apply(env: Environment)(implicit system: ActorSystem, mat: ActorMaterializer): ContributionOphanService =
-    if(env.mode == Mode.Prod) new ProdContributionOphanService else NonProdContributionOphanService
+    if (env.mode == Mode.Prod) new ProdContributionOphanService else NonProdContributionOphanService
 
   case class OphanIds(browserId: String, viewId: String, visitId: Option[String])
 
