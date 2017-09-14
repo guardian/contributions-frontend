@@ -57,20 +57,21 @@ class ProdContributionOphanService(implicit system: ActorSystem, materializer: A
   import actions.CommonActions._
   import AcquisitionSubmissionBuilder.ops._
 
+  private def sendSubmission(submission: AcquisitionSubmission)(implicit executionContext: ExecutionContext) = {
+    import submission._
+    OphanService.submit(acquisition, ophanIds.browserId, ophanIds.viewId, ophanIds.visitId)
+      .bimap(err => s"Failed to submit acquisition event to Ophan - ${err.getMessage}", _ => submission)
+  }
+
   def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
     implicit ec: ExecutionContext,
     tags: LoggingTags,
     request: Request[_]
   ): EitherT[Future, String, AcquisitionSubmission] =
-    EitherT.fromEither[Future](a.asAcquisitionSubmission)
-      .flatMap { case submission@AcquisitionSubmission(ophanIds, acquisition) =>
-        OphanService.submit(acquisition, ophanIds.browserId, ophanIds.viewId, ophanIds.visitId)
-          .bimap(err => s"Failed to submit acquisition event to Ophan - ${err.getMessage}", _ => submission)
-      }
-      .leftMap { err =>
-        error(s"$err - contributions session id ${request.sessionId}")
-        err
-      }
+    EitherT.fromEither[Future](a.asAcquisitionSubmission).flatMap(sendSubmission).leftMap { err =>
+      error(s"$err - contributions session id ${request.sessionId}")
+      err
+    }
 }
 
 object ContributionOphanService {
