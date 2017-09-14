@@ -2,7 +2,6 @@ package models
 
 import abtests.Allocation
 import actions.CommonActions.ABTestRequest
-import com.gu.acquisition.services.OphanServiceError
 import com.paypal.api.payments.Payment
 import controllers.httpmodels.CaptureRequest
 import ophan.thrift.componentEvent.ComponentType
@@ -33,7 +32,7 @@ object PaypalAcquisitionComponents {
     implicit object paypalAcquisitionSubmissionBuilder
       extends AcquisitionSubmissionBuilder[Execute] with AcquisitionSubmissionBuilderUtils {
 
-      def buildOphanIds(components: Execute): Either[OphanServiceError, OphanIds] = {
+      def buildOphanIds(components: Execute): Either[String, OphanIds] = {
         import components._
         for {
           browserId <- tryField("ophanBrowserId")(request.ophanBrowserId.get)
@@ -41,7 +40,7 @@ object PaypalAcquisitionComponents {
         } yield OphanIds(browserId, pageviewId, request.ophanVisitId)
       }
 
-      def buildAcquisition(components: Execute): Either[OphanServiceError, Acquisition] = {
+      def buildAcquisition(components: Execute): Either[String, Acquisition] = {
         import components._
         for {
           amount <- tryField("amount")(payment.getPaymentInstruction.getAmount.getValue.toDouble)
@@ -74,7 +73,7 @@ object PaypalAcquisitionComponents {
     implicit object paypalAcquisitionSubmissionBuilder
       extends AcquisitionSubmissionBuilder[Capture] with AcquisitionSubmissionBuilderUtils {
 
-      override def buildOphanIds(components: Capture): Either[OphanServiceError, OphanIds] = {
+      override def buildOphanIds(components: Capture): Either[String, OphanIds] = {
         import components._
         for {
           browserId <- tryField("ophanBrowserId")(request.body.ophanBrowserId.get)
@@ -82,7 +81,7 @@ object PaypalAcquisitionComponents {
         } yield OphanIds(browserId, pageviewId, visitId = None)
       }
 
-      override def buildAcquisition(components: Capture): Either[OphanServiceError, Acquisition] = {
+      override def buildAcquisition(components: Capture): Either[String, Acquisition] = {
         import components._
 
         for {

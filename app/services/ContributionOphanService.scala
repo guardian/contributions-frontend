@@ -11,72 +11,72 @@ import monitoring.{LoggingTags, TagAwareLogger}
 import ophan.thrift.event.{AbTestInfo, Acquisition}
 import play.api.mvc.Request
 import play.api.{Environment, Mode}
-import services.ContributionOphanService.AcquisitionSubmissionBuilder
+import services.ContributionOphanService.{AcquisitionSubmission, AcquisitionSubmissionBuilder}
 import simulacrum.typeclass
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.ClassTag
 
-/**
-  * Used to send contribution acquisitions to Ophan.
-  */
-class ContributionOphanService(env: Environment)(implicit system: ActorSystem, materializer: ActorMaterializer)
-  extends TagAwareLogger {
+trait ContributionOphanService {
+
+  def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
+    implicit ec: ExecutionContext,
+    tags: LoggingTags,
+    request: Request[_]
+  ): EitherT[Future, String, AcquisitionSubmission]
+}
+
+object NonProdContributionOphanService extends ContributionOphanService with TagAwareLogger {
+
+  import AcquisitionSubmissionBuilder.ops._
+  import cats.instances.future._
+
+  private def runtimeClass[A : ClassTag] = reflect.classTag[A].runtimeClass
+
+  def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
+    implicit ec: ExecutionContext,
+    tags: LoggingTags,
+    request: Request[_]
+  ): EitherT[Future, String, AcquisitionSubmission] =
+    EitherT.fromEither[Future](a.asAcquisitionSubmission).bimap(
+      err => {
+        error(s"Unable to build acquisition from instance of ${runtimeClass[A]} - $err")
+        err
+      },
+      submission => {
+        info(s"Acquisition submission created from instance of ${runtimeClass[A]} - $submission")
+        submission
+      }
+    )
+}
+
+class ProdContributionOphanService(implicit system: ActorSystem, materializer: ActorMaterializer)
+  extends ContributionOphanService with TagAwareLogger {
+
+  import cats.instances.future._
   import actions.CommonActions._
+  import AcquisitionSubmissionBuilder.ops._
 
-  private def logOphanServiceError(err: OphanServiceError)(implicit tags: LoggingTags, request: Request[_]): Unit =
-    if (env.mode == Mode.Prod) {
-      // The getMessage() method of a throwable instance is called if the throwable is included in a logging call.
-      // Said method is not currently implemented for the OphanServiceError class (returns null).
-      // This pattern matching ensures a meaningful message will be displayed.
-      err match {
-        case OphanServiceError.Generic(underlying) =>
-          error(
-            s"Failed to submit acquisition event to Ophan. " +
-            s"Contributions session id ${request.sessionId}", underlying
-          )
-        case OphanServiceError.ResponseUnsuccessful(response) =>
-          error(
-            s"Failed to submit acquisition event to Ophan - response with status ${response.status} returned. " +
-            s"Contributions session id ${request.sessionId}"
-          )
-      }
-    }
-
-  /**
-    * A left-valued result is returned iff the app is in production mode and the event was not successfully sent.
-    */
-  // TODO: should an error be returned if not in production mode?
-  def submitAcquisition[A : AcquisitionSubmissionBuilder](a: A)(
-    implicit ec: ExecutionContext, tags: LoggingTags, request: Request[_]): EitherT[Future, OphanServiceError, Unit] = {
-
-    import cats.instances.future._
-    import ContributionOphanService._
-    import AcquisitionSubmissionBuilder.ops._
-
+  def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
+    implicit ec: ExecutionContext,
+    tags: LoggingTags,
+    request: Request[_]
+  ): EitherT[Future, String, AcquisitionSubmission] =
     EitherT.fromEither[Future](a.asAcquisitionSubmission)
-      .flatMap {
-        // Ophan should filter out events coming from the Guardian IP addresses.
-        // Still, explicitly check the server is running in production mode as an extra precaution,
-        // before submitting the event.
-        case AcquisitionSubmission(ophanIds, acquisition) if env.mode == Mode.Prod =>
-          OphanService.submit(acquisition, ophanIds.browserId, ophanIds.viewId, ophanIds.visitId).map(_ => ())
-        case _ =>
-          EitherT.pure[Future, OphanServiceError, Unit](())
+      .flatMap { case submission@AcquisitionSubmission(ophanIds, acquisition) =>
+        OphanService.submit(acquisition, ophanIds.browserId, ophanIds.viewId, ophanIds.visitId)
+          .bimap(err => s"Failed to submit acquisition event to Ophan - ${err.getMessage}", _ => submission)
       }
-      .bimap(
-        err => {
-          logOphanServiceError(err)
-          err
-        },
-        result => {
-          info(s"Acquisition event sent to Ophan. Contributions session id: ${request.sessionId}")
-          result
-        }
-      )
-  }
+      .leftMap { err =>
+        error(s"$err - contributions session id ${request.sessionId}")
+        err
+      }
 }
 
 object ContributionOphanService {
+
+  def apply(env: Environment)(implicit system: ActorSystem, mat: ActorMaterializer): ContributionOphanService =
+    if(env.mode == Mode.Prod) new ProdContributionOphanService else NonProdContributionOphanService
 
   case class OphanIds(browserId: String, viewId: String, visitId: Option[String])
 
@@ -90,11 +90,11 @@ object ContributionOphanService {
     */
   @typeclass trait AcquisitionSubmissionBuilder[A] {
 
-    def buildOphanIds(a: A): Either[OphanServiceError, OphanIds]
+    def buildOphanIds(a: A): Either[String, OphanIds]
 
-    def buildAcquisition(a: A): Either[OphanServiceError, Acquisition]
+    def buildAcquisition(a: A): Either[String, Acquisition]
 
-    def asAcquisitionSubmission(a: A): Either[OphanServiceError, AcquisitionSubmission] =
+    def asAcquisitionSubmission(a: A): Either[String, AcquisitionSubmission] =
       for {
         ophanIds <- buildOphanIds(a)
         acquisition <- buildAcquisition(a)
@@ -106,10 +106,8 @@ object ContributionOphanService {
     */
   trait AcquisitionSubmissionBuilderUtils extends EitherSyntax {
 
-    def tryField[A](name: String)(a: => A): Either[OphanServiceError, A] =
-      Either.catchNonFatal(a).leftMap { _ =>
-        OphanServiceError.Generic(new RuntimeException(s"unable to get value for field $name"))
-      }
+    def tryField[A](name: String)(a: => A): Either[String, A] =
+      Either.catchNonFatal(a).leftMap(_ => s"unable to get value for field $name")
 
     def abTestInfo(native: Set[Allocation], nonNative: Option[ophan.thrift.event.AbTest]): ophan.thrift.event.AbTestInfo = {
       import com.gu.acquisition.syntax._
