@@ -15,12 +15,13 @@ import play.api.mvc.QueryStringBindable
 case class ReferrerAcquisitionData(
     campaignCode: Option[String],
     referrerPageviewId: Option[String],
+    referrerUrl: Option[String],
     componentId: Option[String],
     componentType: Option[ComponentType],
     source: Option[AcquisitionSource],
-    // Test the client was in on the referring page,
+    // Used to store the option of the client being in a test on the referring page,
     // that resulted on them landing on the contributions page.
-    // e.g. they clicked the contribute link in the Epic.
+    // e.g. they clicked the contribute link in an Epic AB test.
     abTest: Option[AbTest]
 )
 

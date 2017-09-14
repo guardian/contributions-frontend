@@ -73,7 +73,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       val cmp = request.getQueryString("CMP")
       val intCmp = acquisitionData.flatMap(_.campaignCode).orElse(request.getQueryString("INTCMP"))
       val refererPageviewId = acquisitionData.flatMap(_.referrerPageviewId).orElse(request.getQueryString("REFPVID"))
-      val refererUrl = request.headers.get("referer")
+      val refererUrl = acquisitionData.flatMap(_.referrerUrl).orElse(request.headers.get("referer"))
 
       val disableStripe = request.getQueryString("disableStripe")
         .flatMap(value => Try(value.toBoolean).toOption).getOrElse(false)
