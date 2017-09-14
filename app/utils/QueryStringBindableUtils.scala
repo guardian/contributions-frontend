@@ -44,7 +44,7 @@ object QueryStringBindableUtils {
   /**
     * Use when the value is encoded as Json.
     */
-  def queryStringBindableInstanceFromFormat[A : ClassTag](implicit R: Reads[A], W: Writes[A]): QueryStringBindable[A] =
+  def queryStringBindableInstanceFromFormat[A : ClassTag : Reads : Writes]: QueryStringBindable[A] =
     queryStringBindableInstance(Json.parse(_).validate[A].asOpt, Json.toJson(_).toString)
 
   object Syntax {

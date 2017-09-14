@@ -105,7 +105,7 @@ object ThriftUtils {
     }
 
     implicit def thriftEnumFormatter[A](implicit F: ThriftEnumFormatter[A]): Formatter[A] =
-      formatterInstance { value => F.decode(value).leftMap(err => err.message) }
+      formatterInstance(F.decode(_).leftMap(err => err.message))
 
     implicit val abTestFormatter: Formatter[AbTest] = formatterInstance { json =>
       Json.parse(json).validate[AbTest].asEither.leftMap(_ => s"form value $json invalid")
