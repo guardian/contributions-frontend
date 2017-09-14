@@ -1,7 +1,5 @@
 package utils
 
-import java.net.URLEncoder
-
 import com.twitter.scrooge.ThriftEnum
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource}

@@ -91,7 +91,7 @@ function appDataFrom(container) {
         componentId: container.getAttribute('data-component-id'),
         componentType: container.getAttribute('data-component-type'),
         source: container.getAttribute('data-source'),
-        referrerAbTest: container.getAttribute('data-referrer-ab-test')
+        referrerAbTest: JSON.parse(container.getAttribute('data-referrer-ab-test'))
     };
 }
 
