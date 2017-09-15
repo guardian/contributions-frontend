@@ -89,26 +89,6 @@ object ThriftUtils {
       Json.obj("name" -> abTest.name, "variant" -> abTest.variant)
     }
 
-    // Formatter typeclasses
-
-    private def formatterInstance[A](decoder: String => Either[String, A]) = new Formatter[A] {
-
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] =
-        (for {
-          encodedValue <- Either.fromOption(data.get(key), s"unable to find the key $key in the form")
-          decodedValue <- decoder(encodedValue)
-        } yield decodedValue).leftMap(err => Seq(FormError(key, err)))
-
-      override def unbind(key: String, value: A): Map[String, String] = Map.empty
-    }
-
-    implicit def thriftEnumFormatter[A](implicit F: ThriftEnumFormatter[A]): Formatter[A] =
-      formatterInstance(F.decode(_).leftMap(err => err.message))
-
-    implicit val abTestFormatter: Formatter[AbTest] = formatterInstance { json =>
-      Json.parse(json).validate[AbTest].asEither.leftMap(_ => s"form value $json invalid")
-    }
-
     // Query string bindable type classes
 
     implicit def thriftEnumQueryStringBindable[A : ClassTag](implicit F: ThriftEnumFormatter[A]): QueryStringBindable[A] =

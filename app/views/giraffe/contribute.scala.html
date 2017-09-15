@@ -2,13 +2,14 @@
 @import com.gu.i18n.CountryGroup
 @import fragments.giraffe.{contributionsMain, contributionsAlt, contributionsThisLandIsYourLand}
 @import play.api.libs.json.Json
+@import utils.ThriftEnumFormatter.ops._
 @import utils.ThriftUtils.Implicits._
 @import views.support.CountryGroupImplicits._
 @import views.support.PageInfo
-
 @import ophan.thrift.componentEvent.ComponentType
 @import ophan.thrift.event.AcquisitionSource
 @import ophan.thrift.event.AbTest
+
 @(
     pageInfo: PageInfo,
     maxAmount: Int,
@@ -66,11 +67,11 @@
             }
 
             @for(value <- componentType) {
-                data-component-type="@value"
+                data-component-type="@value.encode"
             }
 
             @for(value <- source) {
-                data-source="@value"
+                data-source="@value.encode"
             }
 
             @for(value <- abTest) {

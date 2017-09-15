@@ -108,7 +108,7 @@ object ContributionOphanService {
   trait AcquisitionSubmissionBuilderUtils extends EitherSyntax {
 
     def tryField[A](name: String)(a: => A): Either[String, A] =
-      Either.catchNonFatal(a).leftMap(_ => s"unable to get value for field $name")
+      Either.catchNonFatal(a).leftMap(err => s"unable to get value for field $name - ${err.getMessage}")
 
     def abTestInfo(native: Set[Allocation], nonNative: Option[ophan.thrift.event.AbTest]): ophan.thrift.event.AbTestInfo = {
       import com.gu.acquisition.syntax._

@@ -43,18 +43,21 @@ object PaypalAcquisitionComponents {
       def buildAcquisition(components: Execute): Either[String, Acquisition] = {
         import components._
         for {
-          amount <- tryField("amount")(payment.getPaymentInstruction.getAmount.getValue.toDouble)
+          transaction <- tryField("transaction")(payment.getTransactions.get(0))
+          countryCode <- tryField("countryCode")(payment.getPayer.getPayerInfo.getCountryCode)
+          currency <- tryField("currency")(transaction.getAmount.getCurrency)
+          amount <- tryField("amount")(transaction.getAmount.getTotal.toDouble)
         } yield {
           Acquisition(
             product = Product.Contribution,
             paymentFrequency = PaymentFrequency.OneOff,
-            currency = payment.getPaymentInstruction.getAmount.getCurrency,
+            currency = currency,
             amount = amount,
             amountInGBP = None, // Calculated at the sinks of the Ophan stream
             paymentProvider = Some(ophan.thrift.event.PaymentProvider.Paypal),
             campaignCode = Some(Set(request.intCmp, request.cmp).flatten),
             abTests = Some(abTestInfo(request.testAllocations, request.abTest)),
-            countryCode = Some(payment.getPayer.getPayerInfo.getCountryCode),
+            countryCode = Some(countryCode),
             referrerPageViewId = request.refererPageviewId,
             referrerUrl = request.refererUrl,
             componentId = request.componentId,
