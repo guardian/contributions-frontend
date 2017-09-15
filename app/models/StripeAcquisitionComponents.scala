@@ -1,7 +1,6 @@
 package models
 
 import actions.CommonActions.ABTestRequest
-import com.gu.acquisition.services.OphanServiceError
 import com.gu.stripe.Stripe.Charge
 import controllers.forms.ContributionRequest
 import ophan.thrift.event.{Acquisition, PaymentFrequency, Product}
@@ -14,7 +13,7 @@ object StripeAcquisitionComponents {
   implicit object stripeAcquisitionSubmissionBuilder
     extends AcquisitionSubmissionBuilder[StripeAcquisitionComponents] with AcquisitionSubmissionBuilderUtils {
 
-    override def buildAcquisition(components: StripeAcquisitionComponents): Either[OphanServiceError, Acquisition] = {
+    override def buildAcquisition(components: StripeAcquisitionComponents): Either[String, Acquisition] = {
       import components._
       Either.right(
         Acquisition(
@@ -36,7 +35,7 @@ object StripeAcquisitionComponents {
       )
     }
 
-    def buildOphanIds(components: StripeAcquisitionComponents): Either[OphanServiceError, OphanIds] = {
+    def buildOphanIds(components: StripeAcquisitionComponents): Either[String, OphanIds] = {
       import components._
       tryField("ophanBrowserId")(request.body.ophanBrowserId.get)
         .map { browserId =>
