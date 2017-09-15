@@ -6,7 +6,7 @@ import com.paypal.api.payments.Payment
 import controllers.httpmodels.CaptureRequest
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event._
-import services.ContributionOphanService.{AcquisitionSubmissionBuilder, AcquisitionSubmissionBuilderUtils, OphanIds}
+import services.ContributionOphanService.{ContributionsAcquisitionSubmissionBuilder, OphanIds}
 
 object PaypalAcquisitionComponents {
 
@@ -29,8 +29,7 @@ object PaypalAcquisitionComponents {
       testAllocations: Set[Allocation]
     )
 
-    implicit object paypalAcquisitionSubmissionBuilder
-      extends AcquisitionSubmissionBuilder[Execute] with AcquisitionSubmissionBuilderUtils {
+    implicit object paypalAcquisitionSubmissionBuilder extends ContributionsAcquisitionSubmissionBuilder[Execute] {
 
       def buildOphanIds(components: Execute): Either[String, OphanIds] = {
         import components._
@@ -73,8 +72,7 @@ object PaypalAcquisitionComponents {
 
   object Capture {
 
-    implicit object paypalAcquisitionSubmissionBuilder
-      extends AcquisitionSubmissionBuilder[Capture] with AcquisitionSubmissionBuilderUtils {
+    implicit object paypalAcquisitionSubmissionBuilder extends ContributionsAcquisitionSubmissionBuilder[Capture] {
 
       override def buildOphanIds(components: Capture): Either[String, OphanIds] = {
         import components._

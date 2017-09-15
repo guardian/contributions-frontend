@@ -4,14 +4,14 @@ import actions.CommonActions.ABTestRequest
 import com.gu.stripe.Stripe.Charge
 import controllers.forms.ContributionRequest
 import ophan.thrift.event.{Acquisition, PaymentFrequency, Product}
-import services.ContributionOphanService.{AcquisitionSubmissionBuilder, AcquisitionSubmissionBuilderUtils, OphanIds}
+import services.ContributionOphanService.{ContributionsAcquisitionSubmissionBuilder, OphanIds}
 
 case class StripeAcquisitionComponents(charge: Charge, request: ABTestRequest[ContributionRequest])
 
 object StripeAcquisitionComponents {
 
   implicit object stripeAcquisitionSubmissionBuilder
-    extends AcquisitionSubmissionBuilder[StripeAcquisitionComponents] with AcquisitionSubmissionBuilderUtils {
+    extends ContributionsAcquisitionSubmissionBuilder[StripeAcquisitionComponents] {
 
     override def buildAcquisition(components: StripeAcquisitionComponents): Either[String, Acquisition] = {
       import components._

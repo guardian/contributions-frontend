@@ -26,11 +26,11 @@ object QueryStringBindableUtils {
         for {
           encodedValue <- Either.fromOption(
             values.headOption,
-            s"no value for key $key in query string"
+            s"No value for key $key in query string."
           )
           decodedValue <- Either.fromOption(
             decoder(encodedValue),
-            s"value of key $key in query string can't be decoded to an instance of ${reflect.classTag[A].runtimeClass}"
+            s"Value of key $key in query string can't be decoded to an instance of ${reflect.classTag[A].runtimeClass}."
           )
         } yield decodedValue
       }
