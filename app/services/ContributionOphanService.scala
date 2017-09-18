@@ -68,10 +68,20 @@ class ProdContributionOphanService(implicit system: ActorSystem, materializer: A
     tags: LoggingTags,
     request: Request[_]
   ): EitherT[Future, String, AcquisitionSubmission] =
-    EitherT.fromEither[Future](a.asAcquisitionSubmission).flatMap(sendSubmission).leftMap { err =>
-      error(s"$err - contributions session id ${request.sessionId}")
-      err
-    }
+    EitherT.fromEither[Future](a.asAcquisitionSubmission).flatMap(sendSubmission)
+      .bimap(
+        err => {
+          error(s"$err - contributions session id ${request.sessionId}")
+          err
+        },
+        submission => {
+          info(
+            s"Acquisition submission created from an instance of ${reflect.classTag[A].runtimeClass} and " +
+            s"successfully submitted to Ophan - contributions session id ${request.sessionId}"
+          )
+          submission
+        }
+      )
 }
 
 object ContributionOphanService {
