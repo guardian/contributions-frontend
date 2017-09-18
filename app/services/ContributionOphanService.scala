@@ -8,7 +8,7 @@ import cats.syntax.EitherSyntax
 import cats.syntax.either._
 import com.gu.acquisition.services.OphanService
 import monitoring.{LoggingTags, TagAwareLogger}
-import ophan.thrift.event.{AbTestInfo, Acquisition}
+import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition}
 import play.api.mvc.Request
 import play.api.{Environment, Mode}
 import services.ContributionOphanService.{AcquisitionSubmission, AcquisitionSubmissionBuilder}
@@ -40,7 +40,7 @@ object NonProdContributionOphanService extends ContributionOphanService with Tag
   ): EitherT[Future, String, AcquisitionSubmission] =
     EitherT.fromEither[Future](a.asAcquisitionSubmission).bimap(
       err => {
-        error(s"Unable to build acquisition from instance of ${runtimeClass[A]} - $err")
+        error(err)
         err
       },
       submission => {
@@ -102,15 +102,16 @@ object ContributionOphanService {
       } yield AcquisitionSubmission(ophanIds, acquisition)
   }
 
-  /**
-    * Mixin to facilitate creating acquisition submission builders.
-    */
-  trait AcquisitionSubmissionBuilderUtils extends EitherSyntax {
 
-    def tryField[A](name: String)(a: => A): Either[String, A] =
-      Either.catchNonFatal(a).leftMap(_ => s"unable to get value for field $name")
+  trait ContributionAcquisitionSubmissionBuilder[A] extends AcquisitionSubmissionBuilder[A] with EitherSyntax {
 
-    def abTestInfo(native: Set[Allocation], nonNative: Option[ophan.thrift.event.AbTest]): ophan.thrift.event.AbTestInfo = {
+    protected def attemptToGet[B](field: String)(a: => B)(implicit classTag: ClassTag[A]): Either[String, B] =
+      Either.catchNonFatal(a).leftMap { err =>
+        s"Failed to build an acquisition submission from an instance of ${reflect.classTag[A].runtimeClass} - " +
+        s"cause: unable to get $field - underlying error message: ${err.getMessage}"
+      }
+
+    protected def abTestInfo(native: Set[Allocation], nonNative: Option[AbTest]): AbTestInfo = {
       import com.gu.acquisition.syntax._
       val abTestInfo = native.asAbTestInfo
       nonNative.map(abTest => AbTestInfo(abTestInfo.tests + abTest)).getOrElse(abTestInfo)

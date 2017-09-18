@@ -8,6 +8,7 @@ import com.gu.i18n.CountryGroup._
 import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
+import models.ReferrerAcquisitionData
 import models.{ContributionAmount, PaymentProvider}
 import monitoring.{CloudWatchMetrics, LoggingTagsProvider, TagAwareLogger}
 import play.api.mvc._
@@ -41,7 +42,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
   def redirectToUk = (NoCacheAction andThen MobileSupportAction) { implicit request => redirectWithQueryParams(routes.Contributions.contribute(UK).url) }
 
   private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) =
-    redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight", "disableStripe"))
+    redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight", "disableStripe", ReferrerAcquisitionData.queryStringKey))
 
   def postPayment(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
     val pageInfo = PageInfo(
@@ -59,13 +60,20 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
     (NoCacheAction andThen MobileSupportAction andThen ABTestAction) { implicit request =>
+      import cats.syntax.either._
 
       val errorMessage = error.map(_.message)
       val stripe = paymentServices.stripeServiceFor(request)
+
+      val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString)
+        // When mobile starts sending acquisition data we will want to warn in all cases.
+        .leftMap(err => if (!request.isMobile) warn(err))
+        .toOption
+
       val cmp = request.getQueryString("CMP")
-      val intCmp = request.getQueryString("INTCMP")
-      val refererPageviewId = request.getQueryString("REFPVID")
-      val refererUrl = request.headers.get("referer")
+      val intCmp = acquisitionData.flatMap(_.campaignCode).orElse(request.getQueryString("INTCMP"))
+      val refererPageviewId = acquisitionData.flatMap(_.referrerPageviewId).orElse(request.getQueryString("REFPVID"))
+      val refererUrl = acquisitionData.flatMap(_.referrerUrl).orElse(request.headers.get("referer"))
 
       val disableStripe = request.getQueryString("disableStripe")
         .flatMap(value => Try(value.toBoolean).toOption).getOrElse(false)
@@ -98,7 +106,11 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
         errorMessage,
         CSRF.getToken.map(_.value),
         request.isAllocated(Test.landingPageTest, "with-copy"),
-        disableStripe
+        disableStripe,
+        acquisitionData.flatMap(_.componentId),
+        acquisitionData.flatMap(_.componentType),
+        acquisitionData.flatMap(_.source),
+        acquisitionData.flatMap(_.abTest)
       )).addingToSession("contributions_session" -> request.sessionId)
     }
   }

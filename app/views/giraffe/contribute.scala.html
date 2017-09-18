@@ -2,8 +2,13 @@
 @import com.gu.i18n.CountryGroup
 @import fragments.giraffe.{contributionsMain, contributionsAlt, contributionsThisLandIsYourLand}
 @import play.api.libs.json.Json
+@import utils.ThriftEnumFormatter.ops._
+@import utils.ThriftUtils.Implicits._
 @import views.support.CountryGroupImplicits._
 @import views.support.PageInfo
+@import ophan.thrift.componentEvent.ComponentType
+@import ophan.thrift.event.AcquisitionSource
+@import ophan.thrift.event.AbTest
 
 @(
     pageInfo: PageInfo,
@@ -18,7 +23,11 @@
     errorMessage: Option[String],
     csrfToken: Option[String],
     inLandingPageTest: Boolean,
-    disableStripe: Boolean
+    disableStripe: Boolean,
+    componentId: Option[String],
+    componentType: Option[ComponentType],
+    source: Option[AcquisitionSource],
+    abTest: Option[AbTest]
 )
 
 @defining { (block: Html) =>
@@ -52,6 +61,22 @@
                 data-referrer-url="@refUrl"
                 }
         data-disable-stripe="@disableStripe"
+
+            @for(value <- componentId) {
+                data-component-id="@value"
+            }
+
+            @for(value <- componentType) {
+                data-component-type="@value.encode"
+            }
+
+            @for(value <- source) {
+                data-source="@value.encode"
+            }
+
+            @for(value <- abTest) {
+                data-referrer-ab-test="@Json.toJson(value)"
+            }
         >
         </section>
 

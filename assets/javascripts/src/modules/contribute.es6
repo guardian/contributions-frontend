@@ -87,7 +87,11 @@ function appDataFrom(container) {
         refererPageviewId: container.getAttribute('data-referrer-pageview-id'),
         refererUrl: container.getAttribute('data-referrer-url'),
         csrfToken: container.getAttribute('data-csrf-token'),
-        disableStripe: container.getAttribute('data-disable-stripe') === 'true'
+        disableStripe: container.getAttribute('data-disable-stripe') === 'true',
+        componentId: container.getAttribute('data-component-id'),
+        componentType: container.getAttribute('data-component-type'),
+        source: container.getAttribute('data-source'),
+        referrerAbTest: JSON.parse(container.getAttribute('data-referrer-ab-test'))
     };
 }
 
