@@ -4,7 +4,7 @@ import java.net.URLDecoder
 
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource}
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json.{Format, Json, Reads, Writes}
 import play.api.mvc.QueryStringBindable
 
 /**
@@ -32,12 +32,10 @@ object ReferrerAcquisitionData {
 
   val queryStringKey = "acquisitionData"
 
-  implicit val acquisitionDataReads: Reads[ReferrerAcquisitionData] = Json.reads[ReferrerAcquisitionData]
+  implicit val acquisitionDataFormat: Format[ReferrerAcquisitionData] = Json.format[ReferrerAcquisitionData]
 
-  private val acquisitionDataQueryStringBindable: QueryStringBindable[ReferrerAcquisitionData] = {
-    implicit val acquisitionDataWrites: Writes[ReferrerAcquisitionData] = Json.writes[ReferrerAcquisitionData]
+  private val acquisitionDataQueryStringBindable: QueryStringBindable[ReferrerAcquisitionData] =
     queryStringBindableInstanceFromFormat[ReferrerAcquisitionData]
-  }
 
   def fromQueryString(queryString: Map[String, Seq[String]]): Either[String, ReferrerAcquisitionData] =
     acquisitionDataQueryStringBindable.bind(queryStringKey, queryString)
