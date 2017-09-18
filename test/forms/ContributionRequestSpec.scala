@@ -2,12 +2,14 @@ package forms
 
 import com.gu.i18n.GBP
 import controllers.forms.ContributionRequest
+import org.scalatest.EitherValues
 import org.scalatestplus.play.PlaySpec
+import play.api.libs.json.{JsObject, Json}
 
-class ContributionRequestSpec extends PlaySpec {
+class ContributionRequestSpec extends PlaySpec with EitherValues {
   import ContributionRequest._
 
-  val baseContributionRequest = ContributionRequest(
+  val baseRequest = ContributionRequest(
     name = "name",
     currency = GBP,
     amount = 10,
@@ -30,56 +32,54 @@ class ContributionRequestSpec extends PlaySpec {
     abTest = None
   )
 
-  val baseFormData: Map[String, String] =  {
-    import baseContributionRequest._
-    Map(
-      "name" -> name,
-      "currency" -> currency.toString,
-      "amount" -> amount.toString,
-      "email" -> email,
-      "token" -> token,
-      "marketing" -> marketing.toString,
-      "ophanPageviewId" -> ophanPageviewId
-    )
-  }
+  val baseJson: JsObject =  Json.obj(
+    "name" -> "name",
+    "currency" -> "gbp",
+    "amount" -> "10.0",
+    "email" -> "test@gmail.com",
+    "token" -> "token",
+    "marketing" -> true,
+    "ophanPageviewId" -> "pageviewId"
+  )
+
+  def checkJson(request: ContributionRequest, json: JsObject): Unit =
+    request mustEqual json.validate[ContributionRequest].asEither.right.value
 
   "A contribution form" should {
 
     "be able to parse data successfully if no optional fields are included" in {
 
-      baseContributionRequest mustEqual contributionForm.bind(baseFormData).value.value
+      checkJson(baseRequest, baseJson)
     }
 
     "be able to parse data successfully when component information is included" in {
 
-      val request = baseContributionRequest.copy(
+      val request = baseRequest.copy(
         componentId = Some("componentId"),
         componentType = Some(ophan.thrift.componentEvent.ComponentType.AcquisitionsEpic)
       )
 
-      val formData = baseFormData +
-        ("componentId" -> "componentId") +
-        ("componentType" -> "ACQUISITIONS_EPIC")
+      val json = baseJson ++ Json.obj("componentId" -> "componentId", "componentType" -> "ACQUISITIONS_EPIC")
 
-      request mustEqual contributionForm.bind(formData).value.value
+      checkJson(request, json)
     }
 
     "be able to parse data successfully when the acquisition source information is included" in {
 
-      val request = baseContributionRequest.copy(source = Some(ophan.thrift.event.AcquisitionSource.GuardianApps))
+      val request = baseRequest.copy(source = Some(ophan.thrift.event.AcquisitionSource.GuardianApps))
 
-      val formData = baseFormData + ("source" -> "GUARDIAN_APPS")
+      val json = baseJson ++ Json.obj("source" -> "GUARDIAN_APPS")
 
-      request mustEqual contributionForm.bind(formData).value.value
+      checkJson(request, json)
     }
 
     "be able to parse data successfully when ab test information is included" in {
 
-      val request = baseContributionRequest.copy(abTest = Some(ophan.thrift.event.AbTest("name", "variant")))
+      val request = baseRequest.copy(abTest = Some(ophan.thrift.event.AbTest("name", "variant")))
 
-      val formData = baseFormData + ("abTest" -> """{"name": "name", "variant": "variant"}""")
+      val json = baseJson ++ Json.obj("abTest" -> Json.obj("name" -> "name", "variant" -> "variant"))
 
-      request mustEqual contributionForm.bind(formData).value.value
+      checkJson(request, json)
     }
   }
 }
