@@ -67,7 +67,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
       val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString)
         // When mobile starts sending acquisition data we will want to warn in all cases.
-        .leftMap(err => if (!request.isMobile) warn(err))
+        .leftMap(err => if (!request.isMobile) warn(s"$err - contributions session id: ${request.sessionId}"))
         .toOption
 
       val cmp = request.getQueryString("CMP")
