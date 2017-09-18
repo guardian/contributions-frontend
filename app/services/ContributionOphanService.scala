@@ -103,12 +103,12 @@ object ContributionOphanService {
   }
 
 
-  trait ContributionsAcquisitionSubmissionBuilder[A] extends AcquisitionSubmissionBuilder[A] with EitherSyntax {
+  trait ContributionAcquisitionSubmissionBuilder[A] extends AcquisitionSubmissionBuilder[A] with EitherSyntax {
 
-    protected def tryField[B](name: String)(a: => B)(implicit classTag: ClassTag[A]): Either[String, B] =
+    protected def attemptToGet[B](field: String)(a: => B)(implicit classTag: ClassTag[A]): Either[String, B] =
       Either.catchNonFatal(a).leftMap { err =>
-        s"Unable to build acquisition submission from an instance of ${reflect.classTag[A].runtimeClass} - " +
-        s"an error occurred when trying to get the field $name - underlying error message: ${err.getMessage}"
+        s"Failed to build an acquisition submission from an instance of ${reflect.classTag[A].runtimeClass} - " +
+        s"cause: unable to get $field - underlying error message: ${err.getMessage}"
       }
 
     protected def abTestInfo(native: Set[Allocation], nonNative: Option[AbTest]): AbTestInfo = {

@@ -4,14 +4,21 @@ import actions.CommonActions.ABTestRequest
 import com.gu.stripe.Stripe.Charge
 import controllers.forms.ContributionRequest
 import ophan.thrift.event.{Acquisition, PaymentFrequency, Product}
-import services.ContributionOphanService.{ContributionsAcquisitionSubmissionBuilder, OphanIds}
+import services.ContributionOphanService.{ContributionAcquisitionSubmissionBuilder, OphanIds}
 
 case class StripeAcquisitionComponents(charge: Charge, request: ABTestRequest[ContributionRequest])
 
 object StripeAcquisitionComponents {
 
   implicit object stripeAcquisitionSubmissionBuilder
-    extends ContributionsAcquisitionSubmissionBuilder[StripeAcquisitionComponents] {
+    extends ContributionAcquisitionSubmissionBuilder[StripeAcquisitionComponents] {
+
+    def buildOphanIds(components: StripeAcquisitionComponents): Either[String, OphanIds] = {
+      import components._
+      attemptToGet("ophan browser id")(request.body.ophanBrowserId.get).map { browserId =>
+        OphanIds(browserId, request.body.ophanPageviewId, request.body.ophanVisitId)
+      }
+    }
 
     override def buildAcquisition(components: StripeAcquisitionComponents): Either[String, Acquisition] = {
       import components._
@@ -33,14 +40,6 @@ object StripeAcquisitionComponents {
           source = request.body.source
         )
       )
-    }
-
-    def buildOphanIds(components: StripeAcquisitionComponents): Either[String, OphanIds] = {
-      import components._
-      tryField("ophanBrowserId")(request.body.ophanBrowserId.get)
-        .map { browserId =>
-          OphanIds(browserId, request.body.ophanPageviewId, request.body.ophanVisitId)
-        }
     }
   }
 }
