@@ -9,7 +9,7 @@ import com.gu.i18n._
 import com.netaporter.uri.dsl._
 import configuration.Config
 import models.ReferrerAcquisitionData
-import models.{ContributionAmount, PaymentProvider}
+import models.{ContributionAmount}
 import monitoring.{CloudWatchMetrics, LoggingTagsProvider, TagAwareLogger}
 import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
@@ -44,7 +44,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
   private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) =
     redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight", "disableStripe", ReferrerAcquisitionData.queryStringKey))
 
-  def postPayment(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
+  def postPayment(countryGroup: CountryGroup) = NoCacheAction.andThen(MetaDataAction.default) { implicit request =>
     val pageInfo = PageInfo(
       title = "Support the Guardian | Contribute today",
       url = request.path,
@@ -59,7 +59,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
   }
 
   def contribute(countryGroup: CountryGroup, error: Option[PaymentError] = None) = addToken {
-    (NoCacheAction andThen MobileSupportAction andThen ABTestAction) { implicit request =>
+    NoCacheAction.andThen(MobileSupportAction).andThen(MetaDataAction.default) { implicit request =>
       import cats.syntax.either._
 
       val errorMessage = error.map(_.message)
@@ -111,11 +111,11 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
         acquisitionData.flatMap(_.componentType),
         acquisitionData.flatMap(_.source),
         acquisitionData.flatMap(_.abTest)
-      )).addingToSession("contributions_session" -> request.sessionId)
+      ))
     }
   }
 
-  def thanks(countryGroup: CountryGroup) = NoCacheAction { implicit request =>
+  def thanks(countryGroup: CountryGroup) = NoCacheAction.andThen(MetaDataAction.default) { implicit request =>
     val charge = request.session.get("charge_id")
     val title = "Thank you!"
 

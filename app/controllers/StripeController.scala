@@ -37,7 +37,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
   }
 
   // THIS ENDPOINT IS USED BY BOTH THE FRONTEND AND THE MOBILE-APP
-  def pay = (NoCacheAction andThen MobileSupportAction andThen ABTestAction)
+  def pay = NoCacheAction.andThen(MobileSupportAction).andThen(MetaDataAction.default)
     .async(parse.json[ContributionRequest]) { implicit request =>
     info(s"A Stripe payment is being attempted with contributions session id: ${request.sessionId}, from platform: ${request.platform}.")
     cloudWatchMetrics.logPaymentAttempt(PaymentProvider.Stripe, request.platform)

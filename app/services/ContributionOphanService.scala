@@ -1,6 +1,7 @@
 package services
 
 import abtests.Allocation
+import actions.CommonActions.MetaDataRequest
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import cats.data.EitherT
@@ -9,7 +10,6 @@ import cats.syntax.either._
 import com.gu.acquisition.services.OphanService
 import monitoring.{LoggingTags, TagAwareLogger}
 import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition}
-import play.api.mvc.Request
 import play.api.{Environment, Mode}
 import services.ContributionOphanService.{AcquisitionSubmission, AcquisitionSubmissionBuilder}
 import simulacrum.typeclass
@@ -22,7 +22,7 @@ trait ContributionOphanService {
   def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
     implicit ec: ExecutionContext,
     tags: LoggingTags,
-    request: Request[_]
+    request: MetaDataRequest[_]
   ): EitherT[Future, String, AcquisitionSubmission]
 }
 
@@ -36,7 +36,7 @@ object NonProdContributionOphanService extends ContributionOphanService with Tag
   def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
     implicit ec: ExecutionContext,
     tags: LoggingTags,
-    request: Request[_]
+    request: MetaDataRequest[_]
   ): EitherT[Future, String, AcquisitionSubmission] =
     EitherT.fromEither[Future](a.asAcquisitionSubmission).bimap(
       err => {
@@ -66,7 +66,7 @@ class ProdContributionOphanService(implicit system: ActorSystem, materializer: A
   def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
     implicit ec: ExecutionContext,
     tags: LoggingTags,
-    request: Request[_]
+    request: MetaDataRequest[_]
   ): EitherT[Future, String, AcquisitionSubmission] =
     EitherT.fromEither[Future](a.asAcquisitionSubmission).flatMap(sendSubmission)
       .bimap(

@@ -1,7 +1,7 @@
 package models
 
 import abtests.Allocation
-import actions.CommonActions.ABTestRequest
+import actions.CommonActions.MetaDataRequest
 import com.paypal.api.payments.Payment
 import controllers.httpmodels.CaptureRequest
 import ophan.thrift.componentEvent.ComponentType
@@ -83,7 +83,7 @@ object PaypalAcquisitionComponents {
     }
   }
 
-  case class Capture(payment: Payment, request: ABTestRequest[CaptureRequest])
+  case class Capture(payment: Payment, request: MetaDataRequest[CaptureRequest])
 
   object Capture {
 
