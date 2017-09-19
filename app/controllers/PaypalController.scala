@@ -44,7 +44,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     }
   }
 
-  def capturePayment = (NoCacheAction andThen ABTestAction).async(parse.json[CaptureRequest]) { implicit request =>
+  def capturePayment = NoCacheAction.andThen(MetaDataAction.default).async(parse.json[CaptureRequest]) { implicit request =>
     val captureBody = request.body
     val paypalService: PaypalService = paymentServices.paypalServiceFor(request)
 
@@ -112,7 +112,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     source: Option[AcquisitionSource],
     abTest: Option[AbTest],
     supportRedirect: Option[Boolean]
-  ) = (NoCacheAction andThen MobileSupportAction andThen ABTestAction).async { implicit request =>
+  ) = NoCacheAction.andThen(MobileSupportAction).andThen(MetaDataAction.default).async { implicit request =>
     val paypalService = paymentServices.paypalServiceFor(request)
 
     info(s"Attempting paypal payment for contributions session id: ${request.sessionId}")
@@ -190,7 +190,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
   private def capAmount(amount: BigDecimal, currency: Currency): BigDecimal = amount min MaxAmount.forCurrency(currency)
 
   def authorize = checkToken {
-    NoCacheAction.async(parse.json[AuthRequest]) { implicit request =>
+    NoCacheAction.andThen(MetaDataAction.default).async(parse.json[AuthRequest]) { implicit request =>
       info(s"Attempting to obtain paypal auth response. Contributions session id: ${request.sessionId}. Platform: ${request.platform}.")
       cloudWatchMetrics.logPaymentAuthAttempt(PaymentProvider.Paypal, request.platform)
       val authRequest = request.body

@@ -1,5 +1,7 @@
 package actions
 
+import java.util.UUID
+
 import abtests.Test
 import abtests.Variant
 import controllers.forms.ContributionRequest
@@ -8,7 +10,7 @@ import models.PaymentProvider
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 object CommonActions {
@@ -33,7 +35,7 @@ object CommonActions {
     }
   }
 
-  case class ABTestRequest[A](testId: Int, request: Request[A]) extends WrappedRequest(request) {
+  case class MetaDataRequest[A](sessionId: String, testId: Int, request: Request[A]) extends WrappedRequest(request) {
     val testAllocations = Test.allocations(testId, request)
     def isAllocated(test: Test, variantName: String) = testAllocations.exists(a => a.test == test && a.variant.name == variantName)
 
@@ -41,16 +43,30 @@ object CommonActions {
       testAllocations.find(_.test == test).map(_.variant)
   }
 
-  object ABTestAction extends ActionBuilder[ABTestRequest] {
-    override def invokeBlock[A](request: Request[A], block: (ABTestRequest[A]) => Future[Result]): Future[Result] = {
+  class MetaDataAction(implicit ec: ExecutionContext) extends ActionBuilder[MetaDataRequest] {
+    import MetaDataAction._
+
+    override def invokeBlock[A](request: Request[A], block: (MetaDataRequest[A]) => Future[Result]): Future[Result] = {
       val idFromCookie: Option[Int] = request.cookies.get(Test.testIdCookieName).map(_.value.toInt)
       val testId: Int = idFromCookie.getOrElse(Random.nextInt(Test.maxTestId))
 
-      block(ABTestRequest(testId, request)).map { result =>
-        if (idFromCookie.isEmpty) result.withCookies(Test.idCookie(testId))
-        else result
+      val sessionId = request.session.get(sessionIdKey).getOrElse(UUID.randomUUID.toString)
+
+      block(MetaDataRequest(sessionId, testId, request)).map { result =>
+        val outResult = if (idFromCookie.isEmpty) result.withCookies(Test.idCookie(testId)) else result
+        outResult.addingToSession(sessionIdKey -> sessionId)(request)
       }
     }
+  }
+
+  object MetaDataAction {
+
+    val default: MetaDataAction = {
+      import play.api.libs.concurrent.Execution.Implicits.defaultContext
+      new MetaDataAction
+    }
+
+    val sessionIdKey = "contributions_session"
   }
 
   implicit class MobileSupportRequest[A](val request: Request[A]) extends AnyVal {
@@ -60,21 +76,6 @@ object CommonActions {
     def platform: String = request.body match {
       case body: ContributionRequest => body.platform.getOrElse(_platform)
       case _ => _platform
-    }
-
-    def playSessionId: Option[String] = {
-      for {
-        playSessionCookie <- request.cookies.get("PLAY_SESSION")
-        value <- Option(playSessionCookie.value)
-      } yield {
-        value.takeWhile( _ != '-')
-      }
-    }
-
-    def initialSessionId: String = playSessionId.getOrElse("unknown_contributions_session")
-
-    def sessionId: String = {
-      request.session.get("contributions_session").getOrElse(initialSessionId)
     }
 
     def isAndroid: Boolean = platform == "android"

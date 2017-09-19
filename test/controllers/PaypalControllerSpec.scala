@@ -1,6 +1,7 @@
 package controllers
 
 import abtests.Allocation
+import actions.CommonActions.MetaDataRequest
 import akka.stream.Materializer
 import cats.data.EitherT
 import com.gu.i18n.{CountryGroup, GBP}
@@ -104,7 +105,7 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
         Matchers.any[ClassTag[Any]],
         Matchers.any[ExecutionContext],
         Matchers.any[LoggingTags],
-        Matchers.any[Request[_]]
+        Matchers.any[MetaDataRequest[_]]
       )
 }
 

@@ -1,12 +1,12 @@
 package models
 
-import actions.CommonActions.ABTestRequest
+import actions.CommonActions.MetaDataRequest
 import com.gu.stripe.Stripe.Charge
 import controllers.forms.ContributionRequest
 import ophan.thrift.event.{Acquisition, PaymentFrequency, Product}
 import services.ContributionOphanService.{ContributionAcquisitionSubmissionBuilder, OphanIds}
 
-case class StripeAcquisitionComponents(charge: Charge, request: ABTestRequest[ContributionRequest])
+case class StripeAcquisitionComponents(charge: Charge, request: MetaDataRequest[ContributionRequest])
 
 object StripeAcquisitionComponents {
 

@@ -1,6 +1,6 @@
 package abtests
 
-import actions.CommonActions.ABTestRequest
+import actions.CommonActions.MetaDataRequest
 import com.github.slugify.Slugify
 import com.gu.acquisition.utils.AbTestConverter
 import play.api.db.Database

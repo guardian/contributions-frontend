@@ -1,6 +1,6 @@
 package views.support
 
-import actions.CommonActions.ABTestRequest
+import actions.CommonActions.MetaDataRequest
 
 case class PageInfo(
   title: String = "Support the Guardian",
