@@ -15,7 +15,7 @@ object QueryStringBindableUtils {
     * Useful when there is one value under the given query string key.
     */
   def queryStringBindableInstance[A : ClassTag](
-      decoder: String => Option[A],
+      decoder: String => Either[String, A],
       encoder: A => String
   ): QueryStringBindable[A] = new QueryStringBindable[A] {
     import cats.syntax.either._
@@ -24,14 +24,8 @@ object QueryStringBindableUtils {
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, A]] =
       params.get(key).map { values =>
         for {
-          encodedValue <- Either.fromOption(
-            values.headOption,
-            s"No value for key $key in query string."
-          )
-          decodedValue <- Either.fromOption(
-            decoder(encodedValue),
-            s"Value of key $key in query string can't be decoded to an instance of ${reflect.classTag[A].runtimeClass}."
-          )
+          encodedValue <- Either.fromOption(values.headOption, s"No value for key $key in query string.")
+          decodedValue <- decoder(encodedValue)
         } yield decodedValue
       }
 
@@ -44,8 +38,25 @@ object QueryStringBindableUtils {
   /**
     * Use when the value is encoded as Json.
     */
-  def queryStringBindableInstanceFromFormat[A : ClassTag : Reads : Writes]: QueryStringBindable[A] =
-    queryStringBindableInstance(Json.parse(_).validate[A].asOpt, Json.toJson(_).toString)
+  def queryStringBindableInstanceFromFormat[A : ClassTag : Reads : Writes]: QueryStringBindable[A] = {
+    import cats.syntax.either._
+
+    def decoder(data: String) = for {
+
+      json <- Either.catchNonFatal(Json.parse(data)).leftMap { _ =>
+        s"""Unable to parse \"$data\" as JSON when attempting to decode an instance of ${reflect.classTag[A].runtimeClass}"""
+      }
+
+      instance <- json.validate[A].asEither.leftMap { _ =>
+        s"Unable to decode JSON $json to an instance of ${reflect.classTag[A].runtimeClass}"
+      }
+
+    } yield instance
+
+    def encoder(instance: A) = Json.toJson(instance).toString
+
+    queryStringBindableInstance(decoder, encoder)
+  }
 
   object Syntax {
 
