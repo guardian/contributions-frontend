@@ -92,7 +92,7 @@ object ThriftUtils {
     // Query string bindable type classes
 
     implicit def thriftEnumQueryStringBindable[A : ClassTag](implicit F: ThriftEnumFormatter[A]): QueryStringBindable[A] =
-      queryStringBindableInstance(F.decode(_).toOption, F.encode)
+      queryStringBindableInstance(F.decode(_).leftMap(_.message), F.encode)
 
     implicit val abTestQueryStringBindable: QueryStringBindable[AbTest] =
       queryStringBindableInstanceFromFormat[AbTest]
