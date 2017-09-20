@@ -8,7 +8,7 @@ import actions.CommonActions._
 import cats.data.EitherT
 import cats.syntax.show._
 import com.gu.i18n.CountryGroup._
-import com.gu.i18n.{AUD, EUR, USD}
+import com.gu.i18n.{AUD, CountryGroup, EUR, USD}
 import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
@@ -44,7 +44,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
 
     val form = request.body
 
-    val stripe = paymentServices.stripeServiceFor(form.name)
+    val stripe = paymentServices.stripeServiceFor(form.name, request)
     val idUser = IdentityId.fromRequest(request) orElse form.idUser
 
     val countryGroup = form.currency match {
@@ -193,7 +193,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       }
 
       withParsedStripeHook(request.body) { stripeHook =>
-        val stripeService = paymentServices.stripeServices(stripeHook.mode)
+        val countryGroup: Option[CountryGroup] = CountryGroup.byFastlyCountryCode(stripeHook.fastlyCountryCode)
+        val stripeService = paymentServices.stripeServices(countryGroup)(stripeHook.mode)
+
         stripeService.processPaymentHook(stripeHook)
           .value.map {
           case Right(_) => {

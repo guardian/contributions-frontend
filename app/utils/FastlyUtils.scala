@@ -1,11 +1,11 @@
 package utils
 
 import com.gu.i18n.CountryGroup
-import play.api.mvc.Request
+import play.api.mvc.{Request, RequestHeader}
 
 object FastlyUtils {
 
-  implicit class FastlyRequest(r: Request[_]) {
+  implicit class FastlyRequest(r: RequestHeader) {
 
     def getFastlyCountryCode: Option[String] = r.headers.get("X-GU-GeoIP-Country-Code")
 
