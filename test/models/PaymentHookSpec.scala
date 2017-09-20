@@ -61,7 +61,8 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
         currency = "GBP",
         amount = BigDecimal("25.00"),
         status = Paid,
-        email = "a@a.a"
+        email = "a@a.a",
+        fastlyCountryCode = "uk"
       )
     }
 
@@ -175,7 +176,8 @@ class PaymentHookSpec extends WordSpec with MustMatchers {
                           |        "abTests": "[{\"testName\":\"AmountHighlightTest\",\"testSlug\":\"highlight\",\"variantName\":\"Amount - 50 highlight\",\"variantSlug\":\"50\"},{\"testName\":\"MessageCopyTest\",\"testSlug\":\"mcopy\",\"variantName\":\"Copy - control\",\"variantSlug\":\"control\"},{\"testName\":\"PaymentMethodTest\",\"testSlug\":\"paymentMethods\",\"variantName\":\"Paypal\",\"variantSlug\":\"paypal\"}]",
                           |        "email": "a@a.a",
                           |        "idUser": "123",
-                          |        "contributionId": "7f5256d2-8e63-4b29-8f1e-f5c4e670db22"
+                          |        "contributionId": "7f5256d2-8e63-4b29-8f1e-f5c4e670db22",
+                          |        "countryCode": "uk"
                           |      },
                           |      "order": null,
                           |      "paid": true,

@@ -133,7 +133,8 @@ case class StripeHook(
   currency: String,
   amount: BigDecimal,
   status: PaymentStatus,
-  email: String
+  email: String,
+  fastlyCountryCode: String
 )
 
 object StripeHook {
@@ -152,6 +153,7 @@ object StripeHook {
         status <- (payload \ "status").validate[PaymentStatus](PaymentStatus.stripeReads)
         email <- (metadata \ "email").validate[String]
         refunded <- (payload \ "refunded").validate[Boolean]
+        fastlyCountryCode <- (metadata \ "countryCode").validate[String]
       } yield {
         StripeHook(
           contributionId = contributionId,
@@ -162,7 +164,8 @@ object StripeHook {
           currency = currency.toUpperCase,
           amount = BigDecimal(amount, 2),
           status = if (refunded) Refunded else status,
-          email = email
+          email = email,
+          fastlyCountryCode = fastlyCountryCode
         )
       }
     }

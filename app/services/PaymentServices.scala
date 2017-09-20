@@ -1,6 +1,7 @@
 package services
 
 import akka.actor.ActorSystem
+import com.gu.i18n.CountryGroup
 import com.gu.monitoring.ServiceMetrics
 import com.gu.stripe.{StripeApiConfig, StripeCredentials}
 import com.typesafe.config.Config
@@ -21,18 +22,28 @@ class PaymentServices(
   actorSystem: ActorSystem
 )(implicit ec: ExecutionContext) {
 
-  val stripeServices: Map[PaymentMode, StripeService] = {
+  import utils.ConfigUtils._
+  import utils.FastlyUtils._
+
+  def stripeServices(maybeCountryGroup: Option[CountryGroup]): Map[PaymentMode, StripeService] = {
+
     val stripeConfig = config.getConfig("stripe")
 
     def stripeServiceFor(mode: PaymentMode): StripeService = {
       val contributionData = contributionDataPerMode(mode)
       val stripeMode = stripeConfig.getString(mode.entryName.toLowerCase)
-      val keys = stripeConfig.getConfig(s"keys.$stripeMode")
+
+      val keys = maybeCountryGroup.flatMap(cg => stripeConfig.getOptionalConfig(s"keys.${cg.id.toLowerCase}"))
+        .getOrElse(stripeConfig.getConfig(s"keys.default"))
+        .getConfig(stripeMode)
+
       val credentials = StripeCredentials(
         secretKey = keys.getString("secret"),
         publicKey = keys.getString("public")
       )
+
       val metrics = new ServiceMetrics(stripeMode, "giraffe", "stripe")
+
       new StripeService(
         apiConfig = StripeApiConfig(stripeMode, credentials),
         metrics = metrics,
@@ -41,6 +52,7 @@ class PaymentServices(
         emailService = emailService
       )
     }
+
     PaymentMode.values.map(mode => mode -> stripeServiceFor(mode)).toMap
   }
 
@@ -70,9 +82,12 @@ class PaymentServices(
   private def modeFor(request: RequestHeader): PaymentMode =
     if (testUserService.isTestUser(request)) Testing else Default
 
-  def stripeServiceFor(displayName: String): StripeService = stripeServices(modeFor(displayName))
+  def stripeServiceFor(displayName: String, request: RequestHeader): StripeService =
+    stripeServices(request.getFastlyCountryGroup)(modeFor(displayName))
 
-  def stripeServiceFor(request: RequestHeader): StripeService = stripeServices(modeFor(request))
+  def stripeServiceFor(request: RequestHeader): StripeService =
+    stripeServices(request.getFastlyCountryGroup)(modeFor(request))
+
 
   def paypalServiceFor(request: RequestHeader): PaypalService = paypalServices(modeFor(request))
 
