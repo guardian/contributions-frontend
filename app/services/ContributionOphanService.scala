@@ -3,16 +3,19 @@ package services
 import abtests.Allocation
 import actions.CommonActions.MetaDataRequest
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.http.scaladsl.model.Uri
+import akka.stream.Materializer
 import cats.data.EitherT
 import cats.syntax.EitherSyntax
-import cats.syntax.either._
 import com.gu.acquisition.services.OphanService
+import com.typesafe.config.Config
+import com.typesafe.scalalogging.LazyLogging
 import monitoring.{LoggingTags, TagAwareLogger}
 import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition}
 import play.api.{Environment, Mode}
 import services.ContributionOphanService.{AcquisitionSubmission, AcquisitionSubmissionBuilder}
 import simulacrum.typeclass
+import utils.AttemptTo
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -26,7 +29,7 @@ trait ContributionOphanService {
   ): EitherT[Future, String, AcquisitionSubmission]
 }
 
-object NonProdContributionOphanService extends ContributionOphanService with TagAwareLogger {
+object MockOphanService extends ContributionOphanService with TagAwareLogger {
 
   import AcquisitionSubmissionBuilder.ops._
   import cats.instances.future._
@@ -50,7 +53,7 @@ object NonProdContributionOphanService extends ContributionOphanService with Tag
     )
 }
 
-class ProdContributionOphanService(implicit system: ActorSystem, materializer: ActorMaterializer)
+class DefaultContributionOphanService(service: OphanService)(implicit system: ActorSystem, materializer: Materializer)
   extends ContributionOphanService with TagAwareLogger {
 
   import cats.instances.future._
@@ -59,7 +62,7 @@ class ProdContributionOphanService(implicit system: ActorSystem, materializer: A
 
   private def sendSubmission(submission: AcquisitionSubmission)(implicit executionContext: ExecutionContext) = {
     import submission._
-    OphanService.submit(acquisition, ophanIds.browserId, ophanIds.viewId, ophanIds.visitId)
+    service.submit(acquisition, ophanIds.browserId, ophanIds.viewId, ophanIds.visitId)
       .bimap(err => s"Failed to submit acquisition event to Ophan - ${err.getMessage}", _ => submission)
   }
 
@@ -84,10 +87,48 @@ class ProdContributionOphanService(implicit system: ActorSystem, materializer: A
       )
 }
 
-object ContributionOphanService {
+object ContributionOphanService extends AttemptTo with LazyLogging {
 
-  def apply(env: Environment)(implicit system: ActorSystem, mat: ActorMaterializer): ContributionOphanService =
-    if (env.mode == Mode.Prod) new ProdContributionOphanService else NonProdContributionOphanService
+  /**
+    * Attempts to build an Ophan service using an endpoint specified under the path ophan.endpoint .
+    */
+  def fromConfig(config: Config)(
+    implicit system: ActorSystem,
+    materializer: Materializer
+  ): Either[String, ContributionOphanService] =
+    for {
+      ophanConfig <- attemptTo("get Ophan config")(config.getConfig("ophan"))
+      endpoint <- attemptTo("get endpoint from Ophan config")(ophanConfig.getString("endpoint"))
+      uri <- attemptTo("parse Ophan endpoint to a Uri")(Uri.parseAbsolute(endpoint))
+      service = new OphanService(uri)
+    } yield new DefaultContributionOphanService(service)
+
+  /**
+    * In production returns an Ophan service which sends events to the production instance of Ophan.
+    *
+    * Otherwise, attempts to return an Ophan service which sends events to a test endpoint -
+    * specified in the config under the path - ophan.endpoint .
+    * If this path is empty, then a mock Ophan service is used instead -
+    * acquisition events are still built, but not sent anywhere.
+    *
+    * Practically ophan.endpoint should be specified if you want to run the contributions website locally against a
+    * locally running instance of Ophan.
+    */
+  def apply(config: Config, environment: Environment)(
+    implicit system: ActorSystem,
+    materializer: Materializer
+  ): ContributionOphanService =
+    if (environment.mode == Mode.Prod) {
+      new DefaultContributionOphanService(OphanService.prod)
+    } else {
+      fromConfig(config).fold[ContributionOphanService](
+        message => {
+          logger.info(s"Ophan endpoint not loaded from config ($message), defaulting to mock Ophan service")
+          MockOphanService
+        },
+        identity
+      )
+    }
 
   case class OphanIds(browserId: String, viewId: String, visitId: Option[String])
 
