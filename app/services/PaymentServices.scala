@@ -25,15 +25,16 @@ class PaymentServices(
   import utils.ConfigUtils._
   import utils.FastlyUtils._
 
-  def stripeServices(maybeCountryGroup: Option[CountryGroup]): Map[PaymentMode, StripeService] = {
+  private val defaultCountryGroup = CountryGroup.UK
 
+  private val stripeServices: Map[CountryGroup, Map[PaymentMode, StripeService]] = {
     val stripeConfig = config.getConfig("stripe")
 
-    def stripeServiceFor(mode: PaymentMode): StripeService = {
+    def stripeServiceFor(countryGroup: CountryGroup, mode: PaymentMode): StripeService = {
       val contributionData = contributionDataPerMode(mode)
       val stripeMode = stripeConfig.getString(mode.entryName.toLowerCase)
 
-      val keys = maybeCountryGroup.flatMap(cg => stripeConfig.getOptionalConfig(s"keys.${cg.id.toLowerCase}"))
+      val keys: Config = stripeConfig.getOptionalConfig(s"keys.${countryGroup.id.toLowerCase}")
         .getOrElse(stripeConfig.getConfig(s"keys.default"))
         .getConfig(stripeMode)
 
@@ -53,10 +54,12 @@ class PaymentServices(
       )
     }
 
-    PaymentMode.values.map(mode => mode -> stripeServiceFor(mode)).toMap
+    CountryGroup.allGroups.map { countryGroup =>
+      countryGroup -> PaymentMode.values.map(mode => mode -> stripeServiceFor(countryGroup, mode)).toMap
+    }.toMap
   }
 
-  val paypalServices: Map[PaymentMode, PaypalService] = {
+  private val paypalServices: Map[PaymentMode, PaypalService] = {
     val paypalExecutionContext = actorSystem.dispatchers.lookup("contexts.paypal-context")
     val paypalConfig = config.getConfig("paypal")
 
@@ -82,12 +85,14 @@ class PaymentServices(
   private def modeFor(request: RequestHeader): PaymentMode =
     if (testUserService.isTestUser(request)) Testing else Default
 
+  def stripeServiceForGroup(maybeGroup: Option[CountryGroup]): Map[PaymentMode, StripeService] =
+    maybeGroup.map(stripeServices).getOrElse(stripeServices(defaultCountryGroup))
+
   def stripeServiceFor(displayName: String, request: RequestHeader): StripeService =
-    stripeServices(request.getFastlyCountryGroup)(modeFor(displayName))
+    stripeServiceForGroup(request.getFastlyCountryGroup)(modeFor(request))
 
   def stripeServiceFor(request: RequestHeader): StripeService =
-    stripeServices(request.getFastlyCountryGroup)(modeFor(request))
-
+    stripeServiceForGroup(request.getFastlyCountryGroup)(modeFor(request))
 
   def paypalServiceFor(request: RequestHeader): PaypalService = paypalServices(modeFor(request))
 

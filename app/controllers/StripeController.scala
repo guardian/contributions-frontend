@@ -194,7 +194,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
 
       withParsedStripeHook(request.body) { stripeHook =>
         val countryGroup: Option[CountryGroup] = CountryGroup.byFastlyCountryCode(stripeHook.fastlyCountryCode)
-        val stripeService = paymentServices.stripeServices(countryGroup)(stripeHook.mode)
+        val stripeService = paymentServices.stripeServiceForGroup(countryGroup)(stripeHook.mode)
 
         stripeService.processPaymentHook(stripeHook)
           .value.map {
