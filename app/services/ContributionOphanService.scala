@@ -88,6 +88,11 @@ object ContributionOphanService extends LazyLogging {
 
   /**
     * Expects the config to have the path ophan.isProd defining a boolean.
+    * If this is true then acquisition events are sent to the production Ophan instance.
+    * Otherwise, a mock instance of the service is used -
+    * one that builds acquisition events, but doesn't send them -
+    * unless ophan.endpoint specifies a valid URI, in which case,
+    * acquisition events will be sent to this configurable endpoint.
     */
   def fromConfig(config: Config)(implicit system: ActorSystem, materializer: Materializer): ContributionOphanService = {
     val ophanConfig = config.getConfig("ophan")
