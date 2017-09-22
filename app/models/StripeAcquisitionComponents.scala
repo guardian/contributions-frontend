@@ -27,7 +27,10 @@ object StripeAcquisitionComponents {
           product = Product.Contribution,
           paymentFrequency = PaymentFrequency.OneOff,
           currency = charge.currency,
-          amount = charge.amount,
+          // Stripe amount is in smallest currency unit.
+          // Convert e.g. Pence to Pounds, Cents to Dollars
+          // https://stripe.com/docs/api#charge_object
+          amount = BigDecimal(charge.amount, 2).toDouble,
           amountInGBP = None, // Calculated at the sinks of the Ophan stream
           paymentProvider = Option(ophan.thrift.event.PaymentProvider.Stripe),
           campaignCode = Some(Set(request.body.intcmp, request.body.cmp).flatten),

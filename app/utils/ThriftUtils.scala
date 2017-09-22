@@ -14,12 +14,10 @@ import scala.reflect.ClassTag
 
 case class ThriftDecodeError private (message: String)
 
-object ThriftDecodeError {
+object ThriftDecodeError extends RuntimeClassUtils {
 
-  def apply[A : ClassTag](value: String): ThriftDecodeError = {
-    val clazz = reflect.classTag[A].runtimeClass
-    new ThriftDecodeError(s"""unable to convert string "$value" to an instance of $clazz""")
-  }
+  def apply[A : ClassTag](value: String): ThriftDecodeError =
+    new ThriftDecodeError(s"""unable to convert string "$value" to an instance of ${runtimeClass[A]}""")
 }
 
 /**

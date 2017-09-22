@@ -8,7 +8,7 @@ import play.api.mvc.QueryStringBindable
 import scala.reflect.ClassTag
 import scala.util.Try
 
-object QueryStringBindableUtils {
+object QueryStringBindableUtils extends RuntimeClassUtils {
 
   /**
     * Utility function for building query string bindables.
@@ -44,11 +44,11 @@ object QueryStringBindableUtils {
     def decoder(data: String) = for {
 
       json <- Either.catchNonFatal(Json.parse(data)).leftMap { _ =>
-        s"""Unable to parse \"$data\" as JSON when attempting to decode an instance of ${reflect.classTag[A].runtimeClass}"""
+        s"""Unable to parse \"$data\" as JSON when attempting to decode an instance of ${runtimeClass[A]}"""
       }
 
       instance <- json.validate[A].asEither.leftMap { _ =>
-        s"Unable to decode JSON $json to an instance of ${reflect.classTag[A].runtimeClass}"
+        s"Unable to decode JSON $json to an instance of ${runtimeClass[A]}"
       }
 
     } yield instance
