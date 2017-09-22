@@ -11,13 +11,13 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import monitoring.{LoggingTags, TagAwareLogger}
 import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition}
-import play.api.{Environment, Mode}
 import services.ContributionOphanService.{AcquisitionSubmission, AcquisitionSubmissionBuilder}
 import simulacrum.typeclass
 import utils.{AttemptTo, RuntimeClassUtils}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
+import scala.util.Try
 
 trait ContributionOphanService {
 
@@ -84,45 +84,33 @@ class DefaultContributionOphanService(service: OphanService)
       )
 }
 
-object ContributionOphanService extends AttemptTo with LazyLogging {
+object ContributionOphanService extends LazyLogging {
 
   /**
-    * Attempts to build an Ophan service using an endpoint specified under the path ophan.endpoint .
+    * Expects the config to have the path ophan.isProd defining a boolean.
     */
-  def fromConfig(config: Config)(
-    implicit system: ActorSystem,
-    materializer: Materializer
-  ): Either[String, ContributionOphanService] =
-    for {
-      ophanConfig <- attemptTo("get Ophan config")(config.getConfig("ophan"))
-      endpoint <- attemptTo("get endpoint from Ophan config")(ophanConfig.getString("endpoint"))
-      uri <- attemptTo("parse Ophan endpoint to a Uri")(Uri.parseAbsolute(endpoint))
-      service = new OphanService(uri)
-    } yield new DefaultContributionOphanService(service)
-
-  /**
-    * In production returns an Ophan service which sends events to the production instance of Ophan.
-    *
-    * Otherwise, attempts to return an Ophan service which sends events to a test endpoint -
-    * specified in the config under the path - ophan.endpoint .
-    * If this path is empty, then a mock Ophan service is used instead -
-    * acquisition events are still built, but not sent anywhere.
-    *
-    * Practically ophan.endpoint should be specified if you want to run the contributions website locally against a
-    * locally running instance of Ophan.
-    */
-  def apply(config: Config, environment: Environment)(
-    implicit system: ActorSystem,
-    materializer: Materializer
-  ): ContributionOphanService =
-    if (environment.mode == Mode.Prod) {
+  def fromConfig(config: Config)(implicit system: ActorSystem, materializer: Materializer): ContributionOphanService = {
+    val ophanConfig = config.getConfig("ophan")
+    if (ophanConfig.getBoolean("isProd")) {
+      logger.info("Initialising production instance of Contribution Ophan service.")
       new DefaultContributionOphanService(OphanService.prod)
     } else {
-      fromConfig(config).valueOr { message =>
-        logger.info(s"Ophan endpoint not loaded from config ($message), defaulting to mock Ophan service")
+      val testEndpoint = Try(ophanConfig.getString("endpoint")).toOption
+      if (testEndpoint.isEmpty) {
+        logger.info("No test endpoint specified. Initialising a mock Contribution Ophan service.")
         MockOphanService
+      } else {
+        val uri = Try(Uri.parseAbsolute(testEndpoint.get)).toOption
+        if (uri.isEmpty) {
+          logger.warn("Invalid test Ophan endpoint specified. Initialising a mock Contribution Ophan service.")
+          MockOphanService
+        } else {
+          logger.info(s"Initialising test instance of Contribution Ophan service with endpoint: ${uri.get}")
+          new DefaultContributionOphanService(new OphanService(uri.get))
+        }
       }
     }
+  }
 
   case class OphanIds(browserId: String, viewId: String, visitId: Option[String])
 
