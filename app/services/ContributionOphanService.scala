@@ -157,13 +157,9 @@ object ContributionOphanService extends AttemptTo with LazyLogging {
       }
 
     protected def abTestInfo(native: Set[Allocation], nonNative: Option[AbTest]): AbTestInfo = {
-      // TODO: re-instate the 'correct' implementation once we have verified that acquisition events are not being sent
-      // because the underlying Ophan client is incorrectly formatting Ab tests.
-
-      // import com.gu.acquisition.syntax._
-      // val abTestInfo = native.asAbTestInfo
-      // nonNative.map(abTest => AbTestInfo(abTestInfo.tests + abTest)).getOrElse(abTestInfo)
-      AbTestInfo()
+      import com.gu.acquisition.syntax._
+      val abTestInfo = native.asAbTestInfo
+      nonNative.map(abTest => AbTestInfo(abTestInfo.tests + abTest)).getOrElse(abTestInfo)
     }
   }
 }
