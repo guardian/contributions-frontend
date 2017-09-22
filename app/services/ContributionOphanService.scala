@@ -156,14 +156,13 @@ object ContributionOphanService extends AttemptTo with LazyLogging {
         s"Failed to build an acquisition submission from an instance of ${runtimeClass[A]} - cause: $err"
       }
 
-    protected def abTestInfo(native: Set[Allocation], nonNative: Option[AbTest]): AbTestInfo = {
-      // TODO: re-instate the 'correct' implementation once we have verified that acquisition events are not being sent
-      // because the underlying Ophan client is incorrectly formatting Ab tests.
-
-      // import com.gu.acquisition.syntax._
-      // val abTestInfo = native.asAbTestInfo
-      // nonNative.map(abTest => AbTestInfo(abTestInfo.tests + abTest)).getOrElse(abTestInfo)
-      AbTestInfo()
+    /**
+      * Combine the tests the user is in on the contributions website and the referring page.
+      */
+    protected def abTestInfo(contributionAbTests: Set[Allocation], referrerAbTest: Option[AbTest]): AbTestInfo = {
+      import com.gu.acquisition.syntax._
+      val abTestInfo = contributionAbTests.asAbTestInfo
+      referrerAbTest.map(abTest => AbTestInfo(abTestInfo.tests + abTest)).getOrElse(abTestInfo)
     }
   }
 }
