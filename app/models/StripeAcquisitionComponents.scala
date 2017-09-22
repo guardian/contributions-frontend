@@ -27,7 +27,7 @@ object StripeAcquisitionComponents {
           product = Product.Contribution,
           paymentFrequency = PaymentFrequency.OneOff,
           currency = charge.currency,
-          // Stripe amount in smallest currency unit.
+          // Stripe amount is in smallest currency unit.
           // Convert e.g. Pence to Pounds, Cents to Dollars
           // https://stripe.com/docs/api#charge_object
           amount = BigDecimal(charge.amount, 2).toDouble,

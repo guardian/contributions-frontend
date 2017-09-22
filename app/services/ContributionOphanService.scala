@@ -6,7 +6,6 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
 import akka.stream.Materializer
 import cats.data.EitherT
-import cats.syntax.EitherSyntax
 import com.gu.acquisition.services.OphanService
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
@@ -15,7 +14,7 @@ import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition}
 import play.api.{Environment, Mode}
 import services.ContributionOphanService.{AcquisitionSubmission, AcquisitionSubmissionBuilder}
 import simulacrum.typeclass
-import utils.AttemptTo
+import utils.{AttemptTo, RuntimeClassUtils}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -29,12 +28,10 @@ trait ContributionOphanService {
   ): EitherT[Future, String, AcquisitionSubmission]
 }
 
-object MockOphanService extends ContributionOphanService with TagAwareLogger {
+object MockOphanService extends ContributionOphanService with TagAwareLogger with RuntimeClassUtils {
 
   import AcquisitionSubmissionBuilder.ops._
   import cats.instances.future._
-
-  private def runtimeClass[A : ClassTag] = reflect.classTag[A].runtimeClass
 
   def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
     implicit ec: ExecutionContext,
@@ -53,8 +50,8 @@ object MockOphanService extends ContributionOphanService with TagAwareLogger {
     )
 }
 
-class DefaultContributionOphanService(service: OphanService)(implicit system: ActorSystem, materializer: Materializer)
-  extends ContributionOphanService with TagAwareLogger {
+class DefaultContributionOphanService(service: OphanService)
+  extends ContributionOphanService with TagAwareLogger with RuntimeClassUtils {
 
   import cats.instances.future._
   import actions.CommonActions._
@@ -79,7 +76,7 @@ class DefaultContributionOphanService(service: OphanService)(implicit system: Ac
         },
         submission => {
           info(
-            s"Acquisition submission created from an instance of ${reflect.classTag[A].runtimeClass} and " +
+            s"Acquisition submission created from an instance of ${runtimeClass[A]} and " +
             s"successfully submitted to Ophan - contributions session id ${request.sessionId}"
           )
           submission
@@ -121,13 +118,10 @@ object ContributionOphanService extends AttemptTo with LazyLogging {
     if (environment.mode == Mode.Prod) {
       new DefaultContributionOphanService(OphanService.prod)
     } else {
-      fromConfig(config).fold[ContributionOphanService](
-        message => {
-          logger.info(s"Ophan endpoint not loaded from config ($message), defaulting to mock Ophan service")
-          MockOphanService
-        },
-        identity
-      )
+      fromConfig(config).valueOr { message =>
+        logger.info(s"Ophan endpoint not loaded from config ($message), defaulting to mock Ophan service")
+        MockOphanService
+      }
     }
 
   case class OphanIds(browserId: String, viewId: String, visitId: Option[String])
@@ -154,12 +148,12 @@ object ContributionOphanService extends AttemptTo with LazyLogging {
   }
 
 
-  trait ContributionAcquisitionSubmissionBuilder[A] extends AcquisitionSubmissionBuilder[A] with EitherSyntax {
+  trait ContributionAcquisitionSubmissionBuilder[A] extends AcquisitionSubmissionBuilder[A]
+    with AttemptTo with RuntimeClassUtils {
 
     protected def attemptToGet[B](field: String)(a: => B)(implicit classTag: ClassTag[A]): Either[String, B] =
-      Either.catchNonFatal(a).leftMap { err =>
-        s"Failed to build an acquisition submission from an instance of ${reflect.classTag[A].runtimeClass} - " +
-        s"cause: unable to get $field - underlying error message: ${err.getMessage}"
+      attemptTo[B](s"get $field")(a).leftMap { err =>
+        s"Failed to build an acquisition submission from an instance of ${runtimeClass[A]} - cause: $err"
       }
 
     protected def abTestInfo(native: Set[Allocation], nonNative: Option[AbTest]): AbTestInfo = {
