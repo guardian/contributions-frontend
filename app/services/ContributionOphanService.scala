@@ -13,7 +13,7 @@ import monitoring.{LoggingTags, TagAwareLogger}
 import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition}
 import services.ContributionOphanService.{AcquisitionSubmission, AcquisitionSubmissionBuilder}
 import simulacrum.typeclass
-import utils.{AttemptTo, RuntimeClassUtils}
+import utils.{AttemptTo, RuntimeClassUtils, TestUserService}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -84,37 +84,68 @@ class DefaultContributionOphanService(service: OphanService)
       )
 }
 
+class RequestDependentOphanService(
+    default: ContributionOphanService,
+    testing: ContributionOphanService,
+    testUserService: TestUserService
+) extends ContributionOphanService {
+
+  override def submitAcquisition[A: AcquisitionSubmissionBuilder : ClassTag](a: A)(
+    implicit ec: ExecutionContext, tags: LoggingTags, request: MetaDataRequest[_]
+  ): EitherT[Future, String, AcquisitionSubmission] =
+    if (testUserService.isTestUser(request)) testing.submitAcquisition(a) else default.submitAcquisition(a)
+}
+
 object ContributionOphanService extends LazyLogging {
 
-  /**
-    * Expects the config to have the path ophan.isProd defining a boolean.
-    * If this is true then acquisition events are sent to the production Ophan instance.
-    * Otherwise, a mock instance of the service is used -
-    * one that builds acquisition events, but doesn't send them -
-    * unless ophan.endpoint specifies a valid URI, in which case,
-    * acquisition events will be sent to this configurable endpoint.
-    */
-  def fromConfig(config: Config)(implicit system: ActorSystem, materializer: Materializer): ContributionOphanService = {
+  def apply(config: Config, testUserService: TestUserService)(
+    implicit system: ActorSystem, materializer: Materializer
+  ): ContributionOphanService = {
+
     val ophanConfig = config.getConfig("ophan")
-    if (ophanConfig.getBoolean("isProd")) {
-      logger.info("Initialising production instance of Contribution Ophan service.")
+
+    lazy val productionService = {
+      logger.info("Initialising production Ophan service")
       new DefaultContributionOphanService(OphanService.prod)
-    } else {
-      val testEndpoint = Try(ophanConfig.getString("endpoint")).toOption
-      if (testEndpoint.isEmpty) {
-        logger.info("No test endpoint specified. Initialising a mock Contribution Ophan service.")
+    }
+
+    lazy val testService: ContributionOphanService = {
+      logger.info("Initializing test Ophan service...")
+      val endpoint = Try(ophanConfig.getString("testEndpoint")).toOption
+      if (endpoint.isEmpty) {
+        logger.info("No endpoint specified for test Ophan service. Using mock Ophan service.")
         MockOphanService
       } else {
-        val uri = Try(Uri.parseAbsolute(testEndpoint.get)).toOption
+        val uri = Try(Uri.parseAbsolute(endpoint.get)).toOption
         if (uri.isEmpty) {
-          logger.warn("Invalid test Ophan endpoint specified. Initialising a mock Contribution Ophan service.")
+          logger.error("Invalid endpoint specified for test Ophan service. Using mock Ophan service.")
           MockOphanService
         } else {
-          logger.info(s"Initialising test instance of Contribution Ophan service with endpoint: ${uri.get}")
+          logger.info(s"Using ${uri.get} as the endpoint for the test Ophan service.")
           new DefaultContributionOphanService(new OphanService(uri.get))
         }
       }
     }
+
+    val testing = ophanConfig.getString("testing") match {
+      case "LIVE" =>
+        logger.warn("Using production Ophan service for test requests")
+        productionService
+      case "TEST" =>
+        logger.info("Using test Ophan service for test requests")
+        testService
+    }
+
+    val default = ophanConfig.getString("default") match {
+      case "LIVE" =>
+        logger.info("Using production Ophan service for default requests")
+        productionService
+      case "TEST" =>
+        logger.info("Using test Ophan service for default requests")
+        testService
+      }
+
+    new RequestDependentOphanService(default, testing, testUserService)
   }
 
   case class OphanIds(browserId: String, viewId: String, visitId: Option[String])
@@ -128,6 +159,7 @@ object ContributionOphanService extends LazyLogging {
     * Type class for creating an acquisition submission from an arbitrary data type.
     */
   @typeclass trait AcquisitionSubmissionBuilder[A] {
+    import cats.syntax.either._
 
     def buildOphanIds(a: A): Either[String, OphanIds]
 

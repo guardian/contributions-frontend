@@ -1,8 +1,6 @@
 package services
 
 import akka.actor.ActorSystem
-import com.gu.identity.play.AuthenticatedIdUser
-import com.gu.identity.testing.usernames.TestUsernames
 import com.gu.monitoring.ServiceMetrics
 import com.gu.stripe.{StripeApiConfig, StripeCredentials}
 import com.typesafe.config.Config
@@ -10,13 +8,13 @@ import data.ContributionData
 import models.PaymentMode
 import models.PaymentMode.{Default, Testing}
 import play.api.mvc.RequestHeader
+import utils.TestUserService
 
 import scala.concurrent.ExecutionContext
 
 class PaymentServices(
   config: Config,
-  authProvider: AuthenticatedIdUser.Provider,
-  testUsernames: TestUsernames,
+  testUserService: TestUserService,
   identityService: IdentityService,
   emailService: EmailService,
   contributionDataPerMode: Map[PaymentMode, ContributionData],
@@ -66,18 +64,11 @@ class PaymentServices(
     PaymentMode.values.map(mode => mode -> paypalServiceFor(mode)).toMap
   }
 
-  private def isTestUser(request: RequestHeader): Boolean =
-    request.getQueryString("_test_username")
-      .orElse(request.cookies.get("_test_username").map(_.value))
-      .orElse(authProvider(request).flatMap(_.displayName))
-      .exists(testUsernames.isValid)
+  private def modeFor(displayName: String): PaymentMode =
+    if (testUserService.isTestUser(displayName)) Testing else Default
 
-  private def isTestUser(displayName: String): Boolean =
-    displayName.split(' ').headOption.exists(testUsernames.isValid)
-
-  private def modeFor(displayName: String): PaymentMode = if (isTestUser(displayName)) Testing else Default
-
-  private def modeFor(request: RequestHeader): PaymentMode = if (isTestUser(request)) Testing else Default
+  private def modeFor(request: RequestHeader): PaymentMode =
+    if (testUserService.isTestUser(request)) Testing else Default
 
   def stripeServiceFor(displayName: String): StripeService = stripeServices(modeFor(displayName))
 
