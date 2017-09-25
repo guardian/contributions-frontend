@@ -21,6 +21,7 @@ import services._
 import router.Routes
 import configuration.{Config, CorsConfig, SupportConfig}
 import monitoring.{CloudWatch, CloudWatchMetrics}
+import utils.DefaultTestUserService
 
 //Sometimes intellij deletes this -> (import router.Routes)
 
@@ -56,10 +57,11 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val cloudWatchClient = CloudWatch.build()
   lazy val cloudWatchMetrics = new CloudWatchMetrics(cloudWatchClient)
 
+  lazy val testUserService = new DefaultTestUserService(identityAuthProvider, testUsernames)
+
   lazy val paymentServices = new PaymentServices(
     config = config,
-    authProvider = identityAuthProvider,
-    testUsernames = testUsernames,
+    testUserService = testUserService,
     identityService = identityService,
     emailService = emailService,
     contributionDataPerMode = contributionDataPerMode,
@@ -71,7 +73,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val identityService = new IdentityService(wsClient, idConfig)
   lazy val emailService = wire[EmailService]
 
-  lazy val ophanService = ContributionOphanService(config, environment)
+  lazy val ophanService = ContributionOphanService(config, testUserService)
   lazy val giraffeController = wire[Contributions]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
