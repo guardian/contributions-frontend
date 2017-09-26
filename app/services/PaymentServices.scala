@@ -62,5 +62,5 @@ class PaymentServices(
 
   def stripeKeysFor(requestHeader: RequestHeader): Map[CountryGroup, String] =
     regionalStripeService.regionalServicesFor(modeFor(requestHeader)).mapValues(_.publicKey)
-
+      .withDefaultValue(regionalStripeService.defaultService.publicKey)
 }

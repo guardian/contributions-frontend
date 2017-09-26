@@ -8,9 +8,9 @@ export function init() {
     else initStripeJS();
 }
 
-function initStripeCheckout() {
-    const handler = StripeCheckout.configure({
-        key: guardian.stripe.key,
+export function makeHandler(key) {
+    return StripeCheckout.configure({
+        key: key,
         image: guardian.stripe.image,
         locale: 'auto',
         name: 'The Guardian',
@@ -18,19 +18,21 @@ function initStripeCheckout() {
         allowRememberMe: false,
         zipCode: false,
         token: token => {
-            store.dispatch({ type: SUBMIT_PAYMENT });
+            store.dispatch({type: SUBMIT_PAYMENT});
             processStripePayment(token);
         }
     });
+}
 
+function initStripeCheckout() {
     store.dispatch({
         type: SET_STRIPE_HANDLER,
-        handler: handler
+        handler: makeHandler(guardian.stripe.defaultPublicKey)
     });
 }
 
 function initStripeJS() {
-    Stripe.setPublishableKey(guardian.stripe.key);
+    Stripe.setPublishableKey(guardian.stripe.defaultPublicKey);
 }
 
 

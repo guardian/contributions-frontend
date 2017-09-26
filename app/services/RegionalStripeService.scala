@@ -11,12 +11,12 @@ import scala.concurrent.ExecutionContext
 
 trait RegionalStripeService {
 
-  def defaultCountryGroup = CountryGroup.UK
+  def defaultService: StripeService
 
   def regionalServicesFor(mode: PaymentMode): Map[CountryGroup, StripeService]
 
-  def serviceFor(mode: PaymentMode, countryGroup: Option[CountryGroup]): StripeService =
-    regionalServicesFor(mode)(countryGroup.getOrElse(defaultCountryGroup))
+  def serviceFor(mode: PaymentMode, countryGroup: Option[CountryGroup]): StripeService
+
 }
 
 class DefaultRegionalStripeService(config: Config,
@@ -70,5 +70,12 @@ class DefaultRegionalStripeService(config: Config,
     }.toMap
   }
 
-  override def regionalServicesFor(mode: PaymentMode) = stripeServices(mode)
+  override def defaultService: StripeService =
+    regionalServicesFor(PaymentMode.Default)(CountryGroup.UK)
+
+  override def regionalServicesFor(mode: PaymentMode) =
+    stripeServices(mode)
+
+  override def serviceFor(mode: PaymentMode, countryGroup: Option[CountryGroup]): StripeService =
+    countryGroup.map(group => regionalServicesFor(mode)(group)).getOrElse(defaultService)
 }
