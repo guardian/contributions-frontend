@@ -44,15 +44,15 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
 
     val form = request.body
 
-    val stripe = paymentServices.stripeServiceFor(form.name, request)
-    val idUser = IdentityId.fromRequest(request) orElse form.idUser
-
     val countryGroup = form.currency match {
       case USD => US
       case AUD => Australia
       case EUR => Europe
       case _ => UK
     }
+
+    val stripe = paymentServices.stripeServiceFor(form.name, Some(countryGroup))
+    val idUser = IdentityId.fromRequest(request) orElse form.idUser
 
     val contributionId = ContributionId.random
 
@@ -194,7 +194,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
 
       withParsedStripeHook(request.body) { stripeHook =>
         val countryGroup: Option[CountryGroup] = CountryGroup.byFastlyCountryCode(stripeHook.fastlyCountryCode)
-        val stripeService = paymentServices.stripeServiceForGroup(countryGroup)(stripeHook.mode)
+        val stripeService = paymentServices.stripeServiceFor(stripeHook.mode, countryGroup)
 
         stripeService.processPaymentHook(stripeHook)
           .value.map {

@@ -59,11 +59,14 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
 
   lazy val testUserService = new DefaultTestUserService(identityAuthProvider, testUsernames)
 
+  lazy val regionalStripeService = new DefaultRegionalStripeService(config, contributionDataPerMode, identityService, emailService)
+
   lazy val paymentServices = new PaymentServices(
     config = config,
     testUserService = testUserService,
     identityService = identityService,
     emailService = emailService,
+    regionalStripeService = regionalStripeService,
     contributionDataPerMode = contributionDataPerMode,
     actorSystem = actorSystem
   )
