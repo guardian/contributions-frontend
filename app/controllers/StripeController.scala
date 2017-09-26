@@ -152,9 +152,9 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
         cloudWatchMetrics.logPaymentFailure(PaymentProvider.Stripe, request.platform)
         BadRequest(Json.toJson(e)).withHeaders(corsHeaders(request): _*)
       }
-      case _ => {
+      case err => {
         cloudWatchMetrics.logUnhandledPaymentFailure(PaymentProvider.Stripe, request.platform)
-        warn(s"Payment failed for unknown reason. contributions session id: ${request.sessionId}, from platform: ${request.platform}")
+        warn(s"Payment failed: ${err.getMessage}. contributions session id: ${request.sessionId}, from platform: ${request.platform}")
         BadRequest(Json.toJson("unknown error")).withHeaders(corsHeaders(request): _*)
       }
     }
