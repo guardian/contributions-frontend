@@ -49,7 +49,6 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       title = "Support the Guardian | Contribute today",
       url = request.path,
       image = Some(Asset.absoluteUrl("images/twitter-card.png")),
-      stripePublicKey = None,
       description = Some("By making a contribution, you’ll be supporting independent journalism that speaks truth to power"),
       customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
     )
@@ -63,7 +62,6 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       import cats.syntax.either._
 
       val errorMessage = error.map(_.message)
-      val stripe = paymentServices.stripeServiceFor(request)
 
       val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString)
         // When mobile starts sending acquisition data we will want to warn in all cases.
@@ -82,7 +80,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
         title = "Support the Guardian | Contribute today",
         url = request.path,
         image = Some(Asset.absoluteUrl("images/twitter-card.png")),
-        stripePublicKey = Some(stripe.publicKey),
+        stripePublicKeys = paymentServices.stripeKeysFor(request),
         description = Some("By making a contribution, you’ll be supporting independent journalism that speaks truth to power"),
         customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
       )

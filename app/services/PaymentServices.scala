@@ -18,46 +18,10 @@ class PaymentServices(
   testUserService: TestUserService,
   identityService: IdentityService,
   emailService: EmailService,
+  regionalStripeService: RegionalStripeService,
   contributionDataPerMode: Map[PaymentMode, ContributionData],
   actorSystem: ActorSystem
 )(implicit ec: ExecutionContext) {
-
-  import utils.ConfigUtils._
-  import utils.FastlyUtils._
-
-  private val defaultCountryGroup = CountryGroup.UK
-
-  private val stripeServices: Map[CountryGroup, Map[PaymentMode, StripeService]] = {
-    val stripeConfig = config.getConfig("stripe")
-
-    def stripeServiceFor(countryGroup: CountryGroup, mode: PaymentMode): StripeService = {
-      val contributionData = contributionDataPerMode(mode)
-      val stripeMode = stripeConfig.getString(mode.entryName.toLowerCase)
-
-      val keys: Config = stripeConfig.getOptionalConfig(s"keys.${countryGroup.id.toLowerCase}")
-        .getOrElse(stripeConfig.getConfig(s"keys.default"))
-        .getConfig(stripeMode)
-
-      val credentials = StripeCredentials(
-        secretKey = keys.getString("secret"),
-        publicKey = keys.getString("public")
-      )
-
-      val metrics = new ServiceMetrics(stripeMode, "giraffe", "stripe")
-
-      new StripeService(
-        apiConfig = StripeApiConfig(stripeMode, credentials),
-        metrics = metrics,
-        contributionData = contributionData,
-        identityService = identityService,
-        emailService = emailService
-      )
-    }
-
-    CountryGroup.allGroups.map { countryGroup =>
-      countryGroup -> PaymentMode.values.map(mode => mode -> stripeServiceFor(countryGroup, mode)).toMap
-    }.toMap
-  }
 
   private val paypalServices: Map[PaymentMode, PaypalService] = {
     val paypalExecutionContext = actorSystem.dispatchers.lookup("contexts.paypal-context")
@@ -85,15 +49,18 @@ class PaymentServices(
   private def modeFor(request: RequestHeader): PaymentMode =
     if (testUserService.isTestUser(request)) Testing else Default
 
-  def stripeServiceForGroup(maybeGroup: Option[CountryGroup]): Map[PaymentMode, StripeService] =
-    maybeGroup.map(stripeServices).getOrElse(stripeServices(defaultCountryGroup))
-
-  def stripeServiceFor(displayName: String, request: RequestHeader): StripeService =
-    stripeServiceForGroup(request.getFastlyCountryGroup)(modeFor(request))
-
-  def stripeServiceFor(request: RequestHeader): StripeService =
-    stripeServiceForGroup(request.getFastlyCountryGroup)(modeFor(request))
-
   def paypalServiceFor(request: RequestHeader): PaypalService = paypalServices(modeFor(request))
+
+  def stripeServiceFor(displayName: String, countryGroup: Option[CountryGroup]): StripeService =
+    regionalStripeService.serviceFor(modeFor(displayName), countryGroup)
+
+  def stripeServiceFor(requestHeader: RequestHeader, countryGroup: Option[CountryGroup]): StripeService =
+    regionalStripeService.serviceFor(modeFor(requestHeader), countryGroup)
+
+  def stripeServiceFor(mode: PaymentMode, countryGroup: Option[CountryGroup]): StripeService =
+    regionalStripeService.serviceFor(mode, countryGroup)
+
+  def stripeKeysFor(requestHeader: RequestHeader): Map[CountryGroup, String] =
+    regionalStripeService.regionalServicesFor(modeFor(requestHeader)).mapValues(_.publicKey)
 
 }

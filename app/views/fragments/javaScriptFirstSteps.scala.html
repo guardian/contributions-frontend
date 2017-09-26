@@ -27,12 +27,9 @@
         css: {
             loaded: false
         },
-        @for(stripePublicKey <- pageInfo.stripePublicKey) {
-            stripe: {
-                key: '@stripePublicKey',
-                image: '@Asset.at("images/gu.png")'
-            },
-        }
+        stripe: {
+            image: '@Asset.at("images/gu.png")'
+        },
         membership: {
             buildNumber: '@app.BuildInfo.buildNumber',
             svgSprite: "@Asset.at("images/svg-sprite.svg")"
