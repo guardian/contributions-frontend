@@ -63,6 +63,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
       val errorMessage = error.map(_.message)
 
+      val regionalStripePublicKeys = paymentServices.stripeKeysFor(request)
+
       val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString)
         // When mobile starts sending acquisition data we will want to warn in all cases.
         .leftMap(err => if (!request.isMobile) warn(s"$err - contributions session id: ${request.sessionId}"))
@@ -80,7 +82,8 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
         title = "Support the Guardian | Contribute today",
         url = request.path,
         image = Some(Asset.absoluteUrl("images/twitter-card.png")),
-        stripePublicKeys = paymentServices.stripeKeysFor(request),
+        stripePublicKey = Some(regionalStripePublicKeys(countryGroup)),
+        regionalStripePublicKeys = regionalStripePublicKeys,
         description = Some("By making a contribution, you’ll be supporting independent journalism that speaks truth to power"),
         customSignInUrl = Some((Config.idWebAppUrl / "signin") ? ("skipConfirmation" -> "true"))
       )

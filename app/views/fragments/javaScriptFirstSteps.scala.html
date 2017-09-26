@@ -1,4 +1,5 @@
 @import views.support.PageInfo
+@import com.gu.i18n.CountryGroup
 @(pageInfo: PageInfo)
 
     @import configuration.Config
@@ -27,9 +28,12 @@
         css: {
             loaded: false
         },
+        @pageInfo.stripePublicKey.map { key =>
         stripe: {
+            defaultPublicKey: '@key',
             image: '@Asset.at("images/gu.png")'
         },
+        }
         membership: {
             buildNumber: '@app.BuildInfo.buildNumber',
             svgSprite: "@Asset.at("images/svg-sprite.svg")"

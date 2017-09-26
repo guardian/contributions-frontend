@@ -9,6 +9,7 @@ case class PageInfo(
   description: Option[String] = None,
   image: Option[String] = None,
   customSignInUrl: Option[String] = None,
-  stripePublicKeys: Map[CountryGroup, String] = Map.empty,
+  stripePublicKey: Option[String] = None,
+  regionalStripePublicKeys: Map[CountryGroup, String] = Map.empty,
   kruxId: String = "JglooLwn"
 )

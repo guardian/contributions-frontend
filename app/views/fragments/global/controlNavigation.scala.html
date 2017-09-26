@@ -76,7 +76,7 @@
                             class="nav-popup__link"
                             data-country-group="@Json.toJson(countryGroup)"
                             data-max-amount="@MaxAmount.forCurrency(countryGroup.currency)"
-                            data-stripe-key="@pageInfo.stripePublicKeys.get(countryGroup)">
+                            data-stripe-key="@pageInfo.regionalStripePublicKeys.get(countryGroup)">
                             @countryGroup.name (@countryGroup.currency.identifier)
                         </a>
                     </li>
