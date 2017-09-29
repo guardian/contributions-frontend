@@ -2,11 +2,12 @@ package models
 
 import abtests.Allocation
 import actions.CommonActions.MetaDataRequest
+import com.gu.acquisition.model.OphanIds
 import com.paypal.api.payments.Payment
 import controllers.httpmodels.CaptureRequest
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event._
-import services.ContributionOphanService.{ContributionAcquisitionSubmissionBuilder, OphanIds}
+import services.ContributionOphanService.ContributionAcquisitionSubmissionBuilder
 
 import scala.reflect.ClassTag
 
@@ -53,9 +54,8 @@ object PaypalAcquisitionComponents {
       def buildOphanIds(components: Execute): Either[String, OphanIds] = {
         import components._
         for {
-          browserId <- attemptToGet("browser id")(request.ophanBrowserId.get)
           pageviewId <- attemptToGet("pageview id")(request.ophanPageviewId.get)
-        } yield OphanIds(browserId, pageviewId, request.ophanVisitId)
+        } yield OphanIds(pageviewId, request.ophanVisitId, request.ophanBrowserId)
       }
 
       def buildAcquisition(components: Execute): Either[String, Acquisition] = {
@@ -92,9 +92,8 @@ object PaypalAcquisitionComponents {
       override def buildOphanIds(components: Capture): Either[String, OphanIds] = {
         import components._
         for {
-          browserId <- attemptToGet("browser id")(request.body.ophanBrowserId.get)
           pageviewId <- attemptToGet("pageview id")(request.body.ophanPageviewId.get)
-        } yield OphanIds(browserId, pageviewId, visitId = None)
+        } yield OphanIds(pageviewId, visitId = None, request.body.ophanBrowserId)
       }
 
       override def buildAcquisition(components: Capture): Either[String, Acquisition] = {
