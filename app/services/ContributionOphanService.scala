@@ -32,7 +32,7 @@ trait ContributionOphanService {
 
 /**
   * Wraps an Ophan service.
-  * Useful if you want to provide different logging dependent on whether the underlying service
+  * Useful if you want to provide different logging dependent on the underlying service
   * e.g. whether its attempting to send acquisition events to an Ophan endpoint, in addition to building them
   */
 class OphanServiceWithLogging(service: OphanService, infoMessage: LoggingContext => String)
