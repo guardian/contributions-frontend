@@ -4,7 +4,7 @@ import abtests.Allocation
 import actions.CommonActions.MetaDataRequest
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.Materializer
 import cats.data.EitherT
 import com.gu.acquisition.model.AcquisitionSubmission
 import com.gu.acquisition.model.errors.OphanServiceError
