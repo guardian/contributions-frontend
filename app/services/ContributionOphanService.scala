@@ -67,7 +67,7 @@ object OphanServiceWithLogging {
     submission: AcquisitionSubmission
   )
 
-  def io(uri: HttpUrl)(implicit client: OkHttpClient): OphanServiceWithLogging =
+  def http(uri: HttpUrl)(implicit client: OkHttpClient): OphanServiceWithLogging =
     new OphanServiceWithLogging(OphanService(uri), { ctx =>
       s"Acquisition submission created from an instance of ${ctx.runtimeClass} and " +
       s"successfully submitted to Ophan - contributions session id ${ctx.request.sessionId}"
@@ -100,7 +100,7 @@ object ContributionOphanService extends LazyLogging {
 
     lazy val productionService = {
       logger.info("Initialising production Ophan service")
-      OphanServiceWithLogging.io(OphanService.prodEndpoint)
+      OphanServiceWithLogging.http(OphanService.prodEndpoint)
     }
 
     lazy val testService = {
@@ -116,7 +116,7 @@ object ContributionOphanService extends LazyLogging {
           OphanServiceWithLogging.mock
         } else {
           logger.info(s"Using ${uri.get} as the endpoint for the test Ophan service.")
-          OphanServiceWithLogging.io(uri.get)
+          OphanServiceWithLogging.http(uri.get)
         }
       }
     }
