@@ -1,10 +1,11 @@
 package models
 
 import actions.CommonActions.MetaDataRequest
+import com.gu.acquisition.model.OphanIds
 import com.gu.stripe.Stripe.Charge
 import controllers.forms.ContributionRequest
 import ophan.thrift.event.{Acquisition, PaymentFrequency, Product}
-import services.ContributionOphanService.{ContributionAcquisitionSubmissionBuilder, OphanIds}
+import services.ContributionOphanService.ContributionAcquisitionSubmissionBuilder
 
 case class StripeAcquisitionComponents(charge: Charge, request: MetaDataRequest[ContributionRequest])
 
@@ -15,9 +16,7 @@ object StripeAcquisitionComponents {
 
     def buildOphanIds(components: StripeAcquisitionComponents): Either[String, OphanIds] = {
       import components._
-      attemptToGet("ophan browser id")(request.body.ophanBrowserId.get).map { browserId =>
-        OphanIds(browserId, request.body.ophanPageviewId, request.body.ophanVisitId)
-      }
+      Right(OphanIds(request.body.ophanPageviewId, request.body.ophanVisitId, request.body.ophanBrowserId))
     }
 
     override def buildAcquisition(components: StripeAcquisitionComponents): Either[String, Acquisition] = {

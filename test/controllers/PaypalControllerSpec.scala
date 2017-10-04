@@ -20,10 +20,10 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRFCheck
 import services.{ContributionOphanService, PaymentServices, PaypalService}
 import cats.instances.future._
+import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
-import services.ContributionOphanService.AcquisitionSubmissionBuilder
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}

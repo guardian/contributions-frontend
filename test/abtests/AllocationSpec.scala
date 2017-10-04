@@ -17,7 +17,7 @@ class AllocationSpec extends PlaySpec {
       Mockito.when(mockAllocation.test.slug).thenReturn(testName)
       Mockito.when(mockAllocation.variant.name).thenReturn(variantName)
 
-      import com.gu.acquisition.utils.AbTestConverter.ops._
+      import com.gu.acquisition.typeclasses.AbTestConverter.ops._
 
       val test = mockAllocation.asAbTest
 

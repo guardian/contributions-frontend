@@ -2,17 +2,17 @@ package services
 
 import abtests.Allocation
 import actions.CommonActions.MetaDataRequest
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.Uri
-import akka.stream.Materializer
 import cats.data.EitherT
-import com.gu.acquisition.services.OphanService
+import com.gu.acquisition.model.AcquisitionSubmission
+import com.gu.acquisition.model.errors.OphanServiceError
+import com.gu.acquisition.services.{MockOphanService, OphanService}
+import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import monitoring.{LoggingTags, TagAwareLogger}
-import ophan.thrift.event.{AbTest, AbTestInfo, Acquisition}
-import services.ContributionOphanService.{AcquisitionSubmission, AcquisitionSubmissionBuilder}
-import simulacrum.typeclass
+import okhttp3.{HttpUrl, OkHttpClient}
+import ophan.thrift.event.{AbTest, AbTestInfo}
+import services.OphanServiceWithLogging.LoggingContext
 import utils.{AttemptTo, RuntimeClassUtils, TestUserService}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,104 +25,98 @@ trait ContributionOphanService {
     implicit ec: ExecutionContext,
     tags: LoggingTags,
     request: MetaDataRequest[_]
-  ): EitherT[Future, String, AcquisitionSubmission]
+  ): EitherT[Future, OphanServiceError, AcquisitionSubmission]
 }
 
-object MockOphanService extends ContributionOphanService with TagAwareLogger with RuntimeClassUtils {
+/**
+  * Wraps an Ophan service.
+  * Useful if you want to provide different logging dependent on the underlying service
+  * e.g. whether its attempting to send acquisition events to an Ophan endpoint, in addition to building them
+  */
+class OphanServiceWithLogging(service: OphanService, infoMessage: LoggingContext => String)
+  extends ContributionOphanService with TagAwareLogger with RuntimeClassUtils {
 
-  import AcquisitionSubmissionBuilder.ops._
   import cats.instances.future._
 
   def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
     implicit ec: ExecutionContext,
     tags: LoggingTags,
     request: MetaDataRequest[_]
-  ): EitherT[Future, String, AcquisitionSubmission] =
-    EitherT.fromEither[Future](a.asAcquisitionSubmission).bimap(
+  ): EitherT[Future, OphanServiceError, AcquisitionSubmission] =
+    service.submit(a).bimap(
       err => {
-        error(err)
+        error(s"${err.getMessage} - contributions session id ${request.sessionId}")
         err
       },
       submission => {
-        info(s"Acquisition submission created from instance of ${runtimeClass[A]} - $submission")
+        val context = LoggingContext(runtimeClass[A], request, submission)
+        info(infoMessage(context))
         submission
       }
     )
 }
 
-class DefaultContributionOphanService(service: OphanService)
-  extends ContributionOphanService with TagAwareLogger with RuntimeClassUtils {
+object OphanServiceWithLogging {
 
-  import cats.instances.future._
-  import actions.CommonActions._
-  import AcquisitionSubmissionBuilder.ops._
+  /**
+    * Context required to for useful logging messages on a successful acquisition submission.
+    */
+  private[services] case class LoggingContext(
+    runtimeClass: Class[_],
+    request: MetaDataRequest[_],
+    submission: AcquisitionSubmission
+  )
 
-  private def sendSubmission(submission: AcquisitionSubmission)(implicit executionContext: ExecutionContext) = {
-    import submission._
-    service.submit(acquisition, ophanIds.browserId, ophanIds.viewId, ophanIds.visitId)
-      .bimap(err => s"Failed to submit acquisition event to Ophan - ${err.getMessage}", _ => submission)
-  }
+  def http(uri: HttpUrl)(implicit client: OkHttpClient): OphanServiceWithLogging =
+    new OphanServiceWithLogging(OphanService(uri), { ctx =>
+      s"Acquisition submission created from an instance of ${ctx.runtimeClass} and " +
+      s"successfully submitted to Ophan - contributions session id ${ctx.request.sessionId}"
+    })
 
-  def submitAcquisition[A : AcquisitionSubmissionBuilder : ClassTag](a: A)(
-    implicit ec: ExecutionContext,
-    tags: LoggingTags,
-    request: MetaDataRequest[_]
-  ): EitherT[Future, String, AcquisitionSubmission] =
-    EitherT.fromEither[Future](a.asAcquisitionSubmission).flatMap(sendSubmission)
-      .bimap(
-        err => {
-          error(s"$err - contributions session id ${request.sessionId}")
-          err
-        },
-        submission => {
-          info(
-            s"Acquisition submission created from an instance of ${runtimeClass[A]} and " +
-            s"successfully submitted to Ophan - contributions session id ${request.sessionId}"
-          )
-          submission
-        }
-      )
+  def mock: OphanServiceWithLogging = new OphanServiceWithLogging(MockOphanService, { ctx =>
+    s"Acquisition submission created from an instance of ${ctx.runtimeClass} - submission: ${ctx.submission}"
+  })
 }
 
 class RequestDependentOphanService(
-    default: ContributionOphanService,
-    testing: ContributionOphanService,
-    testUserService: TestUserService
-) extends ContributionOphanService {
+  default: OphanServiceWithLogging,
+  testing: OphanServiceWithLogging,
+  testUserService: TestUserService
+) extends ContributionOphanService with TagAwareLogger with RuntimeClassUtils {
 
   override def submitAcquisition[A: AcquisitionSubmissionBuilder : ClassTag](a: A)(
     implicit ec: ExecutionContext, tags: LoggingTags, request: MetaDataRequest[_]
-  ): EitherT[Future, String, AcquisitionSubmission] =
+  ): EitherT[Future, OphanServiceError, AcquisitionSubmission] =
     if (testUserService.isTestUser(request)) testing.submitAcquisition(a) else default.submitAcquisition(a)
 }
 
 object ContributionOphanService extends LazyLogging {
 
-  def apply(config: Config, testUserService: TestUserService)(
-    implicit system: ActorSystem, materializer: Materializer
-  ): ContributionOphanService = {
+  def apply(config: Config, testUserService: TestUserService): ContributionOphanService = {
 
     val ophanConfig = config.getConfig("ophan")
 
+    implicit lazy val client = new OkHttpClient()
+
     lazy val productionService = {
       logger.info("Initialising production Ophan service")
-      new DefaultContributionOphanService(OphanService.prod)
+      OphanServiceWithLogging.http(OphanService.prodEndpoint)
     }
 
-    lazy val testService: ContributionOphanService = {
+    lazy val testService = {
       logger.info("Initializing test Ophan service...")
       val endpoint = Try(ophanConfig.getString("testEndpoint")).toOption
       if (endpoint.isEmpty) {
         logger.info("No endpoint specified for test Ophan service. Using mock Ophan service.")
-        MockOphanService
+        OphanServiceWithLogging.mock
       } else {
-        val uri = Try(Uri.parseAbsolute(endpoint.get)).toOption
+        val uri = Try(HttpUrl.parse(endpoint.get)).toOption
         if (uri.isEmpty) {
           logger.error("Invalid endpoint specified for test Ophan service. Using mock Ophan service.")
-          MockOphanService
+          OphanServiceWithLogging.mock
         } else {
           logger.info(s"Using ${uri.get} as the endpoint for the test Ophan service.")
-          new DefaultContributionOphanService(new OphanService(uri.get))
+          OphanServiceWithLogging.http(uri.get)
         }
       }
     }
@@ -148,31 +142,6 @@ object ContributionOphanService extends LazyLogging {
     new RequestDependentOphanService(default, testing, testUserService)
   }
 
-  case class OphanIds(browserId: String, viewId: String, visitId: Option[String])
-
-  /**
-    * Encapsulates all the data required to submit an acquisition to Ophan.
-    */
-  case class AcquisitionSubmission(ophanIds: OphanIds, acquisition: Acquisition)
-
-  /**
-    * Type class for creating an acquisition submission from an arbitrary data type.
-    */
-  @typeclass trait AcquisitionSubmissionBuilder[A] {
-    import cats.syntax.either._
-
-    def buildOphanIds(a: A): Either[String, OphanIds]
-
-    def buildAcquisition(a: A): Either[String, Acquisition]
-
-    def asAcquisitionSubmission(a: A): Either[String, AcquisitionSubmission] =
-      for {
-        ophanIds <- buildOphanIds(a)
-        acquisition <- buildAcquisition(a)
-      } yield AcquisitionSubmission(ophanIds, acquisition)
-  }
-
-
   trait ContributionAcquisitionSubmissionBuilder[A] extends AcquisitionSubmissionBuilder[A]
     with AttemptTo with RuntimeClassUtils {
 
@@ -185,7 +154,7 @@ object ContributionOphanService extends LazyLogging {
       * Combine the tests the user is in on the contributions website and the referring page.
       */
     protected def abTestInfo(contributionAbTests: Set[Allocation], referrerAbTest: Option[AbTest]): AbTestInfo = {
-      import com.gu.acquisition.syntax._
+      import com.gu.acquisition.syntax.iterable._
       val abTestInfo = contributionAbTests.asAbTestInfo
       referrerAbTest.map(abTest => AbTestInfo(abTestInfo.tests + abTest)).getOrElse(abTestInfo)
     }

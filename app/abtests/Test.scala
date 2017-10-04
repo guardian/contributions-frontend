@@ -1,16 +1,10 @@
 package abtests
 
-import actions.CommonActions.MetaDataRequest
 import com.github.slugify.Slugify
-import com.gu.acquisition.utils.AbTestConverter
-import play.api.db.Database
+import com.gu.acquisition.typeclasses.AbTestConverter
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
-import play.api.mvc.AnyContent
 import play.api.mvc.{Cookie, Request}
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
-import scala.util.control.NonFatal
 import scala.util.matching.Regex
 
 case class Percentage(value: Double) {
@@ -23,7 +17,7 @@ case class Test(name: String, audienceSize: Percentage, audienceOffset: Percenta
   val idRange: Range = startId.to(endId).tail
 
   val slug: String = Test.slugify(name)
-  val cookieName: String = s"${Test.cookiePrefix}.${slug}"
+  val cookieName: String = s"${Test.cookiePrefix}.$slug"
 
   def allocate(id: Int, request: Request[_]): Option[Allocation] = {
     if (idRange.contains(id) && canRun(request)) Some(Allocation(this, variants.toList(id % variants.size)))
