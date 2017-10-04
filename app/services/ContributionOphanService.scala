@@ -2,9 +2,6 @@ package services
 
 import abtests.Allocation
 import actions.CommonActions.MetaDataRequest
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.Uri
-import akka.stream.Materializer
 import cats.data.EitherT
 import com.gu.acquisition.model.AcquisitionSubmission
 import com.gu.acquisition.model.errors.OphanServiceError
@@ -13,6 +10,7 @@ import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import monitoring.{LoggingTags, TagAwareLogger}
+import okhttp3.{HttpUrl, OkHttpClient}
 import ophan.thrift.event.{AbTest, AbTestInfo}
 import services.OphanServiceWithLogging.LoggingContext
 import utils.{AttemptTo, RuntimeClassUtils, TestUserService}
@@ -69,7 +67,7 @@ object OphanServiceWithLogging {
     submission: AcquisitionSubmission
   )
 
-  def io(uri: Uri)(implicit system: ActorSystem, mat: Materializer): OphanServiceWithLogging =
+  def io(uri: HttpUrl)(implicit client: OkHttpClient): OphanServiceWithLogging =
     new OphanServiceWithLogging(OphanService(uri), { ctx =>
       s"Acquisition submission created from an instance of ${ctx.runtimeClass} and " +
       s"successfully submitted to Ophan - contributions session id ${ctx.request.sessionId}"
@@ -94,11 +92,11 @@ class RequestDependentOphanService(
 
 object ContributionOphanService extends LazyLogging {
 
-  def apply(config: Config, testUserService: TestUserService)(
-    implicit system: ActorSystem, materializer: Materializer
-  ): ContributionOphanService = {
+  def apply(config: Config, testUserService: TestUserService): ContributionOphanService = {
 
     val ophanConfig = config.getConfig("ophan")
+
+    implicit lazy val client = new OkHttpClient()
 
     lazy val productionService = {
       logger.info("Initialising production Ophan service")
@@ -112,7 +110,7 @@ object ContributionOphanService extends LazyLogging {
         logger.info("No endpoint specified for test Ophan service. Using mock Ophan service.")
         OphanServiceWithLogging.mock
       } else {
-        val uri = Try(Uri.parseAbsolute(endpoint.get)).toOption
+        val uri = Try(HttpUrl.parse(endpoint.get)).toOption
         if (uri.isEmpty) {
           logger.error("Invalid endpoint specified for test Ophan service. Using mock Ophan service.")
           OphanServiceWithLogging.mock

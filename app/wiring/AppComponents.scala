@@ -1,12 +1,10 @@
 package wiring
 
-import akka.stream.Materializer
 import com.github.nscala_time.time.Imports._
 import com.gu.identity.cookie.{PreProductionKeys, ProductionKeys}
 import com.gu.identity.play.AccessCredentials.{Cookies, Token}
 import com.gu.identity.testing.usernames.TestUsernames
 import com.gu.monitoring.ServiceMetrics
-import com.gu.okhttp.RequestRunners
 import com.softwaremill.macwire._
 import com.typesafe.config.ConfigFactory
 import controllers._
@@ -77,6 +75,7 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val emailService = wire[EmailService]
 
   lazy val ophanService = ContributionOphanService(config, testUserService)
+
   lazy val giraffeController = wire[Contributions]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
