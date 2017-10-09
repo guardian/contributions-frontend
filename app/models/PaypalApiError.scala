@@ -13,11 +13,13 @@ object PaypalErrorType extends Enum[PaypalErrorType] with PlayJsonEnum[PaypalErr
 
   case object NotFound extends PaypalErrorType
   case object PaymentAlreadyDone extends PaypalErrorType
+  case object InstrumentDeclined extends PaypalErrorType
   case object Other extends PaypalErrorType
 
   def fromPaypalError(error: Error): PaypalErrorType = error.getName match {
     case "INVALID_RESOURCE_ID" => NotFound
     case "PAYMENT_ALREADY_DONE" => PaymentAlreadyDone
+    case "INSTRUMENT_DECLINED" => InstrumentDeclined
     case _ => Other
   }
 }
@@ -28,22 +30,21 @@ case class PaypalApiError(
 )
 
 object PaypalApiError {
+
   def fromString(message: String): PaypalApiError = PaypalApiError(PaypalErrorType.Other, message)
 
-  private def detailToString(details: ErrorDetails): String =
-    s"""
-       |field: ${details.getField}
-       |issue: ${details.getIssue}
-       |""".stripMargin
-
   def fromThrowable(exception: Throwable): PaypalApiError = exception match {
+
     case paypalException: PayPalRESTException =>
-      val details = Option(paypalException.getDetails)
-        .flatMap(d => Option(d.getDetails))
-        .map(_.asScala).getOrElse(Nil)
-        .map(detailToString)
-        .mkString(";\n")
-      PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), details)
+
+      val errorMessage = (for {
+        error <- Option(paypalException.getDetails)
+        message <- Option(error.getMessage)
+        message if message != ""
+      } yield message).getOrElse("Unknown error message")
+
+      PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), errorMessage)
+
     case exception: Exception =>
       PaypalApiError.fromString(exception.getMessage)
   }
