@@ -40,7 +40,7 @@ object PaypalApiError {
       val errorMessage = (for {
         error <- Option(paypalException.getDetails)
         message <- Option(error.getMessage)
-        message if message != ""
+        if message != ""
       } yield message).getOrElse("Unknown error message")
 
       PaypalApiError(PaypalErrorType.fromPaypalError(paypalException.getDetails), errorMessage)
