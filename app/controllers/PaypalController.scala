@@ -134,8 +134,18 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
       )
 
     def notOkResult(paypalError: PaypalApiError): Result = {
-      error(s"Error executing PayPal payment for contributions session id: ${request.sessionId} \n\t error message: ${paypalError.message}")
+
+      val message = s"Error executing PayPal payment for contributions session id: ${request.sessionId} " +
+        s"error message: ${paypalError.message}"
+
+      paypalError.errorType match {
+        // This signifies an issue with the user's account. Don't pollute error level logs with such issues.
+        case PaypalErrorType.InstrumentDeclined => warn(message)
+        case _ => error(message)
+      }
+
       cloudWatchMetrics.logPaymentFailure(PaymentProvider.Paypal, request.platform)
+
       render {
         case Accepts.Json() => BadRequest(JsNull)
         case Accepts.Html() =>
