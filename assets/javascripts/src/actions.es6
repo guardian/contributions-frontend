@@ -141,7 +141,6 @@ function paymentFormData(state, token) {
         token: token,
         marketing: state.details.optIn,
         postcode: state.details.postcode,
-        abTests: state.data.abTests,
         ophanPageviewId: state.data.ophan.pageviewId,
         ophanBrowserId: state.data.ophan.browserId,
         cmp: state.data.cmpCode,
@@ -152,6 +151,7 @@ function paymentFormData(state, token) {
         componentId: state.data.componentId,
         componentType: state.data.componentType,
         source: state.data.source,
-        abTest: state.data.referrerAbTest
+        refererAbTest: state.data.refererAbTest,
+        nativeAbTests: state.data.abTests
     };
 }

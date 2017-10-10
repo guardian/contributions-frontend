@@ -28,7 +28,9 @@ case class ContributionRequest(
   componentId: Option[String],
   componentType: Option[ComponentType],
   source: Option[AcquisitionSource],
-  abTest: Option[AbTest]
+  abTest: Option[AbTest], // Deprecated
+  refererAbTest: Option[AbTest],
+  nativeAbTests: Option[Set[AbTest]]
 )
 
 object ContributionRequest {
