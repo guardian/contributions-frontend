@@ -148,7 +148,8 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
       render {
         case Accepts.Json() => BadRequest(JsNull)
-        case Accepts.Html() => Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
+        case Accepts.Html() =>
+          Redirect(routes.Contributions.contribute(countryGroup, Some(PaypalError)).url, SEE_OTHER)
       }
     }
 
