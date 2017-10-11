@@ -160,7 +160,7 @@ function paymentFormData(state, token) {
         componentId: state.data.componentId,
         componentType: state.data.componentType,
         source: state.data.source,
-        refererAbTest: state.data.refererAbTest,
+        refererAbTest: state.data.referrerAbTest,
         nativeAbTests: useOphanEncodingForAbTests(state.data.abTests)
     };
 }
