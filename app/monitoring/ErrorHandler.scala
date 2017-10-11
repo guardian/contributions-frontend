@@ -23,7 +23,7 @@ class ErrorHandler @Inject()(
     config: Configuration,
     sourceMapper: Option[SourceMapper],
     router: => Option[Router]
-) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with TagAwareLogger with LoggingTagsProvider {
+) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with TagAwareLogger with LoggingTagsProvider with AcceptExtractors {
 
   override def logServerError(request: RequestHeader, usefulException: UsefulException) {
     try {
@@ -36,20 +36,30 @@ class ErrorHandler @Inject()(
     } finally MDC.clear()
   }
 
-  override def onClientError(request: RequestHeader, statusCode: Int, message: String = ""): Future[Result] = {
+  override def onClientError(request: RequestHeader, statusCode: Int, message: String = ""): Future[Result] =
     super.onClientError(request, statusCode, message).map(Cached(_))
-  }
 
   override protected def onNotFound(request: RequestHeader, message: String): Future[Result] = {
-    Future.successful(Cached(NotFound(views.html.error404())))
+    Future.successful(request match {
+      case Accepts.Html() => NotFound(views.html.error404())
+      case _ => NotFound(s"Not Found ${message}")
+    })
   }
 
   override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] =
-    Future.successful(NoCache(InternalServerError(views.html.error500(exception))))
+    Future.successful(NoCache(request match {
+      case Accepts.Html() => InternalServerError(views.html.error500(exception))
+      case _ => InternalServerError(s"Internal Server Error (error id: ${exception.id})")
+    }))
 
-  override protected def onBadRequest(header: RequestHeader, message: String): Future[Result] = {
+
+  override protected def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
     // Implicit logging tags passed explicitly as it can not be derived implicitly (the request is not implicit).
-    error(s"Bad request: $message")(loggingTagsFromRequestHeader(header))
-    Future.successful(NoCache(BadRequest(views.html.error400(header, message))))
+    error(s"Bad request: $message")(loggingTagsFromRequestHeader(request))
+
+    Future.successful(NoCache(request match {
+      case Accepts.Html() => BadRequest(views.html.error400(request, message))
+      case _ => BadRequest(message)
+    }))
   }
 }
