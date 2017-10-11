@@ -126,13 +126,22 @@ export function trackCheckoutStep(checkoutStep, actionName, label) {
     }
 }
 
+
 /**
- * Convert app state to the structure required for payment posts
- *
- * @param state
- * @return object
+ * Convert app state to the structure required for posts to the /stripe/pay endpoint
  */
 function paymentFormData(state, token) {
+
+    // /stripe/pay endpoint requires AB tests to be serialized using the Ophan encoding.
+    function useOphanEncodingForAbTests(abTests) {
+        return abTests.map(abTest => {
+            return {
+                name: abTest.testSlug,
+                variant: abTest.variantSlug
+            }
+        })
+    }
+
     return {
         name: state.details.name,
         currency: state.data.currency.code,
@@ -141,7 +150,6 @@ function paymentFormData(state, token) {
         token: token,
         marketing: state.details.optIn,
         postcode: state.details.postcode,
-        abTests: state.data.abTests,
         ophanPageviewId: state.data.ophan.pageviewId,
         ophanBrowserId: state.data.ophan.browserId,
         cmp: state.data.cmpCode,
@@ -152,6 +160,7 @@ function paymentFormData(state, token) {
         componentId: state.data.componentId,
         componentType: state.data.componentType,
         source: state.data.source,
-        abTest: state.data.referrerAbTest
+        refererAbTest: state.data.referrerAbTest,
+        nativeAbTests: useOphanEncodingForAbTests(state.data.abTests)
     };
 }

@@ -144,6 +144,7 @@ object ContributionOphanService extends LazyLogging {
 
   trait ContributionAcquisitionSubmissionBuilder[A] extends AcquisitionSubmissionBuilder[A]
     with AttemptTo with RuntimeClassUtils {
+    import scala.collection.Set
 
     protected def attemptToGet[B](field: String)(a: => B)(implicit classTag: ClassTag[A]): Either[String, B] =
       attemptTo[B](s"get $field")(a).leftMap { err =>
@@ -155,8 +156,16 @@ object ContributionOphanService extends LazyLogging {
       */
     protected def abTestInfo(contributionAbTests: Set[Allocation], referrerAbTest: Option[AbTest]): AbTestInfo = {
       import com.gu.acquisition.syntax.iterable._
-      val abTestInfo = contributionAbTests.asAbTestInfo
-      referrerAbTest.map(abTest => AbTestInfo(abTestInfo.tests + abTest)).getOrElse(abTestInfo)
+      abTestInfo(Some(contributionAbTests.asAbTestInfo.tests), referrerAbTest)
+    }
+
+    /**
+      * Combine the tests the user is in on the native and referring websites.
+      */
+    protected def abTestInfo(nativeAbTests: Option[Set[AbTest]], referrerAbTest: Option[AbTest]): AbTestInfo = {
+      var abTests = nativeAbTests.getOrElse(Set.empty)
+      referrerAbTest.foreach(abTests += _)
+      AbTestInfo(abTests)
     }
   }
 }
