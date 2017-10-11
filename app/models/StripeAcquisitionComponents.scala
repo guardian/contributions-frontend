@@ -33,7 +33,7 @@ object StripeAcquisitionComponents {
           amountInGBP = None, // Calculated at the sinks of the Ophan stream
           paymentProvider = Option(ophan.thrift.event.PaymentProvider.Stripe),
           campaignCode = Some(Set(request.body.intcmp, request.body.cmp).flatten),
-          abTests = Some(abTestInfo(request.body.nativeAbTests, request.body.abTest)),
+          abTests = Some(abTestInfo(request.body.nativeAbTests, request.body.refererAbTest)),
           countryCode = Some(charge.source.country),
           referrerPageViewId = request.body.refererPageviewId,
           referrerUrl = request.body.refererUrl,
