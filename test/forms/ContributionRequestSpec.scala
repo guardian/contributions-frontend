@@ -29,7 +29,9 @@ class ContributionRequestSpec extends PlaySpec with EitherValues {
     componentId = None,
     componentType = None,
     source = None,
-    abTest = None
+    abTest = None,
+    refererAbTest = None,
+    nativeAbTests = None
   )
 
   val baseJson: JsObject =  Json.obj(
@@ -80,6 +82,18 @@ class ContributionRequestSpec extends PlaySpec with EitherValues {
       val json = baseJson ++ Json.obj("abTest" -> Json.obj("name" -> "name", "variant" -> "variant"))
 
       checkJson(request, json)
+
+      val request2 = baseRequest.copy(refererAbTest = Some(ophan.thrift.event.AbTest("name", "variant")))
+
+      val json2 = baseJson ++ Json.obj("refererAbTest" -> Json.obj("name" -> "name", "variant" -> "variant"))
+
+      checkJson(request2, json2)
+
+      val request3 = baseRequest.copy(nativeAbTests = Some(Set(ophan.thrift.event.AbTest("name", "variant"))))
+
+      val json3 = baseJson ++ Json.obj("nativeAbTests" -> Json.arr(Json.obj("name" -> "name", "variant" -> "variant")))
+
+      checkJson(request3, json3)
     }
   }
 }
