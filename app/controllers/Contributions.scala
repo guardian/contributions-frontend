@@ -22,6 +22,7 @@ import scala.util.Try
 
 class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cloudWatchMetrics: CloudWatchMetrics)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
+  import ContributionsController._
 
   val social: Set[Social] = Set(
     Twitter("I've just contributed to the Guardian. Join me in supporting independent journalism https://membership.theguardian.com/contribute"),
@@ -65,10 +66,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
       val regionalStripePublicKeys = paymentServices.stripeKeysFor(request)
 
-      val acquisitionData = ReferrerAcquisitionData.fromQueryString(request.queryString)
-        // When mobile starts sending acquisition data we will want to warn in all cases.
-        .leftMap(err => if (!request.isMobile) warn(s"$err - contributions session id: ${request.sessionId}"))
-        .toOption
+      val acquisitionData = referrerAcquisitionDataFromRequest
 
       val cmp = request.getQueryString("CMP")
       val intCmp = acquisitionData.flatMap(_.campaignCode).orElse(request.getQueryString("INTCMP"))
@@ -134,6 +132,22 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       image = None,
       description = Some("You’ve made a vital contribution that will help us maintain our independent, investigative journalism")
     ), social, countryGroup, charge, iosRedirectUrl))
+  }
+}
+
+object ContributionsController extends TagAwareLogger with LoggingTagsProvider {
+
+  def referrerAcquisitionDataFromRequest(implicit request: MetaDataRequest[_]): Option[ReferrerAcquisitionData] = {
+    import cats.syntax.either._
+
+    ReferrerAcquisitionData.fromQueryString(request.queryString)
+      // When mobile starts sending acquisition data we will want to warn in all cases.
+      .leftMap(err => if (!request.isMobile) {
+        val userAgent = request.headers.get("User-Agent").getOrElse("unknown")
+        val referrerUrl = request.headers.get("referer").getOrElse("unknown")
+        warn(s"$err - User-Agent: $userAgent - referer: $referrerUrl - contributions session id: ${request.sessionId}")
+      })
+      .toOption
   }
 }
 
