@@ -152,14 +152,6 @@ object ContributionOphanService extends LazyLogging {
       }
 
     /**
-      * Combine the tests the user is in on the contributions website and the referring page.
-      */
-    protected def abTestInfo(contributionAbTests: Set[Allocation], referrerAbTest: Option[AbTest]): AbTestInfo = {
-      import com.gu.acquisition.syntax.iterable._
-      abTestInfo(Some(contributionAbTests.asAbTestInfo.tests), referrerAbTest)
-    }
-
-    /**
       * Combine the tests the user is in on the native and referring websites.
       */
     protected def abTestInfo(nativeAbTests: Option[Set[AbTest]], referrerAbTest: Option[AbTest]): AbTestInfo = {

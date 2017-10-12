@@ -110,7 +110,8 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     componentId: Option[String],
     componentType: Option[ComponentType],
     source: Option[AcquisitionSource],
-    abTest: Option[AbTest],
+    refererAbTest: Option[AbTest],
+    nativeAbTests: Option[Set[AbTest]],
     supportRedirect: Option[Boolean]
   ) = NoCacheAction.andThen(MobileSupportAction).andThen(MetaDataAction.default).async { implicit request =>
     val paypalService = paymentServices.paypalServiceFor(request)
@@ -184,8 +185,8 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         componentId = componentId,
         componentType = componentType,
         source = source,
-        abTest = abTest,
-        testAllocations = request.testAllocations
+        refererAbTest = refererAbTest,
+        nativeAbTests = nativeAbTests
       )
 
     paypalService.executePayment(paymentId, payerId)
@@ -221,7 +222,8 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         componentId = authRequest.componentId,
         componentType = authRequest.componentType,
         source = authRequest.source,
-        abTest = authRequest.abTest,
+        refererAbTest = authRequest.refererAbTest,
+        nativeAbTests = authRequest.nativeAbTests,
         supportRedirect = authRequest.supportRedirect
       )
 

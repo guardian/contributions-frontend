@@ -86,7 +86,8 @@ class PaypalService(
     componentId: Option[String],
     componentType: Option[ComponentType],
     source: Option[AcquisitionSource],
-    abTest: Option[AbTest],
+    refererAbTest: Option[AbTest],
+    nativeAbTests: Option[Set[AbTest]],
     supportRedirect: Option[Boolean] = Some(false)
   )(implicit tags: LoggingTags): EitherT[Future, PaypalApiError, Payment] = {
     import utils.QueryStringBindableUtils.Syntax._
@@ -106,7 +107,8 @@ class PaypalService(
           componentId.map(_.encodeQueryString("componentId")),
           componentType.map(_.encodeQueryString("componentType")),
           source.map(_.encodeQueryString("source")),
-          abTest.map(_.encodeQueryString("abTest")),
+          refererAbTest.map(_.encodeQueryString("refererAbTest")),
+          nativeAbTests.map(_.encodeQueryString("nativeAbTests")),
           supportRedirect.map(value => s"supportRedirect=$value")
         ).flatten match {
           case Nil => ""

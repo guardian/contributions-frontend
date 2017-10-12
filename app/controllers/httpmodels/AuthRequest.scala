@@ -28,7 +28,9 @@ case class AuthRequest private (
   componentId: Option[String],
   componentType: Option[ComponentType],
   source: Option[AcquisitionSource],
-  abTest: Option[AbTest]
+  abTest: Option[AbTest], // Deprecated, should user referer and native AB test fields
+  refererAbTest: Option[AbTest],
+  nativeAbTests: Option[Set[AbTest]]
 )
 
 object AuthRequest {
@@ -55,7 +57,9 @@ object AuthRequest {
     componentId: Option[String],
     componentType: Option[ComponentType],
     source: Option[AcquisitionSource],
-    abTest: Option[AbTest]
+    abTest: Option[AbTest],
+    refererAbTest: Option[AbTest],
+    nativeAbTests: Option[Set[AbTest]]
   ): AuthRequest = {
     val safeRefererUrl = refererUrl.flatMap(url => Try(Uri.parse(url).copy(fragment = None).toString).toOption)
 
@@ -73,7 +77,9 @@ object AuthRequest {
       componentId = componentId,
       componentType = componentType,
       source = source,
-      abTest = abTest
+      abTest = abTest,
+      refererAbTest = refererAbTest,
+      nativeAbTests = nativeAbTests
     )
   }
 
@@ -91,7 +97,9 @@ object AuthRequest {
       (__ \ "componentId").readNullable[String] and
       (__ \ "componentType").readNullable[ComponentType] and
       (__ \ "source").readNullable[AcquisitionSource] and
-      (__ \ "abTest").readNullable[AbTest]
+      (__ \ "abTest").readNullable[AbTest] and
+      (__ \ "refererAbTest").readNullable[AbTest] and
+      (__ \ "nativeAbTests").readNullable[Set[AbTest]]
     ) (AuthRequest.withSafeRefererUrl _)
 }
 
