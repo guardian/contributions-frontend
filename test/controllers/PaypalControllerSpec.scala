@@ -138,7 +138,8 @@ class PaypalControllerSpec extends PlaySpec
     componentId = None,
     componentType = None,
     source = None,
-    abTest = None,
+    refererAbTest = None,
+    nativeAbTests = None,
     supportRedirect = None
   )
 
@@ -157,7 +158,8 @@ class PaypalControllerSpec extends PlaySpec
     componentId = None,
     componentType = None,
     source = None,
-    abTest = None,
+    refererAbTest = None,
+    nativeAbTests = None,
     supportRedirect = Some(true)
   )
 
