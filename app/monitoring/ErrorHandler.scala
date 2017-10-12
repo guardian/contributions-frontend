@@ -18,12 +18,15 @@ import scala.concurrent._
 
 @Singleton
 class ErrorHandler @Inject()(
-    identityAuthProvider: AuthenticatedIdUser.Provider,
-    env: Environment,
-    config: Configuration,
-    sourceMapper: Option[SourceMapper],
-    router: => Option[Router]
-) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with TagAwareLogger with LoggingTagsProvider with AcceptExtractors {
+  identityAuthProvider: AuthenticatedIdUser.Provider,
+  env: Environment,
+  config: Configuration,
+  sourceMapper: Option[SourceMapper],
+  router: => Option[Router]
+) extends DefaultHttpErrorHandler(env, config, sourceMapper, router)
+  with TagAwareLogger
+  with LoggingTagsProvider
+  with AcceptExtractors {
 
   override def logServerError(request: RequestHeader, usefulException: UsefulException) {
     try {
@@ -39,12 +42,11 @@ class ErrorHandler @Inject()(
   override def onClientError(request: RequestHeader, statusCode: Int, message: String = ""): Future[Result] =
     super.onClientError(request, statusCode, message).map(Cached(_))
 
-  override protected def onNotFound(request: RequestHeader, message: String): Future[Result] = {
+  override protected def onNotFound(request: RequestHeader, message: String): Future[Result] =
     Future.successful(request match {
       case Accepts.Html() => NotFound(views.html.error404())
       case _ => NotFound(s"Not Found ${message}")
     })
-  }
 
   override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] =
     Future.successful(NoCache(request match {
