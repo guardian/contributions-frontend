@@ -26,4 +26,6 @@ deployments:
 
   contributions-frontend:
     type: autoscaling
+    parameters:
+        bucket: membership-dist
     dependencies: [cfn, contributions-frontend-ami, contributions-frontend-static]
