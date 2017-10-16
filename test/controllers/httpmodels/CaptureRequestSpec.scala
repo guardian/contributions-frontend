@@ -22,7 +22,9 @@ class CaptureRequestSpec extends PlaySpec with EitherValues {
     componentId = None,
     componentType = None,
     source = None,
-    abTest = None
+    abTest = None,
+    refererAbTest = None,
+    nativeAbTests = None
   )
 
   private val baseJson = Json.obj(

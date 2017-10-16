@@ -45,8 +45,8 @@ object PaypalAcquisitionComponents {
       componentId: Option[String],
       componentType: Option[ComponentType],
       source: Option[AcquisitionSource],
-      abTest: Option[AbTest],
-      testAllocations: Set[Allocation]
+      refererAbTest: Option[AbTest],
+      nativeAbTests: Option[Set[AbTest]]
     )
 
     implicit object paypalAcquisitionSubmissionBuilder extends PaypalAcquisitionSubmissionBuilder[Execute] {
@@ -70,7 +70,7 @@ object PaypalAcquisitionComponents {
             amountInGBP = None, // Calculated at the sinks of the Ophan stream
             paymentProvider = Some(ophan.thrift.event.PaymentProvider.Paypal),
             campaignCode = Some(Set(request.intCmp, request.cmp).flatten),
-            abTests = Some(abTestInfo(request.testAllocations, request.abTest)),
+            abTests = Some(abTestInfo(request.nativeAbTests, request.refererAbTest)),
             countryCode = Some(info.countryCode),
             referrerPageViewId = request.refererPageviewId,
             referrerUrl = request.refererUrl,
@@ -108,7 +108,7 @@ object PaypalAcquisitionComponents {
             amountInGBP = None, // Calculated at the sinks of the Ophan stream
             paymentProvider = Some(ophan.thrift.event.PaymentProvider.Paypal),
             campaignCode = Some(Set(request.body.cmp, request.body.intCmp).flatten),
-            abTests = Some(abTestInfo(request.testAllocations, request.body.abTest)),
+            abTests = Some(abTestInfo(request.body.nativeAbTests, request.body.refererAbTest)),
             countryCode = Some(info.countryCode),
             referrerPageViewId = request.body.refererPageviewId,
             referrerUrl = request.body.refererUrl,

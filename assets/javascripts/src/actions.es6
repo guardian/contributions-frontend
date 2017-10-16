@@ -67,6 +67,16 @@ export function processStripePayment(token) {
     }).catch(error => store.dispatch({type: PAYMENT_ERROR, kind: 'network', error: error}));
 }
 
+// /stripe/pay and /paypal/auth endpoints require AB tests to be serialized using the Ophan encoding.
+function useOphanEncodingForAbTests(abTests) {
+    return abTests.map(abTest => {
+        return {
+            name: abTest.testSlug,
+            variant: abTest.variantSlug
+        }
+    })
+}
+
 export function paypalRedirect(dispatch) {
     const state = store.getState();
     dispatch({ type: SUBMIT_PAYMENT });
@@ -84,7 +94,8 @@ export function paypalRedirect(dispatch) {
         componentId: state.data.componentId,
         componentType: state.data.componentType,
         source: state.data.source,
-        abTest: state.data.referrerAbTest
+        refererAbTest: state.data.referrerAbTest, // Already uses Ophan encoding
+        nativeAbTests: useOphanEncodingForAbTests(state.data.abTests)
     };
 
     const url = '/paypal/auth?csrfToken=' + state.data.csrfToken;
@@ -132,16 +143,6 @@ export function trackCheckoutStep(checkoutStep, actionName, label) {
  */
 function paymentFormData(state, token) {
 
-    // /stripe/pay endpoint requires AB tests to be serialized using the Ophan encoding.
-    function useOphanEncodingForAbTests(abTests) {
-        return abTests.map(abTest => {
-            return {
-                name: abTest.testSlug,
-                variant: abTest.variantSlug
-            }
-        })
-    }
-
     return {
         name: state.details.name,
         currency: state.data.currency.code,
@@ -160,7 +161,7 @@ function paymentFormData(state, token) {
         componentId: state.data.componentId,
         componentType: state.data.componentType,
         source: state.data.source,
-        refererAbTest: state.data.referrerAbTest,
+        refererAbTest: state.data.referrerAbTest, // Already uses Ophan encoding
         nativeAbTests: useOphanEncodingForAbTests(state.data.abTests)
     };
 }

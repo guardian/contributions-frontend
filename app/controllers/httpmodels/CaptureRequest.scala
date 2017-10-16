@@ -18,7 +18,9 @@ case class CaptureRequest (
   componentId: Option[String],
   componentType: Option[ComponentType],
   source: Option[AcquisitionSource],
-  abTest: Option[AbTest]
+  abTest: Option[AbTest], // Deprecated, should user referer and native AB test fields
+  refererAbTest: Option[AbTest],
+  nativeAbTests: Option[Set[AbTest]]
 )
 
 object CaptureRequest {

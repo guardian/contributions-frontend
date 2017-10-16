@@ -94,5 +94,8 @@ object ThriftUtils {
 
     implicit val abTestQueryStringBindable: QueryStringBindable[AbTest] =
       queryStringBindableInstanceFromFormat[AbTest]
+
+    implicit val abTestsQueryStringBindable: QueryStringBindable[Set[AbTest]] =
+      queryStringBindableInstanceFromFormat[Set[AbTest]]
   }
 }
