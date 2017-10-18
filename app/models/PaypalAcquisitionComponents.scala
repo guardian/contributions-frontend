@@ -53,9 +53,7 @@ object PaypalAcquisitionComponents {
 
       def buildOphanIds(components: Execute): Either[String, OphanIds] = {
         import components._
-        for {
-          pageviewId <- attemptToGet("pageview id")(request.ophanPageviewId.get)
-        } yield OphanIds(pageviewId, request.ophanVisitId, request.ophanBrowserId)
+        Right(OphanIds(request.ophanPageviewId, request.ophanVisitId, request.ophanBrowserId))
       }
 
       def buildAcquisition(components: Execute): Either[String, Acquisition] = {
@@ -90,10 +88,8 @@ object PaypalAcquisitionComponents {
     implicit object paypalAcquisitionSubmissionBuilder extends PaypalAcquisitionSubmissionBuilder[Capture] {
 
       override def buildOphanIds(components: Capture): Either[String, OphanIds] = {
-        import components._
-        for {
-          pageviewId <- attemptToGet("pageview id")(request.body.ophanPageviewId.get)
-        } yield OphanIds(pageviewId, visitId = None, request.body.ophanBrowserId)
+        import components.request.body
+        Right(OphanIds(body.ophanPageviewId, visitId = None, body.ophanBrowserId))
       }
 
       override def buildAcquisition(components: Capture): Either[String, Acquisition] = {
