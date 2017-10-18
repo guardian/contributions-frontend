@@ -59,7 +59,7 @@ _This is optional as it is handled by `sbt devrun`_
 npm run watch
 ```
 
-This runs [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html) on port 9111, proxying requests to 9112. In this case, the bundled JS is stored in memory, which allows for much faster recompilation on changes, but the main.js file won't be created. You can also access localhost:9111/webpack-dev-server/\<route\> for a live reload environment. 
+This runs [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html) on port 9111, proxying requests to 9112. In this case, the bundled JS is stored in memory, which allows for much faster recompilation on changes, but the main.js file won't be created. You can also access `localhost:9111/webpack-dev-server/\<route\>` for a live reload environment. 
 
 If you want to compile main.js as a file, you can use `npm run compile` on its own and access the Play application directly.
 
@@ -134,8 +134,7 @@ sbt acceptance:test
 **TODO: Make this autodeployable**
 
 We use continuous deployment of the `master` branch to Production (https://contribute.theguardian.com/).
-See [fix-a-failed-deploy.md](https://github.com/guardian/deploy/blob/master/magenta-lib/docs/magenta-lib/howto/fix-a-failed-deploy.md)
-for what to do if a deploy goes bad.
+See `fix-a-failed-deploy.md` for what to do if a deploy goes bad.
 
 ## Security
 
