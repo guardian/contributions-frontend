@@ -73,7 +73,7 @@ val awsCloudwatch = "com.amazonaws" % "aws-java-sdk-cloudwatch" % "1.11.95"
 val selenium = "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % Test
 val seleniumManager = "io.github.bonigarcia" % "webdrivermanager" % "1.7.1" % Test
 val seleniumHtmlUnitDriver = "org.seleniumhq.selenium" % "htmlunit-driver" % "2.23" % Test
-val acquisitionEventProducer = "com.gu" %% "acquisition-event-producer" % "2.0.0-rc.5"
+val acquisitionEventProducer = "com.gu" %% "acquisition-event-producer" % "2.0.0"
 val simulacrum = "com.github.mpilquist" %% "simulacrum" % "0.10.0"
 
 // Used by simulacrum

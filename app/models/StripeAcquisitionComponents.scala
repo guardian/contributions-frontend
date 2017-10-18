@@ -16,12 +16,12 @@ object StripeAcquisitionComponents {
 
     def buildOphanIds(components: StripeAcquisitionComponents): Either[String, OphanIds] = {
       import components._
-      Right(OphanIds(request.body.ophanPageviewId, request.body.ophanVisitId, request.body.ophanBrowserId))
+      Right(OphanIds(Some(request.body.ophanPageviewId), request.body.ophanVisitId, request.body.ophanBrowserId))
     }
 
     override def buildAcquisition(components: StripeAcquisitionComponents): Either[String, Acquisition] = {
       import components._
-      Either.right(
+      Right(
         Acquisition(
           product = Product.Contribution,
           paymentFrequency = PaymentFrequency.OneOff,
