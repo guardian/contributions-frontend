@@ -30,7 +30,6 @@ object StripeAcquisitionComponents {
           // Convert e.g. Pence to Pounds, Cents to Dollars
           // https://stripe.com/docs/api#charge_object
           amount = BigDecimal(charge.amount, 2).toDouble,
-          amountInGBP = None, // Calculated at the sinks of the Ophan stream
           paymentProvider = Option(ophan.thrift.event.PaymentProvider.Stripe),
           campaignCode = Some(Set(request.body.intcmp, request.body.cmp).flatten),
           abTests = Some(abTestInfo(request.body.nativeAbTests, request.body.refererAbTest)),
@@ -39,7 +38,8 @@ object StripeAcquisitionComponents {
           referrerUrl = request.body.refererUrl,
           componentId = request.body.componentId,
           componentTypeV2 = request.body.componentType,
-          source = request.body.source
+          source = request.body.source,
+          platform = Some(ophan.thrift.event.Platform.Contribution)
         )
       )
     }
