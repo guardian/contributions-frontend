@@ -1,6 +1,5 @@
 package models
 
-import abtests.Allocation
 import actions.CommonActions.MetaDataRequest
 import com.gu.acquisition.model.OphanIds
 import com.paypal.api.payments.Payment
@@ -65,7 +64,6 @@ object PaypalAcquisitionComponents {
             paymentFrequency = PaymentFrequency.OneOff,
             currency = info.currency,
             amount = info.amount,
-            amountInGBP = None, // Calculated at the sinks of the Ophan stream
             paymentProvider = Some(ophan.thrift.event.PaymentProvider.Paypal),
             campaignCode = Some(Set(request.intCmp, request.cmp).flatten),
             abTests = Some(abTestInfo(request.nativeAbTests, request.refererAbTest)),
@@ -74,7 +72,8 @@ object PaypalAcquisitionComponents {
             referrerUrl = request.refererUrl,
             componentId = request.componentId,
             componentTypeV2 = request.componentType,
-            source = request.source
+            source = request.source,
+            platform = Some(ophan.thrift.event.Platform.Contribution)
           )
         }
       }
@@ -101,7 +100,6 @@ object PaypalAcquisitionComponents {
             paymentFrequency = ophan.thrift.event.PaymentFrequency.OneOff,
             currency = info.currency,
             amount = info.amount,
-            amountInGBP = None, // Calculated at the sinks of the Ophan stream
             paymentProvider = Some(ophan.thrift.event.PaymentProvider.Paypal),
             campaignCode = Some(Set(request.body.cmp, request.body.intCmp).flatten),
             abTests = Some(abTestInfo(request.body.nativeAbTests, request.body.refererAbTest)),
@@ -110,7 +108,8 @@ object PaypalAcquisitionComponents {
             referrerUrl = request.body.refererUrl,
             componentId = request.body.componentId,
             componentTypeV2 = request.body.componentType,
-            source = request.body.source
+            source = request.body.source,
+            platform = Some(ophan.thrift.event.Platform.Contribution)
           )
         }
       }
