@@ -162,7 +162,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
           val redirectUrl = if (supportRedirect.getOrElse(false)) {
-            supportConfig.thankYouURL
+            supportConfig.thankYouURL + "?contributionValue=" + amount.map(_.amount).getOrElse("")
           } else {
             routes.Contributions.postPayment(countryGroup).url
           }
