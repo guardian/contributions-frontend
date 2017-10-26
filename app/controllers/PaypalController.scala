@@ -161,11 +161,14 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
-          val redirectUrl = if (supportRedirect.getOrElse(false)) {
-            supportConfig.thankYouURL + "?contributionValue=" + amount.map(_.amount).getOrElse("")
+
+          val redirectUrl = if (supportRedirect.contains(true)) {
+            val queryString = amount.map({ amount => "contributionValue=" + amount.amount }).mkString("?","&","")
+            supportConfig.thankYouURL + queryString
           } else {
             routes.Contributions.postPayment(countryGroup).url
           }
+
           redirectWithCampaignCodes(redirectUrl).addingToSession(session: _ *)
       }
       info(s"Paypal payment from platform: ${request.platform} is successful. Contributions session id: ${request.sessionId}.")
