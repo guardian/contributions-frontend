@@ -174,7 +174,7 @@ class PaypalControllerSpec extends PlaySpec
       val result: Future[Result] = executeSupportPayment(fixture.controller)(fakeRequest)
 
       status(result).mustBe(303)
-      redirectLocation(result).mustBe(Some("https://support.thegulocal.com/thankyou"))
+      redirectLocation(result).mustBe(Some("https://support.thegulocal.com/thankyou?contributionValue=10"))
     }
 
     "generate correct redirect URL for successful PayPal payments" in {
