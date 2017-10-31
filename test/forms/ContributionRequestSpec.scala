@@ -29,9 +29,9 @@ class ContributionRequestSpec extends PlaySpec with EitherValues {
     componentId = None,
     componentType = None,
     source = None,
-    abTest = None,
     refererAbTest = None,
-    nativeAbTests = None
+    nativeAbTests = None,
+    isSupport = None
   )
 
   val baseJson: JsObject =  Json.obj(
@@ -77,23 +77,17 @@ class ContributionRequestSpec extends PlaySpec with EitherValues {
 
     "be able to parse data successfully when ab test information is included" in {
 
-      val request = baseRequest.copy(abTest = Some(ophan.thrift.event.AbTest("name", "variant")))
+      val request = baseRequest.copy(refererAbTest = Some(ophan.thrift.event.AbTest("name", "variant")))
 
-      val json = baseJson ++ Json.obj("abTest" -> Json.obj("name" -> "name", "variant" -> "variant"))
+      val json = baseJson ++ Json.obj("refererAbTest" -> Json.obj("name" -> "name", "variant" -> "variant"))
 
       checkJson(request, json)
 
-      val request2 = baseRequest.copy(refererAbTest = Some(ophan.thrift.event.AbTest("name", "variant")))
+      val request2 = baseRequest.copy(nativeAbTests = Some(Set(ophan.thrift.event.AbTest("name", "variant"))))
 
-      val json2 = baseJson ++ Json.obj("refererAbTest" -> Json.obj("name" -> "name", "variant" -> "variant"))
+      val json2 = baseJson ++ Json.obj("nativeAbTests" -> Json.arr(Json.obj("name" -> "name", "variant" -> "variant")))
 
       checkJson(request2, json2)
-
-      val request3 = baseRequest.copy(nativeAbTests = Some(Set(ophan.thrift.event.AbTest("name", "variant"))))
-
-      val json3 = baseJson ++ Json.obj("nativeAbTests" -> Json.arr(Json.obj("name" -> "name", "variant" -> "variant")))
-
-      checkJson(request3, json3)
     }
   }
 }
