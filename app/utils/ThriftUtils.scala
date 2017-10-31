@@ -2,7 +2,7 @@ package utils
 
 import com.twitter.scrooge.ThriftEnum
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.{AbTest, AcquisitionSource, Platform}
+import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.libs.json._
