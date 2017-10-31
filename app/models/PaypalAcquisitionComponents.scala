@@ -45,7 +45,8 @@ object PaypalAcquisitionComponents {
       componentType: Option[ComponentType],
       source: Option[AcquisitionSource],
       refererAbTest: Option[AbTest],
-      nativeAbTests: Option[Set[AbTest]]
+      nativeAbTests: Option[Set[AbTest]],
+      isSupport: Option[Boolean]
     )
 
     implicit object paypalAcquisitionSubmissionBuilder extends PaypalAcquisitionSubmissionBuilder[Execute] {
@@ -73,7 +74,7 @@ object PaypalAcquisitionComponents {
             componentId = request.componentId,
             componentTypeV2 = request.componentType,
             source = request.source,
-            platform = Some(ophan.thrift.event.Platform.Contribution)
+            platform = Some(ophanPlatform(request.isSupport))
           )
         }
       }

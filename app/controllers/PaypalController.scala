@@ -189,7 +189,8 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
         componentType = componentType,
         source = source,
         refererAbTest = refererAbTest,
-        nativeAbTests = nativeAbTests
+        nativeAbTests = nativeAbTests,
+        isSupport = supportRedirect
       )
 
     paypalService.executePayment(paymentId, payerId)

@@ -3,7 +3,7 @@ package controllers.forms
 import com.gu.i18n.Currency
 import models.IdentityId
 import ophan.thrift.componentEvent.ComponentType
-import ophan.thrift.event.{AbTest, AcquisitionSource}
+import ophan.thrift.event.{AbTest, AcquisitionSource, Platform}
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 
 // THIS CASE CLASS IS USED BY THE FRONTEND AND BY THE MOBILE APPS AS A JSON POST
@@ -28,9 +28,9 @@ case class ContributionRequest(
   componentId: Option[String],
   componentType: Option[ComponentType],
   source: Option[AcquisitionSource],
-  abTest: Option[AbTest], // Deprecated, should user referer and native AB test fields
   refererAbTest: Option[AbTest],
-  nativeAbTests: Option[Set[AbTest]]
+  nativeAbTests: Option[Set[AbTest]],
+  isSupport: Option[Boolean]
 )
 
 object ContributionRequest {

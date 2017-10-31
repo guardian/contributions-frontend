@@ -39,7 +39,7 @@ object StripeAcquisitionComponents {
           componentId = request.body.componentId,
           componentTypeV2 = request.body.componentType,
           source = request.body.source,
-          platform = Some(ophan.thrift.event.Platform.Contribution)
+          platform = Some(ophanPlatform(request.body.isSupport))
         )
       )
     }

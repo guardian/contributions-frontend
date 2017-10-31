@@ -159,6 +159,11 @@ object ContributionOphanService extends LazyLogging {
       referrerAbTest.foreach(abTests += _)
       AbTestInfo(abTests)
     }
+
+    // isSupport field models optional boolean flag present in or derived from API requests.
+    protected def ophanPlatform(isSupport: Option[Boolean]): ophan.thrift.event.Platform =
+      if (isSupport.contains(true)) ophan.thrift.event.Platform.Support
+      else ophan.thrift.event.Platform.Contribution
   }
 }
 
