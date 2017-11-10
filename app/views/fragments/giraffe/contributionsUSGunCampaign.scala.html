@@ -1,0 +1,132 @@
+@import com.gu.i18n.CountryGroup
+@import views.support.PageInfo
+@import views.support.CountryGroupImplicits._
+@import abtests.Allocation
+
+@(pageInfo: PageInfo = views.support.PageInfo(),
+    countryGroup: CountryGroup,
+    maxAmount: Option[Int] = None,
+    mainScript: Option[String] = None,
+    errorMessage:Option[String])(content: Html)
+
+@main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
+    <div class='contributions--this-land-is-your-land'>
+        <section class="contributions__banner">
+            <div class='l-constrained'></div>
+        </section>
+
+        <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
+
+            @for(message <- errorMessage) {
+                <div id="errorDialog" class="overlay">
+                    <div>
+                        <h1 class="errorHeader">We're sorry</h1>
+                        <p class="errorMessage">@message</p>
+                        <button class="action action--button contribute-navigation__next" id="errorDialogButton">OK</button>
+
+                    </div>
+                </div>
+            }
+
+            <section class="contributions__inner page-slice l-constrained flex-horizontal-from-tablet">
+                <div class="contributions__inner-wrapper">
+                    <hgroup class="contributions__heading">
+                        <h1 class="contributions__heading--main">
+                            <span>Support our reporting on solutions to</span> <br />
+                            <span class="heading-line--indent-max">America’s gun crisis</span>
+                        </h1>
+
+                        <h2 class="contributions__heading--sub">
+                            <span>Make a contribution</span> <br />
+                            <span class="sub-heading-line--indent">and help us raise $100,00</span>
+                        </h2>
+                    </hgroup>
+                    <div class="contributions__detail">
+                        <div class="contributions__detail__para">
+                            <hr />
+                            <p>
+                                Meaningful solutions to America&#39;s gun violence epidemic are getting lost in the swift cycles of despair, outrage and backlash that define the media&#39;s frenzied response to gun tragedies.
+                            </p>
+
+                            <p>
+                                But at the Guardian: we do not accept the assertion that the debate about gun control is simply too difficult. Our new series&mdash;Break the Cycle&mdash;will put the spotlight on solutions, and hold politicians to account for the gridlock on gun control. It will explore openings for reform&mdash;and go beyond mass shootings to report what works to prevent violence across a range of scenarios from domestic violence to high rates of suicide.
+                            </p>
+
+                            <p>
+                                Our coverage will treat everyone in the debate with respect. To save lives, we need to recognize that gun rights advocates are important partners&mdash;and that both sides want to make America safer.
+                            </p>
+
+                            <p>
+                                We&#39;re asking our readers to join us in this project. The Guardian aims to raise $100,000 to support Break the Cycle. Your support will fund our in-depth reporting on guns throughout 2018, and help us hold politicians to account.
+                            </p>
+
+                            <p>
+                                We&#39;re also seeking larger contributions to support the Guardian’s reporting from foundations, companies and individuals. If you would like to get involved with this project or provide matching funds, please contact us at breakthecycle&#64;theguardian.com.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                @content
+            </section>
+        </main>
+
+        <section id="ticker" data-src='https://interactive.guim.co.uk/docsdata-test/1no5r1O5A0omDkz4HALce4SrFWDGzSuR_jdB2MYOsPt4.json'></section>
+
+        <section class="disclaimer">
+            <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
+                <div class="feedback">
+
+                    <div class="contributions__detail">
+                        <div class="contributions__detail__para">
+                            <p>
+                                Meaningful solutions to America&#39;s gun violence epidemic are getting lost in the swift cycles of despair, outrage and backlash that define the media&#39;s frenzied response to gun tragedies.
+                            </p>
+
+                            <p>
+                                But at the Guardian: we do not accept the assertion that the debate about gun control is simply too difficult. Our new series&mdash;Break the Cycle&mdash;will put the spotlight on solutions, and hold politicians to account for the gridlock on gun control. It will explore openings for reform&mdash;and go beyond mass shootings to report what works to prevent violence across a range of scenarios from domestic violence to high rates of suicide.
+                            </p>
+
+                            <p>
+                                Our coverage will treat everyone in the debate with respect. To save lives, we need to recognize that gun rights advocates are important partners&mdash;and that both sides want to make America safer.
+                            </p>
+
+                            <p>
+                                We&#39;re asking our readers to join us in this project. The Guardian aims to raise $100,000 to support Break the Cycle(link to editorial). Your support will fund our in-depth reporting on guns throughout 2018, and help us hold politicians to account.
+                            </p>
+
+                            <p>
+                                We&#39;re also seeking larger contributions to support the Guardian’s reporting from foundations, companies and individuals. If you would like to get involved with this project or provide matching funds, please contact us at <a href="mailto:breakthecycle@@theguardian.com" class="support-thanks__link">breakthecycle&#64;theguardian.com</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <p>
+                        If we hit our goal, the Guardian will allocate $100,000 to its core operations that will fund our extended coverage of gun violence in America, including editing, reporting, visuals and new commissions. If we exceed our fundraising target, the Guardian will allocate additional funds towards its core operations that fund our in-depth reporting on topics including national affairs, politics, criminal justice, and gun violence. If we fall short of the target, the Guardian will allocate funds for a scaled back project on gun violence. Contributions will not be returned. You can read additional terms and conditions here.
+                    </p>
+
+                    <p>
+                        The ultimate owner of the Guardian is the Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
+                    </p>
+
+                    <p data-shown="gbp aud eur">
+                        Please note that the Guardian is not a charity, will not use your support for charitable programs, and your support of the Guardian’s journalism does not constitute a charitable donation. As such your contribution is not eligible to be treated as a charitable deduction for federal or state taxes in the United States or elsewhere.
+                    </p>
+
+                    <p data-shown="usd">
+                        Please note that the Guardian is not a charity, will not use your support for charitable
+                        programs, and your support of the Guardian’s journalism does not constitute a
+                        charitable donation. As such your contribution is not eligible to be treated as a
+                        charitable deduction for federal or state taxes in the United States or elsewhere.
+                    </p>
+
+                    <p>
+                        If you have any questions about contributing to the Guardian, please <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">contact us here</a>.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+}

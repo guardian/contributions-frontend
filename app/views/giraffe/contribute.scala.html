@@ -1,6 +1,6 @@
 @import abtests._
 @import com.gu.i18n.CountryGroup
-@import fragments.giraffe.{contributionsMain, contributionsAlt, contributionsThisLandIsYourLand}
+@import fragments.giraffe.{contributionsMain, contributionsAlt, contributionsUSGunCampaign}
 @import play.api.libs.json.Json
 @import utils.ThriftEnumFormatter.ops._
 @import utils.ThriftUtils.Implicits._
@@ -31,8 +31,8 @@
 )
 
 @defining { (block: Html) =>
-    @if(intCmpCode.exists(_.contains("_this_land_"))) {
-        @contributionsThisLandIsYourLand(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+    @if(intCmpCode.contains("us_gun_campaign_2017")) {
+        @contributionsUSGunCampaign(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
     } else {
         @if(inLandingPageTest) {
             @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
