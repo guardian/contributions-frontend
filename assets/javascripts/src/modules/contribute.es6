@@ -38,7 +38,7 @@ export function init() {
             const stats = json.sheets.Sheet1[0];
             ReactDOM.render(
                 React.createElement(Ticker, {
-                    total: 200000,
+                    total: stats.total,
                     target: stats.goal,
                 }),
                 tickerContainer
