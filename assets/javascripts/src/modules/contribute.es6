@@ -35,8 +35,12 @@ export function init() {
         }).then(resp => {
             return resp.json();
         }).then(json => {
+            const stats = json.sheets.Sheet1[0];
             ReactDOM.render(
-                React.createElement(Ticker, json.sheets.Sheet1[0]),
+                React.createElement(Ticker, {
+                    total: 200000,
+                    target: stats.goal,
+                }),
                 tickerContainer
             );
         });

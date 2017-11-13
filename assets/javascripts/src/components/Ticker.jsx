@@ -20,7 +20,6 @@ export default class Ticker extends React.Component {
                     <ProgressBar
                         total={this.props.total}
                         target={this.props.target}
-                        overfund={this.props.overfund}
                         duration={duration}
                     />
                 </div>
