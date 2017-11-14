@@ -1,11 +1,7 @@
 import React from 'react';
 
-const positionTarget = (target, overfund) => {
-    return (target / overfund * 100) + '%';
-};
-
-const percentageAsNegativeTranslate = (total, overfund) => {
-    return Math.floor(total / overfund * 100 - 100) + '%';
+const percentageAsNegativeTranslate = (total, target) => {
+    return Math.floor(total / target * 100 - 100) + '%';
 };
 
 const toK = (val) => {
@@ -32,16 +28,14 @@ export default class ProgressBar extends React.Component {
                 </div>
                 <div className="ticker__progress-labels">
                     <span className='ticker__progress-label ticker__progress-label--first'>$0</span>
-                    <span className='ticker__progress-label ticker__progress-label--target'
-                          style={{left: positionTarget(this.props.taget, this.props.overfund)}}
-                    >${toK(this.props.target)}K</span>
-                <span className='ticker__progress-label ticker__progress-label--last'>${toK(this.props.overfund)}K</span>
+                <span className='ticker__progress-label ticker__progress-label--last'>${toK(this.props.target)}K</span>
                 </div>
             </div>
         );
     };
 
     componentDidMount() {
-        setTimeout(() => this.setState({filledProgress: percentageAsNegativeTranslate(this.props.total, this.props.overfund)}), 500);
+        const cappedTotal = Math.min(this.props.total, this.props.target);
+        setTimeout(() => this.setState({filledProgress: percentageAsNegativeTranslate(cappedTotal, this.props.target)}), 500);
     }
 }
