@@ -125,12 +125,13 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       )
     }
 
-    def logPaymentSuccess: Unit = {
+    def logPaymentSuccess(charge: Stripe.Charge): Unit = {
+      val amount = charge.amount
       if (request.isAndroid) {
-        info(s"Stripe payment successful for contributions session id: ${request.sessionId} - redirected to external platform for thank you page. platform is: ${request.platform}.")
+        info(s"Stripe payment successful for contributions session id: ${request.sessionId}. Amount is $amount - redirected to external platform for thank you page. platform is: ${request.platform}.")
         cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
       } else {
-        info(s"Stripe payment successful for contributions session id: ${request.sessionId}, from platform ${request.platform}")
+        info(s"Stripe payment successful for contributions session id: ${request.sessionId}. Amount is $amount - sent from platform ${request.platform}")
         cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       }
     }
@@ -139,7 +140,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       val metadata = createMetaData(charge)
       storeMetaData(metadata) // fire and forget. If it fails we don't want to stop the user
       ophanService.submitAcquisition(StripeAcquisitionComponents(charge, request)) // again, fire and forget.
-      logPaymentSuccess
+      logPaymentSuccess(charge)
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
