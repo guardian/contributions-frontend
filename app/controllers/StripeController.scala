@@ -126,12 +126,13 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     }
 
     def logPaymentSuccess(charge: Stripe.Charge): Unit = {
-      val amount = charge.amount
+      val currency = charge.currency
+      val amount = contributionAmount.show
       if (request.isAndroid) {
-        info(s"Stripe payment successful for contributions session id: ${request.sessionId}. Amount is $amount - redirected to external platform for thank you page. platform is: ${request.platform}.")
+        info(s"Stripe payment successful for contributions session id: ${request.sessionId}. Amount is $amount. \n Redirected to external platform for thank you page. platform is: ${request.platform}.")
         cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Stripe, request.platform)
       } else {
-        info(s"Stripe payment successful for contributions session id: ${request.sessionId}. Amount is $amount - sent from platform ${request.platform}")
+        info(s"Stripe payment successful for contributions session id: ${request.sessionId}. Amount is $amount. Sent from platform ${request.platform}")
         cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Stripe, request.platform)
       }
     }
