@@ -168,10 +168,9 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           } else {
             routes.Contributions.postPayment(countryGroup).url
           }
-
+          info(s"Paypal payment from platform: ${request.platform} is successful. Contributions session id: ${request.sessionId}. Amount is ${amount.map(_.show).getOrElse("")}.")
           redirectWithCampaignCodes(redirectUrl).addingToSession(session: _ *)
       }
-      info(s"Paypal payment from platform: ${request.platform} is successful. Contributions session id: ${request.sessionId}.")
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
       if (supportRedirect.contains(true)) {
         info(s"Redirecting user to support thank-you page. Payment method used: Paypal, platform: ${request.platform} , contributions session id: ${request.sessionId}.")
