@@ -150,13 +150,13 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
         .withHeaders(corsHeaders(request): _*)
     }.recover {
       case e: Stripe.Error => {
-        warn(s"Payment failed for contributions session id: ${request.sessionId}, from platform: ${request.platform}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
+        warn(s"Payment failed for contributions session id: ${request.sessionId}, from platform: ${request.platform}, \n\t for amount: ${contributionAmount.show}, \n\t with code: ${e.decline_code} \n\t and message: ${e.message}.")
         cloudWatchMetrics.logPaymentFailure(PaymentProvider.Stripe, request.platform)
         BadRequest(Json.toJson(e)).withHeaders(corsHeaders(request): _*)
       }
       case err => {
         cloudWatchMetrics.logUnhandledPaymentFailure(PaymentProvider.Stripe, request.platform)
-        warn(s"Payment failed: ${err.getMessage}. contributions session id: ${request.sessionId}, from platform: ${request.platform}")
+        warn(s"Payment failed: ${err.getMessage}. contributions session id: ${request.sessionId}, from platform: ${request.platform}, \n\t for amount: ${contributionAmount.show}")
         BadRequest(Json.toJson("unknown error")).withHeaders(corsHeaders(request): _*)
       }
     }
