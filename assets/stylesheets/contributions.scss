@@ -173,11 +173,13 @@ $control-spacing: 5px;
     background-image: url('https://media.guim.co.uk/e7b4b3b6cd9a972b1cee26ed4c53d0b38fedb36d/0_268_2480_1408/2480.jpg');
     background-size: cover;
     background-position: center center;
+    background-repeat: no-repeat;
     height: 300px;
     overflow: hidden;
 
     @include mq(desktop) {
-        height: 600px;
+        height: 450px;
+        background-position: center bottom;
     }
 
     .l-constrained {
@@ -194,7 +196,7 @@ $control-spacing: 5px;
         background-color: rgba(0,0,0,0.1);
 
         @include mq(desktop) {
-            height: 600px;
+            height: 450px;
         }
     }
 
