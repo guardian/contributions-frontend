@@ -170,11 +170,15 @@ $control-spacing: 5px;
 }
 
 .contributions__banner--mother-load {
-    background-image: url('https://media.guim.co.uk/273bedced570c1029f359a0d9c20103f62dd0365/0_21_2200_846/2000.jpg');
+    background-image: url('https://media.guim.co.uk/e7b4b3b6cd9a972b1cee26ed4c53d0b38fedb36d/0_268_2480_1408/2480.jpg');
     background-size: cover;
     background-position: center center;
     height: 300px;
     overflow: hidden;
+
+    @include mq(desktop) {
+        height: 600px;
+    }
 
     .l-constrained {
         position: relative;
@@ -188,6 +192,10 @@ $control-spacing: 5px;
         top: 0;
         height: 300px;
         background-color: rgba(0,0,0,0.1);
+
+        @include mq(desktop) {
+            height: 600px;
+        }
     }
 
     .l-constrained:before {
