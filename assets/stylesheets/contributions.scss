@@ -169,6 +169,46 @@ $control-spacing: 5px;
     }
 }
 
+.contributions__banner--mother-load {
+    background-image: url('https://media.guim.co.uk/e7b4b3b6cd9a972b1cee26ed4c53d0b38fedb36d/0_268_2480_1408/2480.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    height: 300px;
+    overflow: hidden;
+
+    @include mq(desktop) {
+        height: 450px;
+        background-position: center bottom;
+    }
+
+    .l-constrained {
+        position: relative;
+    }
+
+    .l-constrained:before,
+    .l-constrained:after {
+        content: '';
+        position: absolute;
+        width: 50vw;
+        top: 0;
+        height: 300px;
+        background-color: rgba(0,0,0,0.1);
+
+        @include mq(desktop) {
+            height: 450px;
+        }
+    }
+
+    .l-constrained:before {
+        left: -50vw;
+    }
+
+    .l-constrained:after {
+        right: -50vw;
+    }
+}
+
 .contribute_card__button {
     @include mq($until: tablet) {
         margin-top: 24px;
@@ -666,7 +706,7 @@ $currencies: gbp usd aud eur nzd cad;
     color: white;
 }
 
-.contributions--this-land-is-your-land {
+.contributions--us-campaign {
     .contributions__wrapper {
         .contributions__inner {
             overflow: visible;

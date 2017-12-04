@@ -1,0 +1,116 @@
+@import com.gu.i18n.CountryGroup
+@import views.support.PageInfo
+@import views.support.CountryGroupImplicits._
+@import abtests.Allocation
+
+@(pageInfo: PageInfo = views.support.PageInfo(),
+    countryGroup: CountryGroup,
+    maxAmount: Option[Int] = None,
+    mainScript: Option[String] = None,
+    errorMessage:Option[String])(content: Html)
+
+@main(pageInfo, Some(countryGroup), maxAmount, mainScript) {
+    <div class="contributions--us-campaign">
+        <section class="contributions__banner--mother-load">
+            <div class="l-constrained"></div>
+        </section>
+
+        <main class="contributions__wrapper currency-@countryGroup.currency.toString.toLowerCase">
+
+            @for(message <- errorMessage) {
+                <div id="errorDialog" class="overlay">
+                    <div>
+                        <h1 class="errorHeader">We're sorry</h1>
+                        <p class="errorMessage">@message</p>
+                        <button class="action action--button contribute-navigation__next" id="errorDialogButton">OK</button>
+
+                    </div>
+                </div>
+            }
+
+            <section class="contributions__inner page-slice l-constrained flex-horizontal-from-tablet">
+                <div class="contributions__inner-wrapper">
+                    <hgroup class="contributions__heading">
+                        <h1 class="contributions__heading--main">
+                            <span>America is failing mothers.</span> <br />
+                            <span class="heading-line--indent-max">Help us change that.</span>
+                        </h1>
+
+                        <h2 class="contributions__heading--sub">
+                            <span>Support the Guardian's new project</span> <br />
+                            <span class="sub-heading-line--indent">on motherhood in America</span>
+                        </h2>
+                    </hgroup>
+                    <div class="contributions__detail">
+                        <div class="contributions__detail__para">
+                            <hr />
+
+                            <p>The Guardian is seeking contributions to fund <a href='https://www.theguardian.com/us-news/series/the-mother-load'>the Mother Load</a>, a four-month global reporting project to explore why it’s harder to be a mother in America than in any other developed country – and what we can do about it.</p>
+
+                            <p>The Mother Load will use the Guardian's global perspective to illustrate the many ways the US is an outlier by exploring how our workplaces, politicians, healthcare, wealth distribution, and gender conventions leave mothers facing exceptionally high levels of stress and financial hardship. The less privilege you have, the greater your burden.</p>
+
+                            <p>But this project isn’t simply about problems – it’s about solutions. We’ll offer advice on how to lobby your workplace for family-friendly policies. We’ll look to other countries for lessons: how did Finland become the only country in the world where men spend more time with their small children than women? And we’ll show how electing more female leaders can directly improve policies for families.</p>
+
+                            <p>We recognize that fathers are important partners in this battle, and the solutions lie in creating support for families. We’ll strive to show parenthood in all its diversity, sharing perspectives from same-sex couples, single parents, and adoptive families.</p>
+
+                            <p>We’re asking our readers to fund a four-month reporting project to raise awareness, build community, and inspire activism.</p>
+
+                            <p>What are we missing? <a href='mailto:motherhood@@theguardian.com'>We want to hear from you</a>.We're also seeking larger contributions to support the Guardian's reporting on women and girls from foundations, companies and individuals. If you would like to get involved, please <a href='mailto:motherhood@@theguardian.com'>contact us</a></p>
+
+                        </div>
+                    </div>
+                </div>
+
+                @content
+            </section>
+        </main>
+
+        <section class="disclaimer">
+            <div class="support-wrapper page-slice page-slice__feedback l-constrained currency-@countryGroup.currency.toString.toLowerCase">
+                <div class="feedback">
+
+                    <div class="contributions__detail">
+                        <div class="contributions__detail__para">
+                            <p>The Guardian is seeking contributions to fund <a href='https://www.theguardian.com/us-news/series/the-mother-load'>the Mother Load</a>, a four-month global reporting project to explore why it’s harder to be a mother in America than in any other developed country – and what we can do about it.</p>
+
+                            <p>The Mother Load will use the Guardian's global perspective to illustrate the many ways the US is an outlier by exploring how our workplaces, politicians, healthcare, wealth distribution, and gender conventions leave mothers facing exceptionally high levels of stress and financial hardship. The less privilege you have, the greater your burden.</p>
+
+                            <p>But this project isn’t simply about problems – it’s about solutions. We’ll offer advice on how to lobby your workplace for family-friendly policies. We’ll look to other countries for lessons: how did Finland become the only country in the world where men spend more time with their small children than women? And we’ll show how electing more female leaders can directly improve policies for families.</p>
+
+                            <p>We recognize that fathers are important partners in this battle, and the solutions lie in creating support for families. We’ll strive to show parenthood in all its diversity, sharing perspectives from same-sex couples, single parents, and adoptive families.</p>
+
+                            <p>We’re asking our readers to fund a four-month reporting project to raise awareness, build community, and inspire activism.</p>
+
+                            <p>What are we missing? <a href='mailto:motherhood@@theguardian.com'>We want to hear from you</a>.We're also seeking larger contributions to support the Guardian's reporting on women and girls from foundations, companies and individuals. If you would like to get involved, please <a href='mailto:motherhood@@theguardian.com'>contact us</a></p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <p>The Guardian will allocate up to $100,000 of the funds raised to its core operations that will fund our coverage of parenthood in America, including editing, reporting, visuals and new commissions. If the campaign raises more than $100,000 any additional funds will be directed to support the Guardian’s core operations that fund our in-depth coverage of national news and social issues, including women's rights and the struggles of families.</p>
+
+                    <p>Contributions will not be returned. You can read additional <a href='https://www.theguardian.com/info/2016/apr/07/us-contribution-terms-and-conditions'>terms and conditions here</a></p>
+
+                    <p>
+                        The ultimate owner of the Guardian is the Scott Trust Limited, whose role it is to secure the editorial and financial independence of the Guardian in perpetuity. Reader contributions support the Guardian’s journalism.
+                    </p>
+
+                    <p data-shown="gbp aud eur">
+                        Please note that the Guardian is not a charity, will not use your support for charitable programs, and your support of the Guardian’s journalism does not constitute a charitable donation. As such your contribution is not eligible to be treated as a charitable deduction for federal or state taxes in the United States or elsewhere.
+                    </p>
+
+                    <p data-shown="usd">
+                        Please note that the Guardian is not a charity, will not use your support for charitable
+                        programs, and your support of the Guardian’s journalism does not constitute a
+                        charitable donation. As such your contribution is not eligible to be treated as a
+                        charitable deduction for federal or state taxes in the United States or elsewhere.
+                    </p>
+
+                    <p>
+                        If you have any questions about contributing to the Guardian, please <a href="mailto:contribution.support@@theguardian.com" class="support-thanks__link">contact us here</a>.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+}
