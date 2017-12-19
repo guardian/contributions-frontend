@@ -5,4 +5,28 @@
 
 // ----- Garnett Styles ----- //
 
+.container-global.container-global--giraffe {
+  .global-header__inner,
+  .global-header__branding,
+  .global-navigation,
+  .global-navigation__scroll {
+    background-color: #f8f8f8;
+  }
 
+  .global-header {
+    background-color: #f8f8f8;
+
+    .control__item,
+    .control__info {
+      color: guss-colour(neutral-1);
+    }
+
+    .control__icon {
+      border-color: guss-colour(neutral-1);
+    }
+
+    .icon-inline {
+      fill: guss-colour(neutral-1);
+    }
+  }
+}
