@@ -112,7 +112,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       )
     }
 
-    def storeMetaData(metadata: stripe.StripeMetaData): EitherT[Future, String, SavedContributionData] = {
+    def storeMetaData(metadata: stripe.StripeMetaData): EitherT[Future, Throwable, SavedContributionData] = {
       stripe.storeMetaData(
         created = metadata.contributionMetadata.created,
         name = form.name,

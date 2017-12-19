@@ -198,7 +198,7 @@ class PaypalService(
     idUser: Option[IdentityId],
     platform: Option[String],
     ophanVisitId: Option[String]
-  )(implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
+  )(implicit tags: LoggingTags): EitherT[Future, Throwable, SavedContributionData] = {
 
     val contributionDataToSave = for {
       transaction <- attempt("get transaction")(payment.getTransactions.asScala.head)
@@ -262,18 +262,18 @@ class PaypalService(
     }
 
     for {
-      data <- contributionDataToSave.leftMap(_.message)
+      data <- contributionDataToSave.leftMap(identity[Throwable])
       (contributor, contributionMetaData, contributorRow) = data
       contributionMetaData <- contributionData.insertPaymentMetaData(contributionMetaData)
       contributor <- contributionData.saveContributor(contributor)
-      _ <- emailService.thank(contributorRow).leftMap(e => e.getMessage)
+      _ <- emailService.thank(contributorRow)
     } yield SavedContributionData(
       contributor = contributor,
       contributionMetaData = contributionMetaData
     )
   }
 
-  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId])(implicit tags: LoggingTags): EitherT[Future, String, Contributor] = {
+  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId])(implicit tags: LoggingTags): EitherT[Future, Throwable, Contributor] = {
     val contributor = Contributor(
       email = email,
       contributorId = None,
@@ -298,7 +298,7 @@ class PaypalService(
     Event.validateReceivedEvent(context, headers.asJava, body)
   }
 
-  def processPaymentHook(paypalHook: PaypalHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
+  def processPaymentHook(paypalHook: PaypalHook)(implicit tags: LoggingTags): EitherT[Future, Throwable, PaymentHook] = {
 
     def contributionIdFromPaypal(paymentId: String): ContributionId = {
       val payment = Payment.get(apiContext, paypalHook.paymentId)

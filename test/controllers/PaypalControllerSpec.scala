@@ -75,7 +75,7 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
     platform = Matchers.any[Option[String]],
     ophanVisitId = Matchers.any[Option[String]]
   )(Matchers.any[LoggingTags]))
-    .thenReturn(EitherT.pure[Future, String, SavedContributionData](mock[SavedContributionData]))
+    .thenReturn(EitherT.pure[Future, Throwable, SavedContributionData](mock[SavedContributionData]))
 
   val controller: PaypalController = new PaypalController(mockPaymentServices, mockCorsConfig, supportConfig, mockCsrfCheck, mockCloudwatchMetrics, mockOphanService)
 
@@ -244,7 +244,7 @@ class PaypalControllerSpec extends PlaySpec
           platform = Matchers.any[Option[String]],
           ophanVisitId = Matchers.any[Option[String]]
         )(Matchers.any[LoggingTags]))
-          .thenReturn(EitherT.left[Future, String, SavedContributionData](Future.successful("Error")))
+          .thenReturn(EitherT.left[Future, Throwable, SavedContributionData](Future.successful(new RuntimeException("Error"))))
       }
 
 

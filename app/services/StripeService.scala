@@ -94,7 +94,7 @@ class StripeService(
     contributorRow: ContributorRow,
     idUser: Option[IdentityId],
     marketing: Boolean)
-    (implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
+    (implicit tags: LoggingTags): EitherT[Future, Throwable, SavedContributionData] = {
 
     // Fire and forget: we don't want to stop the user flow
     idUser.foreach { id =>
@@ -111,7 +111,7 @@ class StripeService(
     )
   }
 
-  def processPaymentHook(stripeHook: StripeHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
+  def processPaymentHook(stripeHook: StripeHook)(implicit tags: LoggingTags): EitherT[Future, Throwable, PaymentHook] = {
 
     def convertedAmount(event: Event[Charge]): OptionT[Future, BigDecimal] = {
       for {
@@ -132,7 +132,7 @@ class StripeService(
     } yield paymentHook
 
     for {
-      hook <- paymentHook.toRight(s"Unable to find the stripe event identified by ${stripeHook.eventId}")
+      hook <- paymentHook.toRight[Throwable](new RuntimeException(s"Unable to find the stripe event identified by ${stripeHook.eventId}"))
       insertResult <- contributionData.insertPaymentHook(hook)
     } yield insertResult
   }
