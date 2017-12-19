@@ -48,3 +48,21 @@
   }
 }
 
+.global-footer.global-footer--giraffe {
+  .global-brandbar {
+    background-color: #f8f8f8;
+  }
+
+  .control__item,
+  .control__info {
+    color: guss-colour(neutral-1);
+  }
+
+  .control__icon {
+    border-color: guss-colour(neutral-1);
+  }
+
+  .icon-inline {
+    fill: guss-colour(neutral-1);
+  }
+}
