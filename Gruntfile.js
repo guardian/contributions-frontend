@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     var isDev = (grunt.option('dev') !== undefined) ? Boolean(grunt.option('dev')) : process.env.GRUNT_ISDEV === '1';
     var pkg = grunt.file.readJSON('package.json');
     var singleRun = grunt.option('single-run') !== false;
+    const isGarnett = process.env && process.env.CONTRIBUTIONS_FRONTEND_GARNETT === 'true';
 
     /**
      * Load all grunt-* tasks
@@ -79,20 +80,14 @@ module.exports = function (grunt) {
                 precision: 5
             },
             dist: {
-                files: [{
-                    expand: true,
-                    cwd: '<%= dirs.assets.stylesheets %>',
-                    src: [
-                        'giraffe.scss',
-                        'style.scss',
-                        'ie9.style.scss',
-                        'tools.style.scss',
-                        'event-card.scss',
-                        'inlinePayment.scss'
-                    ],
-                    dest: '<%= dirs.publicDir.stylesheets %>',
-                    ext: '.css'
-                }]
+                files: {
+                    '<%= dirs.publicDir.stylesheets %>/giraffe.css': '<%= dirs.assets.stylesheets %>/giraffe.scss',
+                    '<%= dirs.publicDir.stylesheets %>/style.css': `<%= dirs.assets.stylesheets %>/${isGarnett ? 'garnett.scss' : 'style.scss'}`,
+                    '<%= dirs.publicDir.stylesheets %>/ie9.style.css': '<%= dirs.assets.stylesheets %>/ie9.style.scss',
+                    '<%= dirs.publicDir.stylesheets %>/tools.style.css': '<%= dirs.assets.stylesheets %>/tools.style.scss',
+                    '<%= dirs.publicDir.stylesheets %>/event-card.css': '<%= dirs.assets.stylesheets %>/event-card.scss',
+                    '<%= dirs.publicDir.stylesheets %>/inlinePayment.css': '<%= dirs.assets.stylesheets %>/inlinePayment.scss'
+                }
             }
         },
 
