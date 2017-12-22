@@ -3,7 +3,7 @@ import 'whatwg-fetch';
 import store from 'src/store';
 import { urls } from 'src/constants';
 import { trackCheckout, trackPayment } from 'src/modules/analytics/ga';
-import { completeTests, inStripeCheckoutTest } from 'src/modules/abTests';
+import { inStripeCheckoutTest } from 'src/modules/abTests';
 import * as stripe from 'src/modules/stripe';
 
 export const SET_DATA = "SET_DATA";
@@ -57,7 +57,6 @@ export function processStripePayment(token) {
     })).then(response => {
         if (response.response.ok) {
             return trackPayment(state.card.amount, state.data.currency.code)
-                .then(completeTests)
                 .then(() => store.dispatch({type: PAYMENT_COMPLETE, response: response.json}))
                 .then(() => response);
         }
@@ -118,7 +117,6 @@ export function paypalRedirect(dispatch) {
     })
     .then(response => {
         return trackPayment(state.card.amount, state.data.currency.code)
-            .then(completeTests)
             .then(() => response);
     })
     .then((res) =>  window.location = res.approvalUrl)

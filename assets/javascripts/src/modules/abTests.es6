@@ -54,11 +54,6 @@ function registerTestWithOphan(test, complete) {
     return registerTestsWithOphan([test], complete);
 }
 
-export function completeTests() {
-    const state = store.getState();
-    return registerTestsWithOphan(state.data.abTests, true);
-}
-
 function testFor(tests, testName) {
     return tests && tests.find(t => t.testName == testName);
 }
