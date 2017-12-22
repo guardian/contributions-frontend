@@ -57,7 +57,6 @@ export function processStripePayment(token) {
     })).then(response => {
         if (response.response.ok) {
             return trackPayment(state.card.amount, state.data.currency.code)
-                .then(completeTests)
                 .then(() => store.dispatch({type: PAYMENT_COMPLETE, response: response.json}))
                 .then(() => response);
         }
@@ -118,7 +117,6 @@ export function paypalRedirect(dispatch) {
     })
     .then(response => {
         return trackPayment(state.card.amount, state.data.currency.code)
-            .then(completeTests)
             .then(() => response);
     })
     .then((res) =>  window.location = res.approvalUrl)
