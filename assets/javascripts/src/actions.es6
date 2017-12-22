@@ -3,7 +3,7 @@ import 'whatwg-fetch';
 import store from 'src/store';
 import { urls } from 'src/constants';
 import { trackCheckout, trackPayment } from 'src/modules/analytics/ga';
-import { completeTests, inStripeCheckoutTest } from 'src/modules/abTests';
+import { inStripeCheckoutTest } from 'src/modules/abTests';
 import * as stripe from 'src/modules/stripe';
 
 export const SET_DATA = "SET_DATA";
