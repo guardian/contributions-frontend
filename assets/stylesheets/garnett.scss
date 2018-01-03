@@ -61,6 +61,14 @@
   }
 }
 
+.contribute-navigation__next {
+  background-color: guss-colour(neutral-1);
+
+  &:hover {
+    background-color: darken(guss-colour(neutral-1), 10%);
+  }
+}
+
 .global-footer.global-footer--giraffe {
   .global-brandbar {
     background-color: #f8f8f8;
