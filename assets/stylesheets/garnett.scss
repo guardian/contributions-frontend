@@ -29,6 +29,19 @@
       fill: guss-colour(neutral-1);
     }
   }
+
+  .global-navigation {
+    display: none;
+  }
+
+  .global-header__inner {
+    height: unset;
+    padding-bottom: 0;
+  }
+}
+
+.global-header {
+  height: unset;
 }
 
 .global-header__logo__image {
@@ -45,6 +58,14 @@
   @include mq($from: tablet) {
     height: 90px;
     width: 274px;
+  }
+}
+
+.contribute-navigation__next {
+  background-color: guss-colour(neutral-1);
+
+  &:hover {
+    background-color: darken(guss-colour(neutral-1), 10%);
   }
 }
 
