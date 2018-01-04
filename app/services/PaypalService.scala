@@ -289,6 +289,8 @@ class PaypalService(
     idUser.map { id =>
       identityService.updateMarketingPreferences(id, marketingOptInt)
     }
+    if (marketingOptInt)
+      identityService.sendConsentPreferencesEmail(contributor.email)
 
     contributionData.saveContributor(contributor)
   }

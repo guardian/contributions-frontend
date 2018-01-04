@@ -25,7 +25,7 @@ export default class Details extends React.Component {
                 <input id="guardian-opt-in" type="checkbox" name="guardian-opt-in"
                        checked={this.props.details.optIn}
                        onChange={event => this.props.updateDetails({ optIn: event.target.checked })} />
-                <label htmlFor="guardian-opt-in">Keep me up to date with offers from the Guardian</label>
+                <label htmlFor="guardian-opt-in">Check this box to rec</label>
             </div>
         </div>
     }

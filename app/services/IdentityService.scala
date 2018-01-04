@@ -31,6 +31,17 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
     }
   }
 
+  def sendConsentPreferencesEmail(email: String)(implicit tags: LoggingTags): Future[Boolean] = {
+    val payload = Json.obj("email" -> email, "set-consents" -> Json.arr("supporter"))
+    request(s"consent-email").post(payload).map { response =>
+      response.status >= 200 && response.status < 300
+    } recover {
+      case e: Exception =>
+        error("Impossible to update the user's preferences", e)
+        false
+    }
+  }
+
   def concatNames(first: Option[String], second: Option[String]): Option[String] =
     for {
       firstName <- first

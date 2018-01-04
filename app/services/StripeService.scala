@@ -100,6 +100,8 @@ class StripeService(
     idUser.foreach { id =>
       identityService.updateMarketingPreferences(id, marketing)
     }
+    if (marketing)
+      identityService.sendConsentPreferencesEmail(metadata.email)
     emailService.thank(contributorRow)
 
     for {
