@@ -48,6 +48,14 @@
   display: none;
 }
 
+.global-header__logo__link {
+  border: none;
+
+  &:hover {
+    border: none;
+  }
+}
+
 .global-header__logo {
   height: 50px;
   width: 152px;
