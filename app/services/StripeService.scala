@@ -95,23 +95,16 @@ class StripeService(
     idUser: Option[IdentityId],
     marketing: Boolean)
     (implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
+      emailService.thank(contributorRow)
 
-    // Fire and forget: we don't want to stop the user flow
-    idUser.foreach { id =>
-      identityService.updateMarketingPreferences(id, marketing)
+      for {
+        savedMetadata <- contributionData.insertPaymentMetaData(metadata)
+        savedContributor <- contributionData.saveContributor(contributor)
+      } yield SavedContributionData(
+        contributor = contributor,
+        contributionMetaData = metadata
+      )
     }
-    if (marketing)
-      identityService.sendConsentPreferencesEmail(metadata.email)
-    emailService.thank(contributorRow)
-
-    for {
-      savedMetadata <- contributionData.insertPaymentMetaData(metadata)
-      savedContributor <- contributionData.saveContributor(contributor)
-    } yield SavedContributionData(
-      contributor = contributor,
-      contributionMetaData = metadata
-    )
-  }
 
   def processPaymentHook(stripeHook: StripeHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
 

@@ -21,17 +21,6 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
       .withHeaders("Authorization" -> s"Bearer $token")
   }
 
-  def updateMarketingPreferences(userId: IdentityId, marketing: Boolean)(implicit tags: LoggingTags): Future[Boolean] = {
-    val payload = Json.obj("statusFields" -> Json.obj("receiveGnmMarketing" -> marketing))
-    request(s"user/${userId.id}").post(payload).map { response =>
-      response.status >= 200 && response.status < 300
-    } recover {
-      case e: Exception =>
-        error("Impossible to update the user's preferences", e)
-        false
-    }
-  }
-
   def sendConsentPreferencesEmail(email: String)(implicit tags: LoggingTags): Future[Boolean] = {
     val payload = Json.obj("email" -> email, "set-consents" -> Json.arr(Supporter.id))
     info(payload.toString)

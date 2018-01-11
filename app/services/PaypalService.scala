@@ -273,28 +273,6 @@ class PaypalService(
     )
   }
 
-  def updateMarketingOptIn(email: String, marketingOptInt: Boolean, idUser: Option[IdentityId])(implicit tags: LoggingTags): EitherT[Future, String, Contributor] = {
-    val contributor = Contributor(
-      email = email,
-      contributorId = None,
-      marketingOptIn = Some(marketingOptInt),
-      name = None,
-      firstName = None,
-      lastName = None,
-      idUser = None,
-      postCode = None
-    )
-
-    // Fire and forget: we don't want to stop the user flow
-    idUser.map { id =>
-      identityService.updateMarketingPreferences(id, marketingOptInt)
-    }
-    if (marketingOptInt)
-      identityService.sendConsentPreferencesEmail(contributor.email)
-
-    contributionData.saveContributor(contributor)
-  }
-
   def validateEvent(headers: Map[String, String], body: String): Boolean = {
     val context = apiContext.addConfiguration(Constants.PAYPAL_WEBHOOK_ID, config.paypalWebhookId)
     Event.validateReceivedEvent(context, headers.asJava, body)
