@@ -79,7 +79,6 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val giraffeController = wire[Contributions]
   lazy val healthcheckController = wire[Healthcheck]
   lazy val assetController = wire[Assets]
-  lazy val identityController = wire[IdentityController]
   lazy val paypalController = wire[PaypalController]
   lazy val stripeController = new StripeController(paymentServices, stripeConfig, corsConfig, ophanService, cloudWatchMetrics)
   lazy val userController = wire[UserController]

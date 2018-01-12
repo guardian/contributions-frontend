@@ -3,6 +3,7 @@ package controllers
 import java.lang.Math._
 import java.time.Instant
 
+import actions.CommonActions
 import actions.CommonActions._
 import cats.data.EitherT
 import cats.syntax.show._
@@ -11,6 +12,7 @@ import com.gu.i18n.{AUD, CountryGroup, EUR, USD}
 import com.gu.stripe.Stripe
 import com.gu.stripe.Stripe.Charge
 import com.gu.stripe.Stripe.Serializer._
+import com.gu.zuora.soap.models.Queries.PaymentMethod
 import com.typesafe.config.Config
 import configuration.CorsConfig
 import controllers.forms.ContributionRequest
@@ -78,12 +80,11 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     val maxAmountInSmallestCurrencyUnit = MaxAmount.forCurrency(form.currency) * 100
     val amount = min(maxAmountInSmallestCurrencyUnit, amountInSmallestCurrencyUnit)
     val contributionAmount = ContributionAmount(BigDecimal(amount, 2), form.currency)
-    val email = form.email
 
     def thankYouUri = if (request.isAndroid) {
       mobileRedirectUrl(contributionAmount)
     } else {
-      routes.Contributions.postPayment(countryGroup).url
+      routes.Contributions.thanks(countryGroup).url
     }
 
     def createCharge: Future[Stripe.Charge] = {
@@ -144,7 +145,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
       Ok(Json.obj("redirect" -> thankYouUri))
         .addingToSession("charge_id" -> charge.id)
         .addingToSession("amount" -> contributionAmount.show)
-        .addingToSession("email" -> email)
         .addingToSession(PaymentProvider.sessionKey -> PaymentProvider.Stripe.entryName)
         .setCookie[ContribTimestampCookieAttributes](Instant.ofEpochSecond(charge.created).toString)
         .withHeaders(corsHeaders(request): _*)
