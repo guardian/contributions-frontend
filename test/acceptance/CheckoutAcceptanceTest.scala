@@ -51,6 +51,8 @@ class CheckoutAcceptanceTest extends PlaySpec
       stripeCheckout.switchToStripe
       stripeCheckout.fillInCardDetails("4242 4242 4242 4242")
       stripeCheckout.acceptPayment
+      assert(postPayment.pageHasLoaded)
+      postPayment.clickNext
       assert(thankYou.pageHasLoaded)
     }
 
