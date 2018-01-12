@@ -268,20 +268,6 @@
 /* ==========================================================================
    Forms: Labels & Inputs
    ========================================================================== */
-.giraffe-checkbox {
-    position: relative;
-
-    label {
-        @include fs-textSans(2);
-        padding-left: $gs-gutter;
-        display: block;
-    }
-    input {
-        position: absolute;
-        top: 1px;
-    }
-}
-
 .label {
     @include fs-bodyCopy(2);
     color: $c-neutral1;
