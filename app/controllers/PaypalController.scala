@@ -15,8 +15,10 @@ import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource}
 import play.api.mvc._
 import services.{ContributionOphanService, PaymentServices, PaypalService}
+import play.api.data.Form
 import utils.MaxAmount
 import play.api.libs.json._
+import play.api.data.Forms._
 import play.filters.csrf.CSRFCheck
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -287,6 +289,32 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           InternalServerError
         }
       }
+    }
+  }
+  case class MetadataUpdate(marketingOptIn: Boolean)
+
+  val metadataUpdateForm: Form[MetadataUpdate] = Form(
+    mapping(
+      "marketingOptIn"->boolean
+    )(MetadataUpdate.apply)(MetadataUpdate.unapply)
+  )
+
+  def updateMetadata(countryGroup: CountryGroup) = NoCacheAction.async(parse.form(metadataUpdateForm)) { implicit request =>
+    val paypalService = paymentServices.paypalServiceFor(request)
+    val marketingOptIn = request.body.marketingOptIn
+    val idUser = IdentityId.fromRequest(request)
+    val contributor = request.session.data.get("email") match {
+      case Some(email) => paypalService.updateMarketingOptIn(email, marketingOptIn, idUser).value
+      case None => Future.successful(error("email not found in session while trying to update marketing opt in"))
+    }
+
+    val url = request.session.get("amount").flatMap(ContributionAmount.apply)
+      .filter(_ => request.isAndroid)
+      .map(mobileRedirectUrl)
+      .getOrElse(routes.Contributions.thanks(countryGroup).url)
+
+    contributor.map { _ =>
+      Redirect(url, SEE_OTHER)
     }
   }
 }

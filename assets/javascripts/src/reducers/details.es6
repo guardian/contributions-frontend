@@ -4,7 +4,7 @@ const initialState = {
     name: '',
     email: '',
     postcode: '',
-    optIn: false
+    optIn: true
 };
 
 export default function detailsReducer(state = initialState, action) {
