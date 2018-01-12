@@ -18,7 +18,6 @@ import services.{ContributionOphanService, PaymentServices, PaypalService}
 import utils.MaxAmount
 import play.api.libs.json._
 import play.filters.csrf.CSRFCheck
-
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig, supportConfig: SupportConfig,

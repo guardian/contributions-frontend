@@ -282,9 +282,25 @@
     }
 }
 
+.giraffe-checkbox {
+    position: relative;
+
+    label {
+        @include fs-textSans(3);
+        padding-left: $gs-gutter;
+        display: block;
+    }
+    input {
+        position: absolute;
+        top: 1px;
+    }
+}
+
+
 .label--inline {
     display: inline-block;
 }
+
 
 .input-text,
 .input-textarea {
