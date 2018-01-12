@@ -2,17 +2,21 @@ package controllers
 
 import actions.CommonActions._
 import com.gu.i18n.CountryGroup
-import controllers.forms.MetadataUpdate
+
 import models._
 import monitoring._
+import play.api.data.Form
+import play.api.data.Forms.mapping
 import play.api.mvc._
 import services.IdentityService
+import play.api.data.Form
+import play.api.data.Forms._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class IdentityController(identityService: IdentityService)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
-  val metadataUpdateForm = MetadataUpdate.metadataUpdateForm
+  val metadataUpdateForm = MarketingOptInUpdate.marketingOptInForm
 
   def updateMarketingPreferences(countryGroup: CountryGroup) = NoCacheAction(parse.form(metadataUpdateForm)) { implicit request =>
     val marketingOptIn = request.body.marketingOptIn
@@ -30,3 +34,15 @@ class IdentityController(identityService: IdentityService)(implicit ec: Executio
     Redirect(url, SEE_OTHER)
   }
 }
+
+case class MarketingOptInUpdate(marketingOptIn: Boolean)
+
+object MarketingOptInUpdate {
+
+  val marketingOptInForm: Form[MarketingOptInUpdate] = Form(
+    mapping(
+      "marketingOptIn" -> boolean
+    )(MarketingOptInUpdate.apply)(MarketingOptInUpdate.unapply)
+  )
+}
+

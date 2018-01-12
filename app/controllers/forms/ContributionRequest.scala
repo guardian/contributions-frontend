@@ -4,9 +4,8 @@ import com.gu.i18n.Currency
 import models.IdentityId
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource, Platform}
-import play.api.data.Form
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
-import play.api.data.Forms._
+
 
 // THIS CASE CLASS IS USED BY THE FRONTEND AND BY THE MOBILE APPS AS A JSON POST
 // NEW FIELDS SHOULD BE OPTIONAL OR SUPPORTED BY BOTH
@@ -48,16 +47,4 @@ object ContributionRequest {
 
   implicit val contributionRequestReads: Reads[ContributionRequest] = Json.reads[ContributionRequest]
 }
-
-case class MetadataUpdate(marketingOptIn: Boolean)
-
-object MetadataUpdate {
-
-  val metadataUpdateForm: Form[MetadataUpdate] = Form(
-    mapping(
-      "marketingOptIn" -> boolean
-    )(MetadataUpdate.apply)(MetadataUpdate.unapply)
-  )
-}
-
 
