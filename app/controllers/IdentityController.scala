@@ -16,9 +16,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class IdentityController(identityService: IdentityService)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
-  val metadataUpdateForm = MarketingOptInUpdate.marketingOptInForm
+  val marketingOptInForm = MarketingOptInUpdate.marketingOptInForm
 
-  def updateMarketingPreferences(countryGroup: CountryGroup) = NoCacheAction(parse.form(metadataUpdateForm)) { implicit request =>
+  def updateMarketingPreferences(countryGroup: CountryGroup) = NoCacheAction(parse.form(marketingOptInForm)) { implicit request =>
     val marketingOptIn = request.body.marketingOptIn
 
     request.session.data.get("email") match {
