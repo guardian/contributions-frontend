@@ -8,6 +8,7 @@ import play.api.http.Status
 import play.api.libs.json._
 import play.api.libs.ws.WSResponse
 import play.api.libs.ws.{WSClient, WSRequest}
+import com.gu.identity.model.Consent.Supporter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -20,9 +21,10 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
       .withHeaders("Authorization" -> s"Bearer $token")
   }
 
-  def updateMarketingPreferences(userId: IdentityId, marketing: Boolean)(implicit tags: LoggingTags): Future[Boolean] = {
-    val payload = Json.obj("statusFields" -> Json.obj("receiveGnmMarketing" -> marketing))
-    request(s"user/${userId.id}").post(payload).map { response =>
+  def sendConsentPreferencesEmail(email: String)(implicit tags: LoggingTags): Future[Boolean] = {
+    val payload = Json.obj("email" -> email, "set-consents" -> Json.arr(Supporter.id))
+    info(payload.toString)
+    request(s"consent-email").post(payload).map { response =>
       response.status >= 200 && response.status < 300
     } recover {
       case e: Exception =>
@@ -72,4 +74,10 @@ class IdentityService(wsClient: WSClient, config: Config)(implicit ec: Execution
           error("Error accessing Identity API", err)
           Autofill.empty
       }
+
+  def updateMarketingOptIn(email: String, marketingOptIn: Boolean)(implicit tags: LoggingTags): Future[Boolean] = {
+    if (marketingOptIn)
+      sendConsentPreferencesEmail(email)
+    else Future.successful(true)
+  }
 }
