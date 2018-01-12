@@ -6,6 +6,7 @@ import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource, Platform}
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 
+
 // THIS CASE CLASS IS USED BY THE FRONTEND AND BY THE MOBILE APPS AS A JSON POST
 // NEW FIELDS SHOULD BE OPTIONAL OR SUPPORTED BY BOTH
 case class ContributionRequest(
@@ -46,5 +47,4 @@ object ContributionRequest {
 
   implicit val contributionRequestReads: Reads[ContributionRequest] = Json.reads[ContributionRequest]
 }
-
 
