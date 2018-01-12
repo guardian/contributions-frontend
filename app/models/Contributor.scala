@@ -15,6 +15,5 @@ case class Contributor(
   firstName: Option[String],
   lastName: Option[String],
   idUser: Option[IdentityId],
-  postCode: Option[String],
-  marketingOptIn: Option[Boolean]
+  postCode: Option[String]
 )

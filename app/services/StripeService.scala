@@ -33,7 +33,6 @@ class StripeService(
     created: DateTime,
     name: String,
     postCode: Option[String],
-    marketing: Boolean,
     testAllocations: Set[Allocation],
     cmp: Option[String],
     intCmp: Option[String],
@@ -69,8 +68,7 @@ class StripeService(
       firstName = None,
       lastName = None,
       idUser = idUser,
-      postCode = postCode,
-      marketingOptIn = Some(marketing)
+      postCode = postCode
     )
 
     val contributorRow = ContributorRow(
@@ -92,8 +90,7 @@ class StripeService(
     metadata: ContributionMetaData,
     contributor: Contributor,
     contributorRow: ContributorRow,
-    idUser: Option[IdentityId],
-    marketing: Boolean)
+    idUser: Option[IdentityId])
     (implicit tags: LoggingTags): EitherT[Future, String, SavedContributionData] = {
       emailService.thank(contributorRow)
 

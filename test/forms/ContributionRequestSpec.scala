@@ -15,7 +15,6 @@ class ContributionRequestSpec extends PlaySpec with EitherValues {
     amount = 10,
     email = "test@gmail.com",
     token = "token",
-    marketing = true,
     postcode = None,
     ophanPageviewId = "pageviewId",
     ophanBrowserId = None,
@@ -40,7 +39,6 @@ class ContributionRequestSpec extends PlaySpec with EitherValues {
     "amount" -> "10.0",
     "email" -> "test@gmail.com",
     "token" -> "token",
-    "marketing" -> true,
     "ophanPageviewId" -> "pageviewId"
   )
 
@@ -74,6 +72,17 @@ class ContributionRequestSpec extends PlaySpec with EitherValues {
 
       checkJson(request, json)
     }
+
+    "be able to parse data successfully when marketing information is included" in {
+
+      val request = baseRequest
+
+      val json = baseJson ++ Json.obj("marketing" -> "true")
+
+      checkJson(request, json)
+    }
+
+
 
     "be able to parse data successfully when ab test information is included" in {
 

@@ -147,7 +147,6 @@ function paymentFormData(state, token) {
         amount: state.card.amount,
         email: state.details.email,
         token: token,
-        marketing: state.details.optIn,
         postcode: state.details.postcode,
         ophanPageviewId: state.data.ophan.pageviewId,
         ophanBrowserId: state.data.ophan.browserId,
