@@ -1,6 +1,6 @@
 @import abtests._
 @import com.gu.i18n.CountryGroup
-@import fragments.giraffe.{contributionsMain, contributionsAlt, contributionsUSGunCampaign, contributionsMotherLoadCampaign}
+@import fragments.giraffe.{contributionsMain, contributionsAlt, contributionsUSGunCampaign, contributionsMotherLoadCampaign, contributionsAusEnvironmentCampaign}
 @import play.api.libs.json.Json
 @import utils.ThriftEnumFormatter.ops._
 @import utils.ThriftUtils.Implicits._
@@ -31,12 +31,17 @@
 )
 
 @defining { (block: Html) =>
-    @if(intCmpCode.contains("us_gun_campaign_2017")) {
-        @contributionsUSGunCampaign(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
-    } else {
-        @if(intCmpCode.contains("us_mother_load_campaign_2017")) {
+    @intCmpCode match {
+        case Some("aus_environment_campaign_2018") => {
+            @contributionsAusEnvironmentCampaign(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        }
+        case Some("us_gun_campaign_2017") => {
+            @contributionsUSGunCampaign(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
+        }
+        case Some("us_mother_load_campaign_2017") => {
             @contributionsMotherLoadCampaign(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
-        } else {
+        }
+        case _ => {
             @if(inLandingPageTest) {
                 @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
             } else {
