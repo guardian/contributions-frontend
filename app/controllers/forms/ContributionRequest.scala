@@ -15,7 +15,6 @@ case class ContributionRequest(
   amount: BigDecimal,
   email: String,
   token: String,
-  marketing: Boolean,
   postcode: Option[String],
   ophanPageviewId: String,
   ophanBrowserId: Option[String],

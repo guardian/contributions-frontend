@@ -122,7 +122,6 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
           lastname,
           iduser,
           postcode,
-          marketingoptin,
           contributor_id,
           updated
         ) VALUES (
@@ -132,7 +131,6 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
           ${contributor.lastName},
           ${contributor.idUser.map(_.id)},
           ${contributor.postCode},
-          ${contributor.marketingOptIn},
           ${contributor.contributorId.map(_.id)}::uuid,
           now()
         ) ON CONFLICT(receipt_email) DO
@@ -143,7 +141,6 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
           lastname = COALESCE(excluded.lastname, live_contributors.lastname),
           iduser = COALESCE(excluded.iduser, live_contributors.iduser),
           postcode = COALESCE(excluded.postcode, live_contributors.postcode),
-          marketingoptin = COALESCE(excluded.marketingoptin, live_contributors.marketingoptin),
           updated = now()"""
       request.execute()
       contributor

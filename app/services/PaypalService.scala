@@ -245,8 +245,7 @@ class PaypalService(
         firstName = firstName,
         lastName = lastName,
         idUser = idUser,
-        postCode = postCode,
-        marketingOptIn = None
+        postCode = postCode
       )
 
       val contributorRow = ContributorRow(

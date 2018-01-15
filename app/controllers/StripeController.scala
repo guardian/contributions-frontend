@@ -55,7 +55,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
     val contributionId = ContributionId.random
 
     val metadata = Map(
-      "marketing-opt-in" -> form.marketing.toString,
       "email" -> form.email,
       "name" -> form.name,
       "abTests" -> Json.toJson(request.testAllocations).toString,
@@ -97,7 +96,6 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
         created = new DateTime(charge.created * 1000L),
         name = form.name,
         postCode = form.postcode,
-        marketing = form.marketing,
         testAllocations = request.testAllocations,
         cmp = form.cmp,
         intCmp = form.intcmp,
@@ -119,8 +117,7 @@ class StripeController(paymentServices: PaymentServices, stripeConfig: Config, c
         metadata = metadata.contributionMetadata,
         contributor = metadata.contributor,
         contributorRow = metadata.contributorRow,
-        idUser = idUser,
-        marketing = form.marketing
+        idUser = idUser
       )
     }
 
