@@ -838,3 +838,136 @@ $currencies: gbp usd aud eur nzd cad;
         }
     }
 }
+
+.contributions--aus-campaign {
+    .contributions__wrapper {
+        .contributions__inner {
+            overflow: visible;
+            position: relative;
+            padding: 0 10px 20px;
+
+            @include mq(mobileLandscape) {
+                padding: 0 20px 20px;
+            }
+
+            @include mq(desktop) {
+                padding-bottom: 0;
+            }
+        }
+
+        .contribute-container {
+            @include mq(desktop) {
+                position: absolute;
+                top: -92px;
+                right: 20px;
+            }
+
+            &:after {
+                content: 'We prefer to collect contributions online. However, if you wish to mail us your contribution, please send checks to: 315 West 36th St., 8th Floor, New York, NY 10018';
+                display: block;
+                margin-top: 8px;
+                font-family: 'Guardian Text Sans Web';
+                font-size: 13px;
+                line-height: 18px;
+                color: $c-neutral2;
+            }
+        }
+
+        .contributions__heading {
+            margin-top: 0;
+            padding-top: 12px;
+        }
+
+        .heading-line--indent-max {
+            padding-left: 0;
+
+            @include mq(desktop) {
+                padding-left: 140px;
+            }
+        }
+
+        .sub-heading-line--indent {
+            @include mq($until: tablet) {
+                padding-left: 0;
+            }
+        }
+
+        .contributions__detail {
+            @include mq(desktop) {
+                display: none;
+            }
+
+            .contributions__detail__para {
+                a {
+                    color: white;
+                    border-bottom-color: white;
+                }
+            }
+        }
+    }
+
+    .disclaimer {
+        .l-constrained {
+            padding-top: 12px;
+        }
+
+        .feedback {
+            padding: 0 20px;
+        }
+
+        .contributions__detail__para {
+            display: none;
+
+            @include mq(desktop) {
+                display: block;
+            }
+
+            a {
+                color: $medium-yellow;
+                border-bottom-color: $medium-yellow;
+
+                &:hover {
+                    border-bottom-color: $c-neutral1;
+                }
+            }
+        }
+
+        hr {
+            width: 120px;
+            border: 0;
+            height: 1px;
+            background-color: $c-neutral1;
+            margin: 22px 0 4px;
+
+            @include mq($until: desktop) {
+                display: none;
+            }
+        }
+
+        .feedback > p {
+            max-width: 620px;
+            color: $c-neutral2;
+
+            a {
+                color: $medium-yellow;
+                border-bottom-color: $medium-yellow;
+
+                &:hover {
+                    border-bottom-color: $c-neutral1;
+                }
+            }
+        }
+    }
+
+    .contributions__detail__para {
+        font-family: 'Guardian Text Egyptian Web', Georgia, serif;
+        max-width: 620px;
+        width: 100%;
+        font-size: 16px;
+        line-height: 1.5rem;
+
+        @include mq(tablet) {
+            padding-right: 60px;
+        }
+    }
+}
