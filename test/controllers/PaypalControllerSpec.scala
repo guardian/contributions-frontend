@@ -48,8 +48,6 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
 
   val supportConfig = SupportConfig("https://support.thegulocal.com/thankyou")
 
-
-
   Mockito.when(mockPaymentServices.paypalServiceFor(Matchers.any[Request[_]]))
     .thenReturn(mockPaypalService)
 
@@ -82,11 +80,11 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
 
   val controller: PaypalController = new PaypalController(mockPaymentServices, mockCorsConfig, supportConfig, mockCsrfCheck, mockCloudwatchMetrics, mockOphanService)
 
+  def captor[A <: AnyRef](implicit classTag: ClassTag[A]): A =
+    ArgumentCaptor.forClass[A](classTag.runtimeClass.asInstanceOf[Class[A]]).capture()
+
   def numberOfCallsToStoreMetaDataMustBe(times: Int): Unit = {
     eventually(timeout(Span(60, Seconds)), interval(Span(1, Seconds))) {
-      def captor[A <: AnyRef](implicit classTag: ClassTag[A]): A =
-        ArgumentCaptor.forClass[A](classTag.runtimeClass.asInstanceOf[Class[A]]).capture()
-
       Mockito.verify(mockPaypalService, VerificationModeFactory.times(times)).storeMetaData(
         captor[Payment],
         captor[Set[Allocation]],
@@ -228,7 +226,7 @@ class PaypalControllerSpec extends PlaySpec
       val result: Future[Result] = Helpers.call(fixture.controller.capturePayment, captureRequest)
       status(result).mustBe(200)
 
-      Eventually.eventually(timeout(Span(5, Seconds)), interval(Span(50, Millis))) {fixture.numberOfCallsToStoreMetaDataMustBe(1)}
+      fixture.numberOfCallsToStoreMetaDataMustBe(1)
     }
 
     "capture a payment even if storing the metadata failed" in {
