@@ -3,6 +3,7 @@ package controllers
 import actions.CommonActions._
 import cats.instances.future._
 import cats.syntax.show._
+import cookies.GuEmailCookieAttributes
 import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
@@ -153,11 +154,11 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
     }
 
     def okResult(payment: Payment): Result = {
+      val email = payment.getPayer.getPayerInfo.getEmail
       val response = render {
         case Accepts.Json() => Ok(JsNull)
         case Accepts.Html() =>
           val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
-          val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
 
           val redirectUrl = if (supportRedirect.contains(true)) {
@@ -173,8 +174,10 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
       if (supportRedirect.contains(true)) {
         info(s"Redirecting user to support thank-you page. Payment method used: Paypal, platform: ${request.platform} , contributions session id: ${request.sessionId}.")
         cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Paypal, request.platform)
+        response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime).setCookie[GuEmailCookieAttributes](email)
+      } else {
+        response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
       }
-      response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
     }
 
     def requestData =

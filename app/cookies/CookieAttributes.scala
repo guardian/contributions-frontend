@@ -27,5 +27,7 @@ object Cookies {
   object MaxAge {
 
     val `10years` = 60 * 60 * 24 * 365 * 10
+
+    val `1day` = 60 * 60 * 24
   }
 }
