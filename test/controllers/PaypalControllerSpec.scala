@@ -22,14 +22,15 @@ import services.{ContributionOphanService, PaymentServices, PaypalService}
 import cats.instances.future._
 import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import org.mockito.internal.verification.VerificationModeFactory
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.time.{Millis, Seconds, Span}
 import play.api.libs.json.Json
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
-class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSugar {
+class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSugar with Eventually {
 
   val mockPaymentServices: PaymentServices = mock[PaymentServices]
 
@@ -79,23 +80,25 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
 
   val controller: PaypalController = new PaypalController(mockPaymentServices, mockCorsConfig, supportConfig, mockCsrfCheck, mockCloudwatchMetrics, mockOphanService)
 
-  def numberOfCallsToStoreMetaDataMustBe(times: Int): Unit = {
-    def captor[A <: AnyRef](implicit classTag: ClassTag[A]): A =
-      ArgumentCaptor.forClass[A](classTag.runtimeClass.asInstanceOf[Class[A]]).capture()
+  def captor[A <: AnyRef](implicit classTag: ClassTag[A]): A =
+    ArgumentCaptor.forClass[A](classTag.runtimeClass.asInstanceOf[Class[A]]).capture()
 
-    Mockito.verify(mockPaypalService, VerificationModeFactory.times(times)).storeMetaData(
-      captor[Payment],
-      captor[Set[Allocation]],
-      captor[Option[String]],
-      captor[Option[String]],
-      captor[Option[String]],
-      captor[Option[String]],
-      captor[Option[String]],
-      captor[Option[String]],
-      captor[Option[IdentityId]],
-      captor[Option[String]],
-      captor[Option[String]]
-    )(captor[LoggingTags])
+  def numberOfCallsToStoreMetaDataMustBe(times: Int): Unit = {
+    eventually(timeout(Span(60, Seconds)), interval(Span(1, Seconds))) {
+      Mockito.verify(mockPaypalService, VerificationModeFactory.times(times)).storeMetaData(
+        captor[Payment],
+        captor[Set[Allocation]],
+        captor[Option[String]],
+        captor[Option[String]],
+        captor[Option[String]],
+        captor[Option[String]],
+        captor[Option[String]],
+        captor[Option[String]],
+        captor[Option[IdentityId]],
+        captor[Option[String]],
+        captor[Option[String]]
+      )(captor[LoggingTags])
+    }
   }
 
   def numberOfAcquisitionEventSubmissionsShouldBe(times: Int): Unit =
