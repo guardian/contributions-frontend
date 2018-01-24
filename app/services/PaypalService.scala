@@ -18,7 +18,6 @@ import monitoring.LoggingTags
 import ophan.thrift.componentEvent.ComponentType
 import ophan.thrift.event.{AbTest, AcquisitionSource}
 import org.joda.time.DateTime
-import play.api.libs.json.Json
 
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
@@ -114,7 +113,14 @@ class PaypalService(
           case Nil => ""
           case params => params.mkString("?", "&", "")
         }
-        s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
+
+        val supportRedirectExecute = s"https://support.thegulocal.com/paypal/execute$extraParams"
+        val localExecute = s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
+
+        supportRedirect match {
+          case Some(true) => supportRedirectExecute
+          case _ => localExecute
+        }
       }
 
       val cancelUrl = config.baseReturnUrl
