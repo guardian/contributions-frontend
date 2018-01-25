@@ -7,7 +7,7 @@ import cookies.ContribTimestampCookieAttributes
 import cookies.syntax._
 import com.gu.i18n.{CountryGroup, Currency}
 import com.paypal.api.payments.Payment
-import configuration.{CorsConfig, SupportConfig}
+import configuration.CorsConfig
 import controllers.httpmodels.{AuthRequest, AuthResponse, CaptureRequest}
 import models._
 import monitoring._
@@ -21,7 +21,7 @@ import play.filters.csrf.CSRFCheck
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig, supportConfig: SupportConfig,
+class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
   checkToken: CSRFCheck, cloudWatchMetrics: CloudWatchMetrics, ophanService: ContributionOphanService)(implicit ec: ExecutionContext)
   extends Controller with Redirect with TagAwareLogger with LoggingTagsProvider {
   import ContribTimestampCookieAttributes._
@@ -154,22 +154,26 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
     def okResult(payment: Payment): Result = {
       val response = render {
-        case Accepts.Json() =>
+        case Accepts.Json() => {
           if (supportRedirect.contains(true)) {
             Ok(Json.obj("email" -> payment.getPayer.getPayerInfo.getEmail))
+          } else {
+            Ok(JsNull)
           }
-          Ok(JsNull)
+        }
         case Accepts.Html() =>
           val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
+
           val redirectUrl = routes.Contributions.postPayment(countryGroup).url
+
           info(s"Paypal payment from platform: ${request.platform} is successful. Contributions session id: ${request.sessionId}. Amount is ${amount.map(_.show).getOrElse("")}.")
           redirectWithCampaignCodes(redirectUrl).addingToSession(session: _ *)
       }
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
       if (supportRedirect.contains(true)) {
-        info(s"Returning email to support backend. Payment method used: Paypal, platform: ${request.platform} , contributions session id: ${request.sessionId}.")
+        info(s"Redirecting user to support thank-you page. Payment method used: Paypal, platform: ${request.platform} , contributions session id: ${request.sessionId}.")
         cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Paypal, request.platform)
       }
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)

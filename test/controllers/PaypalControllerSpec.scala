@@ -6,7 +6,7 @@ import akka.stream.Materializer
 import cats.data.EitherT
 import com.gu.i18n.{CountryGroup, GBP}
 import com.paypal.api.payments.{Capture, Payment}
-import configuration.{CorsConfig, SupportConfig}
+import configuration.CorsConfig
 import fixtures.TestApplicationFactory
 import models.{ContributionAmount, IdentityId, PaypalApiError, SavedContributionData}
 import monitoring.{CloudWatchMetrics, LoggingTags}
@@ -46,8 +46,6 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
 
   val mockOphanService = mock[ContributionOphanService]
 
-  val supportConfig = SupportConfig("https://support.thegulocal.com/thankyou")
-
   Mockito.when(mockPaymentServices.paypalServiceFor(Matchers.any[Request[_]]))
     .thenReturn(mockPaypalService)
 
@@ -78,7 +76,7 @@ class PaypalControllerFixture(implicit ec: ExecutionContext) extends MockitoSuga
   )(Matchers.any[LoggingTags]))
     .thenReturn(EitherT.pure[Future, String, SavedContributionData](mock[SavedContributionData]))
 
-  val controller: PaypalController = new PaypalController(mockPaymentServices, mockCorsConfig, supportConfig, mockCsrfCheck, mockCloudwatchMetrics, mockOphanService)
+  val controller: PaypalController = new PaypalController(mockPaymentServices, mockCorsConfig, mockCsrfCheck, mockCloudwatchMetrics, mockOphanService)
 
   def captor[A <: AnyRef](implicit classTag: ClassTag[A]): A =
     ArgumentCaptor.forClass[A](classTag.runtimeClass.asInstanceOf[Class[A]]).capture()
