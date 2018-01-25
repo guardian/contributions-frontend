@@ -49,7 +49,8 @@ class PaypalService(
   config: PaypalApiConfig,
   contributionData: ContributionData,
   identityService: IdentityService,
-  emailService: EmailService
+  emailService: EmailService,
+  supportPaypalExecuteEndpoint: String
 )(implicit ec: ExecutionContext) extends TagAwareLogger {
   val description = "Contribution to the guardian"
   val credentials = config.credentials
@@ -114,7 +115,7 @@ class PaypalService(
           case params => params.mkString("?", "&", "")
         }
 
-        val supportRedirectExecute = s"https://support.thegulocal.com/paypal/execute$extraParams"
+        val supportRedirectExecute = s"$supportPaypalExecuteEndpoint$extraParams"
         val localExecute = s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
 
         supportRedirect match {

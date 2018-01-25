@@ -154,26 +154,22 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
     def okResult(payment: Payment): Result = {
       val response = render {
-        case Accepts.Json() => {
-          Ok(Json.obj("email" -> payment.getPayer.getPayerInfo.getEmail))
-        }
+        case Accepts.Json() =>
+          if (supportRedirect.contains(true)) {
+            Ok(Json.obj("email" -> payment.getPayer.getPayerInfo.getEmail))
+          }
+          Ok(JsNull)
         case Accepts.Html() =>
           val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
           val session = List("email" -> email, PaymentProvider.sessionKey -> PaymentProvider.Paypal.entryName) ++ amount.map("amount" -> _.show)
-
-          val redirectUrl = if (supportRedirect.contains(true)) {
-            val queryString = amount.map({ amount => s"contributionValue=${amount.amount}" }).getOrElse("")
-            s"${supportConfig.thankYouURL}?${queryString}"
-          } else {
-            routes.Contributions.postPayment(countryGroup).url
-          }
+          val redirectUrl = routes.Contributions.postPayment(countryGroup).url
           info(s"Paypal payment from platform: ${request.platform} is successful. Contributions session id: ${request.sessionId}. Amount is ${amount.map(_.show).getOrElse("")}.")
           redirectWithCampaignCodes(redirectUrl).addingToSession(session: _ *)
       }
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
       if (supportRedirect.contains(true)) {
-        info(s"Redirecting user to support thank-you page. Payment method used: Paypal, platform: ${request.platform} , contributions session id: ${request.sessionId}.")
+        info(s"Returning email to support backend. Payment method used: Paypal, platform: ${request.platform} , contributions session id: ${request.sessionId}.")
         cloudWatchMetrics.logPaymentSuccessRedirected(PaymentProvider.Paypal, request.platform)
       }
       response.setCookie[ContribTimestampCookieAttributes](payment.getCreateTime)
