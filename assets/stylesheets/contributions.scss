@@ -916,48 +916,30 @@ $currencies: gbp usd aud eur nzd cad;
             margin-top: 0;
             padding-top: 12px;
 
-            h1 span, h2 span {
+            h1, h2 {
                 font-family: 'GHGuardianHeadline-Bold';
             }
 
-            @media (max-width: 50.24em) {
+            @media (max-width: 61.24em) {
 
                 br {
                     display: none;
                 }
 
-                h1 span, h2 span {
-                    font-size: 2.1rem;
-                    line-height: 2.4rem;
-                }
-
                 h2 span {
+                    font-size: 2rem;
+                    line-height: 2.4rem;
                     color: #3f3f3e;
                 }
 
 
             }
 
-            @media (min-width: 50.25em) and (max-width: 61.24em) {
-
-                h2 span {
-                    background-color: #ffe500;
-                    display: inline-block;
-                    color: black;
-                    padding: 10px;
-                    margin-bottom: 10px;
-                    display: inline-block;
-                }
-
-            }
 
             @media (min-width: 61.25em) {
 
-                h1 span {
-                    line-height: 3.2rem;
-                }
-
                 h2 span {
+                    font-size: 2.3rem;
                     background-color: #ffe500;
                     display: inline-block;
                     color: black;
@@ -974,6 +956,7 @@ $currencies: gbp usd aud eur nzd cad;
                 }
 
             }
+
 
         }
 
