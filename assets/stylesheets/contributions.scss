@@ -4,7 +4,6 @@
 @import 'utilities/util-layout';
 @import 'svg';
 @import 'components/ticker';
-@import 'typography';
 
 $control-spacing: 5px;
 
@@ -912,51 +911,71 @@ $currencies: gbp usd aud eur nzd cad;
             }
         }
 
+/*
+$mq-breakpoints: (
+    mobile:          320px,
+    mobileMedium:    360px,
+    mobileLandscape: 480px,
+    phablet:         660px,
+    tablet:          740px,
+    desktop:         980px,
+    leftCol:         1140px,
+    wide:            1300px
+);
+*/
+
         .contributions__heading {
+
             margin-top: 0;
             padding-top: 12px;
 
-            h1, h2 {
-                font-family: 'GHGuardianHeadline-Bold';
-            }
+            br {
 
-            @media (max-width: 61.24em) {
-
-                br {
+                @include mq($until: desktop) {
                     display: none;
                 }
 
-                h2 span {
-                    font-size: 2rem;
-                    line-height: 2.4rem;
-                    color: #3f3f3e;
-                }
-
-
+                
             }
 
+            h2 span {
 
-            @media (min-width: 61.25em) {
+                @include mq($until: desktop) {
 
-                h2 span {
-                    font-size: 2.3rem;
+                    font-size: 30px;
+                    line-height: 34px;
+                    color: #3f3f3e;
+                  
+                }
+
+                @include mq(desktop) {
+
+                    font-size: 36px;
+                    line-height: 40px;
                     background-color: #ffe500;
                     display: inline-block;
                     color: black;
                     padding: 10px;
                     margin-bottom: 10px;
+
                 }
 
-                .sub-heading-line--indent {
+            }
+
+            .sub-heading-line--indent {
+
+                @include mq(desktop) {
+
                     padding-left: 60px;
                     display: inline-block;
                     color: black;
                     padding: 10px;
                     float: right;
+
+
                 }
 
             }
-
 
         }
 
