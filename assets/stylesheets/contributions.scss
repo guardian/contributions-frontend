@@ -902,7 +902,7 @@ $currencies: gbp usd aud eur nzd cad;
             }
 
             &:after {
-                content: 'We prefer to collect contributions online. However, if you wish to mail us your contribution, please send checks to: 315 West 36th St., 8th Floor, New York, NY 10018';
+                content: '';
                 display: block;
                 margin-top: 8px;
                 font-family: 'Guardian Text Sans Web';
