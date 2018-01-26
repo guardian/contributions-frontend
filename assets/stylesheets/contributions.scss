@@ -870,6 +870,16 @@ $currencies: gbp usd aud eur nzd cad;
 }
 
 .contributions--aus-campaign {
+
+    .ticker__filled-progress {
+        background-color: #ffe500;
+    }
+
+    .ticker__count {
+        color: #ffe500;
+    }
+
+
     .contributions__wrapper {
 
         background-color: #b7b7b7;
@@ -887,10 +897,6 @@ $currencies: gbp usd aud eur nzd cad;
             @include mq(desktop) {
                 padding-bottom: 0;
             }
-        }
-
-        .ticker__filled-progress, .ticker__count {
-            background-color: #ffe500;
         }
 
         .contribute-container {
@@ -1024,13 +1030,19 @@ $mq-breakpoints: (
             padding: 0 20px;
         }
 
+        .feedback>p {
+            max-width: 620px;
+            color: #767676;
+        }
+
+
         .feedback>p a {
             color: black;
             border-bottom-color: #ffe500;
         }
 
         .feedback>p a:hover {
-            border-bottom-color: black
+            border-bottom-color: #000
         }
 
         .contributions__detail__para {
@@ -1041,11 +1053,11 @@ $mq-breakpoints: (
             }
 
             a {
-                color: $medium-yellow;
-                border-bottom-color: $medium-yellow;
+                color: black;
+                border-bottom-color: #ffe500;
 
                 &:hover {
-                    border-bottom-color: $c-neutral1;
+                    border-bottom-color: #000;
                 }
             }
         }
