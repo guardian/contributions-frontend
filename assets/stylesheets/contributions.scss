@@ -839,9 +839,43 @@ $currencies: gbp usd aud eur nzd cad;
     }
 }
 
+.contributions__banner--aus-campaign {
+    background-image: url('https://interactive.guim.co.uk/embed/2018/this-wide-brown-land/landing/2000.jpg');
+    background-size: cover;
+    background-position: center center;
+    height: 300px;
+    overflow: hidden;
+
+    .l-constrained {
+        position: relative;
+    }
+
+    .l-constrained:before,
+    .l-constrained:after {
+        content: '';
+        position: absolute;
+        width: 50vw;
+        top: 0;
+        height: 300px;
+        background-color: rgba(0,0,0,0.1);
+    }
+
+    .l-constrained:before {
+        left: -50vw;
+    }
+
+    .l-constrained:after {
+        right: -50vw;
+    }
+}
+
 .contributions--aus-campaign {
     .contributions__wrapper {
+
+        background-color: #b7b7b7;
+
         .contributions__inner {
+            background-color: #DCDCDD;
             overflow: visible;
             position: relative;
             padding: 0 10px 20px;
@@ -855,6 +889,10 @@ $currencies: gbp usd aud eur nzd cad;
             }
         }
 
+        .ticker__filled-progress, .ticker__count {
+            background-color: #ffe500;
+        }
+
         .contribute-container {
             @include mq(desktop) {
                 position: absolute;
@@ -863,7 +901,7 @@ $currencies: gbp usd aud eur nzd cad;
             }
 
             &:after {
-                content: 'We prefer to collect contributions online. However, if you wish to mail us your contribution, please send checks to: 315 West 36th St., 8th Floor, New York, NY 10018';
+                content: '';
                 display: block;
                 margin-top: 8px;
                 font-family: 'Guardian Text Sans Web';
@@ -873,16 +911,79 @@ $currencies: gbp usd aud eur nzd cad;
             }
         }
 
+/*
+$mq-breakpoints: (
+    mobile:          320px,
+    mobileMedium:    360px,
+    mobileLandscape: 480px,
+    phablet:         660px,
+    tablet:          740px,
+    desktop:         980px,
+    leftCol:         1140px,
+    wide:            1300px
+);
+*/
+
         .contributions__heading {
+
             margin-top: 0;
             padding-top: 12px;
+
+            br {
+
+                @include mq($until: desktop) {
+                    display: none;
+                }
+
+                
+            }
+
+            h2 span {
+
+                @include mq($until: desktop) {
+
+                    font-size: 30px;
+                    line-height: 34px;
+                    color: #3f3f3e;
+                  
+                }
+
+                @include mq(desktop) {
+
+                    font-size: 36px;
+                    line-height: 40px;
+                    background-color: #ffe500;
+                    display: inline-block;
+                    color: black;
+                    padding: 10px;
+                    margin-bottom: 10px;
+
+                }
+
+            }
+
+            .sub-heading-line--indent {
+
+                @include mq(desktop) {
+
+                    padding-left: 60px;
+                    display: inline-block;
+                    color: black;
+                    padding: 10px;
+                    float: right;
+
+
+                }
+
+            }
+
         }
 
         .heading-line--indent-max {
             padding-left: 0;
 
             @include mq(desktop) {
-                padding-left: 140px;
+                padding-left: 100px;
             }
         }
 
@@ -899,10 +1000,18 @@ $currencies: gbp usd aud eur nzd cad;
 
             .contributions__detail__para {
                 a {
-                    color: white;
-                    border-bottom-color: white;
+                    color: black;
+                    border-bottom-color: #ffe500;
+                    font-weight: 700;
                 }
             }
+
+            .contributions__detail__para {
+                a:hover {
+                    border-bottom-color: black;
+                }
+            }
+
         }
     }
 
@@ -913,6 +1022,15 @@ $currencies: gbp usd aud eur nzd cad;
 
         .feedback {
             padding: 0 20px;
+        }
+
+        .feedback>p a {
+            color: black;
+            border-bottom-color: #ffe500;
+        }
+
+        .feedback>p a:hover {
+            border-bottom-color: black
         }
 
         .contributions__detail__para {
@@ -944,19 +1062,6 @@ $currencies: gbp usd aud eur nzd cad;
             }
         }
 
-        .feedback > p {
-            max-width: 620px;
-            color: $c-neutral2;
-
-            a {
-                color: $medium-yellow;
-                border-bottom-color: $medium-yellow;
-
-                &:hover {
-                    border-bottom-color: $c-neutral1;
-                }
-            }
-        }
     }
 
     .contributions__detail__para {
