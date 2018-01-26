@@ -24,7 +24,7 @@ import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsSuccess, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -122,7 +122,9 @@ class PaypalControllerSpec extends PlaySpec
   implicit val executionContext: ExecutionContext = app.actorSystem.dispatcher
   implicit val mat: Materializer = app.materializer
 
-  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/").withHeaders(("Accept", "text/html"))
+  val fakeRequestHtml: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/").withHeaders(("Accept", "text/html"))
+
+  val fakeRequestJson: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/").withHeaders(("Accept", "application/json"))
 
   def executePayment(controller: PaypalController): Action[AnyContent] = controller.executePayment(
     countryGroup = CountryGroup.UK,
@@ -166,17 +168,19 @@ class PaypalControllerSpec extends PlaySpec
 
   "Paypal Controller" should {
 
-    "generate correct redirect URL for support's successful PayPal payments" in {
+    "return the email address when called from support (and accept type is application/json)" in {
       val fixture = new PaypalControllerFixture {
         Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
           .thenReturn(EitherT.right[Future, PaypalApiError, Payment](Future.successful(mockPaypalPayment)))
       }
 
-      val result: Future[Result] = executeSupportPayment(fixture.controller)(fakeRequest)
+      val result: Future[Result] = executeSupportPayment(fixture.controller)(fakeRequestJson)
 
-      status(result).mustBe(303)
-      redirectLocation(result).mustBe(Some("https://support.thegulocal.com/thankyou?contributionValue=10"))
+      status(result).mustBe(200)
+      (contentAsJson(result) \ "email").validate[String].mustEqual(JsSuccess("a@b.com"))
     }
+
+
 
     "generate correct redirect URL for successful PayPal payments" in {
       val fixture = new PaypalControllerFixture {
@@ -184,7 +188,7 @@ class PaypalControllerSpec extends PlaySpec
           .thenReturn(EitherT.pure[Future, PaypalApiError, Payment](mockPaypalPayment))
       }
 
-      val result: Future[Result] = executePayment(fixture.controller)(fakeRequest)
+      val result: Future[Result] = executePayment(fixture.controller)(fakeRequestHtml)
 
       status(result).mustBe(303)
       redirectLocation(result).mustBe(Some("/uk/post-payment"))
@@ -198,7 +202,7 @@ class PaypalControllerSpec extends PlaySpec
           .thenReturn(EitherT.left[Future, PaypalApiError, Payment](Future.successful(PaypalApiError.fromString("Error"))))
       }
 
-      val result: Future[Result] = executePayment(fixture.controller)(fakeRequest)
+      val result: Future[Result] = executePayment(fixture.controller)(fakeRequestHtml)
 
       status(result).mustBe(303)
       redirectLocation(result).mustBe(Some("/uk?error_code=PaypalError"))
@@ -263,7 +267,7 @@ class PaypalControllerSpec extends PlaySpec
           .thenReturn(EitherT.pure[Future, PaypalApiError, Payment](mockPaypalPayment))
       }
 
-      whenReady(executePayment(fixture.controller)(fakeRequest)) { _ =>
+      whenReady(executePayment(fixture.controller)(fakeRequestHtml)) { _ =>
         fixture.numberOfAcquisitionEventSubmissionsShouldBe(1)
       }
     }
@@ -275,7 +279,7 @@ class PaypalControllerSpec extends PlaySpec
           .thenReturn(EitherT.left[Future, PaypalApiError, Payment](Future.successful(PaypalApiError.fromString("Error"))))
       }
 
-      whenReady(executePayment(fixture.controller)(fakeRequest)) { _ =>
+      whenReady(executePayment(fixture.controller)(fakeRequestHtml)) { _ =>
         fixture.numberOfAcquisitionEventSubmissionsShouldBe(0)
       }
     }

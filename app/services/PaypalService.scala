@@ -115,12 +115,12 @@ class PaypalService(
           case params => params.mkString("?", "&", "")
         }
 
-        val supportRedirectExecute = s"$supportPaypalExecuteEndpoint$extraParams"
-        val localExecute = s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
+        val supportBackendExecuteEndpoint = s"$supportPaypalExecuteEndpoint$extraParams"
+        val contributeBackendExecuteEndpoint = s"${config.baseReturnUrl}/paypal/${countryGroup.id}/execute$extraParams"
 
         supportRedirect match {
-          case Some(true) => supportRedirectExecute
-          case _ => localExecute
+          case Some(true) => supportBackendExecuteEndpoint
+          case _ => contributeBackendExecuteEndpoint
         }
       }
 
