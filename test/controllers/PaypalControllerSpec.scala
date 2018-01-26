@@ -24,7 +24,7 @@ import com.gu.acquisition.typeclasses.AcquisitionSubmissionBuilder
 import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsNull, JsSuccess, JsUndefined, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -177,12 +177,25 @@ class PaypalControllerSpec extends PlaySpec
       val result: Future[Result] = executeSupportPayment(fixture.controller)(fakeRequestJson)
 
       status(result).mustBe(200)
+
       (contentAsJson(result) \ "email").validate[String].mustEqual(JsSuccess("a@b.com"))
     }
 
+    "Return an empty 200 when execute is called, accept type is application/json and supporter redirect is false" in {
+      val fixture = new PaypalControllerFixture {
+        Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
+          .thenReturn(EitherT.right[Future, PaypalApiError, Payment](Future.successful(mockPaypalPayment)))
+      }
 
+      val result: Future[Result] = executePayment(fixture.controller)(fakeRequestJson)
 
-    "generate correct redirect URL for successful PayPal payments" in {
+      val a = contentAsJson(result)
+      contentAsJson(result).mustEqual(JsNull)
+      status(result).mustBe(200)
+
+    }
+
+    "generate correct redirect URL for successful PayPal payments when accept type is text/html" in {
       val fixture = new PaypalControllerFixture {
         Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
           .thenReturn(EitherT.pure[Future, PaypalApiError, Payment](mockPaypalPayment))

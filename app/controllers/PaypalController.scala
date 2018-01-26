@@ -154,13 +154,8 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
 
     def okResult(payment: Payment): Result = {
       val response = render {
-        case Accepts.Json() => {
-          if (supportRedirect.contains(true)) {
-            Ok(Json.obj("email" -> payment.getPayer.getPayerInfo.getEmail))
-          } else {
-            Ok(JsNull)
-          }
-        }
+        case Accepts.Json() if supportRedirect.contains(true) => Ok(Json.obj("email" -> payment.getPayer.getPayerInfo.getEmail))
+        case Accepts.Json() => Ok(JsNull)
         case Accepts.Html() =>
           val amount: Option[ContributionAmount] = paypalService.paymentAmount(payment)
           val email = payment.getPayer.getPayerInfo.getEmail
