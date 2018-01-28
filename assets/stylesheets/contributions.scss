@@ -907,7 +907,7 @@ $currencies: gbp usd aud eur nzd cad;
             }
 
             &:after {
-                content: '';
+                content: 'We prefer to collect contributions online. However, if you wish to mail us your contribution, please send cheques to GNM Australia Pty Ltd, Level 3, 19 Foster St, Surry Hills, NSW 2010';
                 display: block;
                 margin-top: 8px;
                 font-family: 'Guardian Text Sans Web';
@@ -916,19 +916,6 @@ $currencies: gbp usd aud eur nzd cad;
                 color: $c-neutral2;
             }
         }
-
-/*
-$mq-breakpoints: (
-    mobile:          320px,
-    mobileMedium:    360px,
-    mobileLandscape: 480px,
-    phablet:         660px,
-    tablet:          740px,
-    desktop:         980px,
-    leftCol:         1140px,
-    wide:            1300px
-);
-*/
 
         .contributions__heading {
 
