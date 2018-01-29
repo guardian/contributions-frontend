@@ -870,6 +870,16 @@ $currencies: gbp usd aud eur nzd cad;
 }
 
 .contributions--aus-campaign {
+
+    .ticker__filled-progress {
+        background-color: #ffe500;
+    }
+
+    .ticker__count {
+        color: #ffe500;
+    }
+
+
     .contributions__wrapper {
 
         background-color: #b7b7b7;
@@ -889,10 +899,6 @@ $currencies: gbp usd aud eur nzd cad;
             }
         }
 
-        .ticker__filled-progress, .ticker__count {
-            background-color: #ffe500;
-        }
-
         .contribute-container {
             @include mq(desktop) {
                 position: absolute;
@@ -901,7 +907,7 @@ $currencies: gbp usd aud eur nzd cad;
             }
 
             &:after {
-                content: '';
+                content: 'We prefer to collect contributions online. However, if you wish to mail us your contribution, please send cheques to GNM Australia Pty Ltd, Level 3, 19 Foster St, Surry Hills, NSW 2010';
                 display: block;
                 margin-top: 8px;
                 font-family: 'Guardian Text Sans Web';
@@ -910,19 +916,6 @@ $currencies: gbp usd aud eur nzd cad;
                 color: $c-neutral2;
             }
         }
-
-/*
-$mq-breakpoints: (
-    mobile:          320px,
-    mobileMedium:    360px,
-    mobileLandscape: 480px,
-    phablet:         660px,
-    tablet:          740px,
-    desktop:         980px,
-    leftCol:         1140px,
-    wide:            1300px
-);
-*/
 
         .contributions__heading {
 
@@ -938,20 +931,46 @@ $mq-breakpoints: (
                 
             }
 
+            h1 {
+                margin-bottom: 10px;
+            }
+
+            h2 strong {
+
+                @include mq($until: desktop) {
+
+                    font-size: 28px;
+                    color: #4c0f0f;
+                    display: block;
+                  
+                }
+
+                @include mq(desktop) {
+
+                    font-size: 28px;
+                    color: #4c0f0f;
+                    display: block;
+                    padding-left: 10px;
+
+                }
+
+            }
+
+
             h2 span {
 
                 @include mq($until: desktop) {
 
-                    font-size: 30px;
-                    line-height: 34px;
+                    font-size: 28px;
+                    line-height: 32px;
                     color: #3f3f3e;
                   
                 }
 
                 @include mq(desktop) {
 
-                    font-size: 36px;
-                    line-height: 40px;
+                    font-size: 28px;
+                    line-height: 32px;
                     background-color: #ffe500;
                     display: inline-block;
                     color: black;
@@ -1024,13 +1043,19 @@ $mq-breakpoints: (
             padding: 0 20px;
         }
 
+        .feedback>p {
+            max-width: 620px;
+            color: #767676;
+        }
+
+
         .feedback>p a {
             color: black;
             border-bottom-color: #ffe500;
         }
 
         .feedback>p a:hover {
-            border-bottom-color: black
+            border-bottom-color: #000
         }
 
         .contributions__detail__para {
@@ -1041,11 +1066,11 @@ $mq-breakpoints: (
             }
 
             a {
-                color: $medium-yellow;
-                border-bottom-color: $medium-yellow;
+                color: black;
+                border-bottom-color: #ffe500;
 
                 &:hover {
-                    border-bottom-color: $c-neutral1;
+                    border-bottom-color: #000;
                 }
             }
         }
