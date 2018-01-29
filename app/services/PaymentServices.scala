@@ -26,6 +26,8 @@ class PaymentServices(
   private val paypalServices: Map[PaymentMode, PaypalService] = {
     val paypalExecutionContext = actorSystem.dispatchers.lookup("contexts.paypal-context")
     val paypalConfig = config.getConfig("paypal")
+    val supportBackendConfig = config.getConfig("support-backend")
+    val supportPaypalExecuteEndpoint = supportBackendConfig.getString("paypal-execute")
 
     def paypalServiceFor(mode: PaymentMode): PaypalService = {
       val contributionData = contributionDataPerMode(mode)
@@ -36,7 +38,8 @@ class PaymentServices(
         config = apiConfig,
         contributionData = contributionData,
         identityService = identityService,
-        emailService = emailService
+        emailService = emailService,
+        supportPaypalExecuteEndpoint = supportPaypalExecuteEndpoint
       )(paypalExecutionContext)
     }
 

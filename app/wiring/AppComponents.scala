@@ -17,7 +17,7 @@ import play.filters.gzip.GzipFilterComponents
 import play.filters.headers.{SecurityHeadersConfig, SecurityHeadersFilter}
 import services._
 import router.Routes
-import configuration.{Config, CorsConfig, SupportConfig}
+import configuration.{Config, CorsConfig}
 import monitoring.{CloudWatch, CloudWatchMetrics}
 import utils.DefaultTestUserService
 
@@ -31,7 +31,6 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   lazy val config = ConfigFactory.load()
   lazy val stripeConfig = config.getConfig("stripe")
   lazy val corsConfig = CorsConfig.from(config.getConfig("cors"))
-  lazy val supportConfig = SupportConfig.from(config.getConfig("support-frontend"))
   private val idConfig = config.getConfig("identity")
 
   lazy val identityKeys = if (idConfig.getBoolean("production.keys")) new ProductionKeys else new PreProductionKeys
