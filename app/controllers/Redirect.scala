@@ -7,6 +7,10 @@ import play.api.mvc.{Controller, Request}
 
 trait Redirect {
   self: Controller =>
+  def redirect(destinationUrl: String)(implicit request: Request[Any]) = {
+    Redirect(destinationUrl, SEE_OTHER)
+  }
+
   def redirectWithQueryString(destinationUrl: String)(implicit request: Request[Any]) = {
     Redirect(destinationUrl, request.queryString, SEE_OTHER)
   }
