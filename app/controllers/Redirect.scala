@@ -7,9 +7,12 @@ import play.api.mvc.{Controller, Request}
 
 trait Redirect {
   self: Controller =>
-  def redirectWithCampaignCodes(destinationUrl: String, additionalParams: Set[String] = Set.empty)(implicit request: Request[Any]) = {
-    val queryParamsToForward = Set("INTCMP", "CMP", "REFPVID", "platform", "amount") ++ additionalParams
-    Redirect(destinationUrl, request.queryString.filterKeys(queryParamsToForward), SEE_OTHER)
+  def redirect(destinationUrl: String)(implicit request: Request[Any]) = {
+    Redirect(destinationUrl, SEE_OTHER)
+  }
+
+  def redirectWithQueryString(destinationUrl: String)(implicit request: Request[Any]) = {
+    Redirect(destinationUrl, request.queryString, SEE_OTHER)
   }
 
   def mobileRedirectUrl(amount: ContributionAmount): String = {

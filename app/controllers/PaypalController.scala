@@ -164,7 +164,7 @@ class PaypalController(paymentServices: PaymentServices, corsConfig: CorsConfig,
           val redirectUrl = routes.Contributions.postPayment(countryGroup).url
 
           info(s"Paypal payment from platform: ${request.platform} is successful. Contributions session id: ${request.sessionId}. Amount is ${amount.map(_.show).getOrElse("")}.")
-          redirectWithCampaignCodes(redirectUrl).addingToSession(session: _ *)
+          redirect(redirectUrl).addingToSession(session: _ *)
       }
       cloudWatchMetrics.logPaymentSuccess(PaymentProvider.Paypal, request.platform)
       if (supportRedirect.contains(true)) {

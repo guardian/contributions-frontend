@@ -43,7 +43,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
   def redirectToUk = (NoCacheAction andThen MobileSupportAction) { implicit request => redirectWithQueryParams(routes.Contributions.contribute(UK).url) }
 
   private def redirectWithQueryParams(destinationUrl: String)(implicit request: Request[Any]) =
-    redirectWithCampaignCodes(destinationUrl, Set("mcopy", "skipAmount", "highlight", "disableStripe", ReferrerAcquisitionData.queryStringKey))
+    redirectWithQueryString(destinationUrl)
 
   def postPayment(countryGroup: CountryGroup) = NoCacheAction.andThen(MetaDataAction.default) { implicit request =>
     val pageInfo = PageInfo(
