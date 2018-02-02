@@ -14,18 +14,44 @@ import play.api.db.Database
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagAwareLogger {
+trait ContributionData {
+  def insertPaymentHook(paymentHook: PaymentHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook]
+  def insertPaymentMetaData(pmd: ContributionMetaData)(implicit tags: LoggingTags): EitherT[Future, String, ContributionMetaData]
+  def saveContributor(contributor: Contributor)(implicit tags: LoggingTags): EitherT[Future, String, Contributor]
+}
+
+class CurrentAndNewContributionData(currentDB: ContributionDataInstance, newDB: ContributionDataInstance) extends ContributionData {
+
+  override def insertPaymentHook(paymentHook: PaymentHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
+    newDB.insertPaymentHook(paymentHook)
+    currentDB.insertPaymentHook(paymentHook)
+  }
+
+  override def insertPaymentMetaData(pmd: ContributionMetaData)(implicit tags: LoggingTags): EitherT[Future, String, ContributionMetaData] = {
+    newDB.insertPaymentMetaData(pmd)
+    currentDB.insertPaymentMetaData(pmd)
+  }
+
+  override def saveContributor(contributor: Contributor)(implicit tags: LoggingTags): EitherT[Future, String, Contributor] = {
+    newDB.saveContributor(contributor)
+    currentDB.saveContributor(contributor)
+  }
+}
+
+class ContributionDataInstance(db: Database)(implicit ec: ExecutionContext) extends ContributionData with TagAwareLogger {
 
   def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(db.withConnection(autocommit)(block))
     Either.fromTry(result).leftMap { exception =>
-      error("Error encountered during the execution of the sql query", exception)
-      "Error encountered during the execution of the sql query"
+      val errorMessage = s"Error encountered during the execution of the sql query on the ${db.name} database"
+      error(errorMessage, exception)
+      errorMessage
     }
   })
 
   def insertPaymentHook(paymentHook: PaymentHook)(implicit tags: LoggingTags): EitherT[Future, String, PaymentHook] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
+      info(s"Inserting into ${db.name}.payment_hook table")
       val request = SQL"""
         INSERT INTO payment_hooks(
           contributionid,
@@ -65,6 +91,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
 
   def insertPaymentMetaData(pmd: ContributionMetaData)(implicit tags: LoggingTags): EitherT[Future, String, ContributionMetaData] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
+      info(s"Inserting into ${db.name}.contribution_metadata table")
       val request = SQL"""
         INSERT INTO contribution_metadata(
           contributionid,
@@ -114,6 +141,7 @@ class ContributionData(db: Database)(implicit ec: ExecutionContext) extends TagA
   def saveContributor(contributor: Contributor)(implicit tags: LoggingTags): EitherT[Future, String, Contributor] = {
     withAsyncConnection(autocommit = true) { implicit conn =>
       // Note that the contributor ID will only set on insert. it's not touched on update.
+      info(s"Inserting into ${db.name}.live_contributors table")
       val request = SQL"""
         INSERT INTO live_contributors(
           receipt_email,
