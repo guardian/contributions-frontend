@@ -45,11 +45,11 @@ trait AppComponents extends PlayComponents with GzipFilterComponents {
   val contributionDataPerMode: Map[PaymentMode, ContributionData] = {
     val dbConfig = config.getConfig("dbConf")
     def contributionDataFor(mode: PaymentMode) = {
-      val postgresModeKey = dbConfig.getString(s"${mode.entryName.toLowerCase}")
+      val postgresModeKey = dbConfig.getString(mode.entryName.toLowerCase)
       val auroraModeKey = s"${dbConfig.getString(s"${mode.entryName.toLowerCase}")}_aurora"
       new CurrentAndNewContributionData(
-        new ContributionDataInstance(dbApi.database(postgresModeKey))(jdbcExecutionContext), // explicit execution context to avoid blocking the app
-        new ContributionDataInstance(dbApi.database(auroraModeKey))(jdbcExecutionContext)) // explicit execution context to avoid blocking the app
+        new ContributionDataInstance(dbApi.database(postgresModeKey), "paymentprovider", "paymentstatus")(jdbcExecutionContext), // explicit execution context to avoid blocking the app
+        new ContributionDataInstance(dbApi.database(auroraModeKey), "public.paymentprovider", "public.paymentstatus")(jdbcExecutionContext)) // explicit execution context to avoid blocking the app
     }
     PaymentMode.values.map(mode => mode -> contributionDataFor(mode)).toMap
   }

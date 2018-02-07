@@ -38,7 +38,7 @@ class CurrentAndNewContributionData(currentDB: ContributionDataInstance, newDB: 
   }
 }
 
-class ContributionDataInstance(db: Database)(implicit ec: ExecutionContext) extends ContributionData with TagAwareLogger {
+class ContributionDataInstance(db: Database, paymentProviderType: String, paymentStatusType: String)(implicit ec: ExecutionContext) extends ContributionData with TagAwareLogger {
 
   def withAsyncConnection[A](autocommit: Boolean = false)(block: Connection => A)(implicit tags: LoggingTags): EitherT[Future, String, A] = EitherT(Future {
     val result = Try(db.withConnection(autocommit)(block))
@@ -66,12 +66,12 @@ class ContributionDataInstance(db: Database)(implicit ec: ExecutionContext) exte
         ) VALUES (
           ${paymentHook.contributionId.id}::uuid,
           ${paymentHook.paymentId},
-          ${paymentHook.provider}::paymentProvider,
+          ${paymentHook.provider}::#$paymentProviderType,
           ${paymentHook.created},
           ${paymentHook.currency},
           ${paymentHook.amount},
           ${paymentHook.convertedAmount},
-          ${paymentHook.status}::paymentStatus,
+          ${paymentHook.status}::#$paymentStatusType,
           ${paymentHook.email}
         ) ON CONFLICT(contributionId) DO
         UPDATE SET
