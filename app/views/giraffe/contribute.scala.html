@@ -35,12 +35,6 @@
         case Some("aus_environment_campaign_2018") => {
             @contributionsAusEnvironmentCampaign(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
         }
-        case Some("us_gun_campaign_2017") => {
-            @contributionsUSGunCampaign(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
-        }
-        case Some("us_mother_load_campaign_2017") => {
-            @contributionsMotherLoadCampaign(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
-        }
         case _ => {
             @if(inLandingPageTest) {
                 @contributionsAlt(pageInfo, countryGroup, Some(maxAmount), Some("contributePage.js"), errorMessage)(block)
