@@ -31,7 +31,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
 
   def redirectToSupportContribute(countryId: String) = (NoCacheAction andThen MobileSupportAction) { implicit request =>
-    val validIds = List("uk", "us", "au", "ca", "nz", "int")
+    val validIds = List("uk", "us", "au", "ca", "nz", "int", "eu")
 
     val path = if(validIds.contains(countryId)) countryId else "uk"
 
@@ -47,6 +47,7 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
       case Some(Canada) => "ca"
       case Some(NewZealand) => "nz"
       case Some(RestOfTheWorld) => "int"
+      case Some(Europe) => "eu"
       case _ => "uk"
     }
 
