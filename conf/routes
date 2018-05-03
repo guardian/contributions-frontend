@@ -28,9 +28,9 @@ POST           /stripe/pay                      controllers.StripeController.pay
 OPTIONS        /stripe/pay                      controllers.StripeController.payOptions
 POST           /stripe/hook                     controllers.StripeController.hook
 
-GET            /ca                              controllers.Contributions.redirectToSupportContribute(countryId = "ca")
-GET            /nz                              controllers.Contributions.redirectToSupportContribute(countryId = "nz")
-GET            /int                             controllers.Contributions.redirectToSupportContribute(countryId = "int")
+GET            /ca                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.Canada, error_code: Option[PaymentError]?=None)
+GET            /nz                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.NewZealand, error_code: Option[PaymentError]?=None)
+GET            /int                             controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.RestOfTheWorld, error_code: Option[PaymentError]?=None)
 GET            /uk                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.UK, error_code: Option[PaymentError]?=None)
 GET            /au                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.Australia, error_code: Option[PaymentError]?=None)
 GET            /us                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.US, error_code: Option[PaymentError]?=None)
