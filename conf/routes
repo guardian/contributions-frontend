@@ -28,13 +28,13 @@ POST           /stripe/pay                      controllers.StripeController.pay
 OPTIONS        /stripe/pay                      controllers.StripeController.payOptions
 POST           /stripe/hook                     controllers.StripeController.hook
 
-GET            /ca                              controllers.Contributions.redirectToUk
-GET            /nz                              controllers.Contributions.redirectToUk
-GET            /int                             controllers.Contributions.redirectToUk
-GET            /uk                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.UK, error_code: Option[PaymentError]?=None)
-GET            /au                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.Australia, error_code: Option[PaymentError]?=None)
-GET            /us                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.US, error_code: Option[PaymentError]?=None)
-GET            /eu                              controllers.Contributions.contribute(countryGroup: CountryGroup?=CountryGroup.Europe, error_code: Option[PaymentError]?=None)
+GET            /ca                              controllers.Contributions.redirectToSupportContribute("ca")
+GET            /nz                              controllers.Contributions.redirectToSupportContribute("nz")
+GET            /int                             controllers.Contributions.redirectToSupportContribute("int")
+GET            /uk                              controllers.Contributions.redirectToSupportContribute("uk")
+GET            /au                              controllers.Contributions.redirectToSupportContribute("au")
+GET            /us                              controllers.Contributions.redirectToSupportContribute("us")
+GET            /eu                              controllers.Contributions.redirectToSupportContribute("eu")
 
 GET            /:countryGroup/thank-you         controllers.Contributions.thanks(countryGroup: CountryGroup)
 GET            /:countryGroup/post-payment      controllers.Contributions.postPayment(countryGroup: CountryGroup)

@@ -29,6 +29,15 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
     Facebook("https://contribute.theguardian.com/?INTCMP=social")
   )
 
+
+  def redirectToSupportContribute(countryId: String) = (NoCacheAction andThen MobileSupportAction) { implicit request =>
+    val validIds = List("uk", "us", "au", "ca", "nz", "int")
+
+    val path = if(validIds.contains(countryId)) countryId else "uk"
+
+    redirectWithQueryParams(s"https://support.theguardian/${path}/contribute")
+  }
+
   def contributeRedirect = (NoCacheAction andThen MobileSupportAction) { implicit request =>
 
     val path = request.getFastlyCountryGroup match {
