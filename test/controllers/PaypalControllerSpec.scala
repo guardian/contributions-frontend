@@ -209,20 +209,6 @@ class PaypalControllerSpec extends PlaySpec
       fixture.numberOfCallsToStoreMetaDataMustBe(1)
     }
 
-    "generate correct redirect URL for unsuccessful PayPal payments" in {
-      val fixture = new PaypalControllerFixture {
-        Mockito.when(mockPaypalService.executePayment(Matchers.anyString, Matchers.anyString)(Matchers.any[LoggingTags]))
-          .thenReturn(EitherT.left[Future, PaypalApiError, Payment](Future.successful(PaypalApiError.fromString("Error"))))
-      }
-
-      val result: Future[Result] = executePayment(fixture.controller)(fakeRequestHtml)
-
-      status(result).mustBe(303)
-      redirectLocation(result).mustBe(Some("/uk?error_code=PaypalError"))
-
-      fixture.numberOfCallsToStoreMetaDataMustBe(0)
-    }
-
     val captureRequest = FakeRequest("POST", "/paypal/capture").withJsonBody(Json.parse(
       """{
             "paymentId": "PAY_u27dioc90iojdew",
