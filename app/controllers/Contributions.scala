@@ -31,13 +31,17 @@ class Contributions(paymentServices: PaymentServices, addToken: CSRFAddToken, cl
 
   def contributeRedirect = (NoCacheAction andThen MobileSupportAction) { implicit request =>
 
-    val countryGroup = request.getFastlyCountryGroup match {
-      case Some(Canada) | Some(NewZealand) | Some(RestOfTheWorld) => UK
-      case Some(other) => other
-      case None => UK
+    val path = request.getFastlyCountryGroup match {
+      case Some(UK) => "uk"
+      case Some(US) => "us"
+      case Some(Australia) => "au"
+      case Some(Canada) => "ca"
+      case Some(NewZealand) => "nz"
+      case Some(RestOfTheWorld) => "int"
+      case _ => "uk"
     }
 
-    redirectWithQueryParams(routes.Contributions.contribute(countryGroup).url)
+    redirectWithQueryParams(s"https://support.theguardian/${path}/contribute")
   }
 
   def redirectToUk = (NoCacheAction andThen MobileSupportAction) { implicit request => redirectWithQueryParams(routes.Contributions.contribute(UK).url) }
